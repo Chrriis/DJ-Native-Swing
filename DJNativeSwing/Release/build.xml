@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<project name="DJNativeSwing Build Script" default="createRelease" basedir="..">
+
+  <target name="createRelease" description="Create the release">
+    <ant antfile="build.xml" inheritall="false"/>
+    <ant antfile="../DJNativeSwingDemo/build.xml" inheritall="false"/>
+    <delete file="DJNativeSwing.zip"/>
+    <zip duplicate="preserve" destfile="Release/DJNativeSwing.zip">
+      <!-- DJNativeSwing documents -->
+      <zipfileset dir="." includes="licence.txt"/>
+      <zipfileset dir="Release" includes="readme.txt,changelog.txt"/>
+      <!-- DJNativeSwing binaries -->
+      <zipfileset dir="../DJNativeSwing" includes="DJNativeSwing.jar,DJNativeSwingDemo.jar"/>
+      <zipfileset dir="../DJNativeSwing/lib" prefix="lib"/>
+      <!-- DJNativeSwingDemo sources -->
+      <zipfileset dir="../DJNativeSwingDemo/src" prefix="src/DJNativeSwingDemo"/>
+      <!-- DJNativeSwing sources -->
+      <zipfileset dir="../DJNativeSwing/src" prefix="src/DJNativeSwing"/>
+    </zip>
+  </target>
+
+</project>

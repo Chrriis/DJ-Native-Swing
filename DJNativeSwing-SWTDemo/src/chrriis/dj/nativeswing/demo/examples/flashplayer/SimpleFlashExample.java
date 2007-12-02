@@ -1,0 +1,36 @@
+/*
+ * Christopher Deckers (chrriis@nextencia.net)
+ * http://www.nextencia.net
+ * 
+ * See the file "readme.txt" for information on usage and redistribution of
+ * this file, and for a DISCLAIMER OF ALL WARRANTIES.
+ */
+package chrriis.dj.nativeswing.demo.examples.flashplayer;
+
+import java.awt.BorderLayout;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+import chrriis.dj.nativeswing.demo.DemoUtils;
+import chrriis.dj.nativeswing.ui.JFlashPlayer;
+
+/**
+ * @author Christopher Deckers
+ */
+public class SimpleFlashExample extends JPanel {
+
+  public SimpleFlashExample() {
+    super(new BorderLayout(0, 0));
+    String fileURL = DemoUtils.extractFileURL(SimpleFlashExample.class, "resource/Movement-pointer_or_click.swf");
+    if(fileURL == null) {
+      add(new JLabel("Failed to extract the Flash file."), BorderLayout.CENTER);
+      return;
+    }
+    JFlashPlayer player = new JFlashPlayer();
+    player.setControlBarVisible(false);
+    player.setURL(fileURL);
+    add(player, BorderLayout.CENTER);
+  }
+  
+}

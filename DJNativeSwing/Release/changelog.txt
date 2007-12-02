@@ -1,0 +1,14 @@
+The DJ project - NativeSwing
+http://djproject.sourceforge.net
+Christopher Deckers (chrriis@nextencia.net)
+Licence terms: LGPL (see licence.txt)
+
+---------------------------------- Change log ----------------------------------
+
+* Version 1.0.0:
+
+- Web browser and Flash Player are implemented.
+- Multi Media Player is implemented on Windows using Ole controls.
+- Utility to access file associations is implemented.
+- All threading and chains of execution (synchronous and asynchronous callbacks)
+  are implemented.

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<project name="Build Script" default="createJar">
+
+  <target name="createJar" description="Create the Jar files">
+    <delete file="../DJNativeSwing/DJNativeSwingDemo.jar"/>
+    <jar duplicate="preserve" destfile="../DJNativeSwing/DJNativeSwingDemo.jar">
+		  <manifest>
+			  <attribute name="Class-Path" value="DJNativeSwing.jar swt.jar lib/swt/swt-3.4M3-win32-win32-x86.jar"/>
+			  <attribute name="Main-Class" value="chrriis.dj.nativeswing.demo.DemoFrame"/>
+		  </manifest>
+	    <fileset dir="bin"/>
+      <zipfileset dir="src" prefix="src/" includes="chrriis/dj/nativeswing/demo/examples/**/*.java"/>
+		</jar>
+  </target>
+
+</project>
