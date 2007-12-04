@@ -34,7 +34,7 @@ Note that the last call is blocking, and it assumes that the Swing application
 exits explicitely with a System.exit(int) call, which is generally the rule.
 
 
-3. Any demo?
+3. Any tutorial or demo?
 
 The DJ NativeSwing Demo presents all the features of the NativeSwing library,
 along with the code that was required. Simply launch DJNativeSwingDemo.jar.
