@@ -70,6 +70,8 @@ and the demo.
 
 There is of course some access to the CVS tree, from the Sourceforge website.
 
+For the sources of the SWT libraries, check the eclipse repositories. 
+
 
 6. How to contribute?
 
