@@ -151,12 +151,12 @@ public class JFlashPlayer extends JPanel {
     try {
       tempJSFile = File.createTempFile("nsfp", ".js");
       BufferedWriter out = new BufferedWriter(new FileWriter(tempJSFile));
-      String encodedURL = encodeURL(url);
+      String escapedURL = escapeXML(url);
       out.write(
           "<!--" + LS +
           "window.document.write('<object classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\" codebase=\"\" id=\"myFlashMovie\">');" + LS +
-          "window.document.write('  <param name=\"movie\" value=\"' + decodeURIComponent('" + encodedURL + "') + '\";\">');" + LS +
-          "window.document.write('  <embed play=\"" + isAutoStart + "\" swliveconnect=\"true\" name=\"myFlashMovie\" src=\"" + encodedURL + "\" quality=\"high\" type=\"application/x-shockwave-flash\">');" + LS +
+          "window.document.write('  <param name=\"movie\" value=\"' + decodeURIComponent('" + escapedURL + "') + '\";\">');" + LS +
+          "window.document.write('  <embed play=\"" + isAutoStart + "\" swliveconnect=\"true\" name=\"myFlashMovie\" src=\"" + escapedURL + "\" quality=\"high\" type=\"application/x-shockwave-flash\">');" + LS +
           "window.document.write('  </embed>');" + LS +
           "window.document.write('</object>');" + LS +
           "//-->" + LS
@@ -346,4 +346,35 @@ public class JFlashPlayer extends JPanel {
     return encodedString.replaceAll("\\+", "%20");
   }
   
+  public static String escapeXML(String s) {
+    if(s == null || s.length() == 0) {
+      return s;
+    }
+    StringBuffer sb = new StringBuffer((int)(s.length() * 1.1));
+    for(int i=0; i<s.length(); i++) {
+      char c = s.charAt(i);
+      switch(c) {
+        case '<':
+          sb.append("&lt;");
+          break;
+        case '>':
+          sb.append("&gt;");
+          break;
+        case '&':
+          sb.append("&amp;");
+          break;
+        case '\'':
+          sb.append("&apos;");
+          break;
+        case '\"':
+          sb.append("&quot;");
+          break;
+        default:
+          sb.append(c);
+        break;
+      }
+    }
+    return sb.toString();
+  }
+
 }
