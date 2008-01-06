@@ -26,18 +26,19 @@ Then, you need to add the following to your main method:
 
 public static void main(String[] args) {
   NativeInterfaceHandler.init();
-  // The rest of the initialization of the program
+  // Here goes the rest of the initialization
   NativeInterfaceHandler.runEventPump();
 }
 
-Note that the last call is blocking, and it assumes that the Swing application
-exits explicitely with a System.exit(int) call, which is generally the rule.
+Note that the last call is blocking until all non-daemon threads are terminated.
+This is a paranoid check as Swing applications usually terminate using a
+System.exit(int) call.
 
 
 3. Any tutorial or demo?
 
 The DJ NativeSwing Demo presents all the features of the NativeSwing library,
-along with the code that was required. Simply launch DJNativeSwingDemo.jar.
+along with the corresponding code. Simply launch DJNativeSwingDemo.jar.
 
 By default, the Windows version of SWT is provided and in the demo's classpath.
 If you wish to try on a different platform, simply place the corresponding SWT
@@ -76,4 +77,4 @@ For the sources of the SWT libraries, check the eclipse repositories.
 6. How to contribute?
 
 If you are interested in helping the project, simply send me an e-mail. Friendly
-e-mails are always welcome!
+e-mails are always welcome too!

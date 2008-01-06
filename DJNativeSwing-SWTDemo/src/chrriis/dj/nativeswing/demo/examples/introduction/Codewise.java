@@ -30,11 +30,11 @@ public class Codewise extends JPanel {
         "    <pre>" + LS +
         "      public static void main(String[] args) {" + LS +
         "        NativeInterfaceHandler.init();" + LS +
-        "        // The rest of the initialization of the program" + LS +
+        "        // Here goes the rest of the initialization" + LS +
         "        NativeInterfaceHandler.runEventPump();" + LS +
         "      }</pre>" + LS +
         "    </p>" + LS +
-        "    <p>Note that the last call is blocking, and it assumes that the Swing application exits explicitely with a System.exit(int) call, which is generally the rule.</p>" + LS +
+        "    <p>Note that the last call is blocking until all non-daemon threads are terminated. This is a paranoid check as Swing applications usually terminate using a System.exit(int) call.</p>" + LS +
         "    <h1>Native components are Swing-like</h1>" + LS +
         "    <p>Try the next examples and look at the source code: they could not be easier to manipulate.</p>" + LS +
         "  </body>" + LS +

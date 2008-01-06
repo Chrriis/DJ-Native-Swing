@@ -37,9 +37,10 @@ public class NativeInterfaceHandler {
 
   protected static volatile Thread displayThread;
   protected static volatile Display display;
+  protected static volatile boolean isRunning;
 
   public static void init() {
-    if(display != null) {
+    if(isRunning) {
       return;
     }
     try {
@@ -52,6 +53,7 @@ public class NativeInterfaceHandler {
     }
     displayThread = Thread.currentThread();
     display = new Display();
+    isRunning = true;
     // Specific Sun property to prevent heavyweight components from erasing their background.
     System.setProperty("sun.awt.noerasebackground", "true");
     // It seems on Linux this is required to get the component visible.
@@ -127,35 +129,90 @@ public class NativeInterfaceHandler {
         }
       }
     }, WindowEvent.WINDOW_EVENT_MASK | ComponentEvent.COMPONENT_EVENT_MASK);
-  }
-  
-  public static void runEventPump() {
-    new Thread("SWT wake-up thread") {
+    Runtime.getRuntime().addShutdownHook(new Thread("DJNativeSwing Shutdown Hook") {
+      @Override
+      public void run() {
+        display.syncExec(new Runnable() {
+          public void run() {
+            cleanUp();
+          }
+        });
+      }
+    });
+    Thread autoShutdownThread = new Thread("DJNativeSwing Auto-Shutdown") {
+      protected Thread[] activeThreads = new Thread[1024];
       @Override
       public void run() {
         while(true) {
           try {
+            Thread.sleep(500);
+          } catch(Exception e) {
+          }
+          ThreadGroup group = Thread.currentThread().getThreadGroup();
+          for(ThreadGroup parentGroup = group; (parentGroup = parentGroup.getParent()) != null; group = parentGroup);
+          boolean isAlive = false;
+          for(int i=group.enumerate(activeThreads, true)-1; i>=0; i--) {
+            Thread t = activeThreads[i];
+            if(t != displayThread && !t.isDaemon() && t.isAlive()) {
+              isAlive = true;
+              break;
+            }
+          }
+          if(!isAlive) {
+            isRunning = false;
+            display.wake();
+          }
+        }
+      }
+    };
+    autoShutdownThread.setDaemon(true);
+    autoShutdownThread.start();
+  }
+  
+  protected static void cleanUp() {
+    for(Shell shell: shellList) {
+      shell.dispose();
+    }
+    shellList = new ArrayList<Shell>();
+    canvasList = new ArrayList<Canvas>();
+    // Note: display is not disposed because it makes the JVM to crash. Anyway, its resources are released on system exit.
+//    display.dispose();
+//    display = null;
+  }
+  
+  public static void runEventPump() {
+    Thread wakeUpThread = new Thread("DJNativeSwing SWT wake-up") {
+      @Override
+      public void run() {
+        while(display != null) {
+          try {
             sleep(50);
-            // for some reasons, need to wake up everytime it sleeps using a fake event 
-            display.asyncExec(new Runnable() {
-              public void run() {
-              }
-            });
+            if(display != null && !display.isDisposed()) {
+              // for some reasons, need to wake up everytime it sleeps using a fake event
+              display.asyncExec(new Runnable() {
+                public void run() {
+                }
+              });
+            }
           } catch(Exception e) {
             e.printStackTrace();
           }
         }
       }
-    }.start();
-    while(true) {
+    };
+    wakeUpThread.setDaemon(true);
+    wakeUpThread.start();
+    while(isRunning) {
       dispatch();
     }
-    // TODO: add shutdown hooks for special cleanup?
+    cleanUp();
   }
   
   public static void dispatch() {
     if(display.readAndDispatch()) {
-      display.sleep();
+      if(isRunning) {
+        display.sleep();
+      }
     }
   }
   
@@ -185,7 +242,7 @@ public class NativeInterfaceHandler {
             public void run() {
               while(true) {
                 Runnable r;
-                synchronized (SWING_LOCK) {
+                synchronized(SWING_LOCK) {
                   if(swingRunnableList.isEmpty()) {
                     hasSwingRun = true;
                     break;
@@ -200,7 +257,7 @@ public class NativeInterfaceHandler {
       }
       while(!hasSwingRun) {
         Runnable r = null;
-        synchronized (SWT_LOCK) {
+        synchronized(SWT_LOCK) {
           if(swtRunnableList.isEmpty()) {
             hasSWTRun = true;
           } else {
@@ -238,7 +295,7 @@ public class NativeInterfaceHandler {
             public void run() {
               while(true) {
                 Runnable r;
-                synchronized (SWT_LOCK) {
+                synchronized(SWT_LOCK) {
                   if(swtRunnableList.isEmpty()) {
                     hasSWTRun = true;
                     break;
@@ -253,7 +310,7 @@ public class NativeInterfaceHandler {
       }
       while(!hasSWTRun) {
         Runnable r = null;
-        synchronized (SWING_LOCK) {
+        synchronized(SWING_LOCK) {
           if(swingRunnableList.isEmpty()) {
             hasSwingRun = true;
           } else {
