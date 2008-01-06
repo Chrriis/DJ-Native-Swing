@@ -5,7 +5,7 @@ Licence terms: LGPL (see licence.txt)
 
 ---------------------------------- Change log ----------------------------------
 
-* Version 0.0.9:
+* Version 0.9.1:
 
 - Web browser and Flash Player are implemented.
 - Multi Media Player is implemented on Windows using Ole controls.
