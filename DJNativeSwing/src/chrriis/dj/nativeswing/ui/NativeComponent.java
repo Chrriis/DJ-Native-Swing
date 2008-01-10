@@ -145,6 +145,9 @@ public abstract class NativeComponent extends Canvas {
   @Override
   public void addNotify() {
     super.addNotify();
+    if(initializationRunnableList == null) {
+      throw new IllegalStateException("A native component cannot be re-created after having been disposed.");
+    }
     NativeInterfaceHandler.invokeSWT(new Runnable() {
       public void run() {
         shell = NativeInterfaceHandler.createShell(NativeComponent.this);
