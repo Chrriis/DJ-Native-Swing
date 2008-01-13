@@ -178,9 +178,10 @@ public class JFlashPlayer extends JPanel {
         "        command = command == null? '': encodeURIComponent(command);" + LS +
         "        window.location = 'command://' + command;" + LS +
         "      }" + LS +
-        "      function getFlashMovieObject(movieName) {" + LS +
+        "      function getFlashMovieObject() {" + LS +
+        "        var movieName = \"myFlashMovie\";" + LS +
         "        if(window.document[movieName]) {" + LS +
-        "            return window.document[movieName];" + LS +
+        "          return window.document[movieName];" + LS +
         "        }" + LS +
         "        if(navigator.appName.indexOf(\"Microsoft Internet\") == -1) {" + LS +
         "          if(document.embeds && document.embeds[movieName]) {" + LS +
@@ -191,23 +192,23 @@ public class JFlashPlayer extends JPanel {
         "        }" + LS +
         "      }" + LS +
         "      function playFM() {" + LS +
-        "        var flashMovie=getFlashMovieObject(\"myFlashMovie\");" + LS +
+        "        var flashMovie = getFlashMovieObject();" + LS +
         "        flashMovie.Play();" + LS +
         "      }" + LS +
         "      function stopFM() {" + LS +
-        "        var flashMovie=getFlashMovieObject(\"myFlashMovie\");" + LS +
-        "        flashMovie.Stop();" + LS +
+        "        var flashMovie = getFlashMovieObject();" + LS +
+        "        flashMovie.StopPlay();" + LS +
         "      }" + LS +
         "      function rewindFM() {" + LS +
-        "        var flashMovie=getFlashMovieObject(\"myFlashMovie\");" + LS +
+        "        var flashMovie = getFlashMovieObject();" + LS +
         "        flashMovie.Rewind();" + LS +
         "      }" + LS +
         "      function setVariableFM(variableName, variableValue) {" + LS +
-        "        var flashMovie=getFlashMovieObject(\"myFlashMovie\");" + LS +
+        "        var flashMovie = getFlashMovieObject();" + LS +
         "        flashMovie.SetVariable(decodeURIComponent(variableName), decodeURIComponent(variableValue));" + LS +
         "      }" + LS +
         "      function getVariableFM(variableName) {" + LS +
-        "        var flashMovie=getFlashMovieObject(\"myFlashMovie\");" + LS +
+        "        var flashMovie = getFlashMovieObject();" + LS +
         "        try {" + LS +
         "          sendCommand('getVariableFM:' + flashMovie.GetVariable(decodeURIComponent(variableName)));" + LS +
         "        } catch(e) {" + LS +
