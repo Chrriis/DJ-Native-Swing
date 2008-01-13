@@ -160,7 +160,9 @@ class NativeWebBrowser extends NativeComponent {
                     }
                     webBrowserWindow.setVisible(true);
                   }
-                  jWebBrowser.setURL(browserAttributes.url);
+                  if(browserAttributes.url != null) {
+                    jWebBrowser.setURL(browserAttributes.url);
+                  }
 
                 }
               }
@@ -304,6 +306,9 @@ class NativeWebBrowser extends NativeComponent {
   }
   
   public boolean setURL(final String url) {
+    if(url == null) {
+      throw new IllegalArgumentException("The url cannot be null!");
+    }
     final boolean[] result = new boolean[1];
     run(new Runnable() {
       public void run() {
