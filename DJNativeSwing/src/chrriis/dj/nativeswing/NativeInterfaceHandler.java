@@ -171,7 +171,11 @@ public class NativeInterfaceHandler {
   
   protected static void cleanUp() {
     for(Shell shell: shellList) {
-      shell.dispose();
+      try {
+        shell.dispose();
+      } catch(Exception e) {
+        // Swallow exceptions. These are de-activation of controls when the display is already disposed.
+      }
     }
     shellList = new ArrayList<Shell>();
     canvasList = new ArrayList<Canvas>();
