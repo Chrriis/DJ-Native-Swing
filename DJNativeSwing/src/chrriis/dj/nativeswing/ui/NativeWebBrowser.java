@@ -11,6 +11,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Window;
 import java.net.URLDecoder;
+import java.util.regex.Pattern;
 
 import javax.swing.SwingUtilities;
 
@@ -372,7 +373,9 @@ class NativeWebBrowser extends NativeComponent {
     final boolean[] result = new boolean[1];
     run(new Runnable() {
       public void run() {
-        result[0] = browser.execute(script);
+        // Remove line comments, because it does not work properly on Mozilla.
+        String script_ = Pattern.compile("//.*$", Pattern.MULTILINE).matcher(script).replaceAll("");
+        result[0] = browser.execute(script_);
       }
     });
     return result[0];
