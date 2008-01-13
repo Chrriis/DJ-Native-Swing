@@ -21,6 +21,7 @@ The key components are of course a rich web browser and a flash player.
 Simply place the NativeSwing.jar library in your classpath, as well as the SWT
 library 3.4 corresponding to your platform (swt.jar, see
 http://www.eclipse.org/swt)
+Java 5.0 or later is required.
 
 Then, you need to add the following to your main method:
 
