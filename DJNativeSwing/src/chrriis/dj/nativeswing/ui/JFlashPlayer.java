@@ -27,6 +27,7 @@ import javax.swing.border.BevelBorder;
 import chrriis.common.Utils;
 import chrriis.common.WebServer;
 import chrriis.common.WebServer.WebServerContent;
+import chrriis.dj.nativeswing.NativeInterfaceHandler;
 import chrriis.dj.nativeswing.ui.event.FlashPlayerListener;
 import chrriis.dj.nativeswing.ui.event.FlashPlayerWindowOpeningEvent;
 import chrriis.dj.nativeswing.ui.event.WebBrowserAdapter;
@@ -54,12 +55,6 @@ public class JFlashPlayer extends JPanel {
     webBrowser = new JWebBrowser();
     webBrowser.setBarsVisible(false);
     webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
-      @Override
-      public void commandReceived(WebBrowserEvent e, String command) {
-        if(command.startsWith("getVariableFM:")) {
-          getVariableResult = command.substring("getVariableFM:".length());
-        }
-      }
 //      @Override
 //      public void urlChanging(WebBrowserNavigationEvent e) {
 //        if(url == null || !url.equals(e.getNewURL())) {
@@ -149,7 +144,7 @@ public class JFlashPlayer extends JPanel {
     } catch(Exception e) {
       url = new File(url).toURI().toString();
     }
-    url = WebServer.getDefaultWebServer().getResourcePath(getClass().getName(), "html/" + isAutoStart + "/" + url);
+    url = WebServer.getDefaultWebServer().getWebServerContentURL(getClass().getName(), "html/" + isAutoStart + "/" + url);
     webBrowser.setURL(url);
   }
 
@@ -191,8 +186,6 @@ public class JFlashPlayer extends JPanel {
     webBrowser.execute("setVariableFM('" + Utils.encodeURL(name) + "', '" + Utils.encodeURL(value) + "')");
   }
   
-  protected String getVariableResult;
-  
   /**
    * @return The value, or null or an empty string when the variable is not defined.
    */
@@ -200,9 +193,36 @@ public class JFlashPlayer extends JPanel {
     if(url == null) {
       return null;
     }
-    getVariableResult = null;
+    final String TEMP_RESULT = new String();
+    final String[] getVariableResult = new String[] {TEMP_RESULT};
+    webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
+      @Override
+      public void commandReceived(WebBrowserEvent e, String command) {
+        if(command.startsWith("getVariableFM:")) {
+          getVariableResult[0] = command.substring("getVariableFM:".length());
+          webBrowser.removeWebBrowserListener(this);
+        }
+      }
+    });
     webBrowser.execute("getVariableFM('" + Utils.encodeURL(name) + "');");
-    return getVariableResult;
+    for(int i=0; i<20; i++) {
+      if(getVariableResult[0] != TEMP_RESULT) {
+        break;
+      }
+      NativeInterfaceHandler.invokeSWT(new Runnable() {
+        public void run() {
+          if(getVariableResult[0] != TEMP_RESULT) {
+            return;
+          }
+          try {
+            Thread.sleep(50);
+          } catch(Exception e) {
+          }
+        }
+      });
+    }
+    String result = getVariableResult[0];
+    return result == TEMP_RESULT? null: result;
   }
   
   public boolean isControlBarVisible() {
@@ -296,7 +316,7 @@ public class JFlashPlayer extends JPanel {
                 "    </style>" + LS +
                 "  </head>" + LS +
                 "  <body height=\"*\">" + LS +
-                "    <script src=\"" + WebServer.getDefaultWebServer().getResourcePath(JFlashPlayer.class.getName(), "js/" + isAutoStart + "/" + url) + "\"></script>" + LS +
+                "    <script src=\"" + WebServer.getDefaultWebServer().getWebServerContentURL(JFlashPlayer.class.getName(), "js/" + isAutoStart + "/" + url) + "\"></script>" + LS +
                 "  </body>" + LS +
                 "</html>" + LS;
             return new ByteArrayInputStream(content.getBytes("UTF-8"));

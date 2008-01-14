@@ -10,6 +10,7 @@ package chrriis.common;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -17,8 +18,11 @@ import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URL;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * @author Christopher Deckers
@@ -28,11 +32,198 @@ public class WebServer {
   public static abstract class WebServerContent {
     
     public static final String MIME_APPLICATION_OCTET_STREAM = "application/octet-stream";
-    public static final String MIME_TEXT = "text/plain";
-    public static final String MIME_TEXT_HTML = "text/html";
-    public static final String MIME_IMAGE_GIF = "image/gif";
-    public static final String MIME_IMAGE_PNG = "image/png";
-    public static final String MIME_IMAGE_JPEG = "image/jpeg";
+    
+    protected static Map<String, String> extensionToMimeTypeMap = new HashMap<String, String>();
+    static {
+      extensionToMimeTypeMap.put("323", "text/h323");
+      extensionToMimeTypeMap.put("acx", "application/internet-property-stream");
+      extensionToMimeTypeMap.put("ai", "application/postscript");
+      extensionToMimeTypeMap.put("aif", "audio/x-aiff");
+      extensionToMimeTypeMap.put("aifc", "audio/x-aiff");
+      extensionToMimeTypeMap.put("aiff", "audio/x-aiff");
+      extensionToMimeTypeMap.put("asf", "video/x-ms-asf");
+      extensionToMimeTypeMap.put("asr", "video/x-ms-asf");
+      extensionToMimeTypeMap.put("asx", "video/x-ms-asf");
+      extensionToMimeTypeMap.put("au", "audio/basic");
+      extensionToMimeTypeMap.put("avi", "video/x-msvideo");
+      extensionToMimeTypeMap.put("axs", "application/olescript");
+      extensionToMimeTypeMap.put("bas", "text/plain");
+      extensionToMimeTypeMap.put("bcpio", "application/x-bcpio");
+      extensionToMimeTypeMap.put("bin", "application/octet-stream");
+      extensionToMimeTypeMap.put("bmp", "image/bmp");
+      extensionToMimeTypeMap.put("c", "text/plain");
+      extensionToMimeTypeMap.put("cat", "application/vnd.ms-pkiseccat");
+      extensionToMimeTypeMap.put("cdf", "application/x-cdf");
+      extensionToMimeTypeMap.put("cer", "application/x-x509-ca-cert");
+      extensionToMimeTypeMap.put("class", "application/octet-stream");
+      extensionToMimeTypeMap.put("clp", "application/x-msclip");
+      extensionToMimeTypeMap.put("cmx", "image/x-cmx");
+      extensionToMimeTypeMap.put("cod", "image/cis-cod");
+      extensionToMimeTypeMap.put("cpio", "application/x-cpio");
+      extensionToMimeTypeMap.put("crd", "application/x-mscardfile");
+      extensionToMimeTypeMap.put("crl", "application/pkix-crl");
+      extensionToMimeTypeMap.put("crt", "application/x-x509-ca-cert");
+      extensionToMimeTypeMap.put("csh", "application/x-csh");
+      extensionToMimeTypeMap.put("css", "text/css");
+      extensionToMimeTypeMap.put("dcr", "application/x-director");
+      extensionToMimeTypeMap.put("der", "application/x-x509-ca-cert");
+      extensionToMimeTypeMap.put("dir", "application/x-director");
+      extensionToMimeTypeMap.put("dll", "application/x-msdownload");
+      extensionToMimeTypeMap.put("dms", "application/octet-stream");
+      extensionToMimeTypeMap.put("doc", "application/msword");
+      extensionToMimeTypeMap.put("dot", "application/msword");
+      extensionToMimeTypeMap.put("dvi", "application/x-dvi");
+      extensionToMimeTypeMap.put("dxr", "application/x-director");
+      extensionToMimeTypeMap.put("eps", "application/postscript");
+      extensionToMimeTypeMap.put("etx", "text/x-setext");
+      extensionToMimeTypeMap.put("evy", "application/envoy");
+      extensionToMimeTypeMap.put("exe", "application/octet-stream");
+      extensionToMimeTypeMap.put("fif", "application/fractals");
+      extensionToMimeTypeMap.put("flr", "x-world/x-vrml");
+      extensionToMimeTypeMap.put("gif", "image/gif");
+      extensionToMimeTypeMap.put("gtar", "application/x-gtar");
+      extensionToMimeTypeMap.put("gz", "application/x-gzip");
+      extensionToMimeTypeMap.put("h", "text/plain");
+      extensionToMimeTypeMap.put("hdf", "application/x-hdf");
+      extensionToMimeTypeMap.put("hlp", "application/winhlp");
+      extensionToMimeTypeMap.put("hqx", "application/mac-binhex40");
+      extensionToMimeTypeMap.put("hta", "application/hta");
+      extensionToMimeTypeMap.put("htc", "text/x-component");
+      extensionToMimeTypeMap.put("htm", "text/html");
+      extensionToMimeTypeMap.put("html", "text/html");
+      extensionToMimeTypeMap.put("htt", "text/webviewhtml");
+      extensionToMimeTypeMap.put("ico", "image/x-icon");
+      extensionToMimeTypeMap.put("ief", "image/ief");
+      extensionToMimeTypeMap.put("iii", "application/x-iphone");
+      extensionToMimeTypeMap.put("ins", "application/x-internet-signup");
+      extensionToMimeTypeMap.put("isp", "application/x-internet-signup");
+      extensionToMimeTypeMap.put("jfif", "image/pipeg");
+      extensionToMimeTypeMap.put("jnlp", "application/x-java-jnlp-file");
+      extensionToMimeTypeMap.put("jpe", "image/jpeg");
+      extensionToMimeTypeMap.put("jpeg", "image/jpeg");
+      extensionToMimeTypeMap.put("jpg", "image/jpeg");
+      extensionToMimeTypeMap.put("js", "application/x-javascript");
+      extensionToMimeTypeMap.put("latex", "application/x-latex");
+      extensionToMimeTypeMap.put("lha", "application/octet-stream");
+      extensionToMimeTypeMap.put("lsf", "video/x-la-asf");
+      extensionToMimeTypeMap.put("lsx", "video/x-la-asf");
+      extensionToMimeTypeMap.put("lzh", "application/octet-stream");
+      extensionToMimeTypeMap.put("m13", "application/x-msmediaview");
+      extensionToMimeTypeMap.put("m14", "application/x-msmediaview");
+      extensionToMimeTypeMap.put("m3u", "audio/x-mpegurl");
+      extensionToMimeTypeMap.put("man", "application/x-troff-man");
+      extensionToMimeTypeMap.put("mdb", "application/x-msaccess");
+      extensionToMimeTypeMap.put("me", "application/x-troff-me");
+      extensionToMimeTypeMap.put("mht", "message/rfc822");
+      extensionToMimeTypeMap.put("mhtml", "message/rfc822");
+      extensionToMimeTypeMap.put("mid", "audio/mid");
+      extensionToMimeTypeMap.put("mny", "application/x-msmoney");
+      extensionToMimeTypeMap.put("mov", "video/quicktime");
+      extensionToMimeTypeMap.put("movie", "video/x-sgi-movie");
+      extensionToMimeTypeMap.put("mp2", "video/mpeg");
+      extensionToMimeTypeMap.put("mp3", "audio/mpeg");
+      extensionToMimeTypeMap.put("mpa", "video/mpeg");
+      extensionToMimeTypeMap.put("mpe", "video/mpeg");
+      extensionToMimeTypeMap.put("mpeg", "video/mpeg");
+      extensionToMimeTypeMap.put("mpg", "video/mpeg");
+      extensionToMimeTypeMap.put("mpp", "application/vnd.ms-project");
+      extensionToMimeTypeMap.put("mpv2", "video/mpeg");
+      extensionToMimeTypeMap.put("ms", "application/x-troff-ms");
+      extensionToMimeTypeMap.put("mvb", "application/x-msmediaview");
+      extensionToMimeTypeMap.put("nws", "message/rfc822");
+      extensionToMimeTypeMap.put("oda", "application/oda");
+      extensionToMimeTypeMap.put("p10", "application/pkcs10");
+      extensionToMimeTypeMap.put("p12", "application/x-pkcs12");
+      extensionToMimeTypeMap.put("p7b", "application/x-pkcs7-certificates");
+      extensionToMimeTypeMap.put("p7c", "application/x-pkcs7-mime");
+      extensionToMimeTypeMap.put("p7m", "application/x-pkcs7-mime");
+      extensionToMimeTypeMap.put("p7r", "application/x-pkcs7-certreqresp");
+      extensionToMimeTypeMap.put("p7s", "application/x-pkcs7-signature");
+      extensionToMimeTypeMap.put("pbm", "image/x-portable-bitmap");
+      extensionToMimeTypeMap.put("pdf", "application/pdf");
+      extensionToMimeTypeMap.put("pfx", "application/x-pkcs12");
+      extensionToMimeTypeMap.put("pgm", "image/x-portable-graymap");
+      extensionToMimeTypeMap.put("pko", "application/ynd.ms-pkipko");
+      extensionToMimeTypeMap.put("pma", "application/x-perfmon");
+      extensionToMimeTypeMap.put("pmc", "application/x-perfmon");
+      extensionToMimeTypeMap.put("pml", "application/x-perfmon");
+      extensionToMimeTypeMap.put("pmr", "application/x-perfmon");
+      extensionToMimeTypeMap.put("pmw", "application/x-perfmon");
+      extensionToMimeTypeMap.put("pnm", "image/x-portable-anymap");
+      extensionToMimeTypeMap.put("pot,", "application/vnd.ms-powerpoint");
+      extensionToMimeTypeMap.put("ppm", "image/x-portable-pixmap");
+      extensionToMimeTypeMap.put("pps", "application/vnd.ms-powerpoint");
+      extensionToMimeTypeMap.put("ppt", "application/vnd.ms-powerpoint");
+      extensionToMimeTypeMap.put("prf", "application/pics-rules");
+      extensionToMimeTypeMap.put("ps", "application/postscript");
+      extensionToMimeTypeMap.put("pub", "application/x-mspublisher");
+      extensionToMimeTypeMap.put("qt", "video/quicktime");
+      extensionToMimeTypeMap.put("ra", "audio/x-pn-realaudio");
+      extensionToMimeTypeMap.put("ram", "audio/x-pn-realaudio");
+      extensionToMimeTypeMap.put("ras", "image/x-cmu-raster");
+      extensionToMimeTypeMap.put("rgb", "image/x-rgb");
+      extensionToMimeTypeMap.put("rmi", "audio/mid");
+      extensionToMimeTypeMap.put("roff", "application/x-troff");
+      extensionToMimeTypeMap.put("rtf", "application/rtf");
+      extensionToMimeTypeMap.put("rtx", "text/richtext");
+      extensionToMimeTypeMap.put("scd", "application/x-msschedule");
+      extensionToMimeTypeMap.put("sct", "text/scriptlet");
+      extensionToMimeTypeMap.put("setpay", "application/set-payment-initiation");
+      extensionToMimeTypeMap.put("setreg", "application/set-registration-initiation");
+      extensionToMimeTypeMap.put("sh", "application/x-sh");
+      extensionToMimeTypeMap.put("shar", "application/x-shar");
+      extensionToMimeTypeMap.put("sit", "application/x-stuffit");
+      extensionToMimeTypeMap.put("snd", "audio/basic");
+      extensionToMimeTypeMap.put("spc", "application/x-pkcs7-certificates");
+      extensionToMimeTypeMap.put("spl", "application/futuresplash");
+      extensionToMimeTypeMap.put("src", "application/x-wais-source");
+      extensionToMimeTypeMap.put("sst", "application/vnd.ms-pkicertstore");
+      extensionToMimeTypeMap.put("stl", "application/vnd.ms-pkistl");
+      extensionToMimeTypeMap.put("stm", "text/html");
+      extensionToMimeTypeMap.put("svg", "image/svg+xml");
+      extensionToMimeTypeMap.put("sv4cpio", "application/x-sv4cpio");
+      extensionToMimeTypeMap.put("sv4crc", "application/x-sv4crc");
+      extensionToMimeTypeMap.put("swf", "application/x-shockwave-flash");
+      extensionToMimeTypeMap.put("t", "application/x-troff");
+      extensionToMimeTypeMap.put("tar", "application/x-tar");
+      extensionToMimeTypeMap.put("tcl", "application/x-tcl");
+      extensionToMimeTypeMap.put("tex", "application/x-tex");
+      extensionToMimeTypeMap.put("texi", "application/x-texinfo");
+      extensionToMimeTypeMap.put("texinfo", "application/x-texinfo");
+      extensionToMimeTypeMap.put("tgz", "application/x-compressed");
+      extensionToMimeTypeMap.put("tif", "image/tiff");
+      extensionToMimeTypeMap.put("tiff", "image/tiff");
+      extensionToMimeTypeMap.put("tr", "application/x-troff");
+      extensionToMimeTypeMap.put("trm", "application/x-msterminal");
+      extensionToMimeTypeMap.put("tsv", "text/tab-separated-values");
+      extensionToMimeTypeMap.put("txt", "text/plain");
+      extensionToMimeTypeMap.put("uls", "text/iuls");
+      extensionToMimeTypeMap.put("ustar", "application/x-ustar");
+      extensionToMimeTypeMap.put("vcf", "text/x-vcard");
+      extensionToMimeTypeMap.put("vrml", "x-world/x-vrml");
+      extensionToMimeTypeMap.put("wav", "audio/x-wav");
+      extensionToMimeTypeMap.put("wcm", "application/vnd.ms-works");
+      extensionToMimeTypeMap.put("wdb", "application/vnd.ms-works");
+      extensionToMimeTypeMap.put("wks", "application/vnd.ms-works");
+      extensionToMimeTypeMap.put("wmf", "application/x-msmetafile");
+      extensionToMimeTypeMap.put("wps", "application/vnd.ms-works");
+      extensionToMimeTypeMap.put("wri", "application/x-mswrite");
+      extensionToMimeTypeMap.put("wrl", "x-world/x-vrml");
+      extensionToMimeTypeMap.put("wrz", "x-world/x-vrml");
+      extensionToMimeTypeMap.put("xaf", "x-world/x-vrml");
+      extensionToMimeTypeMap.put("xbm", "image/x-xbitmap");
+      extensionToMimeTypeMap.put("xla", "application/vnd.ms-excel");
+      extensionToMimeTypeMap.put("xlc", "application/vnd.ms-excel");
+      extensionToMimeTypeMap.put("xlm", "application/vnd.ms-excel");
+      extensionToMimeTypeMap.put("xls", "application/vnd.ms-excel");
+      extensionToMimeTypeMap.put("xlt", "application/vnd.ms-excel");
+      extensionToMimeTypeMap.put("xlw", "application/vnd.ms-excel");
+      extensionToMimeTypeMap.put("xof", "x-world/x-vrml");
+      extensionToMimeTypeMap.put("xpm", "image/x-xpixmap");
+      extensionToMimeTypeMap.put("xwd", "image/x-xwindowdump");
+      extensionToMimeTypeMap.put("z", "application/x-compress");
+      extensionToMimeTypeMap.put("zip", "application/zip");
+    }
     
     public static String getDefaultMimeType(String extension) {
       if(extension == null) {
@@ -41,23 +232,8 @@ public class WebServer {
       if(extension.startsWith(".")) {
         extension = extension.substring(1);
       }
-      extension = extension.toLowerCase(Locale.ENGLISH);
-      if("txt".equals(extension)) {
-        return MIME_TEXT;
-      }
-      if("html".equals(extension) || "htm".equals(extension)) {
-        return MIME_TEXT_HTML;
-      }
-      if("gif".equals(extension)) {
-        return MIME_IMAGE_GIF;
-      }
-      if("png".equals(extension)) {
-        return MIME_IMAGE_PNG;
-      }
-      if("jpg".equals(extension) || "jpeg".equals(extension)) {
-        return MIME_IMAGE_JPEG;
-      }
-      return MIME_APPLICATION_OCTET_STREAM;
+      String mimeType = extensionToMimeTypeMap.get(extension.toLowerCase(Locale.ENGLISH));
+      return mimeType != null? mimeType: MIME_APPLICATION_OCTET_STREAM;
     }
     
     public abstract InputStream getInputStream();
@@ -87,7 +263,7 @@ public class WebServer {
       StringBuilder sb = new StringBuilder();
       sb.append("HTTP/1.0 " + code + " OK" + LS);
       sb.append("Content-Type: " + contentType + LS);
-      sb.append("Server: WebServer/1.0");
+      sb.append("Server: WebServer/1.0" + LS);
       sb.append("Date: " + new Date() + LS);
 //      sb.append("Expires: " + new Date() + LS);
 //      sb.append("Last-modified: " + new Date(lastModified) + LS);
@@ -183,7 +359,15 @@ public class WebServer {
     isRunning = false;
   }
   
+  public boolean isRunning() {
+    return isRunning;
+  }
+  
   public void start() throws IOException {
+    start(true);
+  }
+  
+  public void start(boolean isDaemon) throws IOException {
     if(isRunning) {
       return;
     }
@@ -196,6 +380,11 @@ public class WebServer {
         while(isRunning) {
           try {
             Socket socket = serverSocket.accept();
+            // Too risky if there are multiple network interfaces. Need to find a better way...
+//            String hostAddress = socket.getInetAddress().getHostAddress();
+//            if(!HOST_ADDRESS.equals(hostAddress) && !"127.0.0.1".equals(hostAddress)) {
+//              throw new IllegalStateException("Illegal connection from host " + hostAddress);
+//            }
             socket.setSoTimeout(10000);
             WebServerConnectionThread webServerConnectionThread = new WebServerConnectionThread(socket);
             webServerConnectionThread.start();
@@ -205,7 +394,7 @@ public class WebServer {
         }
       }
     };
-    listenerThread.setDaemon(true);
+    listenerThread.setDaemon(isDaemon);
     listenerThread.start();
   }
   
@@ -213,17 +402,86 @@ public class WebServer {
     return port;
   }
   
-  public String getResourcePath(String className, String resourcePath) {
-    String path = port + "/" + className + "/" + Utils.encodeURL(resourcePath);
-    try {
-      return "http://" + InetAddress.getLocalHost().getHostAddress() + ":" + path;
-    } catch(Exception e) {
-      return "http://127.0.0.1:" + path;
-    }
+  /**
+   * @return A URL that when accessed will invoke the method <code>static WebServerContent getWebServerContent(String resourcePath)</code> of the parameter class (the method visibility does not matter).
+   */
+  public String getWebServerContentURL(String className, String resourcePath) {
+    return "http://" + HOST_ADDRESS + ":" + port + "/" + className + "/" + Utils.encodeURL(resourcePath);
   }
   
+  public String getClassPathResourceURL(String className, String resourcePath) {
+    return WebServer.getDefaultWebServer().getWebServerContentURL(WebServer.class.getName(), "classpath/" + className + "/" + resourcePath);
+  }
+  
+  public String getResourcePathURL(String resourcePath) {
+    return WebServer.getDefaultWebServer().getWebServerContentURL(WebServer.class.getName(), "resource/" + resourcePath);
+  }
+  
+  protected static WebServerContent getWebServerContent(String resourcePath) {
+    int index = resourcePath.indexOf('/');
+    String type = resourcePath.substring(0, index);
+    resourcePath = resourcePath.substring(index + 1);
+    if("classpath".equals(type)) {
+      index = resourcePath.indexOf('/');
+      final String className = resourcePath.substring(0, index);
+      final String resource = resourcePath.substring(index + 1);
+      return new WebServerContent() {
+        @Override
+        public String getContentType() {
+          int index = resource.lastIndexOf('.');
+          return getDefaultMimeType(index == -1? null: resource.substring(index));
+        }
+        @Override
+        public InputStream getInputStream() {
+          try {
+            return Class.forName(className).getResourceAsStream(resource);
+          } catch(Exception e) {
+            e.printStackTrace();
+            return null;
+          }
+        }
+      };
+    }
+    if("resource".equals(type)) {
+      final String resource = resourcePath.substring(index + 1);
+      return new WebServerContent() {
+        @Override
+        public String getContentType() {
+          int index = resource.lastIndexOf('.');
+          return getDefaultMimeType(index == -1? null: resource.substring(index));
+        }
+        @Override
+        public InputStream getInputStream() {
+          String url = resource;
+          try {
+            return new URL(url).openStream();
+          } catch(Exception e) {
+          }
+          try {
+            return new FileInputStream(url);
+          } catch(Exception e) {
+            e.printStackTrace();
+          }
+          return null;
+        }
+      };
+    }
+    return null;
+  }
+
   protected static WebServer webServer;
   protected static Object LOCK = new Object();
+  protected static final String HOST_ADDRESS;
+  
+  static {
+    String hostAddress;
+    try {
+      hostAddress = InetAddress.getLocalHost().getHostAddress();
+    } catch(Exception e) {
+      hostAddress = "http://127.0.0.1";
+    }
+    HOST_ADDRESS = hostAddress;
+  }
   
   public static WebServer getDefaultWebServer() {
     synchronized(LOCK) {
@@ -233,7 +491,7 @@ public class WebServer {
       webServer = new WebServer() {
         @Override
         public void stop() {
-          // Cannot be stopped
+          throw new IllegalStateException("The default web server may be shared and thus cannot be stopped!");
         }
       };
       try {

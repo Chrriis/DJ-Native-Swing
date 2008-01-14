@@ -462,5 +462,9 @@ public class JWebBrowser extends JPanel {
   public JMenu getFileMenu() {
     return fileMenu;
   }
+  
+  public static void clearSessions() {
+    NativeWebBrowser.clearSessions();
+  }
 
 }

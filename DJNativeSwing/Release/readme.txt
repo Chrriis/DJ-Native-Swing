@@ -13,14 +13,15 @@ The NativeSwing library allows an easy integration of some native components
 into Swing applications, and provides some native utilities to enhance Swing's
 APIs.
 
-The key components are of course a rich web browser and a flash player.
+The key components are a rich native web browser and a flash player.
 
 
 2. How to use it?
 
 Simply place the NativeSwing.jar library in your classpath, as well as the SWT
-library 3.4 corresponding to your platform (swt.jar, see
-http://www.eclipse.org/swt)
+3.4 library corresponding to your platform (visit http://www.eclipse.org/swt).
+You may need to refer to the SWT FAQ (http://www.eclipse.org/swt/faq.php) to get
+it working on certain platforms (like the need to install XULRunner on Linux).
 Java 5.0 or later is required.
 
 Then, you need to add the following to your main method:
@@ -31,9 +32,8 @@ public static void main(String[] args) {
   NativeInterfaceHandler.runEventPump();
 }
 
-Note that the last call is blocking until all non-daemon threads are terminated.
-This is a paranoid check as Swing applications usually terminate using a
-System.exit(int) call.
+The last call is blocking until all non-daemon threads terminate. This is a
+paranoid check as Swing applications usually call System.exit(int).
 
 
 3. Any tutorial or demo?
@@ -48,9 +48,9 @@ library, (re-)named swt.jar alongside DJNativeSwingDemo.jar.
 
 4. What is the development status?
 
-The library is tested on Windows, and logically works on all the platforms where
-SWT supports placing SWT components in a Swing application.
-The library's main role is to solve the common integration issues:
+The library is tested on Windows and Linux, and logically works on all the
+platforms where SWT supports placing SWT components in a Swing application.
+The library solves those common integration issues:
 - Lightweight and heavyweight components produce visual glitches, like Swing
   popup menus, tooltips and combo drop menu to appear behind the native
   components.

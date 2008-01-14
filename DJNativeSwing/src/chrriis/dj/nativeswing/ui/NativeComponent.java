@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import chrriis.common.Utils;
 import chrriis.dj.nativeswing.NativeInterfaceHandler;
 import chrriis.dj.nativeswing.ui.event.InitializationEvent;
 import chrriis.dj.nativeswing.ui.event.InitializationListener;
@@ -98,7 +99,7 @@ public abstract class NativeComponent extends Canvas {
       type = MouseEvent.MOUSE_DRAGGED;
     }
     final MouseEvent me;
-    if(UIUtils.IS_JAVA_6_OR_GREATER) {
+    if(Utils.IS_JAVA_6_OR_GREATER) {
       // Not specifying the absX and Y in Java 6 results in a deadlock when pressing alt+F4 while moving the mouse over a native control
       Point cursorLocation = e.display.getCursorLocation();
       if(type == MouseEvent.MOUSE_WHEEL) {

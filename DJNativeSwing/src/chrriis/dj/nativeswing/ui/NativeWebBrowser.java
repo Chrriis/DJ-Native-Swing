@@ -234,6 +234,9 @@ class NativeWebBrowser extends NativeComponent {
           });
           return;
         }
+        if(location.startsWith("javascript:")) {
+          return;
+        }
         final boolean isTopFrame = e.top;
         final boolean[] hasRun = new boolean[1];
         final boolean[] isNavigating = new boolean[] {true};

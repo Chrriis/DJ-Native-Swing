@@ -7,6 +7,9 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.2:
 
+- Code cleanup of unused classes.
+- Possibility to clear all web browser session cookies.
+- JFlashPlayer.getVariable(s) now waits for a result (maximum 1 second).
 - Modified resource access to bypass local file restrictions (web server).
 - URLs cannot be null and now throws an exception immediately to say so.
 - Web browser line comments are removed internally to work with Mozilla.

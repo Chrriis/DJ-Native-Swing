@@ -22,7 +22,7 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 
-import chrriis.dj.nativeswing.demo.DemoUtils;
+import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.ui.JFlashPlayer;
 
 /**
@@ -36,13 +36,13 @@ public class Interactions extends JPanel {
     playerPanel.setBorder(BorderFactory.createTitledBorder("Native Flash Player component"));
     final JFlashPlayer player = new JFlashPlayer();
     player.setAutoStart(true);
-    String resourceURL = DemoUtils.getResourceURL(Interactions.class, "resource/dyn_text_moving.swf");
+    String resourceURL = WebServer.getDefaultWebServer().getClassPathResourceURL(Interactions.class.getName(), "resource/dyn_text_moving.swf");
     player.setURL(resourceURL);
     new Thread() {
       @Override
       public void run() {
         try {
-          sleep(1000);
+          sleep(2000);
         } catch(Exception e) {}
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {

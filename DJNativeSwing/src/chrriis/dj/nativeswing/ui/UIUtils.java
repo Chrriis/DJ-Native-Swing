@@ -26,9 +26,7 @@ import org.eclipse.swt.graphics.RGB;
  */
 public class UIUtils {
 
-  static final boolean IS_JAVA_6_OR_GREATER = System.getProperty("java.version").compareTo("1.6") >= 0;
-
-  static final int[][] KeyTable = {
+  protected static final int[][] KeyTable = {
     
     /* Keyboard and Mouse Masks */
     {java.awt.event.KeyEvent.VK_ALT,  SWT.ALT},

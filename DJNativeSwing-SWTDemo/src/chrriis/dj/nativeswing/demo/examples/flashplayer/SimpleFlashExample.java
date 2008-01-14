@@ -11,7 +11,7 @@ import java.awt.BorderLayout;
 
 import javax.swing.JPanel;
 
-import chrriis.dj.nativeswing.demo.DemoUtils;
+import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.ui.JFlashPlayer;
 
 /**
@@ -23,7 +23,7 @@ public class SimpleFlashExample extends JPanel {
     super(new BorderLayout(0, 0));
     JFlashPlayer player = new JFlashPlayer();
     player.setControlBarVisible(false);
-    String resourceURL = DemoUtils.getResourceURL(SimpleFlashExample.class, "resource/Movement-pointer_or_click.swf");
+    String resourceURL = WebServer.getDefaultWebServer().getClassPathResourceURL(SimpleFlashExample.class.getName(), "resource/Movement-pointer_or_click.swf");
     player.setURL(resourceURL);
     add(player, BorderLayout.CENTER);
   }

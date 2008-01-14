@@ -64,12 +64,6 @@ public class DemoTree extends JTree {
           new Example("Simple Example", SimpleMultiMediaPlayerExample.class, "Load a movie/sound file to an embedded multimedia player.", true),
       }));
     }
-//    exampleGroupList.add(new ExampleGroup("JDirectoryChooser", new Example[] {
-//        new Example("Directory Selection", DirectorySelection.class, "Use a native directory chooser instead of the odd-for-directories JFileChooser.", true),
-//    }));
-//    exampleGroupList.add(new ExampleGroup("JWindowX", new Example[] {
-//        new Example("Window Styles", WindowStyles.class, "Create a window that supports more native functionalities.", true),
-//    }));
     exampleGroupList.add(new ExampleGroup("Utilities", new Example[] {
         new Example("File Associations", FileAssociations.class, "Get the file type associations, and use them to launch files.", true),
     }));

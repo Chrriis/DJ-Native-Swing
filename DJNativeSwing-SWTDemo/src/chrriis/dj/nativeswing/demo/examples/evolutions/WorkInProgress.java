@@ -39,7 +39,7 @@ public class WorkInProgress extends JPanel {
         "    <h1>Non-portable controls</h1>" + LS +
         "    <p>On the Windows operating system, Ole controls can be integrated easily in a Swing application with this library. The general rule is to create a Swing component with a Swing-like API that uses the library to manipulate the Ole control.</p>" + LS +
         "    <p>In fact, this library contains an Ole-based version of a Media Player, that can serve as an example to create other bridged Ole controls.</p>" + LS +
-        "    <p>It is highly probable that this library allows to integrate other platform specific controls.</p>" + LS +
+        "    <p>It is highly possible, though untested, that this library allows to integrate other platform specific controls.</p>" + LS +
         "  </body>" + LS +
         "</html");
     editorPane.setEditable(false);
