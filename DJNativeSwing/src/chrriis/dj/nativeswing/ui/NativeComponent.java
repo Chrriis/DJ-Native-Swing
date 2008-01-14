@@ -85,7 +85,7 @@ public abstract class NativeComponent extends Canvas {
         lastLocation = newLocation;
         break;
     }
-    int button = Utils.translateMouseButton(e.button);
+    int button = UIUtils.translateMouseButton(e.button);
     if(button == 0) {
       switch(type) {
         case MouseEvent.MOUSE_PRESSED:
@@ -98,19 +98,19 @@ public abstract class NativeComponent extends Canvas {
       type = MouseEvent.MOUSE_DRAGGED;
     }
     final MouseEvent me;
-    if(Utils.IS_JAVA_6_OR_GREATER) {
+    if(UIUtils.IS_JAVA_6_OR_GREATER) {
       // Not specifying the absX and Y in Java 6 results in a deadlock when pressing alt+F4 while moving the mouse over a native control
       Point cursorLocation = e.display.getCursorLocation();
       if(type == MouseEvent.MOUSE_WHEEL) {
-        me = new MouseWheelEvent(this, type, System.currentTimeMillis(), Utils.translateModifiers(e.stateMask), e.x, e.y, cursorLocation.x, cursorLocation.y, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, e.count, 1);
+        me = new MouseWheelEvent(this, type, System.currentTimeMillis(), UIUtils.translateModifiers(e.stateMask), e.x, e.y, cursorLocation.x, cursorLocation.y, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, e.count, 1);
       } else {
-        me = new MouseEvent(this, type, System.currentTimeMillis(), Utils.translateModifiers(e.stateMask), e.x, e.y, cursorLocation.x, cursorLocation.y, e.count, false, button);
+        me = new MouseEvent(this, type, System.currentTimeMillis(), UIUtils.translateModifiers(e.stateMask), e.x, e.y, cursorLocation.x, cursorLocation.y, e.count, false, button);
       }
     } else {
       if(type == MouseEvent.MOUSE_WHEEL) {
-        me = new MouseWheelEvent(this, type, System.currentTimeMillis(), Utils.translateModifiers(e.stateMask), e.x, e.y, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, e.count, 1);
+        me = new MouseWheelEvent(this, type, System.currentTimeMillis(), UIUtils.translateModifiers(e.stateMask), e.x, e.y, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, e.count, 1);
       } else {
-        me = new MouseEvent(this, type, System.currentTimeMillis(), Utils.translateModifiers(e.stateMask), e.x, e.y, e.count, false, button);
+        me = new MouseEvent(this, type, System.currentTimeMillis(), UIUtils.translateModifiers(e.stateMask), e.x, e.y, e.count, false, button);
       }
     }
     SwingUtilities.invokeLater(new Runnable() {
@@ -132,9 +132,9 @@ public abstract class NativeComponent extends Canvas {
       }
       keyCode = KeyEvent.VK_UNDEFINED;
     } else {
-      keyCode = Utils.translateKeyCode(e.keyCode);
+      keyCode = UIUtils.translateKeyCode(e.keyCode);
     }
-    final KeyEvent ke = new KeyEvent(this, type, System.currentTimeMillis(), Utils.translateModifiers(e.stateMask), keyCode, character);
+    final KeyEvent ke = new KeyEvent(this, type, System.currentTimeMillis(), UIUtils.translateModifiers(e.stateMask), keyCode, character);
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         dispatchEvent(ke);

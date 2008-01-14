@@ -32,16 +32,12 @@ public class Interactions extends JPanel {
 
   public Interactions() {
     super(new BorderLayout(0, 0));
-    String fileURL = DemoUtils.extractFileURL(Interactions.class, "resource/dyn_text_moving.swf");
-    if(fileURL == null) {
-      add(new JLabel("Failed to extract the Flash file."), BorderLayout.CENTER);
-      return;
-    }
     JPanel playerPanel = new JPanel(new BorderLayout(0, 0));
     playerPanel.setBorder(BorderFactory.createTitledBorder("Native Flash Player component"));
     final JFlashPlayer player = new JFlashPlayer();
     player.setAutoStart(true);
-    player.setURL(fileURL);
+    String resourceURL = DemoUtils.getResourceURL(Interactions.class, "resource/dyn_text_moving.swf");
+    player.setURL(resourceURL);
     new Thread() {
       @Override
       public void run() {

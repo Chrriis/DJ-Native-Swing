@@ -9,7 +9,6 @@ package chrriis.dj.nativeswing.demo.examples.flashplayer;
 
 import java.awt.BorderLayout;
 
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import chrriis.dj.nativeswing.demo.DemoUtils;
@@ -22,14 +21,10 @@ public class SimpleFlashExample extends JPanel {
 
   public SimpleFlashExample() {
     super(new BorderLayout(0, 0));
-    String fileURL = DemoUtils.extractFileURL(SimpleFlashExample.class, "resource/Movement-pointer_or_click.swf");
-    if(fileURL == null) {
-      add(new JLabel("Failed to extract the Flash file."), BorderLayout.CENTER);
-      return;
-    }
     JFlashPlayer player = new JFlashPlayer();
     player.setControlBarVisible(false);
-    player.setURL(fileURL);
+    String resourceURL = DemoUtils.getResourceURL(SimpleFlashExample.class, "resource/Movement-pointer_or_click.swf");
+    player.setURL(resourceURL);
     add(player, BorderLayout.CENTER);
   }
   

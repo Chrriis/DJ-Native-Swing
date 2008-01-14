@@ -24,7 +24,7 @@ import org.eclipse.swt.graphics.RGB;
 /**
  * @author Christopher Deckers
  */
-public class Utils {
+public class UIUtils {
 
   static final boolean IS_JAVA_6_OR_GREATER = System.getProperty("java.version").compareTo("1.6") >= 0;
 
@@ -275,35 +275,4 @@ public class Utils {
     return bufferedImage;
   }
   
-  public static String escapeXML(String s) {
-    if(s == null || s.length() == 0) {
-      return s;
-    }
-    StringBuffer sb = new StringBuffer((int)(s.length() * 1.1));
-    for(int i=0; i<s.length(); i++) {
-      char c = s.charAt(i);
-      switch(c) {
-        case '<':
-          sb.append("&lt;");
-          break;
-        case '>':
-          sb.append("&gt;");
-          break;
-        case '&':
-          sb.append("&amp;");
-          break;
-        case '\'':
-          sb.append("&apos;");
-          break;
-        case '\"':
-          sb.append("&quot;");
-          break;
-        default:
-          sb.append(c);
-        break;
-      }
-    }
-    return sb.toString();
-  }
-
 }

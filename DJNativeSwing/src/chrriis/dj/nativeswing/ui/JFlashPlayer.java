@@ -11,11 +11,10 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.InputStream;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -25,6 +24,9 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
+import chrriis.common.Utils;
+import chrriis.common.WebServer;
+import chrriis.common.WebServer.WebServerContent;
 import chrriis.dj.nativeswing.ui.event.FlashPlayerListener;
 import chrriis.dj.nativeswing.ui.event.FlashPlayerWindowOpeningEvent;
 import chrriis.dj.nativeswing.ui.event.WebBrowserAdapter;
@@ -147,120 +149,8 @@ public class JFlashPlayer extends JPanel {
     } catch(Exception e) {
       url = new File(url).toURI().toString();
     }
-    File tempJSFile;
-    try {
-      tempJSFile = File.createTempFile("nsfp", ".js");
-      BufferedWriter out = new BufferedWriter(new FileWriter(tempJSFile));
-      String escapedURL = escapeXML(url);
-      out.write(
-          "<!--" + LS +
-          "window.document.write('<object classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\" codebase=\"\" id=\"myFlashMovie\">');" + LS +
-          "window.document.write('  <param name=\"movie\" value=\"' + decodeURIComponent('" + escapedURL + "') + '\";\">');" + LS +
-          "window.document.write('  <embed play=\"" + isAutoStart + "\" swliveconnect=\"true\" name=\"myFlashMovie\" src=\"" + escapedURL + "\" quality=\"high\" type=\"application/x-shockwave-flash\">');" + LS +
-          "window.document.write('  </embed>');" + LS +
-          "window.document.write('</object>');" + LS +
-          "//-->" + LS
-      );
-      try {
-        out.close();
-      } catch(Exception e) {}
-      tempJSFile.deleteOnExit();
-    } catch(Exception e) {
-      e.printStackTrace();
-      tempJSFile = null;
-    }
-    String content =
-        "<html>" + LS +
-        "  <head>" + LS +
-        "    <script language=\"JavaScript\" type=\"text/javascript\">" + LS +
-        "      <!--" + LS +
-        "      function sendCommand(command) {" + LS +
-        "        command = command == null? '': encodeURIComponent(command);" + LS +
-        "        window.location = 'command://' + command;" + LS +
-        "      }" + LS +
-        "      function getFlashMovieObject() {" + LS +
-        "        var movieName = \"myFlashMovie\";" + LS +
-        "        if(window.document[movieName]) {" + LS +
-        "          return window.document[movieName];" + LS +
-        "        }" + LS +
-        "        if(navigator.appName.indexOf(\"Microsoft Internet\") == -1) {" + LS +
-        "          if(document.embeds && document.embeds[movieName]) {" + LS +
-        "            return document.embeds[movieName];" + LS +
-        "          }" + LS +
-        "        } else {" + LS +
-        "          return document.getElementById(movieName);" + LS +
-        "        }" + LS +
-        "      }" + LS +
-        "      function playFM() {" + LS +
-        "        var flashMovie = getFlashMovieObject();" + LS +
-        "        flashMovie.Play();" + LS +
-        "      }" + LS +
-        "      function stopFM() {" + LS +
-        "        var flashMovie = getFlashMovieObject();" + LS +
-        "        flashMovie.StopPlay();" + LS +
-        "      }" + LS +
-        "      function rewindFM() {" + LS +
-        "        var flashMovie = getFlashMovieObject();" + LS +
-        "        flashMovie.Rewind();" + LS +
-        "      }" + LS +
-        "      function setVariableFM(variableName, variableValue) {" + LS +
-        "        var flashMovie = getFlashMovieObject();" + LS +
-        "        flashMovie.SetVariable(decodeURIComponent(variableName), decodeURIComponent(variableValue));" + LS +
-        "      }" + LS +
-        "      function getVariableFM(variableName) {" + LS +
-        "        var flashMovie = getFlashMovieObject();" + LS +
-        "        try {" + LS +
-        "          sendCommand('getVariableFM:' + flashMovie.GetVariable(decodeURIComponent(variableName)));" + LS +
-        "        } catch(e) {" + LS +
-        "          sendCommand('getVariableFM:');" + LS +
-        "        }" + LS +
-        "      }" + LS +
-        "      //-->" + LS +
-        "    </script>" + LS +
-        "    <style type=\"text/css\">" + LS +
-        "      html, object, embed, div, body { width: 100%; height: 100%; min-height: 100%; margin: 0; padding: 0; overflow: hidden; }" + LS +
-        "      div { background-color: #FFFFFF; }" + LS +
-        "    </style>" + LS +
-        "  </head>" + LS;
-    if(tempJSFile == null || !tempJSFile.exists()) {
-      String urlXMLEscape = Utils.escapeXML(url);
-      content +=
-        "  <body height=\"*\">" + LS +
-        "    <object classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\" codebase=\"\" id=\"myFlashMovie\">" + LS +
-        "      <param name=\"movie\" value=\"" + urlXMLEscape + "\">" + LS +
-        "      <embed" + LS +
-        "          play=\"" + isAutoStart + "\" swliveconnect=\"true\" name=\"myFlashMovie\"" + LS + 
-        "          src=\"" + urlXMLEscape + "\" quality=\"high\"" + LS +
-        "          type=\"application/x-shockwave-flash\">" + LS +
-        "      </embed>" + LS +
-        "    </object>" + LS +
-        "  </body>" + LS +
-        "</html>" + LS;
-    } else {
-      content +=
-        "  <body height=\"*\">" + LS +
-        "    <script src=\"" + tempJSFile.toURI().toString() + "\"></script>" + LS +
-        "  </body>" + LS +
-        "</html>" + LS;
-    }
-    File tempHTMLFile;
-    try {
-      tempHTMLFile = File.createTempFile("nsfp", ".html");
-      BufferedWriter out = new BufferedWriter(new FileWriter(tempHTMLFile));
-      out.write(content);
-      try {
-        out.close();
-      } catch(Exception e) {}
-      tempHTMLFile.deleteOnExit();
-    } catch(Exception e) {
-      e.printStackTrace();
-      tempHTMLFile = null;
-    }
-    if(tempHTMLFile != null && tempHTMLFile.exists()) {
-      webBrowser.setURL(tempHTMLFile.toURI().toString());
-    } else {
-      webBrowser.setText(content);
-    }
+    url = WebServer.getDefaultWebServer().getResourcePath(getClass().getName(), "html/" + isAutoStart + "/" + url);
+    webBrowser.setURL(url);
   }
 
   protected boolean isAutoStart;
@@ -298,20 +188,20 @@ public class JFlashPlayer extends JPanel {
     if(url == null) {
       return;
     }
-    webBrowser.execute("setVariableFM('" + encodeURL(name) + "', '" + encodeURL(value) + "')");
+    webBrowser.execute("setVariableFM('" + Utils.encodeURL(name) + "', '" + Utils.encodeURL(value) + "')");
   }
   
   protected String getVariableResult;
   
   /**
-   * @return The value, or null or an empty string when th variable is not defined.
+   * @return The value, or null or an empty string when the variable is not defined.
    */
   public String getVariable(String name) {
     if(url == null) {
       return null;
     }
     getVariableResult = null;
-    webBrowser.execute("getVariableFM('" + encodeURL(name) + "');");
+    webBrowser.execute("getVariableFM('" + Utils.encodeURL(name) + "');");
     return getVariableResult;
   }
   
@@ -336,46 +226,116 @@ public class JFlashPlayer extends JPanel {
     return listenerList.getListeners(FlashPlayerListener.class);
   }
   
-  @SuppressWarnings("deprecation")
-  protected static String encodeURL(String s) {
-    String encodedString;
-    try {
-      encodedString = URLEncoder.encode(s, "UTF-8");
-    } catch(Exception e) {
-      encodedString = URLEncoder.encode(s);
+  protected static WebServerContent getWebServerContent(String resourcePath) {
+    int index = resourcePath.indexOf('/');
+    String type = resourcePath.substring(0, index);
+    resourcePath = resourcePath.substring(index + 1);
+    if("html".equals(type)) {
+      index = resourcePath.indexOf('/');
+      final boolean isAutoStart = Boolean.parseBoolean(resourcePath.substring(0, index));
+      final String url = resourcePath.substring(index + 1);
+      return new WebServerContent() {
+        @Override
+        public String getContentType() {
+          return getDefaultMimeType(".html");
+        }
+        @Override
+        public InputStream getInputStream() {
+          try {
+            String content =
+                "<html>" + LS +
+                "  <head>" + LS +
+                "    <script language=\"JavaScript\" type=\"text/javascript\">" + LS +
+                "      <!--" + LS +
+                "      function sendCommand(command) {" + LS +
+                "        command = command == null? '': encodeURIComponent(command);" + LS +
+                "        window.location = 'command://' + command;" + LS +
+                "      }" + LS +
+                "      function getFlashMovieObject() {" + LS +
+                "        var movieName = \"myFlashMovie\";" + LS +
+                "        if(window.document[movieName]) {" + LS +
+                "          return window.document[movieName];" + LS +
+                "        }" + LS +
+                "        if(navigator.appName.indexOf(\"Microsoft Internet\") == -1) {" + LS +
+                "          if(document.embeds && document.embeds[movieName]) {" + LS +
+                "            return document.embeds[movieName];" + LS +
+                "          }" + LS +
+                "        } else {" + LS +
+                "          return document.getElementById(movieName);" + LS +
+                "        }" + LS +
+                "      }" + LS +
+                "      function playFM() {" + LS +
+                "        var flashMovie = getFlashMovieObject();" + LS +
+                "        flashMovie.Play();" + LS +
+                "      }" + LS +
+                "      function stopFM() {" + LS +
+                "        var flashMovie = getFlashMovieObject();" + LS +
+                "        flashMovie.StopPlay();" + LS +
+                "      }" + LS +
+                "      function rewindFM() {" + LS +
+                "        var flashMovie = getFlashMovieObject();" + LS +
+                "        flashMovie.Rewind();" + LS +
+                "      }" + LS +
+                "      function setVariableFM(variableName, variableValue) {" + LS +
+                "        var flashMovie = getFlashMovieObject();" + LS +
+                "        flashMovie.SetVariable(decodeURIComponent(variableName), decodeURIComponent(variableValue));" + LS +
+                "      }" + LS +
+                "      function getVariableFM(variableName) {" + LS +
+                "        var flashMovie = getFlashMovieObject();" + LS +
+                "        try {" + LS +
+                "          sendCommand('getVariableFM:' + flashMovie.GetVariable(decodeURIComponent(variableName)));" + LS +
+                "        } catch(e) {" + LS +
+                "          sendCommand('getVariableFM:');" + LS +
+                "        }" + LS +
+                "      }" + LS +
+                "      //-->" + LS +
+                "    </script>" + LS +
+                "    <style type=\"text/css\">" + LS +
+                "      html, object, embed, div, body { width: 100%; height: 100%; min-height: 100%; margin: 0; padding: 0; overflow: hidden; }" + LS +
+                "      div { background-color: #FFFFFF; }" + LS +
+                "    </style>" + LS +
+                "  </head>" + LS +
+                "  <body height=\"*\">" + LS +
+                "    <script src=\"" + WebServer.getDefaultWebServer().getResourcePath(JFlashPlayer.class.getName(), "js/" + isAutoStart + "/" + url) + "\"></script>" + LS +
+                "  </body>" + LS +
+                "</html>" + LS;
+            return new ByteArrayInputStream(content.getBytes("UTF-8"));
+          } catch(Exception e) {
+            e.printStackTrace();
+            return null;
+          }
+        }
+      };
     }
-    return encodedString.replaceAll("\\+", "%20");
+    if("js".equals(type)) {
+      index = resourcePath.indexOf('/');
+      final boolean isAutoStart = Boolean.parseBoolean(resourcePath.substring(0, index));
+      String url = resourcePath.substring(index + 1);
+      final String escapedURL = Utils.escapeXML(url);
+      return new WebServerContent() {
+        @Override
+        public String getContentType() {
+          return getDefaultMimeType(".js");
+        }
+        public InputStream getInputStream() {
+          try {
+            String content =
+                "<!--" + LS +
+                "window.document.write('<object classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\" codebase=\"\" id=\"myFlashMovie\">');" + LS +
+                "window.document.write('  <param name=\"movie\" value=\"' + decodeURIComponent('" + escapedURL + "') + '\";\">');" + LS +
+                "window.document.write('  <embed play=\"" + isAutoStart + "\" swliveconnect=\"true\" name=\"myFlashMovie\" src=\"" + escapedURL + "\" quality=\"high\" type=\"application/x-shockwave-flash\">');" + LS +
+                "window.document.write('  </embed>');" + LS +
+                "window.document.write('</object>');" + LS +
+                "//-->" + LS;
+            return new ByteArrayInputStream(content.getBytes("UTF-8"));
+          } catch(Exception e) {
+            e.printStackTrace();
+            return null;
+          }
+        }
+      };
+    }
+    return null;
   }
   
-  public static String escapeXML(String s) {
-    if(s == null || s.length() == 0) {
-      return s;
-    }
-    StringBuffer sb = new StringBuffer((int)(s.length() * 1.1));
-    for(int i=0; i<s.length(); i++) {
-      char c = s.charAt(i);
-      switch(c) {
-        case '<':
-          sb.append("&lt;");
-          break;
-        case '>':
-          sb.append("&gt;");
-          break;
-        case '&':
-          sb.append("&amp;");
-          break;
-        case '\'':
-          sb.append("&apos;");
-          break;
-        case '\"':
-          sb.append("&quot;");
-          break;
-        default:
-          sb.append(c);
-        break;
-      }
-    }
-    return sb.toString();
-  }
-
 }

@@ -26,7 +26,7 @@ import javax.swing.filechooser.FileSystemView;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.program.Program;
 
-import chrriis.dj.nativeswing.ui.Utils;
+import chrriis.dj.nativeswing.ui.UIUtils;
 
 /**
  * @author Christopher Deckers
@@ -228,7 +228,7 @@ public class FileTypeLauncher {
       NativeInterfaceHandler.invokeSWT(new Runnable() {
         public void run() {
           ImageData imageData = FileTypeLauncher.this.program.getImageData();
-          result[0] = imageData == null? DEFAULT_ICON: new ImageIcon(Utils.convertImage(imageData));
+          result[0] = imageData == null? DEFAULT_ICON: new ImageIcon(UIUtils.convertImage(imageData));
         }
       });
       icon = result[0];

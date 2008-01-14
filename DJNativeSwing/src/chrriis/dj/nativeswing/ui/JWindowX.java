@@ -76,7 +76,7 @@ public class JWindowX implements RootPaneContainer {
     this.parent = parent;
     rootPane = new JRootPane();
     rootPane.setDoubleBuffered(true);
-    if(Utils.IS_JAVA_6_OR_GREATER) {
+    if(UIUtils.IS_JAVA_6_OR_GREATER) {
       modalityType = ModalityType.MODELESS;
     }
   }
@@ -100,7 +100,7 @@ public class JWindowX implements RootPaneContainer {
     if(modalWindow instanceof JDialog) {
       ((JDialog)modalWindow).setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
       if(isModal()) {
-        if(Utils.IS_JAVA_6_OR_GREATER) {
+        if(UIUtils.IS_JAVA_6_OR_GREATER) {
           ((JDialog)modalWindow).setModalityType(getModalityType());
         } else {
           ((JDialog)modalWindow).setModal(true);
@@ -437,7 +437,7 @@ public class JWindowX implements RootPaneContainer {
           } else {
             List<org.eclipse.swt.graphics.Image> imageList = new ArrayList<org.eclipse.swt.graphics.Image>(iconList.size());
             for(Image image: iconList) {
-              imageList.add(new org.eclipse.swt.graphics.Image(NativeInterfaceHandler.getDisplay(), Utils.convertImage(image)));
+              imageList.add(new org.eclipse.swt.graphics.Image(NativeInterfaceHandler.getDisplay(), UIUtils.convertImage(image)));
             }
             shell.setImages(imageList.toArray(new org.eclipse.swt.graphics.Image[0]));
           }
@@ -556,7 +556,7 @@ public class JWindowX implements RootPaneContainer {
   protected boolean isModal;
   
   protected void setModal(boolean isModal) {
-    if(Utils.IS_JAVA_6_OR_GREATER) {
+    if(UIUtils.IS_JAVA_6_OR_GREATER) {
       setModalityType(isModal? ModalityType.APPLICATION_MODAL: ModalityType.MODELESS);
     } else {
       this.isModal = isModal;
@@ -564,7 +564,7 @@ public class JWindowX implements RootPaneContainer {
   }
   
   protected boolean isModal() {
-    if(Utils.IS_JAVA_6_OR_GREATER) {
+    if(UIUtils.IS_JAVA_6_OR_GREATER) {
       return modalityType != ModalityType.MODELESS;
     }
     return isModal;
