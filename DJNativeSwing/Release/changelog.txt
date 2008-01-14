@@ -5,7 +5,7 @@ Licence terms: LGPL (see licence.txt)
 
 ---------------------------------- Change log ----------------------------------
 
-* Version 0.9.2:
+* Version 0.9.2 (January 15, 2008):
 
 - Code cleanup of unused classes.
 - Possibility to clear all web browser session cookies.
@@ -16,7 +16,7 @@ Licence terms: LGPL (see licence.txt)
 - A component that is disposed and then recreated throws a meaningful exception.
 
 
-* Version 0.9.1:
+* Version 0.9.1 (January 6, 2008):
 
 - Web browser and Flash Player are implemented.
 - Multi Media Player is implemented on Windows using Ole controls.
