@@ -382,7 +382,7 @@ class NativeWebBrowser extends NativeComponent {
     run(new Runnable() {
       public void run() {
         // Remove line comments, because it does not work properly on Mozilla.
-        String script_ = Pattern.compile("//.*$", Pattern.MULTILINE).matcher(script).replaceAll("");
+        String script_ = Pattern.compile("^//.*$", Pattern.MULTILINE).matcher(script).replaceAll("");
         result[0] = browser.execute(script_);
       }
     });
