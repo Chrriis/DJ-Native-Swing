@@ -12,6 +12,7 @@ import java.awt.Component;
 
 import javax.swing.JPanel;
 
+import chrriis.dj.nativeswing.ui.NativeComponentEmbedder;
 import chrriis.dj.nativeswing.ui.event.InitializationEvent;
 import chrriis.dj.nativeswing.ui.event.InitializationListener;
 
@@ -42,7 +43,7 @@ public class JMultiMediaPlayer extends JPanel {
         }
       }
     });
-    add(nativeComponent, BorderLayout.CENTER);
+    add(NativeComponentEmbedder.getEmbeddedComponent(nativeComponent), BorderLayout.CENTER);
   }
   
   /**

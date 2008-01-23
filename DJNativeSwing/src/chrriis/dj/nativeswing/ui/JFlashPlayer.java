@@ -124,8 +124,6 @@ public class JFlashPlayer extends JPanel {
     return value.length() == 0? null: new ImageIcon(JWebBrowser.class.getResource(value));
   }
   
-  protected static final String LS = System.getProperty("line.separator");
-
   protected String url;
   
   public String getURL() {
@@ -144,7 +142,7 @@ public class JFlashPlayer extends JPanel {
     } catch(Exception e) {
       url = new File(url).toURI().toString();
     }
-    url = WebServer.getDefaultWebServer().getWebServerContentURL(getClass().getName(), "html/" + isAutoStart + "/" + url);
+    url = WebServer.getDefaultWebServer().getDynamicContentURL(JFlashPlayer.class.getName(), "html/" + isAutoStart + "/" + url);
     webBrowser.setURL(url);
   }
 
@@ -246,6 +244,8 @@ public class JFlashPlayer extends JPanel {
     return listenerList.getListeners(FlashPlayerListener.class);
   }
   
+  protected static final String LS = System.getProperty("line.separator");
+
   protected static WebServerContent getWebServerContent(String resourcePath) {
     int index = resourcePath.indexOf('/');
     String type = resourcePath.substring(0, index);
@@ -316,7 +316,7 @@ public class JFlashPlayer extends JPanel {
                 "    </style>" + LS +
                 "  </head>" + LS +
                 "  <body height=\"*\">" + LS +
-                "    <script src=\"" + WebServer.getDefaultWebServer().getWebServerContentURL(JFlashPlayer.class.getName(), "js/" + isAutoStart + "/" + url) + "\"></script>" + LS +
+                "    <script src=\"" + WebServer.getDefaultWebServer().getDynamicContentURL(JFlashPlayer.class.getName(), "js/" + isAutoStart + "/" + url) + "\"></script>" + LS +
                 "  </body>" + LS +
                 "</html>" + LS;
             return new ByteArrayInputStream(content.getBytes("UTF-8"));

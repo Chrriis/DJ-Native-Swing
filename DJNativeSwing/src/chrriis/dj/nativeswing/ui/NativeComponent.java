@@ -45,7 +45,7 @@ public abstract class NativeComponent extends Canvas {
   private Shell shell;
   private volatile Control control;
   private volatile List<Runnable> initializationRunnableList = new ArrayList<Runnable>();
-  
+
   public NativeComponent() {
     addFocusListener(new FocusAdapter() {
       @Override
@@ -61,8 +61,19 @@ public abstract class NativeComponent extends Canvas {
         }
       }
     });
+    setFocusable(true);
   }
 
+  protected NativeComponentEmbedder componentEmbedder;
+  
+  protected void setComponentEmbedder(NativeComponentEmbedder componentEmbedder) {
+    this.componentEmbedder = componentEmbedder;
+  }
+  
+  public NativeComponentEmbedder getComponentEmbedder() {
+    return componentEmbedder;
+  }
+  
   protected int buttonPressedCount;
   protected Point lastLocation = new Point(-1, -1);
   
@@ -282,11 +293,6 @@ public abstract class NativeComponent extends Canvas {
       });
     }
     super.removeNotify();
-  }
-
-  @Override
-  public boolean isFocusable() {
-    return true;
   }
 
   @Override

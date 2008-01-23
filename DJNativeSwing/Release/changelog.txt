@@ -5,6 +5,12 @@ Licence terms: LGPL (see licence.txt)
 
 ---------------------------------- Change log ----------------------------------
 
+* Version 0.9.3 (xxxxxxxxxxxxxxxx):
+
+- Layering of native components is possible using a different approach (JNA).
+- Web Server is improved.
+
+
 * Version 0.9.2 (January 15, 2008):
 
 - Code cleanup of unused classes.

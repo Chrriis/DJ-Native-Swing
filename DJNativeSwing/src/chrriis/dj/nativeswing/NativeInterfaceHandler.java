@@ -9,6 +9,7 @@ package chrriis.dj.nativeswing;
 
 import java.awt.AWTEvent;
 import java.awt.Canvas;
+import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Toolkit;
 import java.awt.Window;
@@ -21,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
@@ -29,6 +31,10 @@ import javax.swing.UIManager;
 import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+
+import chrriis.common.Utils;
+import chrriis.dj.nativeswing.ui.NativeComponent;
+import chrriis.dj.nativeswing.ui.NativeComponentEmbedder;
 
 /**
  * @author Christopher Deckers
@@ -39,6 +45,15 @@ public class NativeInterfaceHandler {
   protected static volatile Display display;
   protected static volatile boolean isRunning;
 
+  protected static Set<Window> windowSet;
+  
+  public static Window[] getWindows() {
+    if(Utils.IS_JAVA_6_OR_GREATER) {
+      return Window.getWindows();
+    }
+    return windowSet == null? new Window[0]: windowSet.toArray(new Window[0]);
+  }
+  
   public static void init() {
     if(isRunning) {
       return;
@@ -66,14 +81,42 @@ public class NativeInterfaceHandler {
     Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
       protected Set<Dialog> dialogSet = new HashSet<Dialog>();
       protected volatile Set<Window> blockedWindowSet = new HashSet<Window>();
+//      protected volatile boolean isInvoking;
       protected void adjustNativeComponents() {
+//        if(isInvoking) {
+//          return;
+//        }
+//        isInvoking = true;
+//        SwingUtilities.invokeLater(new Runnable() {
+//          public void run() {
+//            isInvoking = false;
+//            adjustNativeComponents_();
+//          }
+//        });
+//      }
+//      protected void adjustNativeComponents_() {
         invokeSWT(new Runnable() {
           public void run() {
             for(int i=canvasList.size()-1; i>=0; i--) {
               Shell shell = shellList.get(i);
               final Canvas canvas = canvasList.get(i);
-              boolean isBlocked = blockedWindowSet.contains(SwingUtilities.getWindowAncestor(canvas));
-              final boolean isShowing = canvas.isShowing();
+              Component c = canvas;
+              if(canvas instanceof NativeComponent) {
+                JComponent componentEmbedder = ((NativeComponent)canvas).getComponentEmbedder();
+                if(componentEmbedder != null) {
+                  c = componentEmbedder;
+                }
+              }
+              boolean isBlocked = blockedWindowSet.contains(SwingUtilities.getWindowAncestor(c));
+              final boolean isShowing = c.isShowing();
+              if(c != canvas) {
+                Window windowAncestor = SwingUtilities.getWindowAncestor(canvas);
+                if(windowAncestor != null) {
+                  if(windowAncestor.isVisible() != isShowing) {
+                    windowAncestor.setVisible(isShowing);
+                  }
+                }
+              }
               if(!shell.isDisposed()) {
                 shell.setEnabled(!isBlocked && isShowing);
                 SwingUtilities.invokeLater(new Runnable() {
@@ -91,11 +134,42 @@ public class NativeInterfaceHandler {
       }
       public void eventDispatched(AWTEvent e) {
         boolean isAdjusting = false;
+        if(e.getSource() instanceof Window) {
+          switch(e.getID()) {
+            case ComponentEvent.COMPONENT_SHOWN:
+            case ComponentEvent.COMPONENT_HIDDEN:
+              for(int i=canvasList.size()-1; i>=0; i--) {
+                final Canvas canvas = canvasList.get(i);
+                if(canvas instanceof NativeComponent) {
+                  NativeComponentEmbedder componentEmbedder = ((NativeComponent)canvas).getComponentEmbedder();
+                  if(componentEmbedder != null) {
+                    componentEmbedder.adjustWindowMask();
+                  }
+                }
+              }
+              break;
+          }
+        }
         switch(e.getID()) {
           case ComponentEvent.COMPONENT_SHOWN:
           case ComponentEvent.COMPONENT_HIDDEN:
             isAdjusting = true;
             break;
+        }
+        if(!Utils.IS_JAVA_6_OR_GREATER && e.getSource() instanceof Window) {
+          if(windowSet == null) {
+            windowSet = new HashSet<Window>();
+          }
+          switch(e.getID()) {
+            case WindowEvent.WINDOW_OPENED:
+            case ComponentEvent.COMPONENT_SHOWN:
+              windowSet.add((Window)e.getSource());
+              break;
+            case WindowEvent.WINDOW_CLOSED:
+            case ComponentEvent.COMPONENT_HIDDEN:
+              windowSet.remove(e.getSource());
+              break;
+          }
         }
         if(e.getSource() instanceof Dialog) {
           switch(e.getID()) {

@@ -46,16 +46,17 @@ public class DemoFrame extends JFrame {
   
   public DemoFrame() {
     super("The DJ Project - NativeSwing");
+    Class<DemoFrame> clazz = DemoFrame.class;
     if(System.getProperty("java.version").compareTo("1.6") >= 0) {
       setIconImages(Arrays.asList(new Image[] {
-          new ImageIcon(getClass().getResource("resource/DJIcon16x16.png")).getImage(),
-          new ImageIcon(getClass().getResource("resource/DJIcon24x24.png")).getImage(),
-          new ImageIcon(getClass().getResource("resource/DJIcon32x32.png")).getImage(),
-          new ImageIcon(getClass().getResource("resource/DJIcon48x48.png")).getImage(),
-          new ImageIcon(getClass().getResource("resource/DJIcon256x256.png")).getImage(),
+          new ImageIcon(clazz.getResource("resource/DJIcon16x16.png")).getImage(),
+          new ImageIcon(clazz.getResource("resource/DJIcon24x24.png")).getImage(),
+          new ImageIcon(clazz.getResource("resource/DJIcon32x32.png")).getImage(),
+          new ImageIcon(clazz.getResource("resource/DJIcon48x48.png")).getImage(),
+          new ImageIcon(clazz.getResource("resource/DJIcon256x256.png")).getImage(),
       }));
     } else {
-      setIconImage(new ImageIcon(getClass().getResource("resource/DJIcon32x32Plain.png")).getImage());
+      setIconImage(new ImageIcon(clazz.getResource("resource/DJIcon32x32Plain.png")).getImage());
     }
     setDefaultCloseOperation(EXIT_ON_CLOSE);
     setLocationByPlatform(true);
@@ -125,7 +126,7 @@ public class DemoFrame extends JFrame {
                             try {
                               InputStreamReader reader;
                               try {
-                                reader = new InputStreamReader(getClass().getResourceAsStream("/src/" + componentClass.getName().replace('.', '/') + ".java"), "UTF-8");
+                                reader = new InputStreamReader(DemoFrame.class.getResourceAsStream("/src/" + componentClass.getName().replace('.', '/') + ".java"), "UTF-8");
                               } catch(Exception ex) {
                                 reader = new InputStreamReader(new BufferedInputStream(new FileInputStream("src/" + componentClass.getName().replace('.', '/') + ".java")), "UTF-8");
                               }

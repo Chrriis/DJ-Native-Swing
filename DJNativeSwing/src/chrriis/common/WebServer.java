@@ -10,6 +10,7 @@ package chrriis.common;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -218,6 +219,7 @@ public class WebServer {
       extensionToMimeTypeMap.put("xls", "application/vnd.ms-excel");
       extensionToMimeTypeMap.put("xlt", "application/vnd.ms-excel");
       extensionToMimeTypeMap.put("xlw", "application/vnd.ms-excel");
+      extensionToMimeTypeMap.put("xml", "application/xhtml+xml");
       extensionToMimeTypeMap.put("xof", "x-world/x-vrml");
       extensionToMimeTypeMap.put("xpm", "image/x-xpixmap");
       extensionToMimeTypeMap.put("xwd", "image/x-xwindowdump");
@@ -249,10 +251,16 @@ public class WebServer {
   
   protected static class WebServerConnectionThread extends Thread {
     
+    private static int threadInitNumber;
+    
+    private static synchronized int nextThreadNumber() {
+      return threadInitNumber++;
+    }
+
     protected Socket socket;
     
     public WebServerConnectionThread(Socket socket) {
-      super("WebServer Connection");
+      super("WebServer Connection-" + nextThreadNumber());
       this.socket = socket;
       setDaemon(true);
     }
@@ -300,22 +308,14 @@ public class WebServer {
             writeHTTPError(out, 500, "Invalid Method.");
             return;
           }            
-          String path = request.substring("GET ".length(), request.length() - " HTTP/1.0".length());
-          if(path.startsWith("/")) {
-            path = path.substring(1);
-          }
-          int index = path.indexOf('/');
-          if(index == 0) {
-            writeHTTPError(out, 404, "File Not Found.");
-            return;
-          }
-          String className = path.substring(0, index);
-          String resourcePath = path.substring(index + 1);
-          Class<?> clazz = Class.forName(className);
-          Method getWebServerContentMethod = clazz.getDeclaredMethod("getWebServerContent", String.class);
-          getWebServerContentMethod.setAccessible(true);
-          WebServerContent webServerContent = (WebServerContent)getWebServerContentMethod.invoke(null, Utils.decodeURL(resourcePath));
-          InputStream resourceStream_ = webServerContent.getInputStream();
+          String resourcePath = request.substring("GET ".length(), request.length() - " HTTP/1.0".length());
+//          System.err.println("--> " + resourcePath);
+//          for(String line=request; line != null && line.length() > 0; line = in.readLine()) {
+//            System.err.println(line);
+//          }
+//          System.err.println(resourcePath);
+          WebServerContent webServerContent = getWebServerContent(resourcePath);
+          InputStream resourceStream_ = webServerContent == null? null: webServerContent.getInputStream();
           if(resourceStream_ == null) {
             writeHTTPError(out, 404, "File Not Found.");
             return;
@@ -402,39 +402,72 @@ public class WebServer {
     return port;
   }
   
+  protected String getURLPrefix() {
+    return "http://" + HOST_ADDRESS + ":" + port;
+  }
+  
   /**
-   * @return A URL that when accessed will invoke the method <code>static WebServerContent getWebServerContent(String resourcePath)</code> of the parameter class (the method visibility does not matter).
+   * @return A URL that when accessed will invoke the method <code>static WebServerContent getWebServerContent(String parameter)</code> of the parameter class (the method visibility does not matter).
    */
-  public String getWebServerContentURL(String className, String resourcePath) {
-    return "http://" + HOST_ADDRESS + ":" + port + "/" + className + "/" + Utils.encodeURL(resourcePath);
+  public String getDynamicContentURL(String className, String parameter) {
+    return getURLPrefix() + "/class/" + className + "/" + Utils.encodeURL(parameter);
   }
   
   public String getClassPathResourceURL(String className, String resourcePath) {
-    return WebServer.getDefaultWebServer().getWebServerContentURL(WebServer.class.getName(), "classpath/" + className + "/" + resourcePath);
+    if(!resourcePath.startsWith("/")) {
+      String classPath = className.replace('.', '/');
+      classPath = classPath.substring(0, classPath.lastIndexOf('/') + 1);
+      resourcePath = "/" + classPath + resourcePath;
+    }
+    return getURLPrefix() + "/classpath" + resourcePath;
   }
   
-  public String getResourcePathURL(String resourcePath) {
-    return WebServer.getDefaultWebServer().getWebServerContentURL(WebServer.class.getName(), "resource/" + resourcePath);
+  public String getResourcePathURL(String codeBase, String resourcePath) {
+    return getURLPrefix() + "/resource/" + Utils.encodeURL(codeBase) + "/" + resourcePath;
   }
   
-  protected static WebServerContent getWebServerContent(String resourcePath) {
-    int index = resourcePath.indexOf('/');
-    String type = resourcePath.substring(0, index);
-    resourcePath = resourcePath.substring(index + 1);
+  public WebServerContent getURLContent(String resourceURL) {
+    try {
+      return getWebServerContent(new URL(resourceURL).getPath());
+    } catch(Exception e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+  
+  protected static WebServerContent getWebServerContent(String parameter) {
+    if(parameter.startsWith("/")) {
+      parameter = parameter.substring(1);
+    }
+    int index = parameter.indexOf('/');
+    String type = parameter.substring(0, index);
+    parameter = parameter.substring(index + 1);
+    if("class".equals(type)) {
+      index = parameter.indexOf('/');
+      String className = parameter.substring(0, index);
+      parameter = Utils.decodeURL(parameter.substring(index + 1));
+      try {
+        Class<?> clazz = Class.forName(className);
+        Method getWebServerContentMethod = clazz.getDeclaredMethod("getWebServerContent", String.class);
+        getWebServerContentMethod.setAccessible(true);
+        return (WebServerContent)getWebServerContentMethod.invoke(null, parameter);
+      } catch(Exception e) {
+        e.printStackTrace();
+        return null;
+      }
+    }
     if("classpath".equals(type)) {
-      index = resourcePath.indexOf('/');
-      final String className = resourcePath.substring(0, index);
-      final String resource = resourcePath.substring(index + 1);
+      final String resourcePath = parameter;
       return new WebServerContent() {
         @Override
         public String getContentType() {
-          int index = resource.lastIndexOf('.');
-          return getDefaultMimeType(index == -1? null: resource.substring(index));
+          int index = resourcePath.lastIndexOf('.');
+          return getDefaultMimeType(index == -1? null: resourcePath.substring(index));
         }
         @Override
         public InputStream getInputStream() {
           try {
-            return Class.forName(className).getResourceAsStream(resource);
+            return WebServer.class.getResourceAsStream('/' + resourcePath);
           } catch(Exception e) {
             e.printStackTrace();
             return null;
@@ -443,16 +476,34 @@ public class WebServer {
       };
     }
     if("resource".equals(type)) {
-      final String resource = resourcePath.substring(index + 1);
+      index = parameter.indexOf('/');
+      String codeBase = Utils.decodeURL(parameter.substring(0, index));
+      parameter = parameter.substring(index + 1);
+      String resourceURL;
+      try {
+        URL url = new URL(codeBase);
+        int port = url.getPort();
+        resourceURL = url.getProtocol() + "://" + url.getHost() + (port != -1? ":" + port: "");
+        if(parameter.startsWith("/")) {
+          resourceURL += parameter;
+        } else {
+          String path = url.getPath();
+          path = path.substring(0, path.lastIndexOf('/') + 1) + parameter;
+          resourceURL += path.startsWith("/")? path: "/" + path;
+        }
+      } catch(Exception e) {
+        resourceURL = new File(codeBase, parameter).toURI().toString();
+      }
+      final String resourceURL_ = resourceURL;
       return new WebServerContent() {
         @Override
         public String getContentType() {
-          int index = resource.lastIndexOf('.');
-          return getDefaultMimeType(index == -1? null: resource.substring(index));
+          int index = resourceURL_.lastIndexOf('.');
+          return getDefaultMimeType(index == -1? null: resourceURL_.substring(index));
         }
         @Override
         public InputStream getInputStream() {
-          String url = resource;
+          String url = resourceURL_;
           try {
             return new URL(url).openStream();
           } catch(Exception e) {

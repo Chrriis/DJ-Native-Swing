@@ -25,6 +25,7 @@ import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
 import chrriis.dj.nativeswing.demo.examples.introduction.Codewise;
 import chrriis.dj.nativeswing.demo.examples.introduction.NativeIntegration;
 import chrriis.dj.nativeswing.demo.examples.introduction.TheSolution;
+import chrriis.dj.nativeswing.demo.examples.layering.DesktopPaneExample;
 import chrriis.dj.nativeswing.demo.examples.utilities.FileAssociations;
 import chrriis.dj.nativeswing.demo.examples.webbrowser.JavascriptExecution;
 import chrriis.dj.nativeswing.demo.examples.webbrowser.NavigationControl;
@@ -64,6 +65,9 @@ public class DemoTree extends JTree {
           new Example("Simple Example", SimpleMultiMediaPlayerExample.class, "Load a movie/sound file to an embedded multimedia player.", true),
       }));
     }
+    exampleGroupList.add(new ExampleGroup("Layering", new Example[] {
+        new Example("Desktop Pane Layers", DesktopPaneExample.class, "Demonstrate layering of native components in a desktop pane.", true),
+    }));
     exampleGroupList.add(new ExampleGroup("Utilities", new Example[] {
         new Example("File Associations", FileAssociations.class, "Get the file type associations, and use them to launch files.", true),
     }));

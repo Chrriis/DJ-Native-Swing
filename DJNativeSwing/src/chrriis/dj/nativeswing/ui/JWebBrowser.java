@@ -162,7 +162,7 @@ public class JWebBrowser extends JPanel {
     menuToolAndAddressBarPanel.add(addressBarPanel, BorderLayout.CENTER);
     add(menuToolAndAddressBarPanel, BorderLayout.NORTH);
     webBrowserPanel = new JPanel(new BorderLayout(0, 0));
-    webBrowserPanel.add(nativeComponent, BorderLayout.CENTER);
+    webBrowserPanel.add(NativeComponentEmbedder.getEmbeddedComponent(nativeComponent), BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);
     statusBarPanel = new JPanel(new BorderLayout(0, 0));
     statusBarPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, statusBarPanel.getBackground().darker()), BorderFactory.createEmptyBorder(2, 2, 2, 2)));
