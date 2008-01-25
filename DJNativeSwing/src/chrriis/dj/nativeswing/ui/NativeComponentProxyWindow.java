@@ -36,28 +36,27 @@ import com.sun.jna.examples.WindowUtils;
  */
 class NativeComponentProxyWindow extends NativeComponentProxy {
 
-  protected static volatile boolean isNonFocusable = true;
+  protected static int instanceCount;
+  protected static volatile boolean isNonFocusable;
   
-  static {
-    Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
-      public void eventDispatched(AWTEvent e) {
-        if(e.getSource() instanceof NativeComponent) {
-          return;
-        }
-        switch (e.getID()) {
-          case MouseEvent.MOUSE_ENTERED:
-          case MouseEvent.MOUSE_MOVED:
-          case MouseEvent.MOUSE_DRAGGED:
-            isNonFocusable = false;
-            break;
-          case MouseEvent.MOUSE_EXITED:
-            isNonFocusable = true;
-            break;
-        }
+  protected static AWTEventListener focusAdjustmentEventListener = new AWTEventListener() {
+    public void eventDispatched(AWTEvent e) {
+      if(e.getSource() instanceof NativeComponent) {
+        return;
       }
-    }, AWTEvent.MOUSE_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK);
-  }
-  
+      switch (e.getID()) {
+        case MouseEvent.MOUSE_ENTERED:
+        case MouseEvent.MOUSE_MOVED:
+        case MouseEvent.MOUSE_DRAGGED:
+          isNonFocusable = false;
+          break;
+        case MouseEvent.MOUSE_EXITED:
+          isNonFocusable = true;
+          break;
+      }
+    }
+  };
+
   protected NativeComponentProxyWindow(NativeComponent nativeComponent) {
     super(nativeComponent);
     addFocusListener(new FocusAdapter() {
@@ -108,7 +107,12 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
   protected EmbeddedWindow window;
   
   @Override
-  public Component createPeer() {
+  protected Component createPeer() {
+    if(instanceCount == 0) {
+      isNonFocusable = true;
+      Toolkit.getDefaultToolkit().addAWTEventListener(focusAdjustmentEventListener, AWTEvent.MOUSE_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK);
+    }
+    instanceCount++;
     Window windowAncestor = SwingUtilities.getWindowAncestor(this);
     if(Utils.IS_JAVA_6_OR_GREATER) {
       window = new EmbeddedWindow(this, windowAncestor);
@@ -154,6 +158,10 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
   protected void destroyPeer() {
     window.dispose();
     window = null;
+    instanceCount--;
+    if(instanceCount == 0) {
+      Toolkit.getDefaultToolkit().removeAWTEventListener(focusAdjustmentEventListener);
+    }
   }
   
   protected volatile boolean isInvoking;

@@ -63,7 +63,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
   protected EmbeddedPanel panel;
   
   @Override
-  public Component createPeer() {
+  protected Component createPeer() {
     panel = new EmbeddedPanel();
     nativeComponent.addMouseListener(new MouseAdapter() {
       @Override
