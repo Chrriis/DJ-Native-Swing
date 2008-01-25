@@ -52,7 +52,7 @@ public class DesktopPaneComponentLayeringExample extends JPanel {
     flashPlayerInternalFrame.add(flashPlayer, BorderLayout.CENTER);
     desktopPane.add(flashPlayerInternalFrame);
     // Web Browser 2 internal frame, with a button on top
-    JInternalFrame webBrowser2InternalFrame = new JInternalFrame("Web Browser 2 with JButton on top");
+    JInternalFrame webBrowser2InternalFrame = new JInternalFrame("Web Browser 2 with a JButton on top");
     webBrowser2InternalFrame.setBounds(210, 210, 400, 300);
     webBrowser2InternalFrame.setResizable(true);
     webBrowser2InternalFrame.setVisible(true);
