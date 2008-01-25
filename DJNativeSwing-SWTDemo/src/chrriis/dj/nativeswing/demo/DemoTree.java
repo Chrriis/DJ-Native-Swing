@@ -67,8 +67,8 @@ public class DemoTree extends JTree {
       }));
     }
     exampleGroupList.add(new ExampleGroup("Layering", new Example[] {
-        new Example("Component Layers", DesktopPaneComponentLayeringExample.class, "Demonstrate layering of native components using a desktop pane, using the component layering mode.", true),
-        new Example("Window Layers", DesktopPaneWindowLayeringExample.class, "Demonstrate layering of native components using a desktop pane, using the window layering mode.", true),
+        new Example("Component Layers", DesktopPaneComponentLayeringExample.class, "Demonstrate layering of native components, using the component layering mode.", true),
+        new Example("Window Layers", DesktopPaneWindowLayeringExample.class, "Demonstrate layering of native components, using the window layering mode.", true),
     }));
     exampleGroupList.add(new ExampleGroup("Utilities", new Example[] {
         new Example("File Associations", FileAssociations.class, "Get the file type associations, and use them to launch files.", true),
