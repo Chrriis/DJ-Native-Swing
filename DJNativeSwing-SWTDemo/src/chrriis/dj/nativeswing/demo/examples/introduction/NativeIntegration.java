@@ -26,7 +26,7 @@ public class NativeIntegration extends JPanel {
         "<html>" + LS +
         "  <body>" + LS +
         "    <h1>Why Swing? Why native integration?</h1>" + LS +
-        "    <p>First, Swing is a powerful user-interface toolkit. You can almost render any effects without caring much about portability, since most is handled in a lightweight manner.</p>" + LS +
+        "    <p>Swing is a powerful user-interface toolkit. You can almost render any effects without caring much about portability, since most is handled in a lightweight manner.</p>" + LS +
         "    <p>This portability has a drawback: if something cannot be rendered exactly the same across the supported platforms, the Java Runtime Environment (JRE) will not include the feature. This is the reason why there is no proper web browser component in the JRE.<br/>" + LS +
         "    Of course, sometimes having native components make sense, but I have yet to find a solution that I like...</p>" + LS +
         "    <h1>Mixing native components in Swing</h1>" + LS +

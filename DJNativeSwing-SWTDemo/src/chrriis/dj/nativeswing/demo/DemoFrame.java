@@ -10,7 +10,9 @@ package chrriis.dj.nativeswing.demo;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
@@ -31,6 +33,8 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.text.EditorKit;
+import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledEditorKit;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
@@ -43,6 +47,8 @@ import chrriis.dj.nativeswing.NativeInterfaceHandler;
  * @author Christopher Deckers
  */
 public class DemoFrame extends JFrame {
+  
+  protected static final Font DESCRIPTION_FONT = new Font("Dialog", Font.PLAIN, 14);
   
   public DemoFrame() {
     super("The DJ Project - NativeSwing");
@@ -102,11 +108,16 @@ public class DemoFrame extends JFrame {
                       JEditorPane descriptionEditorPane = new JEditorPane(description.startsWith("<html>")? "text/html": "text/plain", description) {
                         public EditorKit getEditorKitForContentType(String type){
                           if("text/plain".equalsIgnoreCase(type)) {
-                            return new StyledEditorKit();
+                            StyledEditorKit styledEditorKit = new StyledEditorKit();
+                            MutableAttributeSet inputAttributes = styledEditorKit.getInputAttributes();
+                            StyleConstants.setFontFamily(inputAttributes, DESCRIPTION_FONT.getFamily());
+                            StyleConstants.setFontSize(inputAttributes, DESCRIPTION_FONT.getSize());
+                            return styledEditorKit;
                           }
                           return super.getEditorKitForContentType(type);
                         }
                       };
+                      descriptionEditorPane.setFont(DESCRIPTION_FONT);
                       descriptionEditorPane.setEditable(false);
                       descriptionPanel.add(descriptionEditorPane, BorderLayout.CENTER);
                       descriptionPanel.add(new JSeparator(), BorderLayout.SOUTH);
@@ -164,6 +175,7 @@ public class DemoFrame extends JFrame {
   
   public static void main(String[] args) {
     NativeInterfaceHandler.init();
+    Toolkit.getDefaultToolkit().setDynamicLayout(true);
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         new DemoFrame().setVisible(true);
