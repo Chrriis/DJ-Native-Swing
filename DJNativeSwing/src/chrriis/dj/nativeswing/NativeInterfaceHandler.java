@@ -34,7 +34,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.ui.NativeComponent;
-import chrriis.dj.nativeswing.ui.NativeComponentEmbedder;
+import chrriis.dj.nativeswing.ui.NativeComponentProxy;
 
 /**
  * @author Christopher Deckers
@@ -107,13 +107,14 @@ public class NativeInterfaceHandler {
                   c = componentEmbedder;
                 }
               }
-              boolean isBlocked = blockedWindowSet.contains(SwingUtilities.getWindowAncestor(c));
+              Window embedderWindowAncestor = SwingUtilities.getWindowAncestor(c);
+              boolean isBlocked = blockedWindowSet.contains(embedderWindowAncestor);
               final boolean isShowing = c.isShowing();
               if(c != canvas) {
-                Window windowAncestor = SwingUtilities.getWindowAncestor(canvas);
-                if(windowAncestor != null) {
-                  if(windowAncestor.isVisible() != isShowing) {
-                    windowAncestor.setVisible(isShowing);
+                Window canvasWindowAncestor = SwingUtilities.getWindowAncestor(canvas);
+                if(canvasWindowAncestor != null && canvasWindowAncestor != embedderWindowAncestor) {
+                  if(canvasWindowAncestor.isVisible() != isShowing) {
+                    canvasWindowAncestor.setVisible(isShowing);
                   }
                 }
               }
@@ -133,23 +134,30 @@ public class NativeInterfaceHandler {
         });
       }
       public void eventDispatched(AWTEvent e) {
-        boolean isAdjusting = false;
-        if(e.getSource() instanceof Window) {
-          switch(e.getID()) {
-            case ComponentEvent.COMPONENT_SHOWN:
-            case ComponentEvent.COMPONENT_HIDDEN:
-              for(int i=canvasList.size()-1; i>=0; i--) {
-                final Canvas canvas = canvasList.get(i);
-                if(canvas instanceof NativeComponent) {
-                  NativeComponentEmbedder componentEmbedder = ((NativeComponent)canvas).getComponentEmbedder();
-                  if(componentEmbedder != null) {
-                    componentEmbedder.adjustWindowMask();
-                  }
-                }
+        boolean isAdjustingMask = false;
+        switch(e.getID()) {
+          case ComponentEvent.COMPONENT_MOVED:
+            isAdjustingMask = true;
+            break;
+          case ComponentEvent.COMPONENT_SHOWN:
+          case ComponentEvent.COMPONENT_HIDDEN:
+            if(e.getSource() instanceof Window) {
+              isAdjustingMask = true;
+            }
+            break;
+        }
+        if(isAdjustingMask) {
+          for(int i=canvasList.size()-1; i>=0; i--) {
+            final Canvas canvas = canvasList.get(i);
+            if(canvas instanceof NativeComponent) {
+              NativeComponentProxy componentEmbedder = ((NativeComponent)canvas).getComponentEmbedder();
+              if(componentEmbedder != null) {
+                componentEmbedder.adjustPeerMask();
               }
-              break;
+            }
           }
         }
+        boolean isAdjusting = false;
         switch(e.getID()) {
           case ComponentEvent.COMPONENT_SHOWN:
           case ComponentEvent.COMPONENT_HIDDEN:

@@ -7,7 +7,7 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.3 (xxxxxxxxxxxxxxxx):
 
-- Layering of native components is possible using a different approach (JNA).
+- Layering of native components is possible using 2 modes (requires JNA).
 - Web Server is improved.
 
 

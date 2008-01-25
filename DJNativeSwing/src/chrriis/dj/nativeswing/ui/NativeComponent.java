@@ -64,13 +64,13 @@ public abstract class NativeComponent extends Canvas {
     setFocusable(true);
   }
 
-  protected NativeComponentEmbedder componentEmbedder;
+  protected NativeComponentProxy componentEmbedder;
   
-  protected void setComponentEmbedder(NativeComponentEmbedder componentEmbedder) {
+  protected void setComponentEmbedder(NativeComponentProxy componentEmbedder) {
     this.componentEmbedder = componentEmbedder;
   }
   
-  public NativeComponentEmbedder getComponentEmbedder() {
+  public NativeComponentProxy getComponentEmbedder() {
     return componentEmbedder;
   }
   

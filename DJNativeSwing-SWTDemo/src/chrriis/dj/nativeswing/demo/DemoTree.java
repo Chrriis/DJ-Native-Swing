@@ -25,7 +25,8 @@ import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
 import chrriis.dj.nativeswing.demo.examples.introduction.Codewise;
 import chrriis.dj.nativeswing.demo.examples.introduction.NativeIntegration;
 import chrriis.dj.nativeswing.demo.examples.introduction.TheSolution;
-import chrriis.dj.nativeswing.demo.examples.layering.DesktopPaneExample;
+import chrriis.dj.nativeswing.demo.examples.layering.DesktopPaneComponentLayeringExample;
+import chrriis.dj.nativeswing.demo.examples.layering.DesktopPaneWindowLayeringExample;
 import chrriis.dj.nativeswing.demo.examples.utilities.FileAssociations;
 import chrriis.dj.nativeswing.demo.examples.webbrowser.JavascriptExecution;
 import chrriis.dj.nativeswing.demo.examples.webbrowser.NavigationControl;
@@ -66,7 +67,8 @@ public class DemoTree extends JTree {
       }));
     }
     exampleGroupList.add(new ExampleGroup("Layering", new Example[] {
-        new Example("Desktop Pane Layers", DesktopPaneExample.class, "Demonstrate layering of native components in a desktop pane.", true),
+        new Example("Component Layers", DesktopPaneComponentLayeringExample.class, "Demonstrate layering of native components using a desktop pane, using the component layering mode.", true),
+        new Example("Window Layers", DesktopPaneWindowLayeringExample.class, "Demonstrate layering of native components using a desktop pane, using the window layering mode.", true),
     }));
     exampleGroupList.add(new ExampleGroup("Utilities", new Example[] {
         new Example("File Associations", FileAssociations.class, "Get the file type associations, and use them to launch files.", true),
