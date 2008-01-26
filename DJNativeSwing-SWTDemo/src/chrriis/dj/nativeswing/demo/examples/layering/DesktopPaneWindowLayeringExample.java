@@ -37,7 +37,7 @@ public class DesktopPaneWindowLayeringExample extends JPanel {
     webBrowser1InternalFrame.setResizable(true);
     webBrowser1InternalFrame.setVisible(true);
     JWebBrowser webBrowser1 = new JWebBrowser();
-    webBrowser1.setURL("http://www.google.com");
+    webBrowser1.setURL("http://djproject.sf.net");
     webBrowser1InternalFrame.add(webBrowser1, BorderLayout.CENTER);
     desktopPane.add(webBrowser1InternalFrame);
     // Flash Player internal frame

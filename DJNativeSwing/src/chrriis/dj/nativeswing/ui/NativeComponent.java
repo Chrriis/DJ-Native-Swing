@@ -9,6 +9,8 @@ package chrriis.dj.nativeswing.ui;
 
 import java.awt.Canvas;
 import java.awt.Dimension;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
@@ -58,6 +60,34 @@ public abstract class NativeComponent extends Canvas {
               }
             }
           });
+        }
+      }
+    });
+    // Setting the width/height to Integer.MAX_VALUE is not enough.
+    // The following code sets the size one pixel bigger after the first resize and revalidates.
+    // This fixes wrong computations of native scrollbars in components like the web browser.
+    addComponentListener(new ComponentAdapter() {
+      @Override
+      public void componentResized(ComponentEvent e) {
+        if(control != null) {
+          int width = getWidth();
+          int height = getHeight();
+          if(width != 0 && height != 0) {
+            removeComponentListener(this);
+            control.getDisplay().asyncExec(new Runnable() {
+              public void run() {
+                if(!control.isDisposed()) {
+                  control.setSize(getWidth() + 1, getHeight() + 1);
+                  SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                      doLayout();
+                      repaint();
+                    }
+                  });
+                }
+              }
+            });
+          }
         }
       }
     });
