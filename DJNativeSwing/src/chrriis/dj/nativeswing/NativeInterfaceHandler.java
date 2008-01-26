@@ -136,6 +136,7 @@ public class NativeInterfaceHandler {
       public void eventDispatched(AWTEvent e) {
         boolean isAdjustingMask = false;
         switch(e.getID()) {
+          case ComponentEvent.COMPONENT_RESIZED:
           case ComponentEvent.COMPONENT_MOVED:
             isAdjustingMask = true;
             break;
