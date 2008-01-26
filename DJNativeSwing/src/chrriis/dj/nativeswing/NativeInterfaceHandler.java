@@ -434,13 +434,18 @@ public class NativeInterfaceHandler {
     }
   }
   
-  public static void main(final String[] args) {
+  public static void main(String[] args) {
     init();
-    try {
-      Method method = Class.forName(args[0]).getDeclaredMethod("main", new Class[] {String[].class});
+    String mainClass = System.getProperty("dj.nativeswing.mainclass");
+    if(mainClass == null) {
+      mainClass = args[0];
       String[] newArgs = new String[args.length - 1];
       System.arraycopy(args, 1, newArgs, 0, newArgs.length);
-      method.invoke(null, new Object[] {newArgs});
+      args = newArgs;
+    }
+    try {
+      Method method = Class.forName(mainClass).getDeclaredMethod("main", new Class[] {String[].class});
+      method.invoke(null, new Object[] {args});
     } catch(Throwable t) {
       t.printStackTrace();
       System.exit(-1);
