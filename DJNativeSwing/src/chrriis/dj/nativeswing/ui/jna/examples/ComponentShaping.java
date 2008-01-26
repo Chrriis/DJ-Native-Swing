@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2007-2008 Timothy Wall, All Rights Reserved 
  * Parts Copyright (c) 2007 Olivier Chafik 
+ * Parts Copyright (c) 2008 Christopher Deckers 
  * 
  * This library is free software; you can
  * redistribute it and/or modify it under the terms of the GNU Lesser
@@ -11,19 +12,14 @@
  * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package com.sun.jna.examples;
-
-import static com.sun.jna.examples.WindowUtils.setWindowMask;
-import static com.sun.jna.examples.WindowUtils.setWindowTransparent;
+package chrriis.dj.nativeswing.ui.jna.examples;
 
 import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Dialog;
 import java.awt.Dimension;
-import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
@@ -58,6 +54,7 @@ import javax.swing.SwingUtilities;
 import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
+import com.sun.jna.examples.RasterRangesUtils;
 import com.sun.jna.examples.unix.X11;
 import com.sun.jna.examples.unix.X11.Display;
 import com.sun.jna.examples.unix.X11.GC;
@@ -116,7 +113,7 @@ import com.sun.jna.ptr.PointerByReference;
  */
 // TODO: setWindowMask() should accept a threshold; some cases want a
 // 50% threshold, some might want zero/non-zero
-public class WindowUtils {
+public class ComponentShaping {
     public static boolean doPaint;
     private static final String TRANSPARENT_OLD_BG = "transparent-old-bg";
     private static final String TRANSPARENT_OLD_OPAQUE = "transparent-old-opaque";
@@ -834,6 +831,7 @@ public class WindowUtils {
 
         public void setWindowAlpha(final Window w, final float alpha) {
             whenDisplayable(w, new Runnable() {
+                @SuppressWarnings("deprecation")
                 public void run() {
                     Object peer = w.getPeer();
                     try {
@@ -1018,7 +1016,7 @@ public class WindowUtils {
                 IntByReference pcount = new IntByReference();
                 info = x11.XGetVisualInfo(dpy, mask, template, pcount);
                 if (info != null) {
-                    List list = new ArrayList();
+                    List<Integer> list = new ArrayList<Integer>();
                     XVisualInfo[] infos = 
                         (XVisualInfo[])info.toArray(pcount.getValue());
                     for (int i = 0; i < infos.length; i++) {
@@ -1032,7 +1030,7 @@ public class WindowUtils {
                     }
                     alphaVisualIDs = new int[list.size()];
                     for (int i=0;i < alphaVisualIDs.length;i++) {
-                        alphaVisualIDs[i] = ((Integer)list.get(i)).intValue();
+                        alphaVisualIDs[i] = list.get(i).intValue();
                     }
                     return alphaVisualIDs;
                 }
@@ -1046,34 +1044,34 @@ public class WindowUtils {
             return alphaVisualIDs;
         }
 
-        private X11.Window getContentWindow(Window w, X11.Display dpy,
-                                            X11.Window win, Point offset) {
-            if ((w instanceof Frame && !((Frame)w).isUndecorated())
-                || (w instanceof Dialog && !((Dialog)w).isUndecorated())) {
-                X11 x11 = X11.INSTANCE;
-                X11.WindowByReference rootp = new X11.WindowByReference();
-                X11.WindowByReference parentp = new X11.WindowByReference();
-                PointerByReference childrenp = new PointerByReference();
-                IntByReference countp = new IntByReference();
-                x11.XQueryTree(dpy, win, rootp, parentp, childrenp, countp);
-                Pointer p = childrenp.getValue();
-                int[] ids = p.getIntArray(0, countp.getValue());
-                for (int i=0;i < ids.length;i++) {
-                    // TODO: more verification of correct window?
-                    X11.Window child = new X11.Window(ids[i]);
-                    X11.XWindowAttributes xwa = new X11.XWindowAttributes();
-                    x11.XGetWindowAttributes(dpy, child, xwa);
-                    offset.x = -xwa.x;
-                    offset.y = -xwa.y;
-                    win = child; 
-                    break;
-                }
-                if (p != null) {
-                    x11.XFree(p);
-                }
-            }
-            return win;
-        }
+//        private X11.Window getContentWindow(Window w, X11.Display dpy,
+//                                            X11.Window win, Point offset) {
+//            if ((w instanceof Frame && !((Frame)w).isUndecorated())
+//                || (w instanceof Dialog && !((Dialog)w).isUndecorated())) {
+//                X11 x11 = X11.INSTANCE;
+//                X11.WindowByReference rootp = new X11.WindowByReference();
+//                X11.WindowByReference parentp = new X11.WindowByReference();
+//                PointerByReference childrenp = new PointerByReference();
+//                IntByReference countp = new IntByReference();
+//                x11.XQueryTree(dpy, win, rootp, parentp, childrenp, countp);
+//                Pointer p = childrenp.getValue();
+//                int[] ids = p.getIntArray(0, countp.getValue());
+//                for (int i=0;i < ids.length;i++) {
+//                    // TODO: more verification of correct window?
+//                    X11.Window child = new X11.Window(ids[i]);
+//                    X11.XWindowAttributes xwa = new X11.XWindowAttributes();
+//                    x11.XGetWindowAttributes(dpy, child, xwa);
+//                    offset.x = -xwa.x;
+//                    offset.y = -xwa.y;
+//                    win = child; 
+//                    break;
+//                }
+//                if (p != null) {
+//                    x11.XFree(p);
+//                }
+//            }
+//            return win;
+//        }
 
         public X11.Window getDrawable(Component c) {
             int id = (int)Native.getComponentID(c);
