@@ -17,6 +17,8 @@ import java.awt.Window;
 import java.awt.event.AWTEventListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.HierarchyBoundsListener;
+import java.awt.event.HierarchyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
@@ -146,6 +148,14 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
       }
     });
     window.getContentPane().add(nativeComponent, BorderLayout.CENTER);
+    addHierarchyBoundsListener(new HierarchyBoundsListener() {
+      public void ancestorMoved(HierarchyEvent e) {
+        adjustPeerBounds();
+      }
+      public void ancestorResized(HierarchyEvent e) {
+        adjustPeerBounds();
+      }
+    });
     return window;
   }
   

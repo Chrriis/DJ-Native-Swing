@@ -15,6 +15,8 @@ import java.awt.Point;
 import java.awt.Window;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.HierarchyBoundsListener;
+import java.awt.event.HierarchyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
@@ -90,6 +92,18 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
       
     });
     panel.add(nativeComponent, BorderLayout.CENTER);
+    addHierarchyBoundsListener(new HierarchyBoundsListener() {
+      public void ancestorMoved(HierarchyEvent e) {
+        Component component = e.getChanged();
+        if(component instanceof Window) {
+          return;
+        }
+        adjustPeerBounds();
+      }
+      public void ancestorResized(HierarchyEvent e) {
+        adjustPeerBounds();
+      }
+    });
     return panel;
   }
   

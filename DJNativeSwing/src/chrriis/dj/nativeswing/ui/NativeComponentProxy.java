@@ -14,7 +14,6 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
-import java.awt.event.HierarchyBoundsListener;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
 import java.awt.geom.Area;
@@ -47,14 +46,6 @@ public abstract class NativeComponentProxy extends JComponent {
     super.addNotify();
     peer = createPeer();
     adjustPeerBounds();
-    addHierarchyBoundsListener(new HierarchyBoundsListener() {
-      public void ancestorMoved(HierarchyEvent e) {
-        adjustPeerBounds();
-      }
-      public void ancestorResized(HierarchyEvent e) {
-        adjustPeerBounds();
-      }
-    });
     addHierarchyListener(new HierarchyListener() {
       public void hierarchyChanged(HierarchyEvent e) {
         long changeFlags = e.getChangeFlags();
@@ -112,6 +103,9 @@ public abstract class NativeComponentProxy extends JComponent {
   @SuppressWarnings("deprecation")
   @Override
   public void reshape(int x, int y, int w, int h) {
+    if(x == getX() && y == getY() && w == getWidth() && h == getHeight()) {
+      return;
+    }
     super.reshape(x, y, w, h);
     adjustPeerBounds();
   }
