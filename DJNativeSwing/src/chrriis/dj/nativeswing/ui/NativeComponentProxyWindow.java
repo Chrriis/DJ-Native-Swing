@@ -103,6 +103,9 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
     @Override
     public boolean getFocusableWindowState() {
       NativeComponentProxyWindow nativeComponentEmbedder = this.nativeComponentEmbedder.get();
+      if(nativeComponentEmbedder == null) {
+        return false;
+      }
 //      System.err.println(isNonFocusable + ", " + nativeComponentEmbedder.isFocusOwner() + ", " + nativeComponentEmbedder.nativeComponent.isFocusOwner());
 //      System.err.println((!isNonFocusable || nativeComponentEmbedder.isFocusOwner()) && super.getFocusableWindowState());
       return (!isNonFocusable || nativeComponentEmbedder.isFocusOwner() || nativeComponentEmbedder.nativeComponent.isFocusOwner());
@@ -125,6 +128,9 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
     }
     public void windowGainedFocus(WindowEvent e) {
       NativeComponentProxyWindow nativeComponentEmbedder = this.nativeComponentEmbedder.get();
+      if(nativeComponentEmbedder == null) {
+        return;
+      }
       for(Component parent = nativeComponentEmbedder; parent != null && !(parent instanceof Window); parent = parent.getParent()) {
         if(parent instanceof JInternalFrame) {
           Window windowAncestor = SwingUtilities.getWindowAncestor(nativeComponentEmbedder);

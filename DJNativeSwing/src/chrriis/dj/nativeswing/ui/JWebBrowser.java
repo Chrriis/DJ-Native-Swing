@@ -81,6 +81,9 @@ public class JWebBrowser extends JPanel {
     }
     public void componentInitialized(InitializationEvent e) {
       JWebBrowser webBrowser = this.webBrowser.get();
+      if(webBrowser == null) {
+        return;
+      }
       Object[] listeners = webBrowser.listenerList.getListenerList();
       e = null;
       for(int i=listeners.length-2; i>=0; i-=2) {
@@ -102,6 +105,9 @@ public class JWebBrowser extends JPanel {
     @Override
     public void urlChanged(WebBrowserNavigationEvent e) {
       JWebBrowser webBrowser = this.webBrowser.get();
+      if(webBrowser == null) {
+        return;
+      }
       webBrowser.stopButton.setEnabled(false);
       webBrowser.stopMenuItem.setEnabled(false);
       webBrowser.addressField.setText(webBrowser.nativeComponent.getURL());
@@ -115,6 +121,9 @@ public class JWebBrowser extends JPanel {
     @Override
     public void urlChanging(WebBrowserNavigationEvent e) {
       JWebBrowser webBrowser = this.webBrowser.get();
+      if(webBrowser == null) {
+        return;
+      }
       webBrowser.addressField.setText(e.getNewURL());
       webBrowser.stopButton.setEnabled(true);
       webBrowser.stopMenuItem.setEnabled(true);
@@ -122,6 +131,9 @@ public class JWebBrowser extends JPanel {
     @Override
     public void urlChangeCanceled(WebBrowserNavigationEvent e) {
       JWebBrowser webBrowser = this.webBrowser.get();
+      if(webBrowser == null) {
+        return;
+      }
       webBrowser.stopButton.setEnabled(false);
       webBrowser.stopMenuItem.setEnabled(false);
       webBrowser.addressField.setText(webBrowser.nativeComponent.getURL());
@@ -135,6 +147,9 @@ public class JWebBrowser extends JPanel {
     @Override
     public void statusChanged(WebBrowserEvent e) {
       JWebBrowser webBrowser = this.webBrowser.get();
+      if(webBrowser == null) {
+        return;
+      }
       String status = webBrowser.nativeComponent.getStatus();
       webBrowser.statusLabel.setText(status.length() == 0? " ": status);
     }

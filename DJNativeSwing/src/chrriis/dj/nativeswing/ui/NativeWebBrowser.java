@@ -87,17 +87,21 @@ class NativeWebBrowser extends NativeComponent {
       public void close(WindowEvent e) {
         NativeInterfaceHandler.invokeSwing(new Runnable() {
           public void run() {
+            JWebBrowser webBrowser = NativeWebBrowser.this.webBrowser.get();
+            if(webBrowser == null) {
+              return;
+            }
             Object[] listeners = listenerList.getListenerList();
             WebBrowserEvent e = null;
             for(int i=listeners.length-2; i>=0; i-=2) {
               if(listeners[i] == WebBrowserListener.class) {
                 if(e == null) {
-                  e = new WebBrowserEvent(webBrowser.get());
+                  e = new WebBrowserEvent(webBrowser);
                 }
                 ((WebBrowserListener)listeners[i + 1]).windowClosing(e);
               }
             }
-            Window window = SwingUtilities.getWindowAncestor(webBrowser.get());
+            Window window = SwingUtilities.getWindowAncestor(webBrowser);
             if(window instanceof JWebBrowserWindow) {
               window.dispose();
             }
@@ -135,6 +139,10 @@ class NativeWebBrowser extends NativeComponent {
             browserAttributes.hasStatusBar = e.statusBar;
             NativeInterfaceHandler.invokeSwing(new Runnable() {
               public void run() {
+                JWebBrowser webBrowser = NativeWebBrowser.this.webBrowser.get();
+                if(webBrowser == null) {
+                  return;
+                }
                 JWebBrowser jWebBrowser = new JWebBrowser();
                 jWebBrowser.setAddressBarVisible(browserAttributes.hasAddressBar);
                 jWebBrowser.setMenuBarVisible(browserAttributes.hasMenuBar);
@@ -145,7 +153,7 @@ class NativeWebBrowser extends NativeComponent {
                 for(int i=listeners.length-2; i>=0 && jWebBrowser != null; i-=2) {
                   if(listeners[i] == WebBrowserListener.class) {
                     if(e == null) {
-                      e = new WebBrowserWindowOpeningEvent(NativeWebBrowser.this.webBrowser.get(), jWebBrowser, browserAttributes.url, browserAttributes.location, browserAttributes.size);
+                      e = new WebBrowserWindowOpeningEvent(webBrowser, jWebBrowser, browserAttributes.url, browserAttributes.location, browserAttributes.size);
                     }
                     ((WebBrowserListener)listeners[i + 1]).windowOpening(e);
                     jWebBrowser = e.isConsumed()? null: e.getNewWebBrowser();
@@ -191,12 +199,16 @@ class NativeWebBrowser extends NativeComponent {
         final boolean isTopFrame = e.top;
         NativeInterfaceHandler.invokeSwing(new Runnable() {
           public void run() {
+            JWebBrowser webBrowser = NativeWebBrowser.this.webBrowser.get();
+            if(webBrowser == null) {
+              return;
+            }
             Object[] listeners = listenerList.getListenerList();
             WebBrowserNavigationEvent e = null;
             for(int i=listeners.length-2; i>=0; i-=2) {
               if(listeners[i] == WebBrowserListener.class) {
                 if(e == null) {
-                  e = new WebBrowserNavigationEvent(webBrowser.get(), location, isTopFrame);
+                  e = new WebBrowserNavigationEvent(webBrowser, location, isTopFrame);
                 }
                 ((WebBrowserListener)listeners[i + 1]).urlChanged(e);
               }
@@ -222,12 +234,16 @@ class NativeWebBrowser extends NativeComponent {
           final String command_ = command;
           NativeInterfaceHandler.invokeSwing(new Runnable() {
             public void run() {
+              JWebBrowser webBrowser = NativeWebBrowser.this.webBrowser.get();
+              if(webBrowser == null) {
+                return;
+              }
               Object[] listeners = listenerList.getListenerList();
               WebBrowserEvent e = null;
               for(int i=listeners.length-2; i>=0; i-=2) {
                 if(listeners[i] == WebBrowserListener.class) {
                   if(e == null) {
-                    e = new WebBrowserEvent(webBrowser.get());
+                    e = new WebBrowserEvent(webBrowser);
                   }
                   ((WebBrowserListener)listeners[i + 1]).commandReceived(e, command_);
                 }
@@ -244,12 +260,16 @@ class NativeWebBrowser extends NativeComponent {
         final boolean[] isNavigating = new boolean[] {true};
         NativeInterfaceHandler.invokeSwing(new Runnable() {
           public void run() {
+            JWebBrowser webBrowser = NativeWebBrowser.this.webBrowser.get();
+            if(webBrowser == null) {
+              return;
+            }
             Object[] listeners = listenerList.getListenerList();
             WebBrowserNavigationEvent e = null;
             for(int i=listeners.length-2; i>=0; i-=2) {
               if(listeners[i] == WebBrowserListener.class) {
                 if(e == null) {
-                  e = new WebBrowserNavigationEvent(webBrowser.get(), location, isTopFrame);
+                  e = new WebBrowserNavigationEvent(webBrowser, location, isTopFrame);
                 }
                 ((WebBrowserListener)listeners[i + 1]).urlChanging(e);
                 isNavigating[0] &= !e.isConsumed();
@@ -265,12 +285,16 @@ class NativeWebBrowser extends NativeComponent {
         if(!e.doit) {
           NativeInterfaceHandler.invokeSwing(new Runnable() {
             public void run() {
+              JWebBrowser webBrowser = NativeWebBrowser.this.webBrowser.get();
+              if(webBrowser == null) {
+                return;
+              }
               Object[] listeners = listenerList.getListenerList();
               WebBrowserNavigationEvent e = null;
               for(int i=listeners.length-2; i>=0; i-=2) {
                 if(listeners[i] == WebBrowserListener.class) {
                   if(e == null) {
-                    e = new WebBrowserNavigationEvent(webBrowser.get(), location, isTopFrame);
+                    e = new WebBrowserNavigationEvent(webBrowser, location, isTopFrame);
                   }
                   ((WebBrowserListener)listeners[i + 1]).urlChangeCanceled(e);
                 }
@@ -404,13 +428,17 @@ class NativeWebBrowser extends NativeComponent {
   protected String status;
   
   protected void updateStatus(String status) {
+    JWebBrowser webBrowser = NativeWebBrowser.this.webBrowser.get();
+    if(webBrowser == null) {
+      return;
+    }
     this.status = status;
     Object[] listeners = listenerList.getListenerList();
     WebBrowserEvent e = null;
     for(int i=listeners.length-2; i>=0; i-=2) {
       if(listeners[i] == WebBrowserListener.class) {
         if(e == null) {
-          e = new WebBrowserEvent(webBrowser.get());
+          e = new WebBrowserEvent(webBrowser);
         }
         ((WebBrowserListener)listeners[i + 1]).statusChanged(e);
       }
@@ -424,13 +452,17 @@ class NativeWebBrowser extends NativeComponent {
   protected String title;
   
   protected void updateTitle(String title) {
+    JWebBrowser webBrowser = NativeWebBrowser.this.webBrowser.get();
+    if(webBrowser == null) {
+      return;
+    }
     this.title = title;
     Object[] listeners = listenerList.getListenerList();
     WebBrowserEvent e = null;
     for(int i=listeners.length-2; i>=0; i-=2) {
       if(listeners[i] == WebBrowserListener.class) {
         if(e == null) {
-          e = new WebBrowserEvent(webBrowser.get());
+          e = new WebBrowserEvent(webBrowser);
         }
         ((WebBrowserListener)listeners[i + 1]).titleChanged(e);
       }
@@ -447,13 +479,17 @@ class NativeWebBrowser extends NativeComponent {
     if(this.pageLoadingProgressValue == loadingProgressValue) {
       return;
     }
+    JWebBrowser webBrowser = NativeWebBrowser.this.webBrowser.get();
+    if(webBrowser == null) {
+      return;
+    }
     this.pageLoadingProgressValue = loadingProgressValue;
     Object[] listeners = listenerList.getListenerList();
     WebBrowserEvent e = null;
     for(int i=listeners.length-2; i>=0; i-=2) {
       if(listeners[i] == WebBrowserListener.class) {
         if(e == null) {
-          e = new WebBrowserEvent(webBrowser.get());
+          e = new WebBrowserEvent(webBrowser);
         }
         ((WebBrowserListener)listeners[i + 1]).loadingProgressChanged(e);
       }

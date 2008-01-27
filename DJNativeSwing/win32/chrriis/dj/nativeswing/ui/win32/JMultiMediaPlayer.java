@@ -9,6 +9,8 @@ package chrriis.dj.nativeswing.ui.win32;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 
 import javax.swing.JPanel;
 
@@ -26,23 +28,33 @@ public class JMultiMediaPlayer extends JPanel {
 
   protected NativeMultimediaPlayer nativeComponent;
   
+  protected static class NInitializationListener implements InitializationListener {
+    protected Reference<JMultiMediaPlayer> multiMediaPlayer;
+    protected NInitializationListener(JMultiMediaPlayer multiMediaPlayer) {
+      this.multiMediaPlayer = new WeakReference<JMultiMediaPlayer>(multiMediaPlayer);
+    }
+    public void componentInitialized(InitializationEvent e) {
+      JMultiMediaPlayer multiMediaPlayer = this.multiMediaPlayer.get();
+      if(multiMediaPlayer == null) {
+        return;
+      }
+      Object[] listeners = multiMediaPlayer.listenerList.getListenerList();
+      e = null;
+      for(int i=listeners.length-2; i>=0; i-=2) {
+        if(listeners[i] == InitializationEvent.class) {
+          if(e == null) {
+            e = new InitializationEvent(multiMediaPlayer);
+          }
+          ((InitializationListener)listeners[i + 1]).componentInitialized(e);
+        }
+      }
+    }
+  }
+  
   public JMultiMediaPlayer() {
     setLayout(new BorderLayout(0, 0));
     nativeComponent = new NativeMultimediaPlayer();
-    nativeComponent.addInitializationListener(new InitializationListener() {
-      public void componentInitialized(InitializationEvent e) {
-        Object[] listeners = listenerList.getListenerList();
-        e = null;
-        for(int i=listeners.length-2; i>=0; i-=2) {
-          if(listeners[i] == InitializationEvent.class) {
-            if(e == null) {
-              e = new InitializationEvent(JMultiMediaPlayer.this);
-            }
-            ((InitializationListener)listeners[i + 1]).componentInitialized(e);
-          }
-        }
-      }
-    });
+    nativeComponent.addInitializationListener(new NInitializationListener(this));
     add(NativeComponentEmbedder.getEmbeddedComponent(nativeComponent), BorderLayout.CENTER);
   }
   

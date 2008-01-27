@@ -65,6 +65,9 @@ public class JFlashPlayer extends JPanel {
     @Override
     public void windowOpening(WebBrowserWindowOpeningEvent ev) {
       JFlashPlayer flashPlayer = this.flashPlayer.get();
+      if(flashPlayer == null) {
+        return;
+      }
       Object[] listeners = flashPlayer.listenerList.getListenerList();
       FlashPlayerWindowOpeningEvent e = null;
       for(int i=listeners.length-2; i>=0 && !ev.isConsumed(); i-=2) {
