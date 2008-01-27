@@ -128,6 +128,9 @@ public abstract class NativeComponentProxy extends JComponent {
         area.subtract(new Area(c.getBounds()));
       }
     }
+    if(area.isEmpty()) {
+      return area;
+    }
     Container c = this;
     Container parent = c.getParent();
     while(parent != null && !(parent instanceof Window)) {
@@ -167,6 +170,9 @@ public abstract class NativeComponentProxy extends JComponent {
             }
           }
         }
+      }
+      if(area.isEmpty()) {
+        return area;
       }
       c = parent;
       parent = c.getParent();
