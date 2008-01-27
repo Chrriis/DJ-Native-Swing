@@ -67,7 +67,10 @@ public class DesktopPaneWindowLayeringExample extends JPanel {
         return false;
       }
     };
+    // When a frame is iconified, components are destroyed. To avoid this, we use the option to destroy on finalize.
+    NativeComponentEmbedder.setDestroyOnFinalize(true);
     JWebBrowser webBrowser2 = new JWebBrowser();
+    NativeComponentEmbedder.setDestroyOnFinalize(false);
     webBrowser2.setURL("http://www.google.com");
     cons.weightx = 1;
     cons.weighty = 1;
@@ -81,6 +84,7 @@ public class DesktopPaneWindowLayeringExample extends JPanel {
     webBrowser2ContentPane.add(webBrowser2Button);
     webBrowser2ContentPane.setComponentZOrder(webBrowser2Button, 0);
     webBrowser2InternalFrame.add(webBrowser2ContentPane, BorderLayout.CENTER);
+    webBrowser2InternalFrame.setIconifiable(true);
     desktopPane.add(webBrowser2InternalFrame);
     add(desktopPane, BorderLayout.CENTER);
     NativeComponentEmbedder.setPreferredLayering(NativeComponentEmbedder.Layering.NO_LAYERING);

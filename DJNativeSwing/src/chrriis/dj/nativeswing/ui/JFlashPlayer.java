@@ -14,6 +14,8 @@ import java.awt.event.ActionListener;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -48,38 +50,45 @@ public class JFlashPlayer extends JPanel {
   protected JButton playButton;
   protected JButton pauseButton;
   protected JButton stopButton;
+
+  protected static class NWebBrowserListener extends WebBrowserAdapter {
+    protected Reference<JFlashPlayer> flashPlayer;
+    protected NWebBrowserListener(JFlashPlayer flashPlayer) {
+      this.flashPlayer = new WeakReference<JFlashPlayer>(flashPlayer);
+    }
+//    @Override
+//    public void urlChanging(WebBrowserNavigationEvent e) {
+//      if(url == null || !url.equals(e.getNewURL())) {
+//        e.consume();
+//      }
+//    }
+    @Override
+    public void windowOpening(WebBrowserWindowOpeningEvent ev) {
+      JFlashPlayer flashPlayer = this.flashPlayer.get();
+      Object[] listeners = flashPlayer.listenerList.getListenerList();
+      FlashPlayerWindowOpeningEvent e = null;
+      for(int i=listeners.length-2; i>=0 && !ev.isConsumed(); i-=2) {
+        if(listeners[i] == FlashPlayerListener.class) {
+          if(e == null) {
+            e = new FlashPlayerWindowOpeningEvent(flashPlayer, ev.getNewWebBrowser(), ev.getNewURL(), ev.getLocation(), ev.getSize());
+          }
+          ((FlashPlayerListener)listeners[i + 1]).windowOpening(e);
+          if(e.isConsumed()) {
+            ev.consume();
+          } else {
+            ev.setNewWebBrowser(e.getNewWebBrowser());
+          }
+        }
+      }
+    }
+  }
   
   public JFlashPlayer() {
     super(new BorderLayout(0, 0));
     webBrowserPanel = new JPanel(new BorderLayout(0, 0));
     webBrowser = new JWebBrowser();
     webBrowser.setBarsVisible(false);
-    webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
-//      @Override
-//      public void urlChanging(WebBrowserNavigationEvent e) {
-//        if(url == null || !url.equals(e.getNewURL())) {
-//          e.consume();
-//        }
-//      }
-      @Override
-      public void windowOpening(WebBrowserWindowOpeningEvent ev) {
-        Object[] listeners = listenerList.getListenerList();
-        FlashPlayerWindowOpeningEvent e = null;
-        for(int i=listeners.length-2; i>=0 && !ev.isConsumed(); i-=2) {
-          if(listeners[i] == FlashPlayerListener.class) {
-            if(e == null) {
-              e = new FlashPlayerWindowOpeningEvent(JFlashPlayer.this, ev.getNewWebBrowser(), ev.getNewURL(), ev.getLocation(), ev.getSize());
-            }
-            ((FlashPlayerListener)listeners[i + 1]).windowOpening(e);
-            if(e.isConsumed()) {
-              ev.consume();
-            } else {
-              ev.setNewWebBrowser(e.getNewWebBrowser());
-            }
-          }
-        }
-      }
-    });
+    webBrowser.addWebBrowserListener(new NWebBrowserListener(this));
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);
     controlBarPane = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 2));

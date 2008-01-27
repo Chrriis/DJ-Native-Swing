@@ -24,6 +24,8 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.geom.Area;
 import java.beans.PropertyVetoException;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 
 import javax.swing.JDialog;
 import javax.swing.JInternalFrame;
@@ -76,7 +78,7 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
 
   protected static class EmbeddedWindow extends JDialog {
     
-    protected NativeComponentProxyWindow nativeComponentEmbedder;
+    protected Reference<NativeComponentProxyWindow> nativeComponentEmbedder;
     
     public EmbeddedWindow(NativeComponentProxyWindow nativeComponentEmbedder, Window w) {
       super(w);
@@ -94,15 +96,53 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
     }
 
     protected void init(NativeComponentProxyWindow nativeComponentEmbedder) {
-      this.nativeComponentEmbedder = nativeComponentEmbedder;
+      this.nativeComponentEmbedder = new WeakReference<NativeComponentProxyWindow>(nativeComponentEmbedder);
       setUndecorated(true);
     }
     
     @Override
     public boolean getFocusableWindowState() {
+      NativeComponentProxyWindow nativeComponentEmbedder = this.nativeComponentEmbedder.get();
 //      System.err.println(isNonFocusable + ", " + nativeComponentEmbedder.isFocusOwner() + ", " + nativeComponentEmbedder.nativeComponent.isFocusOwner());
 //      System.err.println((!isNonFocusable || nativeComponentEmbedder.isFocusOwner()) && super.getFocusableWindowState());
       return (!isNonFocusable || nativeComponentEmbedder.isFocusOwner() || nativeComponentEmbedder.nativeComponent.isFocusOwner());
+    }
+  }
+  
+  protected HierarchyBoundsListener hierarchyBoundsListener = new HierarchyBoundsListener() {
+    public void ancestorMoved(HierarchyEvent e) {
+      adjustPeerBounds();
+    }
+    public void ancestorResized(HierarchyEvent e) {
+      adjustPeerBounds();
+    }
+  };
+
+  protected static class NWindowFocusListener implements WindowFocusListener {
+    protected Reference<NativeComponentProxyWindow> nativeComponentEmbedder;
+    protected NWindowFocusListener(NativeComponentProxyWindow nativeComponentEmbedder) {
+      this.nativeComponentEmbedder = new WeakReference<NativeComponentProxyWindow>(nativeComponentEmbedder);
+    }
+    public void windowGainedFocus(WindowEvent e) {
+      NativeComponentProxyWindow nativeComponentEmbedder = this.nativeComponentEmbedder.get();
+      for(Component parent = nativeComponentEmbedder; parent != null && !(parent instanceof Window); parent = parent.getParent()) {
+        if(parent instanceof JInternalFrame) {
+          Window windowAncestor = SwingUtilities.getWindowAncestor(nativeComponentEmbedder);
+          if(windowAncestor != null) {
+            boolean focusableWindowState = windowAncestor.getFocusableWindowState();
+            windowAncestor.setFocusableWindowState(false);
+//            ((JInternalFrame)parent).moveToFront();
+            try {
+              ((JInternalFrame)parent).setSelected(true);
+            } catch (PropertyVetoException e1) {
+            }
+            windowAncestor.setFocusableWindowState(focusableWindowState);
+          }
+          break;
+        }
+      }
+    }
+    public void windowLostFocus(WindowEvent e) {
     }
   }
   
@@ -125,38 +165,19 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
         window = new EmbeddedWindow(this, (Frame)windowAncestor);
       }
     }
-    window.addWindowFocusListener(new WindowFocusListener() {
-      public void windowGainedFocus(WindowEvent e) {
-        for(Component parent = NativeComponentProxyWindow.this; parent != null && !(parent instanceof Window); parent = parent.getParent()) {
-          if(parent instanceof JInternalFrame) {
-            Window windowAncestor = SwingUtilities.getWindowAncestor(NativeComponentProxyWindow.this);
-            if(windowAncestor != null) {
-              boolean focusableWindowState = windowAncestor.getFocusableWindowState();
-              windowAncestor.setFocusableWindowState(false);
-//              ((JInternalFrame)parent).moveToFront();
-              try {
-                ((JInternalFrame)parent).setSelected(true);
-              } catch (PropertyVetoException e1) {
-              }
-              windowAncestor.setFocusableWindowState(focusableWindowState);
-            }
-            break;
-          }
-        }
-      }
-      public void windowLostFocus(WindowEvent e) {
-      }
-    });
+    window.addWindowFocusListener(new NWindowFocusListener(this));
     window.getContentPane().add(nativeComponent, BorderLayout.CENTER);
-    addHierarchyBoundsListener(new HierarchyBoundsListener() {
-      public void ancestorMoved(HierarchyEvent e) {
-        adjustPeerBounds();
-      }
-      public void ancestorResized(HierarchyEvent e) {
-        adjustPeerBounds();
-      }
-    });
     return window;
+  }
+  
+  @Override
+  protected void connectPeer() {
+    addHierarchyBoundsListener(hierarchyBoundsListener);
+  }
+  
+  @Override
+  protected void disconnectPeer() {
+    removeHierarchyBoundsListener(hierarchyBoundsListener);
   }
   
   @Override

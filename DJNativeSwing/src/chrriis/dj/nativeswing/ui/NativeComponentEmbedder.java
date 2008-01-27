@@ -22,6 +22,16 @@ public class NativeComponentEmbedder {
   
   protected NativeComponentEmbedder() {}
   
+  protected static boolean isDestroyOnFinalize;
+  
+  public static void setDestroyOnFinalize(boolean isDestroyOnFinalize) {
+    NativeComponentEmbedder.isDestroyOnFinalize = isDestroyOnFinalize;
+  }
+  
+  public static boolean isDestroyOnFinalize() {
+    return isDestroyOnFinalize;
+  }
+  
   protected static Layering preferredLayering = Layering.NO_LAYERING;
   
   public static void setPreferredLayering(Layering preferredLayering) {

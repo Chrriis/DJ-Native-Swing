@@ -34,36 +34,75 @@ import chrriis.dj.nativeswing.ui.NativeComponentProxyWindow.EmbeddedWindow;
 public abstract class NativeComponentProxy extends JComponent {
 
   protected NativeComponent nativeComponent;
+  protected boolean isDestroyOnFinalize;
 
   protected NativeComponentProxy(NativeComponent nativeComponent) {
+    isDestroyOnFinalize = NativeComponentEmbedder.isDestroyOnFinalize();
     nativeComponent.setComponentEmbedder(this);
     setFocusable(true);
     this.nativeComponent = nativeComponent;
   }
   
+  protected HierarchyListener hierarchyListener = new HierarchyListener() {
+    public void hierarchyChanged(HierarchyEvent e) {
+      long changeFlags = e.getChangeFlags();
+      if((changeFlags & (HierarchyEvent.SHOWING_CHANGED)) != 0) {
+        adjustPeerMask();
+      }
+    }
+  };
+  
   @Override
   public void addNotify() {
     super.addNotify();
+    nativeComponent.setComponentEmbedder(this);
+    addHierarchyListener(hierarchyListener);
+    if(peer != null) {
+      adjustPeerBounds();
+      connectPeer();
+      return;
+    }
     peer = createPeer();
     adjustPeerBounds();
-    addHierarchyListener(new HierarchyListener() {
-      public void hierarchyChanged(HierarchyEvent e) {
-        long changeFlags = e.getChangeFlags();
-        if((changeFlags & (HierarchyEvent.SHOWING_CHANGED)) != 0) {
-          adjustPeerMask();
-        }
-      }
-    });
+    connectPeer();
     addPeer();
+  }
+  
+  protected void connectPeer() {
+    
+  }
+  
+  protected void disconnectPeer() {
+    
   }
   
   @Override
   public void removeNotify() {
     super.removeNotify();
+    nativeComponent.setComponentEmbedder(null);
+    removeHierarchyListener(hierarchyListener);
+    if(isDestroyOnFinalize) {
+      disconnectPeer();
+      adjustPeerMask();
+      return;
+    }
     if(peer != null) {
       destroyPeer();
       peer = null;
     }
+  }
+  
+  @Override
+  protected void finalize() throws Throwable {
+    super.finalize();
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        if(peer != null) {
+          destroyPeer();
+          peer = null;
+        }
+      }
+    });
   }
 
   protected Component peer;
@@ -112,10 +151,7 @@ public abstract class NativeComponentProxy extends JComponent {
   
   protected Area computePeerMaskArea() {
     Window windowAncestor = SwingUtilities.getWindowAncestor(this);
-    if(windowAncestor == null) {
-      return null;
-    }
-    if(!isShowing()) {
+    if(windowAncestor == null || !isShowing()) {
       return new Area(new Rectangle(0, 0));
     }
     Area area = new Area(new Rectangle(0, 0, getWidth(), getHeight()));

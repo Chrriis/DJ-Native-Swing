@@ -62,49 +62,62 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     
   }
   
+  protected HierarchyBoundsListener hierarchyBoundsListener = new HierarchyBoundsListener() {
+    public void ancestorMoved(HierarchyEvent e) {
+      Component component = e.getChanged();
+      if(component instanceof Window) {
+        return;
+      }
+      adjustPeerBounds();
+    }
+    public void ancestorResized(HierarchyEvent e) {
+      adjustPeerBounds();
+    }
+  };
+
+  protected MouseAdapter mouseListener = new MouseAdapter() {
+    @Override
+    public void mousePressed(MouseEvent e) {
+      adjustFocus();
+    }
+    protected void adjustFocus() {
+      for(Component parent = NativeComponentProxyPanel.this; parent != null && !(parent instanceof Window); parent = parent.getParent()) {
+        if(parent instanceof JInternalFrame) {
+          Window windowAncestor = SwingUtilities.getWindowAncestor(NativeComponentProxyPanel.this);
+          if(windowAncestor != null) {
+            boolean focusableWindowState = windowAncestor.getFocusableWindowState();
+            windowAncestor.setFocusableWindowState(false);
+            try {
+              ((JInternalFrame)parent).setSelected(true);
+            } catch (PropertyVetoException e1) {
+            }
+            windowAncestor.setFocusableWindowState(focusableWindowState);
+          }
+          break;
+        }
+      }
+    }
+  };
+  
   protected EmbeddedPanel panel;
   
   @Override
   protected Component createPeer() {
     panel = new EmbeddedPanel();
-    nativeComponent.addMouseListener(new MouseAdapter() {
-      @Override
-      public void mousePressed(MouseEvent e) {
-        adjustFocus();
-      }
-      protected void adjustFocus() {
-        for(Component parent = NativeComponentProxyPanel.this; parent != null && !(parent instanceof Window); parent = parent.getParent()) {
-          if(parent instanceof JInternalFrame) {
-            Window windowAncestor = SwingUtilities.getWindowAncestor(NativeComponentProxyPanel.this);
-            if(windowAncestor != null) {
-              boolean focusableWindowState = windowAncestor.getFocusableWindowState();
-              windowAncestor.setFocusableWindowState(false);
-              try {
-                ((JInternalFrame)parent).setSelected(true);
-              } catch (PropertyVetoException e1) {
-              }
-              windowAncestor.setFocusableWindowState(focusableWindowState);
-            }
-            break;
-          }
-        }
-      }
-      
-    });
     panel.add(nativeComponent, BorderLayout.CENTER);
-    addHierarchyBoundsListener(new HierarchyBoundsListener() {
-      public void ancestorMoved(HierarchyEvent e) {
-        Component component = e.getChanged();
-        if(component instanceof Window) {
-          return;
-        }
-        adjustPeerBounds();
-      }
-      public void ancestorResized(HierarchyEvent e) {
-        adjustPeerBounds();
-      }
-    });
     return panel;
+  }
+  
+  @Override
+  protected void connectPeer() {
+    addHierarchyBoundsListener(hierarchyBoundsListener);
+    nativeComponent.addMouseListener(mouseListener);
+  }
+  
+  @Override
+  protected void disconnectPeer() {
+    removeHierarchyBoundsListener(hierarchyBoundsListener);
+    nativeComponent.removeMouseListener(mouseListener);
   }
   
   @Override

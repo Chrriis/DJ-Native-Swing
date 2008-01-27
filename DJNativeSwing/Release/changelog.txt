@@ -8,6 +8,7 @@ Licence terms: LGPL (see licence.txt)
 * Version 0.9.3 (xxxxxxxxxxxxxxxx):
 
 - Layering of native components is possible using 2 modes (requires JNA).
+- With layers, a destruction mode allows to destroy on finalization.
 - Web Server is improved.
 - Convenient main is enhanced to use a system property.
 - Default sizes is fixed.

@@ -13,6 +13,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -61,6 +63,8 @@ public class JWebBrowser extends JPanel {
   protected JCheckBoxMenuItem statusBarCheckBoxMenuItem;
   protected JPanel webBrowserPanel;
   
+  protected JTextField addressField;
+  protected JLabel statusLabel;
   protected JButton backButton;
   protected JMenuItem backMenuItem;
   protected JButton forwardButton;
@@ -69,24 +73,77 @@ public class JWebBrowser extends JPanel {
   protected JMenuItem refreshMenuItem;
   protected JButton stopButton;
   protected JMenuItem stopMenuItem;
+
+  protected static class NInitializationListener implements InitializationListener {
+    protected Reference<JWebBrowser> webBrowser;
+    protected NInitializationListener(JWebBrowser webBrowser) {
+      this.webBrowser = new WeakReference<JWebBrowser>(webBrowser);
+    }
+    public void componentInitialized(InitializationEvent e) {
+      JWebBrowser webBrowser = this.webBrowser.get();
+      Object[] listeners = webBrowser.listenerList.getListenerList();
+      e = null;
+      for(int i=listeners.length-2; i>=0; i-=2) {
+        if(listeners[i] == InitializationEvent.class) {
+          if(e == null) {
+            e = new InitializationEvent(webBrowser);
+          }
+          ((InitializationListener)listeners[i + 1]).componentInitialized(e);
+        }
+      }
+    }
+  }
+  
+  protected static class NWebBrowserListener extends WebBrowserAdapter {
+    protected Reference<JWebBrowser> webBrowser;
+    protected NWebBrowserListener(JWebBrowser webBrowser) {
+      this.webBrowser = new WeakReference<JWebBrowser>(webBrowser);
+    }
+    @Override
+    public void urlChanged(WebBrowserNavigationEvent e) {
+      JWebBrowser webBrowser = this.webBrowser.get();
+      webBrowser.stopButton.setEnabled(false);
+      webBrowser.stopMenuItem.setEnabled(false);
+      webBrowser.addressField.setText(webBrowser.nativeComponent.getURL());
+      boolean isBackEnabled = webBrowser.nativeComponent.isBackEnabled();
+      webBrowser.backButton.setEnabled(isBackEnabled);
+      webBrowser.backMenuItem.setEnabled(isBackEnabled);
+      boolean isForwardEnabled = webBrowser.nativeComponent.isForwardEnabled();
+      webBrowser.forwardButton.setEnabled(isForwardEnabled);
+      webBrowser.forwardMenuItem.setEnabled(isForwardEnabled);
+    }
+    @Override
+    public void urlChanging(WebBrowserNavigationEvent e) {
+      JWebBrowser webBrowser = this.webBrowser.get();
+      webBrowser.addressField.setText(e.getNewURL());
+      webBrowser.stopButton.setEnabled(true);
+      webBrowser.stopMenuItem.setEnabled(true);
+    }
+    @Override
+    public void urlChangeCanceled(WebBrowserNavigationEvent e) {
+      JWebBrowser webBrowser = this.webBrowser.get();
+      webBrowser.stopButton.setEnabled(false);
+      webBrowser.stopMenuItem.setEnabled(false);
+      webBrowser.addressField.setText(webBrowser.nativeComponent.getURL());
+      boolean isBackEnabled = webBrowser.nativeComponent.isBackEnabled();
+      webBrowser.backButton.setEnabled(isBackEnabled);
+      webBrowser.backMenuItem.setEnabled(isBackEnabled);
+      boolean isForwardEnabled = webBrowser.nativeComponent.isForwardEnabled();
+      webBrowser.forwardButton.setEnabled(isForwardEnabled);
+      webBrowser.forwardMenuItem.setEnabled(isForwardEnabled);
+    }
+    @Override
+    public void statusChanged(WebBrowserEvent e) {
+      JWebBrowser webBrowser = this.webBrowser.get();
+      String status = webBrowser.nativeComponent.getStatus();
+      webBrowser.statusLabel.setText(status.length() == 0? " ": status);
+    }
+  }
   
   public JWebBrowser() {
     setLayout(new BorderLayout(0, 0));
     nativeComponent = new NativeWebBrowser(this);
-    nativeComponent.addInitializationListener(new InitializationListener() {
-      public void componentInitialized(InitializationEvent e) {
-        Object[] listeners = listenerList.getListenerList();
-        e = null;
-        for(int i=listeners.length-2; i>=0; i-=2) {
-          if(listeners[i] == InitializationEvent.class) {
-            if(e == null) {
-              e = new InitializationEvent(JWebBrowser.this);
-            }
-            ((InitializationListener)listeners[i + 1]).componentInitialized(e);
-          }
-        }
-      }
-    });
+    nativeComponent.addInitializationListener(new NInitializationListener(this));
     JPanel menuToolAndAddressBarPanel = new JPanel(new BorderLayout(0, 0));
     menuBar = new JMenuBar();
     menuToolAndAddressBarPanel.add(menuBar, BorderLayout.NORTH);
@@ -144,7 +201,7 @@ public class JWebBrowser extends JPanel {
     addressToolBarInnerPanel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
     addressToolBarInnerPanel.setOpaque(false);
     addressToolBar.setFloatable(false);
-    final JTextField addressField = new JTextField();
+    addressField = new JTextField();
     ActionListener goActionListener = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         nativeComponent.setURL(addressField.getText());
@@ -166,46 +223,10 @@ public class JWebBrowser extends JPanel {
     add(webBrowserPanel, BorderLayout.CENTER);
     statusBarPanel = new JPanel(new BorderLayout(0, 0));
     statusBarPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, statusBarPanel.getBackground().darker()), BorderFactory.createEmptyBorder(2, 2, 2, 2)));
-    final JLabel statusLabel = new JLabel(" ");
+    statusLabel = new JLabel(" ");
     statusBarPanel.add(statusLabel, BorderLayout.CENTER);
     add(statusBarPanel, BorderLayout.SOUTH);
-    nativeComponent.addWebBrowserListener(new WebBrowserAdapter() {
-      @Override
-      public void urlChanged(WebBrowserNavigationEvent e) {
-        stopButton.setEnabled(false);
-        stopMenuItem.setEnabled(false);
-        addressField.setText(nativeComponent.getURL());
-        boolean isBackEnabled = nativeComponent.isBackEnabled();
-        backButton.setEnabled(isBackEnabled);
-        backMenuItem.setEnabled(isBackEnabled);
-        boolean isForwardEnabled = nativeComponent.isForwardEnabled();
-        forwardButton.setEnabled(isForwardEnabled);
-        forwardMenuItem.setEnabled(isForwardEnabled);
-      }
-      @Override
-      public void urlChanging(WebBrowserNavigationEvent e) {
-        addressField.setText(e.getNewURL());
-        stopButton.setEnabled(true);
-        stopMenuItem.setEnabled(true);
-      }
-      @Override
-      public void urlChangeCanceled(WebBrowserNavigationEvent e) {
-        stopButton.setEnabled(false);
-        stopMenuItem.setEnabled(false);
-        addressField.setText(nativeComponent.getURL());
-        boolean isBackEnabled = nativeComponent.isBackEnabled();
-        backButton.setEnabled(isBackEnabled);
-        backMenuItem.setEnabled(isBackEnabled);
-        boolean isForwardEnabled = nativeComponent.isForwardEnabled();
-        forwardButton.setEnabled(isForwardEnabled);
-        forwardMenuItem.setEnabled(isForwardEnabled);
-      }
-      @Override
-      public void statusChanged(WebBrowserEvent e) {
-        String status = nativeComponent.getStatus();
-        statusLabel.setText(status.length() == 0? " ": status);
-      }
-    });
+    nativeComponent.addWebBrowserListener(new NWebBrowserListener(this));
     adjustBorder();
     fileMenu = new JMenu(RESOURCES.getString("FileMenu"));
     JMenuItem fileNewWindowMenuItem = new JMenuItem(RESOURCES.getString("FileNewWindowMenu"));
