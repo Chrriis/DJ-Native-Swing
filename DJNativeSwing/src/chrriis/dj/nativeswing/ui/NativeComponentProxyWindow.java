@@ -32,7 +32,8 @@ import javax.swing.JInternalFrame;
 import javax.swing.SwingUtilities;
 
 import chrriis.common.Utils;
-import chrriis.dj.nativeswing.ui.jna.examples.ComponentShaping;
+
+import com.sun.jna.examples.WindowUtils;
 
 
 /**
@@ -232,7 +233,7 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
       window.setSize(getSize());
       if(!lastArea.equals(area)) {
         lastArea = area;
-        ComponentShaping.setWindowMask(window, area);
+        WindowUtils.setWindowMask(window, area);
       }
     }
   }

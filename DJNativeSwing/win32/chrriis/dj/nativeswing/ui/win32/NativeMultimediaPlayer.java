@@ -7,6 +7,8 @@
  */
 package chrriis.dj.nativeswing.ui.win32;
 
+import java.awt.Component;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.ole.win32.OLE;
@@ -705,6 +707,10 @@ class NativeMultimediaPlayer extends NativeComponent {
       }
     });
     return result[0];
+  }
+  
+  protected Component createEmbeddableComponent() {
+    return super.createEmbeddableComponent();
   }
   
 }

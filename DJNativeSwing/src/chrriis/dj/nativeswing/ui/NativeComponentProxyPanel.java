@@ -27,7 +27,8 @@ import javax.swing.JLayeredPane;
 import javax.swing.RootPaneContainer;
 import javax.swing.SwingUtilities;
 
-import chrriis.dj.nativeswing.ui.jna.examples.ComponentShaping;
+import com.sun.jna.examples.WindowUtils;
+
 
 /**
  * @author Christopher Deckers
@@ -174,7 +175,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
       panel.setSize(getSize());
       if(!lastArea.equals(area)) {
         lastArea = area;
-        ComponentShaping.setWindowMask(panel, area);
+        WindowUtils.setComponentMask(panel, area);
       }
     }
   }

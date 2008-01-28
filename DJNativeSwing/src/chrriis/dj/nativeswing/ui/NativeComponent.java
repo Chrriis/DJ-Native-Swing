@@ -469,7 +469,11 @@ public abstract class NativeComponent extends Canvas {
     NativeComponent.nextInstancePreferences = nextInstancePreferences;
   }
   
-  public Component createEmbeddableComponent() {
+  static {
+    System.setProperty("jna.force_hw_popups", "false");
+  }
+  
+  protected Component createEmbeddableComponent() {
     try {
       switch(getNextInstancePreferences().getLayering()) {
         case COMPONENT_LAYERING:
