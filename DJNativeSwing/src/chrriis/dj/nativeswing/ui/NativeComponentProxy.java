@@ -7,13 +7,17 @@
  */
 package chrriis.dj.nativeswing.ui;
 
+import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.Window;
+import java.awt.event.AWTEventListener;
+import java.awt.event.ComponentEvent;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
 import java.awt.geom.Area;
@@ -25,20 +29,45 @@ import javax.swing.JLayeredPane;
 import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
 
+import chrriis.dj.nativeswing.Disposable;
 import chrriis.dj.nativeswing.NativeInterfaceHandler;
 import chrriis.dj.nativeswing.ui.NativeComponentProxyWindow.EmbeddedWindow;
 
 /**
  * @author Christopher Deckers
  */
-public abstract class NativeComponentProxy extends JComponent {
+abstract class NativeComponentProxy extends JComponent implements Disposable {
 
   protected NativeComponent nativeComponent;
   protected boolean isDestroyOnFinalize;
 
+  protected AWTEventListener maskAdjustmentEventListener = new AWTEventListener() {
+    public void eventDispatched(AWTEvent e) {
+      boolean isAdjustingMask = false;
+      switch(e.getID()) {
+        case ComponentEvent.COMPONENT_RESIZED:
+        case ComponentEvent.COMPONENT_MOVED:
+          isAdjustingMask = true;
+          break;
+        case ComponentEvent.COMPONENT_SHOWN:
+        case ComponentEvent.COMPONENT_HIDDEN:
+          if(e.getSource() instanceof Window) {
+            isAdjustingMask = true;
+          }
+          break;
+      }
+      if(isAdjustingMask) {
+        NativeComponentProxy componentEmbedder = nativeComponent.getComponentProxy();
+        if(componentEmbedder != null) {
+          componentEmbedder.adjustPeerMask();
+        }
+      }
+    }
+  };
+
   protected NativeComponentProxy(NativeComponent nativeComponent) {
-    isDestroyOnFinalize = NativeComponentEmbedder.isDestroyOnFinalize();
-    nativeComponent.setComponentEmbedder(this);
+    isDestroyOnFinalize = NativeComponent.getNextInstancePreferences().isDestroyOnFinalize();
+    nativeComponent.setComponentProxy(this);
     setFocusable(true);
     this.nativeComponent = nativeComponent;
   }
@@ -55,8 +84,9 @@ public abstract class NativeComponentProxy extends JComponent {
   @Override
   public void addNotify() {
     super.addNotify();
-    nativeComponent.setComponentEmbedder(this);
+    nativeComponent.setComponentProxy(this);
     addHierarchyListener(hierarchyListener);
+    Toolkit.getDefaultToolkit().addAWTEventListener(maskAdjustmentEventListener, AWTEvent.COMPONENT_EVENT_MASK);
     if(peer != null) {
       adjustPeerBounds();
       connectPeer();
@@ -79,17 +109,15 @@ public abstract class NativeComponentProxy extends JComponent {
   @Override
   public void removeNotify() {
     super.removeNotify();
-    nativeComponent.setComponentEmbedder(null);
+    nativeComponent.setComponentProxy(null);
     removeHierarchyListener(hierarchyListener);
+    Toolkit.getDefaultToolkit().removeAWTEventListener(maskAdjustmentEventListener);
     if(isDestroyOnFinalize) {
       disconnectPeer();
       adjustPeerMask();
       return;
     }
-    if(peer != null) {
-      destroyPeer();
-      peer = null;
-    }
+    dispose();
   }
   
   @Override
@@ -97,12 +125,17 @@ public abstract class NativeComponentProxy extends JComponent {
     super.finalize();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-        if(peer != null) {
-          destroyPeer();
-          peer = null;
-        }
+        dispose();
       }
     });
+  }
+  
+  public void dispose() {
+    if(peer == null) {
+      return;
+    }
+    destroyPeer();
+    peer = null;
   }
 
   protected Component peer;

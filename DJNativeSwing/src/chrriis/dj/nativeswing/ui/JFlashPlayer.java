@@ -29,6 +29,7 @@ import javax.swing.border.BevelBorder;
 import chrriis.common.Utils;
 import chrriis.common.WebServer;
 import chrriis.common.WebServer.WebServerContent;
+import chrriis.dj.nativeswing.Disposable;
 import chrriis.dj.nativeswing.NativeInterfaceHandler;
 import chrriis.dj.nativeswing.ui.event.FlashPlayerListener;
 import chrriis.dj.nativeswing.ui.event.FlashPlayerWindowOpeningEvent;
@@ -39,7 +40,7 @@ import chrriis.dj.nativeswing.ui.event.WebBrowserWindowOpeningEvent;
 /**
  * @author Christopher Deckers
  */
-public class JFlashPlayer extends JPanel {
+public class JFlashPlayer extends JPanel implements Disposable {
 
   protected final ResourceBundle RESOURCES = ResourceBundle.getBundle(JFlashPlayer.class.getPackage().getName().replace('.', '/') + "/resource/FlashPlayer");
 
@@ -370,4 +371,8 @@ public class JFlashPlayer extends JPanel {
     return null;
   }
   
+  public void dispose() {
+    webBrowser.dispose();
+  }
+
 }

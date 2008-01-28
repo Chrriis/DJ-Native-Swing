@@ -41,6 +41,7 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import chrriis.common.ui.source.SourcePane;
+import chrriis.dj.nativeswing.Disposable;
 import chrriis.dj.nativeswing.NativeInterfaceHandler;
 
 /**
@@ -78,6 +79,7 @@ public class DemoFrame extends JFrame {
     selectionModel.setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     selectionModel.addTreeSelectionListener(new TreeSelectionListener() {
       protected Example selectedExample;
+      protected JComponent component;
       public void valueChanged(TreeSelectionEvent e) {
         TreePath selectionPath = demoTree.getSelectionPath();
         if(selectionPath == null) {
@@ -99,6 +101,10 @@ public class DemoFrame extends JFrame {
                       t.printStackTrace();
                       return;
                     }
+                    if(component instanceof Disposable) {
+                      ((Disposable)component).dispose();
+                    }
+                    component = c;
                     selectedExample = example;
                     displayArea.removeAll();
                     JPanel contentPane = new JPanel(new BorderLayout(0, 0));
@@ -123,7 +129,7 @@ public class DemoFrame extends JFrame {
                       descriptionPanel.add(new JSeparator(), BorderLayout.SOUTH);
                       contentPane.add(descriptionPanel, BorderLayout.NORTH);
                     }
-                    contentPane.add(c, BorderLayout.CENTER);
+                    contentPane.add(component, BorderLayout.CENTER);
                     if(example.isShowingSources()) {
                       final JTabbedPane tabbedPane = new JTabbedPane();
                       tabbedPane.addTab("Demo", contentPane);

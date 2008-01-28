@@ -8,6 +8,7 @@
 package chrriis.dj.nativeswing.ui;
 
 import java.awt.Canvas;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -94,14 +95,14 @@ public abstract class NativeComponent extends Canvas {
     setFocusable(true);
   }
 
-  protected NativeComponentProxy componentEmbedder;
+  protected NativeComponentProxy componentProxy;
   
-  protected void setComponentEmbedder(NativeComponentProxy componentEmbedder) {
-    this.componentEmbedder = componentEmbedder;
+  protected void setComponentProxy(NativeComponentProxy componentProxy) {
+    this.componentProxy = componentProxy;
   }
   
-  public NativeComponentProxy getComponentEmbedder() {
-    return componentEmbedder;
+  public NativeComponentProxy getComponentProxy() {
+    return componentProxy;
   }
   
   protected int buttonPressedCount;
@@ -310,15 +311,17 @@ public abstract class NativeComponent extends Canvas {
   @Override
   public void removeNotify() {
     if(shell != null) {
-      NativeInterfaceHandler.invokeSWT(new Runnable() {
+      isDisposed = true;
+      // Postponing removal seems a bit more stable on Linux, mainly when disposing straight after creation.
+      SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-          isDisposed = true;
-          NativeInterfaceHandler.disposeShell(shell);
-          shell = null;
-          if(control != null) {
-            control.dispose();
-            control = null;
-          }
+          NativeInterfaceHandler.invokeSWT(new Runnable() {
+            public void run() {
+              NativeInterfaceHandler.disposeShell(shell);
+              shell = null;
+              control = null;
+            }
+          });
         }
       });
     }
@@ -386,6 +389,99 @@ public abstract class NativeComponent extends Canvas {
   
   public InitializationListener[] getInitializationListeners() {
     return listenerList.getListeners(InitializationListener.class);
+  }
+  
+  public static class Preferences implements Cloneable {
+    
+    public static enum Layering {
+      NO_LAYERING,
+      COMPONENT_LAYERING,
+      WINDOW_LAYERING,
+    }
+    
+    protected Layering layering = Layering.NO_LAYERING;
+    
+    public void setLayering(Layering layering) {
+      if(layering == null) {
+        layering = Layering.NO_LAYERING;
+      }
+      switch(layering) {
+        case COMPONENT_LAYERING:
+        case WINDOW_LAYERING:
+          try {
+            Class.forName("com.sun.jna.examples.WindowUtils");
+          } catch(Exception e) {
+            throw new IllegalStateException("The JNA library is required in the classpath to use the layering mode \"" + layering + "\"!");
+          }
+      }
+      this.layering = layering;
+    }
+
+    public Layering getLayering() {
+      return layering;
+    }
+    
+    protected boolean isDestroyOnFinalize;
+    
+    public void setDestroyOnFinalize(boolean isDestroyOnFinalize) {
+      this.isDestroyOnFinalize = isDestroyOnFinalize;
+    }
+    
+    public boolean isDestroyOnFinalize() {
+      return isDestroyOnFinalize;
+    }
+    
+    @Override
+    public Object clone() {
+      try {
+        return super.clone();
+      } catch (CloneNotSupportedException e) {
+        e.printStackTrace();
+        return null;
+      }
+    }
+    
+  }
+  
+  protected static Preferences defaultPreferences;
+  
+  public static Preferences getDefaultPreferences() {
+    if(defaultPreferences == null) {
+      defaultPreferences = new Preferences();
+    }
+    return defaultPreferences;
+  }
+  
+  public static void setDefaultPreferences(Preferences defaultPreferences) {
+    NativeComponent.defaultPreferences = defaultPreferences;
+  }
+  
+  protected static Preferences nextInstancePreferences;
+  
+  public static Preferences getNextInstancePreferences() {
+    if(nextInstancePreferences == null) {
+      nextInstancePreferences = (Preferences)getDefaultPreferences().clone();
+    }
+    return nextInstancePreferences;
+  }
+  
+  public static void setNextInstancePreferences(Preferences nextInstancePreferences) {
+    NativeComponent.nextInstancePreferences = nextInstancePreferences;
+  }
+  
+  public Component createEmbeddableComponent() {
+    try {
+      switch(getNextInstancePreferences().getLayering()) {
+        case COMPONENT_LAYERING:
+          return new NativeComponentProxyPanel(this);
+        case WINDOW_LAYERING:
+          return new NativeComponentProxyWindow(this);
+        default:
+          return this;
+      }
+    } finally {
+      nextInstancePreferences = null;
+    }
   }
   
 }

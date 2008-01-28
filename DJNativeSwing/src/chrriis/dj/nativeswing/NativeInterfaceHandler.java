@@ -34,7 +34,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.ui.NativeComponent;
-import chrriis.dj.nativeswing.ui.NativeComponentProxy;
 
 /**
  * @author Christopher Deckers
@@ -102,9 +101,9 @@ public class NativeInterfaceHandler {
               final Canvas canvas = canvasList.get(i);
               Component c = canvas;
               if(canvas instanceof NativeComponent) {
-                JComponent componentEmbedder = ((NativeComponent)canvas).getComponentEmbedder();
-                if(componentEmbedder != null) {
-                  c = componentEmbedder;
+                JComponent componentProxy = ((NativeComponent)canvas).getComponentProxy();
+                if(componentProxy != null) {
+                  c = componentProxy;
                 }
               }
               Window embedderWindowAncestor = SwingUtilities.getWindowAncestor(c);
@@ -134,30 +133,6 @@ public class NativeInterfaceHandler {
         });
       }
       public void eventDispatched(AWTEvent e) {
-        boolean isAdjustingMask = false;
-        switch(e.getID()) {
-          case ComponentEvent.COMPONENT_RESIZED:
-          case ComponentEvent.COMPONENT_MOVED:
-            isAdjustingMask = true;
-            break;
-          case ComponentEvent.COMPONENT_SHOWN:
-          case ComponentEvent.COMPONENT_HIDDEN:
-            if(e.getSource() instanceof Window) {
-              isAdjustingMask = true;
-            }
-            break;
-        }
-        if(isAdjustingMask) {
-          for(int i=canvasList.size()-1; i>=0; i--) {
-            final Canvas canvas = canvasList.get(i);
-            if(canvas instanceof NativeComponent) {
-              NativeComponentProxy componentEmbedder = ((NativeComponent)canvas).getComponentEmbedder();
-              if(componentEmbedder != null) {
-                componentEmbedder.adjustPeerMask();
-              }
-            }
-          }
-        }
         boolean isAdjusting = false;
         switch(e.getID()) {
           case ComponentEvent.COMPONENT_SHOWN:
@@ -215,7 +190,7 @@ public class NativeInterfaceHandler {
     Runtime.getRuntime().addShutdownHook(new Thread("DJNativeSwing Shutdown Hook") {
       @Override
       public void run() {
-        display.syncExec(new Runnable() {
+        display.asyncExec(new Runnable() {
           public void run() {
             cleanUp();
           }
@@ -296,10 +271,14 @@ public class NativeInterfaceHandler {
   }
   
   public static void dispatch() {
-    if(display.readAndDispatch()) {
-      if(isRunning) {
-        display.sleep();
+    try {
+      if(display.readAndDispatch()) {
+        if(isRunning) {
+          display.sleep();
+        }
       }
+    } catch(Exception e) {
+      e.printStackTrace();
     }
   }
   

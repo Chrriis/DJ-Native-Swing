@@ -9,9 +9,11 @@ Licence terms: LGPL (see licence.txt)
 
 - Layering of native components is possible using 2 modes (requires JNA).
 - With layers, a destruction mode allows to destroy on finalization.
+- Explicit dispose() is added, mainly for the finalization mode.
+- "default" and "next instance" preferences system for component creation.
 - Web Server is improved.
 - Convenient main is enhanced to use a system property.
-- Default sizes is fixed.
+- Default size of native components is fixed.
 
 
 * Version 0.9.2 (January 15, 2008):

@@ -14,7 +14,7 @@ import java.lang.ref.WeakReference;
 
 import javax.swing.JPanel;
 
-import chrriis.dj.nativeswing.ui.NativeComponentEmbedder;
+import chrriis.dj.nativeswing.Disposable;
 import chrriis.dj.nativeswing.ui.event.InitializationEvent;
 import chrriis.dj.nativeswing.ui.event.InitializationListener;
 
@@ -24,8 +24,9 @@ import chrriis.dj.nativeswing.ui.event.InitializationListener;
  * If the initialization fail, the methods will not have any effect. The results from methods have relevant values only when the component is valid. 
  * @author Christopher Deckers
  */
-public class JMultiMediaPlayer extends JPanel {
+public class JMultiMediaPlayer extends JPanel implements Disposable {
 
+  protected Component embeddableComponent;
   protected NativeMultimediaPlayer nativeComponent;
   
   protected static class NInitializationListener implements InitializationListener {
@@ -55,7 +56,8 @@ public class JMultiMediaPlayer extends JPanel {
     setLayout(new BorderLayout(0, 0));
     nativeComponent = new NativeMultimediaPlayer();
     nativeComponent.addInitializationListener(new NInitializationListener(this));
-    add(NativeComponentEmbedder.getEmbeddedComponent(nativeComponent), BorderLayout.CENTER);
+    embeddableComponent = nativeComponent.createEmbeddableComponent();
+    add(embeddableComponent, BorderLayout.CENTER);
   }
   
   /**
@@ -179,6 +181,12 @@ public class JMultiMediaPlayer extends JPanel {
   
   public boolean pause() {
     return nativeComponent.pause();
+  }
+  
+  public void dispose() {
+    if(embeddableComponent instanceof Disposable) {
+      ((Disposable)embeddableComponent).dispose();
+    }
   }
   
 }

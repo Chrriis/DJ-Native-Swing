@@ -34,6 +34,7 @@ import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.border.BevelBorder;
 
+import chrriis.dj.nativeswing.Disposable;
 import chrriis.dj.nativeswing.ui.event.InitializationEvent;
 import chrriis.dj.nativeswing.ui.event.InitializationListener;
 import chrriis.dj.nativeswing.ui.event.WebBrowserAdapter;
@@ -47,11 +48,13 @@ import chrriis.dj.nativeswing.ui.event.WebBrowserNavigationEvent;
  * If the initialization fail, the methods will not have any effect. The results from methods have relevant values only when the component is valid. 
  * @author Christopher Deckers
  */
-public class JWebBrowser extends JPanel {
+public class JWebBrowser extends JPanel implements Disposable {
 
   protected final ResourceBundle RESOURCES = ResourceBundle.getBundle(JWebBrowser.class.getPackage().getName().replace('.', '/') + "/resource/WebBrowser");
   
+  protected Component embeddableComponent;
   protected NativeWebBrowser nativeComponent;
+
   protected JMenuBar menuBar;
   protected JMenu fileMenu;
   protected JMenu viewMenu;
@@ -234,7 +237,8 @@ public class JWebBrowser extends JPanel {
     menuToolAndAddressBarPanel.add(addressBarPanel, BorderLayout.CENTER);
     add(menuToolAndAddressBarPanel, BorderLayout.NORTH);
     webBrowserPanel = new JPanel(new BorderLayout(0, 0));
-    webBrowserPanel.add(NativeComponentEmbedder.getEmbeddedComponent(nativeComponent), BorderLayout.CENTER);
+    embeddableComponent = nativeComponent.createEmbeddableComponent();
+    webBrowserPanel.add(embeddableComponent, BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);
     statusBarPanel = new JPanel(new BorderLayout(0, 0));
     statusBarPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, statusBarPanel.getBackground().darker()), BorderFactory.createEmptyBorder(2, 2, 2, 2)));
@@ -503,4 +507,10 @@ public class JWebBrowser extends JPanel {
     NativeWebBrowser.clearSessions();
   }
 
+  public void dispose() {
+    if(embeddableComponent instanceof Disposable) {
+      ((Disposable)embeddableComponent).dispose();
+    }
+  }
+  
 }
