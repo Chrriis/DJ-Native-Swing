@@ -92,6 +92,7 @@ class NativeMultimediaPlayer extends NativeComponent {
             break;
           }
         }
+        automation.dispose();
       }
     });
     return result[0];
@@ -118,6 +119,7 @@ class NativeMultimediaPlayer extends NativeComponent {
             break;
           }
         }
+        automation.dispose();
       }
     });
     return result[0];
@@ -144,6 +146,7 @@ class NativeMultimediaPlayer extends NativeComponent {
             break;
           }
         }
+        automation.dispose();
       }
     });
     return result[0];
@@ -172,6 +175,7 @@ class NativeMultimediaPlayer extends NativeComponent {
             break;
           }
         }
+        automation.dispose();
       }
     });
     return result[0];
@@ -198,6 +202,7 @@ class NativeMultimediaPlayer extends NativeComponent {
             break;
           }
         }
+        automation.dispose();
       }
     });
     return result[0];
@@ -214,6 +219,7 @@ class NativeMultimediaPlayer extends NativeComponent {
 //          automation.setProperty(ids[0], new Variant[] {new Variant(isDisplayVisible)});
 //          result[0] = true;
 //        }
+//        automation.dispose();
 //      }
 //    });
 //    return result[0];
@@ -229,6 +235,7 @@ class NativeMultimediaPlayer extends NativeComponent {
 //        if(ids != null) {
 //          result[0] = automation.getProperty(ids[0]).getBoolean();
 //        }
+//        automation.dispose();
 //      }
 //    });
 //    return result[0];
@@ -263,6 +270,7 @@ class NativeMultimediaPlayer extends NativeComponent {
             break;
           }
         }
+        automation.dispose();
       }
     });
     return result[0];
@@ -295,6 +303,7 @@ class NativeMultimediaPlayer extends NativeComponent {
             break;
           }
         }
+        automation.dispose();
       }
     });
     return result[0];
@@ -328,6 +337,7 @@ class NativeMultimediaPlayer extends NativeComponent {
             break;
           }
         }
+        automation.dispose();
       }
     });
     return result[0];
@@ -358,6 +368,7 @@ class NativeMultimediaPlayer extends NativeComponent {
             break;
           }
         }
+        automation.dispose();
       }
     });
     return result[0];
@@ -388,6 +399,7 @@ class NativeMultimediaPlayer extends NativeComponent {
             break;
           }
         }
+        automation.dispose();
       }
     });
     return result[0];
@@ -418,6 +430,7 @@ class NativeMultimediaPlayer extends NativeComponent {
             break;
           }
         }
+        automation.dispose();
       }
     });
     return result[0];
@@ -433,6 +446,7 @@ class NativeMultimediaPlayer extends NativeComponent {
 //          automation.setProperty(ids[0], new Variant(isFullScreen));
 //          result[0] = true;
 //        }
+//        automation.dispose();
 //      }
 //    });
 //    return result[0];
@@ -447,6 +461,7 @@ class NativeMultimediaPlayer extends NativeComponent {
 //        if(ids != null) {
 //          result[0] = automation.getProperty(ids[0]).getBoolean();
 //        }
+//        automation.dispose();
 //      }
 //    });
 //    return result[0];
@@ -477,6 +492,7 @@ class NativeMultimediaPlayer extends NativeComponent {
             break;
           }
         }
+        automation.dispose();
       }
     });
     return result[0];
@@ -507,6 +523,7 @@ class NativeMultimediaPlayer extends NativeComponent {
             break;
           }
         }
+        automation.dispose();
       }
     });
     return result[0];
@@ -541,6 +558,7 @@ class NativeMultimediaPlayer extends NativeComponent {
             break;
           }
         }
+        automation.dispose();
       }
     });
     return result[0];
@@ -573,6 +591,7 @@ class NativeMultimediaPlayer extends NativeComponent {
             break;
           }
         }
+        automation.dispose();
       }
     });
     return result[0];
@@ -607,6 +626,7 @@ class NativeMultimediaPlayer extends NativeComponent {
             break;
           }
         }
+        automation.dispose();
       }
     });
     return result[0];
@@ -639,6 +659,7 @@ class NativeMultimediaPlayer extends NativeComponent {
             break;
           }
         }
+        automation.dispose();
       }
     });
     return result[0];
@@ -672,6 +693,7 @@ class NativeMultimediaPlayer extends NativeComponent {
             break;
           }
         }
+        automation.dispose();
       }
     });
     return result[0];
@@ -704,6 +726,7 @@ class NativeMultimediaPlayer extends NativeComponent {
             break;
           }
         }
+        automation.dispose();
       }
     });
     return result[0];

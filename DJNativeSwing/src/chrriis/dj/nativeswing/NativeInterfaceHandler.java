@@ -17,6 +17,7 @@ import java.awt.event.AWTEventListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.Method;
+import java.security.Permission;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -61,6 +62,36 @@ public class NativeInterfaceHandler {
       if(!"com.sun.java.swing.plaf.gtk.GTKLookAndFeel".equals(systemLookAndFeelClassName)) {
         UIManager.setLookAndFeel(systemLookAndFeelClassName);
       }
+    } catch(Exception e) {
+      e.printStackTrace();
+    }
+    // We set up a new security manager to track exit calls.
+    // When this happens, we dispose native resources to avoid freezes.
+    try {
+      System.setSecurityManager(new SecurityManager() {
+        protected SecurityManager securityManager = System.getSecurityManager();
+        @Override
+        public void checkExit(int status) {
+          super.checkExit(status);
+          StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+          if(stackTraceElements.length > 2) {
+            StackTraceElement stackTraceElement = stackTraceElements[2];
+            if("java.lang.Runtime".equals(stackTraceElement.getClassName()) && "exit".equals(stackTraceElement.getMethodName())) {
+              display.syncExec(new Runnable() {
+                public void run() {
+                  cleanUp();
+                }
+              });
+            }
+          }
+        }
+        @Override
+        public void checkPermission(Permission perm) {
+          if(securityManager != null) {
+            securityManager.checkPermission(perm);
+          }
+        }
+      });
     } catch(Exception e) {
       e.printStackTrace();
     }
