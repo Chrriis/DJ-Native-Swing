@@ -73,15 +73,14 @@ public class NativeInterfaceHandler {
         @Override
         public void checkExit(int status) {
           super.checkExit(status);
-          StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-          if(stackTraceElements.length > 2) {
-            StackTraceElement stackTraceElement = stackTraceElements[2];
-            if("java.lang.Runtime".equals(stackTraceElement.getClassName()) && "exit".equals(stackTraceElement.getMethodName())) {
+          for(StackTraceElement stackTraceElement: Thread.currentThread().getStackTrace()) {
+            if(("java.lang.System".equals(stackTraceElement.getClassName()) || "java.lang.Runtime".equals(stackTraceElement.getClassName())) && "exit".equals(stackTraceElement.getMethodName())) {
               display.syncExec(new Runnable() {
                 public void run() {
                   cleanUp();
                 }
               });
+              break;
             }
           }
         }
