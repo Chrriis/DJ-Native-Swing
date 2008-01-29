@@ -372,7 +372,7 @@ public abstract class NativeComponent extends Canvas {
   protected EventListenerList listenerList = new EventListenerList();
   
   public <T extends EventListener> T[] getListeners(Class<T> listenerType) {
-    T[] result = listenerList.getListeners(listenerType);;
+    T[] result = listenerList.getListeners(listenerType);
     if(result.length == 0) { 
       return super.getListeners(listenerType); 
     }
