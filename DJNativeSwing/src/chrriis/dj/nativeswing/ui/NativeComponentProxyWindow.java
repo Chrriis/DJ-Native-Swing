@@ -11,7 +11,9 @@ import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog;
+import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.AWTEventListener;
@@ -42,7 +44,7 @@ import com.sun.jna.examples.WindowUtils;
 class NativeComponentProxyWindow extends NativeComponentProxy {
 
   protected static int instanceCount;
-  protected static volatile boolean isNonFocusable;
+  protected static volatile boolean isFocusBlocked;
   
   protected static AWTEventListener focusAdjustmentEventListener = new AWTEventListener() {
     public void eventDispatched(AWTEvent e) {
@@ -52,11 +54,13 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
       switch (e.getID()) {
         case MouseEvent.MOUSE_ENTERED:
         case MouseEvent.MOUSE_MOVED:
-        case MouseEvent.MOUSE_DRAGGED:
-          isNonFocusable = false;
-          break;
+        case MouseEvent.MOUSE_RELEASED:
         case MouseEvent.MOUSE_EXITED:
-          isNonFocusable = true;
+          isFocusBlocked = false;
+          break;
+        case MouseEvent.MOUSE_PRESSED:
+        case MouseEvent.MOUSE_DRAGGED:
+          isFocusBlocked = true;
           break;
       }
     }
@@ -67,11 +71,12 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
     addFocusListener(new FocusAdapter() {
       @Override
       public void focusGained(FocusEvent e) {
-        isNonFocusable = false;
-//        if(!NativeComponentEmbedder.this.window.isFocused()) {
-//          System.err.println("REQ");
-//          NativeComponentEmbedder.this.window.toFront();
-//        }
+        if(isFocusBlocked) {
+          return;
+        }
+        if(!window.isFocused()) {
+          window.toFront();
+        }
         NativeComponentProxyWindow.this.nativeComponent.requestFocus();
       }
     });
@@ -109,7 +114,7 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
       }
 //      System.err.println(isNonFocusable + ", " + nativeComponentEmbedder.isFocusOwner() + ", " + nativeComponentEmbedder.nativeComponent.isFocusOwner());
 //      System.err.println((!isNonFocusable || nativeComponentEmbedder.isFocusOwner()) && super.getFocusableWindowState());
-      return (!isNonFocusable || nativeComponentEmbedder.isFocusOwner() || nativeComponentEmbedder.nativeComponent.isFocusOwner());
+      return (!isFocusBlocked || nativeComponentEmbedder.isFocusOwner() || nativeComponentEmbedder.nativeComponent.isFocusOwner());
     }
   }
   
@@ -158,7 +163,7 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
   @Override
   protected Component createPeer() {
     if(instanceCount == 0) {
-      isNonFocusable = true;
+      isFocusBlocked = true;
       Toolkit.getDefaultToolkit().addAWTEventListener(focusAdjustmentEventListener, AWTEvent.MOUSE_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK);
     }
     instanceCount++;
@@ -204,7 +209,7 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
   
   protected volatile boolean isInvoking;
   
-  public void adjustPeerMask() {
+  protected void adjustPeerMask() {
     if(isInvoking) {
       return;
     }
@@ -225,17 +230,31 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
     }
     Area area = computePeerMaskArea();
     if(area == null) {
-      return;
+      area = new Area();
     }
-    if(area.isEmpty()) {
-      window.setSize(0, 0);
-    } else {
-      window.setSize(getSize());
-      if(!lastArea.equals(area)) {
-        lastArea = area;
+    if(!lastArea.equals(area)) {
+      lastArea = area;
+      if(area.isEmpty()) {
+        if(window.getWidth() != 1 || window.getHeight() != 1) {
+          window.setSize(1, 1);
+        }
+        WindowUtils.setWindowMask(window, new Rectangle(1, 1, 1, 1));
+      } else {
+        Dimension size = getSize();
+        if(!window.getSize().equals(size)) {
+          window.setSize(size);
+        }
         WindowUtils.setWindowMask(window, area);
       }
     }
+  }
+  
+  @Override
+  protected Dimension getPeerSize() {
+    if(lastArea.isEmpty()) {
+      return new Dimension(1, 1);
+    }
+    return super.getPeerSize();
   }
   
 }

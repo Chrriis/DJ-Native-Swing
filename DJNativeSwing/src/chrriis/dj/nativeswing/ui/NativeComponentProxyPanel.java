@@ -146,7 +146,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
   
   protected volatile boolean isInvoking;
   
-  public void adjustPeerMask() {
+  protected void adjustPeerMask() {
     if(isInvoking) {
       return;
     }
@@ -169,12 +169,14 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     if(area == null) {
       return;
     }
-    if(area.isEmpty()) {
-      panel.setSize(0, 0);
-    } else {
-      panel.setSize(getSize());
-      if(!lastArea.equals(area)) {
-        lastArea = area;
+    if(!lastArea.equals(area)) {
+      lastArea = area;
+      if(area.isEmpty()) {
+        panel.setVisible(false);
+      } else {
+        if(!panel.isVisible()) {
+          panel.setVisible(true);
+        }
         WindowUtils.setComponentMask(panel, area);
       }
     }

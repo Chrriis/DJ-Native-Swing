@@ -101,7 +101,7 @@ public abstract class NativeComponent extends Canvas {
     this.componentProxy = componentProxy;
   }
   
-  public NativeComponentProxy getComponentProxy() {
+  public Component getComponentProxy() {
     return componentProxy;
   }
   

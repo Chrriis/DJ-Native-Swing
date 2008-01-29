@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
@@ -101,7 +100,7 @@ public class NativeInterfaceHandler {
               final Canvas canvas = canvasList.get(i);
               Component c = canvas;
               if(canvas instanceof NativeComponent) {
-                JComponent componentProxy = ((NativeComponent)canvas).getComponentProxy();
+                Component componentProxy = ((NativeComponent)canvas).getComponentProxy();
                 if(componentProxy != null) {
                   c = componentProxy;
                 }
@@ -109,14 +108,6 @@ public class NativeInterfaceHandler {
               Window embedderWindowAncestor = SwingUtilities.getWindowAncestor(c);
               boolean isBlocked = blockedWindowSet.contains(embedderWindowAncestor);
               final boolean isShowing = c.isShowing();
-              if(c != canvas) {
-                Window canvasWindowAncestor = SwingUtilities.getWindowAncestor(canvas);
-                if(canvasWindowAncestor != null && canvasWindowAncestor != embedderWindowAncestor) {
-                  if(canvasWindowAncestor.isVisible() != isShowing) {
-                    canvasWindowAncestor.setVisible(isShowing);
-                  }
-                }
-              }
               if(!shell.isDisposed()) {
                 shell.setEnabled(!isBlocked && isShowing);
                 SwingUtilities.invokeLater(new Runnable() {
@@ -270,7 +261,7 @@ public class NativeInterfaceHandler {
     cleanUp();
   }
   
-  public static void dispatch() {
+  protected static void dispatch() {
     try {
       if(display.readAndDispatch()) {
         if(isRunning) {
@@ -283,6 +274,7 @@ public class NativeInterfaceHandler {
   }
   
   public static Display getDisplay() {
+    checkPump();
     return display;
   }
   
@@ -299,6 +291,7 @@ public class NativeInterfaceHandler {
    */
   @SuppressWarnings("unchecked")
   public static void invokeSwing(final Runnable runnable) {
+    checkPump();
     if(displayThread == Thread.currentThread()) {
       synchronized(SWING_LOCK) {
         swingRunnableList.add(runnable);
@@ -352,6 +345,7 @@ public class NativeInterfaceHandler {
   
   @SuppressWarnings("unchecked")
   public static void invokeSWT(final Runnable runnable) {
+    checkPump();
     if(SwingUtilities.isEventDispatchThread()) {
       synchronized(SWT_LOCK) {
         swtRunnableList.add(runnable);
@@ -398,6 +392,7 @@ public class NativeInterfaceHandler {
   protected static volatile List<Canvas> canvasList = new ArrayList<Canvas>();
   
   public static Shell createShell(Canvas canvas) {
+    checkPump();
     Shell shell = SWT_AWT.new_Shell(getDisplay(), canvas);
     canvasList.add(canvas);
     shellList.add(shell);
@@ -411,6 +406,10 @@ public class NativeInterfaceHandler {
       shellList.remove(index);
       shell.dispose();
     }
+  }
+  
+  public static Canvas[] getCanvas() {
+    return canvasList.toArray(new Canvas[0]);
   }
   
   public static void main(String[] args) {
@@ -432,4 +431,31 @@ public class NativeInterfaceHandler {
     runEventPump();
   }
 
+  protected static void checkPump() {
+    if(displayThread == null) {
+      throw new IllegalStateException("The native interface handler is not initialized! Please refer to the instructions to set it up properly.");
+      // Following code works on Windows, but not on other platforms...
+//      final Object LOCK = new Object();
+//      synchronized(LOCK) {
+//        new Thread("SWT-EventQueue") {
+//          @Override
+//          public void run() {
+//            init();
+//            synchronized(LOCK) {
+//              LOCK.notifyAll();
+//            }
+//            runEventPump();
+//          }
+//        }.start();
+//        while(displayThread == null) {
+//          try {
+//            LOCK.wait();
+//          } catch(Exception e) {
+//            e.printStackTrace();
+//          }
+//        }
+//      }
+    }
+  }
+  
 }

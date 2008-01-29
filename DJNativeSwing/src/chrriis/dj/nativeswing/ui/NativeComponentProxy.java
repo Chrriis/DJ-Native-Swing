@@ -8,6 +8,7 @@
 package chrriis.dj.nativeswing.ui;
 
 import java.awt.AWTEvent;
+import java.awt.Canvas;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -57,9 +58,8 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
           break;
       }
       if(isAdjustingMask) {
-        NativeComponentProxy componentEmbedder = nativeComponent.getComponentProxy();
-        if(componentEmbedder != null) {
-          componentEmbedder.adjustPeerMask();
+        if(nativeComponent.getComponentProxy() == NativeComponentProxy.this) {
+          adjustPeerMask();
         }
       }
     }
@@ -67,7 +67,7 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
 
   protected NativeComponentProxy(NativeComponent nativeComponent) {
     isDestroyOnFinalize = NativeComponent.getNextInstancePreferences().isDestroyOnFinalize();
-    nativeComponent.setComponentProxy(this);
+//    nativeComponent.setComponentProxy(this);
     setFocusable(true);
     this.nativeComponent = nativeComponent;
   }
@@ -150,26 +150,42 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
     if(peer == null) {
       return;
     }
-    peer.setSize(getSize());
     Point location = new Point(0, 0);
     if(peer instanceof Window) {
       SwingUtilities.convertPointToScreen(location, this);
     } else {
       location = SwingUtilities.convertPoint(this, location, peer.getParent());
     }
-    peer.setLocation(location.x, location.y);
-    peer.invalidate();
-    peer.validate();
-    peer.repaint();
-    adjustPeerMask();
+    Dimension size = getPeerSize();
+    Rectangle bounds = new Rectangle(location.x, location.y, size.width, size.height);
+    if(!peer.getBounds().equals(bounds)) {
+      peer.setBounds(bounds);
+      peer.invalidate();
+      peer.validate();
+      peer.repaint();
+      adjustPeerMask();
+    }
+  }
+  
+  protected Dimension getPeerSize() {
+    return getSize();
   }
 
-  public abstract void adjustPeerMask();
+  protected abstract void adjustPeerMask();
   
   @Override
   public void paint(Graphics g) {
     super.paint(g);
-    adjustPeerMask();
+    // On Linux, a JInternalFrame brought to the front may generate a paint call only to that one.
+    // We need to adjust the mask of the frames that go to the back as well.
+    for(Canvas canvas: NativeInterfaceHandler.getCanvas()) {
+      if(canvas instanceof NativeComponent) {
+        Component componentProxy = ((NativeComponent)canvas).getComponentProxy();
+        if(componentProxy instanceof NativeComponentProxy) {
+          ((NativeComponentProxy)componentProxy).adjustPeerMask();
+        }
+      }
+    }
   }
   
   @SuppressWarnings("deprecation")
@@ -184,7 +200,7 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
   
   protected Area computePeerMaskArea() {
     Window windowAncestor = SwingUtilities.getWindowAncestor(this);
-    if(windowAncestor == null || !isShowing()) {
+    if(windowAncestor == null || !isShowing() || getWidth() == 0 || getHeight() == 0) {
       return new Area(new Rectangle(0, 0));
     }
     Area area = new Area(new Rectangle(0, 0, getWidth(), getHeight()));
