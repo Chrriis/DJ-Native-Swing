@@ -178,6 +178,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
           panel.setVisible(true);
         }
         WindowUtils.setComponentMask(panel, area);
+        nativeComponent.repaintNativeControl();
       }
     }
   }

@@ -74,7 +74,9 @@ public class NativeInterfaceHandler {
         public void checkExit(int status) {
           super.checkExit(status);
           for(StackTraceElement stackTraceElement: Thread.currentThread().getStackTrace()) {
-            if(("java.lang.System".equals(stackTraceElement.getClassName()) || "java.lang.Runtime".equals(stackTraceElement.getClassName())) && "exit".equals(stackTraceElement.getMethodName())) {
+            String className = stackTraceElement.getClassName();
+            String methodName = stackTraceElement.getMethodName();
+            if("java.lang.Runtime".equals(className) && ("exit".equals(methodName) || "halt".equals(methodName)) || "java.lang.System".equals(className) && "exit".equals(methodName)) {
               display.syncExec(new Runnable() {
                 public void run() {
                   cleanUp();

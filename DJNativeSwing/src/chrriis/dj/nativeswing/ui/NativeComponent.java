@@ -17,6 +17,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.List;
@@ -391,6 +392,47 @@ public abstract class NativeComponent extends Canvas {
     return listenerList.getListeners(InitializationListener.class);
   }
   
+  protected static Method redrawMethod;
+  protected static Method updateMethod;
+  
+  static {
+    try {
+      redrawMethod = Control.class.getDeclaredMethod("redraw", new Class[] {boolean.class});
+      redrawMethod.setAccessible(true);
+      updateMethod = Control.class.getDeclaredMethod("update", new Class[] {boolean.class});
+      updateMethod.setAccessible(true);
+    } catch(Exception e) {
+      redrawMethod = null;
+      updateMethod = null;
+      // Swallow. Not a big deal if we can't have it working.
+    }
+  }
+  
+  /**
+   * Attemp to force a redraw of the native control. This is useful when a native control shows rendering problems. 
+   */
+  protected void repaintNativeControl() {
+    if(control == null || control.isDisposed()) {
+      return;
+    }
+    if(redrawMethod == null) {
+      return;
+    }
+    control.getDisplay().asyncExec(new Runnable() {
+      public void run() {
+        try {
+          if(control == null || control.isDisposed()) {
+            return;
+          }
+          redrawMethod.invoke(control, Boolean.TRUE);
+          updateMethod.invoke(control, Boolean.TRUE);
+        } catch(Exception e) {
+          // Swallow. Not a big deal if we can't have it working.
+        }
+      }
+    });
+  }
+  
   public static class Preferences implements Cloneable {
     
     public static enum Layering {
@@ -410,6 +452,7 @@ public abstract class NativeComponent extends Canvas {
         case WINDOW_LAYERING:
           try {
             Class.forName("com.sun.jna.examples.WindowUtils");
+            Class.forName("com.sun.jna.Platform");
           } catch(Exception e) {
             throw new IllegalStateException("The JNA library is required in the classpath to use the layering mode \"" + layering + "\"!");
           }

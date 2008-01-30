@@ -2,9 +2,9 @@
 <project name="DJNativeSwing Build Script" default="createRelease" basedir="..">
 
   <target name="createRelease" description="Create the release">
+    <delete file="DJNativeSwing.zip"/>
     <ant antfile="build.xml" inheritall="false"/>
     <ant antfile="../DJNativeSwingDemo/build.xml" inheritall="false"/>
-    <delete file="DJNativeSwing.zip"/>
     <zip duplicate="preserve" destfile="Release/DJNativeSwing.zip">
       <!-- DJNativeSwing documents -->
       <zipfileset dir="." includes="licence.txt"/>
