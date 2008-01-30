@@ -409,7 +409,7 @@ public abstract class NativeComponent extends Canvas {
   }
   
   /**
-   * Attemp to force a redraw of the native control. This is useful when a native control shows rendering problems. 
+   * Attempt to force a redraw of the native control. This is useful when a native control shows rendering problems. 
    */
   protected void repaintNativeControl() {
     if(control == null || control.isDisposed()) {
