@@ -22,6 +22,7 @@ import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
 import chrriis.dj.nativeswing.ui.JFlashPlayer;
 import chrriis.dj.nativeswing.ui.JWebBrowser;
 import chrriis.dj.nativeswing.ui.NativeComponent;
+import chrriis.dj.nativeswing.ui.NativeComponent.Preferences.Destruction;
 import chrriis.dj.nativeswing.ui.NativeComponent.Preferences.Layering;
 
 /**
@@ -73,8 +74,8 @@ public class DesktopPaneComponentLayeringExample extends JPanel implements Dispo
       }
     };
     NativeComponent.getNextInstancePreferences().setLayering(Layering.COMPONENT_LAYERING);
-    // When a frame is iconified, components are destroyed. To avoid this, we use the option to destroy on finalize.
-    NativeComponent.getNextInstancePreferences().setDestroyOnFinalize(true);
+    // When a frame is iconified, components are destroyed. To avoid this, we use the option to destroy on finalization.
+    NativeComponent.getNextInstancePreferences().setDestruction(Destruction.ON_FINALIZATION);
     webBrowser2 = new JWebBrowser();
     webBrowser2.setURL("http://www.google.com");
     cons.weightx = 1;

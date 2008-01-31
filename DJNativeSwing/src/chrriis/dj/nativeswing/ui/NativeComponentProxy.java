@@ -32,6 +32,9 @@ import javax.swing.SwingUtilities;
 
 import chrriis.dj.nativeswing.Disposable;
 import chrriis.dj.nativeswing.NativeInterfaceHandler;
+import chrriis.dj.nativeswing.ui.NativeComponent.Preferences;
+import chrriis.dj.nativeswing.ui.NativeComponent.Preferences.Destruction;
+import chrriis.dj.nativeswing.ui.NativeComponent.Preferences.Shaping;
 import chrriis.dj.nativeswing.ui.NativeComponentProxyWindow.EmbeddedWindow;
 
 /**
@@ -40,53 +43,73 @@ import chrriis.dj.nativeswing.ui.NativeComponentProxyWindow.EmbeddedWindow;
 abstract class NativeComponentProxy extends JComponent implements Disposable {
 
   protected NativeComponent nativeComponent;
-  protected boolean isDestroyOnFinalize;
+  protected boolean isDestructionOnFinalization;
+  protected boolean isShaping;
 
-  protected AWTEventListener maskAdjustmentEventListener = new AWTEventListener() {
-    public void eventDispatched(AWTEvent e) {
-      boolean isAdjustingMask = false;
-      switch(e.getID()) {
-        case ComponentEvent.COMPONENT_RESIZED:
-        case ComponentEvent.COMPONENT_MOVED:
-          isAdjustingMask = true;
-          break;
-        case ComponentEvent.COMPONENT_SHOWN:
-        case ComponentEvent.COMPONENT_HIDDEN:
-          if(e.getSource() instanceof Window) {
-            isAdjustingMask = true;
-          }
-          break;
-      }
-      if(isAdjustingMask) {
-        if(nativeComponent.getComponentProxy() == NativeComponentProxy.this) {
-          adjustPeerMask();
-        }
-      }
-    }
-  };
+  protected AWTEventListener shapeAdjustmentEventListener;
 
   protected NativeComponentProxy(NativeComponent nativeComponent) {
-    isDestroyOnFinalize = NativeComponent.getNextInstancePreferences().isDestroyOnFinalize();
-//    nativeComponent.setComponentProxy(this);
-    setFocusable(true);
-    this.nativeComponent = nativeComponent;
-  }
-  
-  protected HierarchyListener hierarchyListener = new HierarchyListener() {
-    public void hierarchyChanged(HierarchyEvent e) {
-      long changeFlags = e.getChangeFlags();
-      if((changeFlags & (HierarchyEvent.SHOWING_CHANGED)) != 0) {
-        adjustPeerMask();
+    Preferences preferences = NativeComponent.getNextInstancePreferences();
+    Destruction destruction = preferences.getDestruction();
+    isDestructionOnFinalization = destruction == Destruction.ON_FINALIZATION;
+    Shaping shaping = preferences.getShaping();
+    isShaping = shaping == Shaping.DEFAULT || shaping == Shaping.ENABLED;
+    boolean isJNAPresent = isJNAPresent();
+    if(!isJNAPresent) {
+      if(shaping == Shaping.DEFAULT) {
+        isShaping = false;
+      } else {
+        throw new IllegalStateException("The JNA libraries are required to use the shaping functionality!");
       }
     }
-  };
+    setFocusable(true);
+    this.nativeComponent = nativeComponent;
+    if(isShaping) {
+      hierarchyListener = new HierarchyListener() {
+        public void hierarchyChanged(HierarchyEvent e) {
+          long changeFlags = e.getChangeFlags();
+          if((changeFlags & (HierarchyEvent.SHOWING_CHANGED)) != 0) {
+            adjustPeerShape();
+          }
+        }
+      };
+      shapeAdjustmentEventListener = new AWTEventListener() {
+        public void eventDispatched(AWTEvent e) {
+          boolean isAdjustingShape = false;
+          switch(e.getID()) {
+            case ComponentEvent.COMPONENT_RESIZED:
+            case ComponentEvent.COMPONENT_MOVED:
+              isAdjustingShape = true;
+              break;
+            case ComponentEvent.COMPONENT_SHOWN:
+            case ComponentEvent.COMPONENT_HIDDEN:
+              if(e.getSource() instanceof Window) {
+                isAdjustingShape = true;
+              }
+              break;
+          }
+          if(isAdjustingShape) {
+            if(NativeComponentProxy.this.nativeComponent.getComponentProxy() == NativeComponentProxy.this) {
+              adjustPeerShape();
+            }
+          }
+        }
+      };
+    }
+  }
+  
+  protected HierarchyListener hierarchyListener;
   
   @Override
   public void addNotify() {
     super.addNotify();
     nativeComponent.setComponentProxy(this);
-    addHierarchyListener(hierarchyListener);
-    Toolkit.getDefaultToolkit().addAWTEventListener(maskAdjustmentEventListener, AWTEvent.COMPONENT_EVENT_MASK);
+    if(hierarchyListener != null) {
+      addHierarchyListener(hierarchyListener);
+    }
+    if(shapeAdjustmentEventListener != null) {
+      Toolkit.getDefaultToolkit().addAWTEventListener(shapeAdjustmentEventListener, AWTEvent.COMPONENT_EVENT_MASK);
+    }
     if(peer != null) {
       adjustPeerBounds();
       connectPeer();
@@ -110,11 +133,19 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
   public void removeNotify() {
     super.removeNotify();
     nativeComponent.setComponentProxy(null);
-    removeHierarchyListener(hierarchyListener);
-    Toolkit.getDefaultToolkit().removeAWTEventListener(maskAdjustmentEventListener);
-    if(isDestroyOnFinalize) {
+    if(hierarchyListener != null) {
+      removeHierarchyListener(hierarchyListener);
+    }
+    if(shapeAdjustmentEventListener != null) {
+      Toolkit.getDefaultToolkit().removeAWTEventListener(shapeAdjustmentEventListener);
+    }
+    if(isDestructionOnFinalization) {
       disconnectPeer();
-      adjustPeerMask();
+      if(isShaping) {
+        adjustPeerShape();
+      } else {
+        adjustPeerBounds();
+      }
       return;
     }
     dispose();
@@ -150,6 +181,12 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
     if(peer == null) {
       return;
     }
+    if(!isShaping) {
+      boolean isShowing = isShowing();
+      if(isShowing != peer.isVisible()) {
+        peer.setVisible(isShowing);
+      }
+    }
     Point location = new Point(0, 0);
     if(peer instanceof Window) {
       SwingUtilities.convertPointToScreen(location, this);
@@ -163,7 +200,9 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
       peer.invalidate();
       peer.validate();
       peer.repaint();
-      adjustPeerMask();
+      if(isShaping) {
+        adjustPeerShape();
+      }
     }
   }
   
@@ -171,18 +210,31 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
     return getSize();
   }
 
-  protected abstract void adjustPeerMask();
+  protected boolean isJNAPresent() {
+    try {
+      Class.forName("com.sun.jna.examples.WindowUtils");
+      Class.forName("com.sun.jna.Platform");
+      return true;
+    } catch(Exception e) {
+    }
+    return false;
+  }
+  
+  protected abstract void adjustPeerShape();
   
   @Override
   public void paint(Graphics g) {
     super.paint(g);
     // On Linux, a JInternalFrame brought to the front may generate a paint call only to that one.
-    // We need to adjust the mask of the frames that go to the back as well.
+    // We need to adjust the shape of the frames that go to the back as well.
     for(Canvas canvas: NativeInterfaceHandler.getCanvas()) {
       if(canvas instanceof NativeComponent) {
         Component componentProxy = ((NativeComponent)canvas).getComponentProxy();
         if(componentProxy instanceof NativeComponentProxy) {
-          ((NativeComponentProxy)componentProxy).adjustPeerMask();
+          NativeComponentProxy nativeComponentProxy = (NativeComponentProxy)componentProxy;
+          if(nativeComponentProxy.isShaping) {
+            nativeComponentProxy.adjustPeerShape();
+          }
         }
       }
     }
@@ -198,7 +250,7 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
     adjustPeerBounds();
   }
   
-  protected Area computePeerMaskArea() {
+  protected Area computePeerShapeArea() {
     Window windowAncestor = SwingUtilities.getWindowAncestor(this);
     if(windowAncestor == null || !isShowing() || getWidth() == 0 || getHeight() == 0) {
       return new Area(new Rectangle(0, 0));

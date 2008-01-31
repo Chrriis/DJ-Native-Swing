@@ -34,6 +34,7 @@ import javax.swing.JInternalFrame;
 import javax.swing.SwingUtilities;
 
 import chrriis.common.Utils;
+import chrriis.dj.nativeswing.ui.NativeComponent.SimpleNativeComponentHolder;
 
 import com.sun.jna.examples.WindowUtils;
 
@@ -178,7 +179,7 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
       }
     }
     window.addWindowFocusListener(new NWindowFocusListener(this));
-    window.getContentPane().add(nativeComponent, BorderLayout.CENTER);
+    window.getContentPane().add(new SimpleNativeComponentHolder(nativeComponent), BorderLayout.CENTER);
     return window;
   }
   
@@ -209,7 +210,7 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
   
   protected volatile boolean isInvoking;
   
-  protected void adjustPeerMask() {
+  protected void adjustPeerShape() {
     if(isInvoking) {
       return;
     }
@@ -217,18 +218,18 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         isInvoking = false;
-        adjustPeerMask_();
+        adjustPeerShape_();
       }
     });
   }
   
   protected Area lastArea = new Area();
   
-  protected void adjustPeerMask_() {
+  protected void adjustPeerShape_() {
     if(window == null) {
       return;
     }
-    Area area = computePeerMaskArea();
+    Area area = computePeerShapeArea();
     if(area == null) {
       area = new Area();
     }
@@ -252,6 +253,9 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
   
   @Override
   protected Dimension getPeerSize() {
+    if(!isShaping) {
+      return super.getPeerSize();
+    }
     if(lastArea.isEmpty()) {
       return new Dimension(1, 1);
     }

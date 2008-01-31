@@ -27,6 +27,9 @@ import javax.swing.JLayeredPane;
 import javax.swing.RootPaneContainer;
 import javax.swing.SwingUtilities;
 
+import chrriis.dj.nativeswing.ui.NativeComponent.NativeComponentHolder;
+import chrriis.dj.nativeswing.ui.NativeComponent.Preferences.Layering;
+
 import com.sun.jna.examples.WindowUtils;
 
 
@@ -35,8 +38,11 @@ import com.sun.jna.examples.WindowUtils;
  */
 class NativeComponentProxyPanel extends NativeComponentProxy {
 
+  protected boolean isLayered;
+
   protected NativeComponentProxyPanel(NativeComponent nativeComponent) {
     super(nativeComponent);
+    isLayered = NativeComponent.getNextInstancePreferences().getLayering() != Layering.NO_LAYERING;
     addFocusListener(new FocusAdapter() {
       @Override
       public void focusGained(FocusEvent e) {
@@ -45,7 +51,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     });
   }
 
-  protected static class EmbeddedPanel extends Panel {
+  protected static class EmbeddedPanel extends Panel implements NativeComponentHolder {
     
     public EmbeddedPanel() {
       super(new BorderLayout(0, 0));
@@ -127,9 +133,13 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     if(!(windowAncestor instanceof RootPaneContainer)) {
       throw new IllegalStateException("The window ancestor must be a root pane container!");
     }
-    JLayeredPane layeredPane = ((RootPaneContainer)windowAncestor).getLayeredPane();
-    layeredPane.setLayer(panel, Integer.MIN_VALUE);
-    layeredPane.add(panel);
+    if(isLayered) {
+      JLayeredPane layeredPane = ((RootPaneContainer)windowAncestor).getLayeredPane();
+      layeredPane.setLayer(panel, Integer.MIN_VALUE);
+      layeredPane.add(panel);
+    } else {
+      add(panel, BorderLayout.CENTER);
+    }
   }
   
   @Override
@@ -146,7 +156,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
   
   protected volatile boolean isInvoking;
   
-  protected void adjustPeerMask() {
+  protected void adjustPeerShape() {
     if(isInvoking) {
       return;
     }
@@ -154,18 +164,26 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         isInvoking = false;
-        adjustPeerMask_();
+        adjustPeerShape_();
       }
     });
   }
   
+  @Override
+  protected void adjustPeerBounds() {
+    if(!isLayered) {
+      return;
+    }
+    super.adjustPeerBounds();
+  }
+  
   protected Area lastArea = new Area();
   
-  protected void adjustPeerMask_() {
+  protected void adjustPeerShape_() {
     if(panel == null) {
       return;
     }
-    Area area = computePeerMaskArea();
+    Area area = computePeerShapeArea();
     if(area == null) {
       return;
     }

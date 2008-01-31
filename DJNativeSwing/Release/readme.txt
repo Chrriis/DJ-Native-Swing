@@ -35,8 +35,8 @@ public static void main(String[] args) {
 The last call is blocking until all non-daemon threads terminate. This is a
 paranoid check as Swing applications usually call System.exit(int).
 
-If you want to use the layering mode for native components (look at the demo),
-you need the JNA files "jna.jar" and "jna_WindowUtils.jar" in your classpath.
+If you want to use the shaping mode for native components (cf the demo), you
+need the JNA files "jna.jar" and "jna_WindowUtils.jar" in your classpath.
 
 3. Any tutorial or demo?
 

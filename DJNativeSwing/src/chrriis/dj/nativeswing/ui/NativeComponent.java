@@ -7,13 +7,17 @@
  */
 package chrriis.dj.nativeswing.ui;
 
+import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -22,6 +26,7 @@ import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.List;
 
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
 
@@ -38,6 +43,9 @@ import org.eclipse.swt.widgets.Shell;
 
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.NativeInterfaceHandler;
+import chrriis.dj.nativeswing.ui.NativeComponent.Preferences.Destruction;
+import chrriis.dj.nativeswing.ui.NativeComponent.Preferences.Layering;
+import chrriis.dj.nativeswing.ui.NativeComponent.Preferences.Shaping;
 import chrriis.dj.nativeswing.ui.event.InitializationEvent;
 import chrriis.dj.nativeswing.ui.event.InitializationListener;
 
@@ -94,8 +102,20 @@ public abstract class NativeComponent extends Canvas {
       }
     });
     setFocusable(true);
+    addHierarchyListener(new HierarchyListener() {
+      public void hierarchyChanged(HierarchyEvent e) {
+        if((e.getChangeFlags() & HierarchyEvent.PARENT_CHANGED) != 0) {
+          Container parent = getParent();
+          if(parent != null && !(parent instanceof NativeComponentHolder)) {
+            throw new IllegalStateException("The native component cannot be added directly! Use the createEmbeddableComponent() method to get a component that can be added.");
+          }
+        }
+      }
+    });
   }
 
+  static interface NativeComponentHolder {}
+  
   protected NativeComponentProxy componentProxy;
   
   protected void setComponentProxy(NativeComponentProxy componentProxy) {
@@ -190,7 +210,7 @@ public abstract class NativeComponent extends Canvas {
   public void addNotify() {
     super.addNotify();
     if(initializationRunnableList == null) {
-      throw new IllegalStateException("A native component cannot be re-created after having been disposed.");
+      throw new IllegalStateException("A native component cannot be re-created after having been disposed! To achieve re-parenting, use a layering mode and a finalization-time destruction mode.");
     }
     NativeInterfaceHandler.invokeSWT(new Runnable() {
       public void run() {
@@ -436,26 +456,20 @@ public abstract class NativeComponent extends Canvas {
   public static class Preferences implements Cloneable {
     
     public static enum Layering {
+      DEFAULT,
       NO_LAYERING,
       COMPONENT_LAYERING,
       WINDOW_LAYERING,
     }
     
-    protected Layering layering = Layering.NO_LAYERING;
+    protected Layering layering = Layering.DEFAULT;
     
+    /**
+     * Layering allows re-parenting and change of component Z-order.
+     */
     public void setLayering(Layering layering) {
       if(layering == null) {
-        layering = Layering.NO_LAYERING;
-      }
-      switch(layering) {
-        case COMPONENT_LAYERING:
-        case WINDOW_LAYERING:
-          try {
-            Class.forName("com.sun.jna.examples.WindowUtils");
-            Class.forName("com.sun.jna.Platform");
-          } catch(Exception e) {
-            throw new IllegalStateException("The JNA library is required in the classpath to use the layering mode \"" + layering + "\"!");
-          }
+        layering = Layering.DEFAULT;
       }
       this.layering = layering;
     }
@@ -464,14 +478,48 @@ public abstract class NativeComponent extends Canvas {
       return layering;
     }
     
-    protected boolean isDestroyOnFinalize;
-    
-    public void setDestroyOnFinalize(boolean isDestroyOnFinalize) {
-      this.isDestroyOnFinalize = isDestroyOnFinalize;
+    public static enum Destruction {
+      DEFAULT,
+      IMMEDIATELY,
+      ON_FINALIZATION,
     }
     
-    public boolean isDestroyOnFinalize() {
-      return isDestroyOnFinalize;
+    protected Destruction destruction = Destruction.DEFAULT;
+    
+    /**
+     * Deferred destruction until finalization-time allows removal and later re-addition to the user interface. It requires a layering mode, and will select one automatically if it is set to default. It is also possible to explicitely dispose the component rather than waiting until finalization.
+     */
+    public void setDestruction(Destruction destruction) {
+      if(destruction == null) {
+        destruction = Destruction.DEFAULT;
+      }
+      this.destruction = destruction;
+    }
+    
+    public Destruction getDestruction() {
+      return destruction;
+    }
+    
+    public static enum Shaping {
+      DEFAULT,
+      ENABLED,
+      DISABLED,
+    }
+    
+    protected Shaping shaping = Shaping.DEFAULT;
+    
+    /**
+     * Shaping constrains the visibility of the native component, which allows to superimpose native components and Swing components.
+     */
+    public void setShaping(Shaping shaping) {
+      if(shaping == null) {
+        shaping = Shaping.DEFAULT;
+      }
+      this.shaping = shaping;
+    }
+    
+    public Shaping getShaping() {
+      return shaping;
     }
     
     @Override
@@ -516,15 +564,51 @@ public abstract class NativeComponent extends Canvas {
     System.setProperty("jna.force_hw_popups", "false");
   }
   
+  static class SimpleNativeComponentHolder extends JPanel implements NativeComponentHolder {
+    
+    public SimpleNativeComponentHolder(NativeComponent nativeComponent) {
+      this();
+      add(nativeComponent);
+    }
+    
+    public SimpleNativeComponentHolder() {
+      super(new BorderLayout(0, 0));
+    }
+    
+  }
+  
   protected Component createEmbeddableComponent() {
     try {
-      switch(getNextInstancePreferences().getLayering()) {
+      Preferences nextInstancePreferences = getNextInstancePreferences();
+      Layering layering = nextInstancePreferences.getLayering();
+      Destruction destruction = nextInstancePreferences.getDestruction();
+      Shaping shaping = nextInstancePreferences.getShaping();
+      if(destruction == Destruction.ON_FINALIZATION && layering == Layering.DEFAULT) {
+        layering = Layering.COMPONENT_LAYERING;
+        if(shaping == Shaping.DEFAULT) {
+          shaping = Shaping.DISABLED;
+        }
+      }
+      switch(layering) {
         case COMPONENT_LAYERING:
           return new NativeComponentProxyPanel(this);
         case WINDOW_LAYERING:
           return new NativeComponentProxyWindow(this);
         default:
-          return this;
+          switch(destruction) {
+            case DEFAULT:
+            case IMMEDIATELY:
+              break;
+            default:
+              throw new IllegalStateException("Finalization-time destruction cannot be used without a layering mode!");
+          }
+          switch(shaping) {
+            case DEFAULT:
+            case DISABLED:
+              return new SimpleNativeComponentHolder(this);
+            default:
+              return new NativeComponentProxyPanel(this);
+          }
       }
     } finally {
       nextInstancePreferences = null;
