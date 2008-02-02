@@ -21,6 +21,7 @@ import javax.swing.tree.DefaultTreeModel;
 
 import chrriis.dj.nativeswing.demo.examples.componentoptions.DesktopPaneComponentLayeringExample;
 import chrriis.dj.nativeswing.demo.examples.componentoptions.DesktopPaneWindowLayeringExample;
+import chrriis.dj.nativeswing.demo.examples.componentoptions.DestructionOptions;
 import chrriis.dj.nativeswing.demo.examples.componentoptions.ShapingOptions;
 import chrriis.dj.nativeswing.demo.examples.evolutions.WorkInProgress;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.Interactions;
@@ -64,6 +65,7 @@ public class DemoTree extends JTree {
     }));
     exampleGroupList.add(new ExampleGroup("Component Options", new Example[] {
         new Example("Shaping", ShapingOptions.class, "Use the shaping option to superimpose Swing and native components.", true),
+        new Example("Deferred Destruction", DestructionOptions.class, "Use the deferred destruction option to add/remove the same component: it is not destroyed when removed but on explicit dispose() or at garbage collection time.", true),
         new Example("Component Layering", DesktopPaneComponentLayeringExample.class, "Demonstrate layering of native components, using the component layering mode.", true),
         new Example("Window Layering", DesktopPaneWindowLayeringExample.class, "Demonstrate layering of native components, using the window layering mode. Note that the component layering mode is generally preferred.", true),
     }));

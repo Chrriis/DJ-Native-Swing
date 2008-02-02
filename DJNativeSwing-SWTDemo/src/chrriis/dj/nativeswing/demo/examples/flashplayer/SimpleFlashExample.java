@@ -21,11 +21,11 @@ public class SimpleFlashExample extends JPanel {
 
   public SimpleFlashExample() {
     super(new BorderLayout(0, 0));
-    JFlashPlayer player = new JFlashPlayer();
-    player.setControlBarVisible(false);
+    JFlashPlayer flashPlayer = new JFlashPlayer();
+    flashPlayer.setControlBarVisible(false);
     String resourceURL = WebServer.getDefaultWebServer().getClassPathResourceURL(SimpleFlashExample.class.getName(), "resource/Movement-pointer_or_click.swf");
-    player.setURL(resourceURL);
-    add(player, BorderLayout.CENTER);
+    flashPlayer.setURL(resourceURL);
+    add(flashPlayer, BorderLayout.CENTER);
   }
   
 }

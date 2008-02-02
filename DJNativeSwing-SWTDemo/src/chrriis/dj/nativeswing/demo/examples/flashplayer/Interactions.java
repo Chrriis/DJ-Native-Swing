@@ -32,12 +32,12 @@ public class Interactions extends JPanel {
 
   public Interactions() {
     super(new BorderLayout(0, 0));
-    JPanel playerPanel = new JPanel(new BorderLayout(0, 0));
-    playerPanel.setBorder(BorderFactory.createTitledBorder("Native Flash Player component"));
-    final JFlashPlayer player = new JFlashPlayer();
-    player.setAutoStart(true);
+    JPanel flashPlayerPanel = new JPanel(new BorderLayout(0, 0));
+    flashPlayerPanel.setBorder(BorderFactory.createTitledBorder("Native Flash Player component"));
+    final JFlashPlayer flashPlayer = new JFlashPlayer();
+    flashPlayer.setAutoStart(true);
     String resourceURL = WebServer.getDefaultWebServer().getClassPathResourceURL(Interactions.class.getName(), "resource/dyn_text_moving.swf");
-    player.setURL(resourceURL);
+    flashPlayer.setURL(resourceURL);
     new Thread() {
       @Override
       public void run() {
@@ -47,13 +47,13 @@ public class Interactions extends JPanel {
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             // We have to delay, because setting a variable only works when the flash application is loaded.
-            player.setVariable("mytext", "My Text");
+            flashPlayer.setVariable("mytext", "My Text");
           }
         });
       }
     }.start();
-    playerPanel.add(player, BorderLayout.CENTER);
-    add(playerPanel, BorderLayout.CENTER);
+    flashPlayerPanel.add(flashPlayer, BorderLayout.CENTER);
+    add(flashPlayerPanel, BorderLayout.CENTER);
     JPanel variablePanel = new JPanel(new BorderLayout(0, 0));
     variablePanel.setBorder(BorderFactory.createTitledBorder("Get/Set Variables"));
     JPanel getSetNorthPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
@@ -71,7 +71,7 @@ public class Interactions extends JPanel {
     JButton setButton = new JButton("Set");
     setButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        player.setVariable("mytext", setTextField.getText());
+        flashPlayer.setVariable("mytext", setTextField.getText());
       }
     });
     getSetNorthPanel.add(setButton);
@@ -83,7 +83,7 @@ public class Interactions extends JPanel {
     final JLabel getLabel = new JLabel("-");
     getButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        String value = player.getVariable("mytext");
+        String value = flashPlayer.getVariable("mytext");
         getLabel.setText(value == null || value.length() == 0? " ": value);
       }
     });

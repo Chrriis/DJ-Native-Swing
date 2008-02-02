@@ -41,13 +41,13 @@ public class ShapingOptions extends JPanel {
     int layerIndex = 0;
     // A flash player
     NativeComponent.getNextInstanceOptions().setShaping(Shaping.ENABLED);
-    JFlashPlayer player = new JFlashPlayer();
-    player.setControlBarVisible(false);
+    JFlashPlayer flashPlayer = new JFlashPlayer();
+    flashPlayer.setControlBarVisible(false);
     String resourceURL = WebServer.getDefaultWebServer().getClassPathResourceURL(SimpleFlashExample.class.getName(), "resource/Movement-pointer_or_click.swf");
-    player.setURL(resourceURL);
-    player.setBounds(OFFSET_X * layerIndex, OFFSET_Y * layerIndex, WIDTH, HEIGHT);
-    layeredPane.setLayer(player, layerIndex++);
-    layeredPane.add(player);
+    flashPlayer.setURL(resourceURL);
+    flashPlayer.setBounds(OFFSET_X * layerIndex, OFFSET_Y * layerIndex, WIDTH, HEIGHT);
+    layeredPane.setLayer(flashPlayer, layerIndex++);
+    layeredPane.add(flashPlayer);
     // A swing panel
     JPanel swingPanel = new JPanel();
     swingPanel.setBorder(BorderFactory.createTitledBorder("Swing JPanel"));
