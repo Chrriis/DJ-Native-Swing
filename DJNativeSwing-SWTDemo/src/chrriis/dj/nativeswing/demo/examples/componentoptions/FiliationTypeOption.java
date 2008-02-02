@@ -22,17 +22,17 @@ import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
 import chrriis.dj.nativeswing.ui.JFlashPlayer;
 import chrriis.dj.nativeswing.ui.JWebBrowser;
 import chrriis.dj.nativeswing.ui.NativeComponent;
-import chrriis.dj.nativeswing.ui.NativeComponent.Options.Destruction;
-import chrriis.dj.nativeswing.ui.NativeComponent.Options.Layering;
+import chrriis.dj.nativeswing.ui.NativeComponent.Options.DestructionTime;
+import chrriis.dj.nativeswing.ui.NativeComponent.Options.FiliationType;
 
 /**
  * @author Christopher Deckers
  */
-public class LayeringOption extends JPanel implements Disposable {
+public class FiliationTypeOption extends JPanel implements Disposable {
 
   private JWebBrowser webBrowser2;
   
-  public LayeringOption() {
+  public FiliationTypeOption() {
     super(new BorderLayout(0, 0));
     JDesktopPane desktopPane = new JDesktopPane();
     // Web Browser 1 internal frame
@@ -40,7 +40,7 @@ public class LayeringOption extends JPanel implements Disposable {
     webBrowser1InternalFrame.setBounds(10, 10, 400, 300);
     webBrowser1InternalFrame.setResizable(true);
     webBrowser1InternalFrame.setVisible(true);
-    NativeComponent.getNextInstanceOptions().setLayering(Layering.COMPONENT_LAYERING);
+    NativeComponent.getNextInstanceOptions().setFiliationType(FiliationType.COMPONENT_PROXYING);
     JWebBrowser webBrowser1 = new JWebBrowser();
     webBrowser1.setURL("http://djproject.sf.net");
     webBrowser1InternalFrame.add(webBrowser1, BorderLayout.CENTER);
@@ -50,7 +50,7 @@ public class LayeringOption extends JPanel implements Disposable {
     flashPlayerInternalFrame.setBounds(110, 110, 400, 300);
     flashPlayerInternalFrame.setResizable(true);
     flashPlayerInternalFrame.setVisible(true);
-    NativeComponent.getNextInstanceOptions().setLayering(Layering.COMPONENT_LAYERING);
+    NativeComponent.getNextInstanceOptions().setFiliationType(FiliationType.COMPONENT_PROXYING);
     JFlashPlayer flashPlayer = new JFlashPlayer();
     flashPlayer.setControlBarVisible(false);
     String resourceURL = WebServer.getDefaultWebServer().getClassPathResourceURL(SimpleFlashExample.class.getName(), "resource/Movement-pointer_or_click.swf");
@@ -73,9 +73,9 @@ public class LayeringOption extends JPanel implements Disposable {
         return false;
       }
     };
-    NativeComponent.getNextInstanceOptions().setLayering(Layering.COMPONENT_LAYERING);
+    NativeComponent.getNextInstanceOptions().setFiliationType(FiliationType.COMPONENT_PROXYING);
     // When a frame is iconified, components are destroyed. To avoid this, we use the option to destroy on finalization.
-    NativeComponent.getNextInstanceOptions().setDestruction(Destruction.ON_FINALIZATION);
+    NativeComponent.getNextInstanceOptions().setDestructionTime(DestructionTime.ON_FINALIZATION);
     webBrowser2 = new JWebBrowser();
     webBrowser2.setURL("http://www.google.com");
     cons.weightx = 1;

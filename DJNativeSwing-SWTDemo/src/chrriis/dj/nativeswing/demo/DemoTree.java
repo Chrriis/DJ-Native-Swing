@@ -19,9 +19,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 
-import chrriis.dj.nativeswing.demo.examples.componentoptions.DestructionOption;
-import chrriis.dj.nativeswing.demo.examples.componentoptions.LayeringOption;
-import chrriis.dj.nativeswing.demo.examples.componentoptions.ShapingOption;
+import chrriis.dj.nativeswing.demo.examples.componentoptions.DestructionTimeOption;
+import chrriis.dj.nativeswing.demo.examples.componentoptions.FiliationTypeOption;
+import chrriis.dj.nativeswing.demo.examples.componentoptions.VisibilityConstraintOption;
 import chrriis.dj.nativeswing.demo.examples.evolutions.WorkInProgress;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.Interactions;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
@@ -62,10 +62,10 @@ public class DemoTree extends JTree {
         new Example("Simple Example", SimpleFlashExample.class, "Display a flash application.", true),
         new Example("Interactions", Interactions.class, "Control a flash animation, and get/set variables.", true),
     }));
-    exampleGroupList.add(new ExampleGroup("Component Options", new Example[] {
-        new Example("Shaping", ShapingOption.class, "Use the shaping option to superimpose Swing and native components.", true),
-        new Example("Deferred Destruction", DestructionOption.class, "Use the deferred destruction option to add/remove the same component: it is not destroyed when removed but on explicit dispose() or at garbage collection time.", true),
-        new Example("Layering", LayeringOption.class, "Use layering of native components, to allow re-parenting and change of component Z-order.", true),
+    exampleGroupList.add(new ExampleGroup("Component Behaviors", new Example[] {
+        new Example("Visibility Constraint", VisibilityConstraintOption.class, "Constrain the visibility to superimpose Swing and native components.", true),
+        new Example("Destruction Time", DestructionTimeOption.class, "Defer destruction until finalization to add/remove the same component. It is not destroyed when removed but on explicit dispose() or during garbage collection.", true),
+        new Example("Filiation Type", FiliationTypeOption.class, "Use a proxied filiation of native components to allow re-parenting and change of component Z-order. By default, the visibility gets automatically constrained.", true),
     }));
     if(System.getProperty("os.name").startsWith("Windows")) {
       exampleGroupList.add(new ExampleGroup("JMultiMediaPlayer (win32)", new Example[] {

@@ -43,9 +43,9 @@ import org.eclipse.swt.widgets.Shell;
 
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.NativeInterfaceHandler;
-import chrriis.dj.nativeswing.ui.NativeComponent.Options.Destruction;
-import chrriis.dj.nativeswing.ui.NativeComponent.Options.Layering;
-import chrriis.dj.nativeswing.ui.NativeComponent.Options.Shaping;
+import chrriis.dj.nativeswing.ui.NativeComponent.Options.DestructionTime;
+import chrriis.dj.nativeswing.ui.NativeComponent.Options.FiliationType;
+import chrriis.dj.nativeswing.ui.NativeComponent.Options.VisibilityConstraint;
 import chrriis.dj.nativeswing.ui.event.InitializationEvent;
 import chrriis.dj.nativeswing.ui.event.InitializationListener;
 
@@ -210,7 +210,7 @@ public abstract class NativeComponent extends Canvas {
   public void addNotify() {
     super.addNotify();
     if(initializationRunnableList == null) {
-      throw new IllegalStateException("A native component cannot be re-created after having been disposed! To achieve re-parenting, use a layering mode and a finalization-time destruction mode.");
+      throw new IllegalStateException("A native component cannot be re-created after having been disposed! To achieve re-parenting, set the options to use a proxied filiation and a finalization-time destruction.");
     }
     NativeInterfaceHandler.invokeSWT(new Runnable() {
       public void run() {
@@ -455,71 +455,72 @@ public abstract class NativeComponent extends Canvas {
   
   public static class Options implements Cloneable {
     
-    public static enum Layering {
-      DEFAULT,
-      NO_LAYERING,
-      COMPONENT_LAYERING,
-      WINDOW_LAYERING,
+    public static enum FiliationType {
+      AUTO,
+      DIRECT,
+      COMPONENT_PROXYING,
+      WINDOW_PROXYING,
     }
     
-    protected Layering layering = Layering.DEFAULT;
+    protected FiliationType filiationType = FiliationType.AUTO;
     
     /**
-     * Layering allows re-parenting and change of component Z-order.
+     * Proxied filiation allows re-parenting and change of component Z-order.
      */
-    public void setLayering(Layering layering) {
-      if(layering == null) {
-        layering = Layering.DEFAULT;
+    public void setFiliationType(FiliationType filiationType) {
+      if(filiationType == null) {
+        filiationType = FiliationType.AUTO;
       }
-      this.layering = layering;
+      this.filiationType = filiationType;
     }
 
-    public Layering getLayering() {
-      return layering;
+    public FiliationType getFiliationType() {
+      return filiationType;
     }
     
-    public static enum Destruction {
-      DEFAULT,
-      IMMEDIATELY,
+    public static enum DestructionTime {
+      AUTO,
+      WHEN_REMOVED,
       ON_FINALIZATION,
     }
     
-    protected Destruction destruction = Destruction.DEFAULT;
+    protected DestructionTime destructionTime = DestructionTime.AUTO;
     
     /**
-     * Deferred destruction until finalization-time allows removal and later re-addition to the user interface. It requires a layering mode, and will select one automatically if it is set to default. It is also possible to explicitely dispose the component rather than waiting until finalization.
+     * Destruction on finalization allows removal and later re-addition to the user interface. It requires a proxied filiation, and will select one automatically if it is set to default. It is also possible to explicitely dispose the component rather than waiting until finalization.
      */
-    public void setDestruction(Destruction destruction) {
-      if(destruction == null) {
-        destruction = Destruction.DEFAULT;
+    public void setDestructionTime(DestructionTime destructionTime) {
+      if(destructionTime == null) {
+        destructionTime = DestructionTime.AUTO;
       }
-      this.destruction = destruction;
+      this.destructionTime = destructionTime;
     }
     
-    public Destruction getDestruction() {
-      return destruction;
+    public DestructionTime getDestructionTime() {
+      return destructionTime;
     }
     
-    public static enum Shaping {
-      DEFAULT,
-      ENABLED,
-      DISABLED,
+    public static enum VisibilityConstraint {
+      AUTO,
+      NONE,
+      ANCESTORS_BOUNDS,
+      FULL_COMPONENT_TREE,
     }
     
-    protected Shaping shaping = Shaping.DEFAULT;
+    protected VisibilityConstraint visibilityConstraint = VisibilityConstraint.AUTO;
     
     /**
-     * Shaping constrains the visibility of the native component, which allows to superimpose native components and Swing components.
+     * Visibility constraints allow to superimpose native components and Swing components.
      */
-    public void setShaping(Shaping shaping) {
-      if(shaping == null) {
-        shaping = Shaping.DEFAULT;
+    public void setVisibilityConstraint(VisibilityConstraint visibilityConstraint) {
+      if(visibilityConstraint == null) {
+        visibilityConstraint = VisibilityConstraint.AUTO;
       }
-      this.shaping = shaping;
+      this.visibilityConstraint = visibilityConstraint;
     }
     
-    public Shaping getShaping() {
-      return shaping;
+    public VisibilityConstraint getVisibilityConstraint() {
+      return visibilityConstraint;
     }
     
     @Override
@@ -577,34 +578,66 @@ public abstract class NativeComponent extends Canvas {
     
   }
   
+  protected static boolean isJNAPresent() {
+    try {
+      Class.forName("com.sun.jna.examples.WindowUtils");
+      Class.forName("com.sun.jna.Platform");
+      return true;
+    } catch(Exception e) {
+    }
+    return false;
+  }
+  
   protected Component createEmbeddableComponent() {
     try {
       Options nextInstanceOptions = getNextInstanceOptions();
-      Layering layering = nextInstanceOptions.getLayering();
-      Destruction destruction = nextInstanceOptions.getDestruction();
-      Shaping shaping = nextInstanceOptions.getShaping();
-      if(destruction == Destruction.ON_FINALIZATION && layering == Layering.DEFAULT) {
-        layering = Layering.COMPONENT_LAYERING;
-        if(shaping == Shaping.DEFAULT) {
-          shaping = Shaping.DISABLED;
-        }
+      FiliationType filiationType = nextInstanceOptions.getFiliationType();
+      DestructionTime destructionTime = nextInstanceOptions.getDestructionTime();
+      if(destructionTime == DestructionTime.AUTO) {
+        destructionTime = DestructionTime.WHEN_REMOVED;
       }
-      switch(layering) {
-        case COMPONENT_LAYERING:
-          return new NativeComponentProxyPanel(this);
-        case WINDOW_LAYERING:
-          return new NativeComponentProxyWindow(this);
-        default:
-          switch(destruction) {
-            case DEFAULT:
-            case IMMEDIATELY:
+      VisibilityConstraint visibilityConstraint = nextInstanceOptions.getVisibilityConstraint();
+      boolean isJNAPresent = isJNAPresent();
+      if(visibilityConstraint == VisibilityConstraint.AUTO) {
+        if(!isJNAPresent) {
+          visibilityConstraint = VisibilityConstraint.NONE;
+        } else {
+          switch(filiationType) {
+            case COMPONENT_PROXYING:
+            case WINDOW_PROXYING:
+              visibilityConstraint = VisibilityConstraint.FULL_COMPONENT_TREE;
               break;
             default:
-              throw new IllegalStateException("Finalization-time destruction cannot be used without a layering mode!");
+              visibilityConstraint = VisibilityConstraint.NONE;
+            break;
           }
-          switch(shaping) {
-            case DEFAULT:
-            case DISABLED:
+        }
+      }
+      if(visibilityConstraint != VisibilityConstraint.NONE && !isJNAPresent) {
+        throw new IllegalStateException("The JNA libraries are required to use the visibility constraints!");
+      }
+      if(destructionTime == DestructionTime.ON_FINALIZATION && filiationType == FiliationType.AUTO) {
+        filiationType = FiliationType.COMPONENT_PROXYING;
+      }
+      nextInstanceOptions = (Options)nextInstanceOptions.clone();
+      setNextInstanceOptions(nextInstanceOptions);
+      nextInstanceOptions.setDestructionTime(destructionTime);
+      nextInstanceOptions.setFiliationType(filiationType);
+      nextInstanceOptions.setVisibilityConstraint(visibilityConstraint);
+      switch(filiationType) {
+        case COMPONENT_PROXYING:
+          return new NativeComponentProxyPanel(this);
+        case WINDOW_PROXYING:
+          return new NativeComponentProxyWindow(this);
+        default:
+          switch(destructionTime) {
+            case WHEN_REMOVED:
+              break;
+            default:
+              throw new IllegalStateException("Finalization-time destruction cannot be used without a proxied filiation!");
+          }
+          switch(visibilityConstraint) {
+            case NONE:
               return new SimpleNativeComponentHolder(this);
             default:
               return new NativeComponentProxyPanel(this);

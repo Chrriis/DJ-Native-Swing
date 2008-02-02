@@ -22,12 +22,12 @@ import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
 import chrriis.dj.nativeswing.ui.JFlashPlayer;
 import chrriis.dj.nativeswing.ui.JWebBrowser;
 import chrriis.dj.nativeswing.ui.NativeComponent;
-import chrriis.dj.nativeswing.ui.NativeComponent.Options.Shaping;
+import chrriis.dj.nativeswing.ui.NativeComponent.Options.VisibilityConstraint;
 
 /**
  * @author Christopher Deckers
  */
-public class ShapingOption extends JPanel {
+public class VisibilityConstraintOption extends JPanel {
 
   protected static final String LS = System.getProperty("line.separator");
   protected static final int OFFSET_X = 150;
@@ -35,12 +35,12 @@ public class ShapingOption extends JPanel {
   protected static final int WIDTH = 200;
   protected static final int HEIGHT = 200;
 
-  public ShapingOption() {
+  public VisibilityConstraintOption() {
     super(new BorderLayout(0, 0));
     JLayeredPane layeredPane = new JLayeredPane();
     int layerIndex = 0;
     // A flash player
-    NativeComponent.getNextInstanceOptions().setShaping(Shaping.ENABLED);
+    NativeComponent.getNextInstanceOptions().setVisibilityConstraint(VisibilityConstraint.FULL_COMPONENT_TREE);
     JFlashPlayer flashPlayer = new JFlashPlayer();
     flashPlayer.setControlBarVisible(false);
     String resourceURL = WebServer.getDefaultWebServer().getClassPathResourceURL(SimpleFlashExample.class.getName(), "resource/Movement-pointer_or_click.swf");
@@ -56,7 +56,7 @@ public class ShapingOption extends JPanel {
     layeredPane.setLayer(swingPanel, layerIndex++);
     layeredPane.add(swingPanel);
     // A web browser
-    NativeComponent.getNextInstanceOptions().setShaping(Shaping.ENABLED);
+    NativeComponent.getNextInstanceOptions().setVisibilityConstraint(VisibilityConstraint.FULL_COMPONENT_TREE);
     JWebBrowser webBrowser = new JWebBrowser();
     webBrowser.setBarsVisible(false);
     webBrowser.setStatusBarVisible(true);

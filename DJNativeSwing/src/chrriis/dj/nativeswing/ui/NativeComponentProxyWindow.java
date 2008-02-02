@@ -253,7 +253,7 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
   
   @Override
   protected Dimension getPeerSize() {
-    if(!isShaping) {
+    if(!isVisibilityConstrained) {
       return super.getPeerSize();
     }
     if(lastArea.isEmpty()) {

@@ -20,18 +20,18 @@ import chrriis.dj.nativeswing.Disposable;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
 import chrriis.dj.nativeswing.ui.JFlashPlayer;
 import chrriis.dj.nativeswing.ui.NativeComponent;
-import chrriis.dj.nativeswing.ui.NativeComponent.Options.Destruction;
+import chrriis.dj.nativeswing.ui.NativeComponent.Options.DestructionTime;
 
 /**
  * @author Christopher Deckers
  */
-public class DestructionOption extends JPanel implements Disposable {
+public class DestructionTimeOption extends JPanel implements Disposable {
 
   protected JFlashPlayer flashPlayer;
   
-  public DestructionOption() {
+  public DestructionTimeOption() {
     super(new BorderLayout(0, 0));
-    NativeComponent.getNextInstanceOptions().setDestruction(Destruction.ON_FINALIZATION);
+    NativeComponent.getNextInstanceOptions().setDestructionTime(DestructionTime.ON_FINALIZATION);
     flashPlayer = new JFlashPlayer();
     flashPlayer.setControlBarVisible(false);
     String resourceURL = WebServer.getDefaultWebServer().getClassPathResourceURL(SimpleFlashExample.class.getName(), "resource/Movement-pointer_or_click.swf");

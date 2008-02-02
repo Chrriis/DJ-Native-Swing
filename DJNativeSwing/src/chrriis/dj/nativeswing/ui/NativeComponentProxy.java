@@ -33,8 +33,8 @@ import javax.swing.SwingUtilities;
 import chrriis.dj.nativeswing.Disposable;
 import chrriis.dj.nativeswing.NativeInterfaceHandler;
 import chrriis.dj.nativeswing.ui.NativeComponent.Options;
-import chrriis.dj.nativeswing.ui.NativeComponent.Options.Destruction;
-import chrriis.dj.nativeswing.ui.NativeComponent.Options.Shaping;
+import chrriis.dj.nativeswing.ui.NativeComponent.Options.DestructionTime;
+import chrriis.dj.nativeswing.ui.NativeComponent.Options.VisibilityConstraint;
 import chrriis.dj.nativeswing.ui.NativeComponentProxyWindow.EmbeddedWindow;
 
 /**
@@ -44,27 +44,20 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
 
   protected NativeComponent nativeComponent;
   protected boolean isDestructionOnFinalization;
-  protected boolean isShaping;
+  protected boolean isVisibilityConstrained;
+  protected VisibilityConstraint visibilityConstraint;
 
   protected AWTEventListener shapeAdjustmentEventListener;
 
   protected NativeComponentProxy(NativeComponent nativeComponent) {
     Options options = NativeComponent.getNextInstanceOptions();
-    Destruction destruction = options.getDestruction();
-    isDestructionOnFinalization = destruction == Destruction.ON_FINALIZATION;
-    Shaping shaping = options.getShaping();
-    isShaping = shaping == Shaping.DEFAULT || shaping == Shaping.ENABLED;
-    boolean isJNAPresent = isJNAPresent();
-    if(!isJNAPresent) {
-      if(shaping == Shaping.DEFAULT) {
-        isShaping = false;
-      } else {
-        throw new IllegalStateException("The JNA libraries are required to use the shaping functionality!");
-      }
-    }
+    DestructionTime destructionTime = options.getDestructionTime();
+    isDestructionOnFinalization = destructionTime == DestructionTime.ON_FINALIZATION;
+    visibilityConstraint = options.getVisibilityConstraint();
+    isVisibilityConstrained = visibilityConstraint != VisibilityConstraint.NONE;
     setFocusable(true);
     this.nativeComponent = nativeComponent;
-    if(isShaping) {
+    if(isVisibilityConstrained) {
       hierarchyListener = new HierarchyListener() {
         public void hierarchyChanged(HierarchyEvent e) {
           long changeFlags = e.getChangeFlags();
@@ -141,7 +134,7 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
     }
     if(isDestructionOnFinalization) {
       disconnectPeer();
-      if(isShaping) {
+      if(isVisibilityConstrained) {
         adjustPeerShape();
       } else {
         adjustPeerBounds();
@@ -181,7 +174,7 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
     if(peer == null) {
       return;
     }
-    if(!isShaping) {
+    if(!isVisibilityConstrained) {
       boolean isShowing = isShowing();
       if(isShowing != peer.isVisible()) {
         peer.setVisible(isShowing);
@@ -200,7 +193,7 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
       peer.invalidate();
       peer.validate();
       peer.repaint();
-      if(isShaping) {
+      if(isVisibilityConstrained) {
         adjustPeerShape();
       }
     }
@@ -210,16 +203,6 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
     return getSize();
   }
 
-  protected boolean isJNAPresent() {
-    try {
-      Class.forName("com.sun.jna.examples.WindowUtils");
-      Class.forName("com.sun.jna.Platform");
-      return true;
-    } catch(Exception e) {
-    }
-    return false;
-  }
-  
   protected abstract void adjustPeerShape();
   
   @Override
@@ -232,7 +215,7 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
         Component componentProxy = ((NativeComponent)canvas).getComponentProxy();
         if(componentProxy instanceof NativeComponentProxy) {
           NativeComponentProxy nativeComponentProxy = (NativeComponentProxy)componentProxy;
-          if(nativeComponentProxy.isShaping) {
+          if(nativeComponentProxy.isVisibilityConstrained) {
             nativeComponentProxy.adjustPeerShape();
           }
         }
@@ -256,17 +239,22 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
       return new Area(new Rectangle(0, 0));
     }
     Area area = new Area(new Rectangle(0, 0, getWidth(), getHeight()));
-    for(int i=getComponentCount()-1; i>=0; i--) {
-      Component c = getComponent(i);
-      if(c == this) {
-        break;
-      }
-      if(c.isVisible()) {
-        area.subtract(new Area(c.getBounds()));
-      }
-    }
     if(area.isEmpty()) {
       return area;
+    }
+    if(visibilityConstraint == VisibilityConstraint.FULL_COMPONENT_TREE) {
+      for(int i=getComponentCount()-1; i>=0; i--) {
+        Component c = getComponent(i);
+        if(c == this) {
+          break;
+        }
+        if(c.isVisible()) {
+          area.subtract(new Area(c.getBounds()));
+        }
+      }
+      if(area.isEmpty()) {
+        return area;
+      }
     }
     Container c = this;
     Container parent = c.getParent();
@@ -274,7 +262,14 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
       area.intersect(new Area(new Rectangle(SwingUtilities.convertPoint(parent, new Point(0, 0), this), new Dimension(parent.getWidth(), parent.getHeight()))));
       if(parent instanceof JComponent && !((JComponent)parent).isOptimizedDrawingEnabled()) {
         Component[] children;
-        if(parent instanceof JLayeredPane) {
+        if(visibilityConstraint == VisibilityConstraint.ANCESTORS_BOUNDS) {
+          // We want to make an exception for the components of the glass pane (like medium weight popups).
+          if(parent instanceof JRootPane) {
+            children = parent.getComponents();
+          } else {
+            children = new Component[0];
+          }
+        } else if(parent instanceof JLayeredPane) {
           JLayeredPane layeredPane = (JLayeredPane)parent;
           List<Component> childList = new ArrayList<Component>(layeredPane.getComponentCount() - 1);
           for(int i=layeredPane.highestLayer(); i>=layeredPane.getLayer(c); i--) {
@@ -302,7 +297,7 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
                   area.subtract(new Area(SwingUtilities.convertRectangle(child, child2.getBounds(), this)));
                 }
               }
-            } else {
+            } else if(visibilityConstraint == VisibilityConstraint.FULL_COMPONENT_TREE) {
               area.subtract(new Area(SwingUtilities.convertRectangle(parent, child.getBounds(), this)));
             }
           }

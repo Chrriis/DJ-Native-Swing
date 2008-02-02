@@ -28,7 +28,7 @@ import javax.swing.RootPaneContainer;
 import javax.swing.SwingUtilities;
 
 import chrriis.dj.nativeswing.ui.NativeComponent.NativeComponentHolder;
-import chrriis.dj.nativeswing.ui.NativeComponent.Options.Layering;
+import chrriis.dj.nativeswing.ui.NativeComponent.Options.FiliationType;
 
 import com.sun.jna.examples.WindowUtils;
 
@@ -38,11 +38,11 @@ import com.sun.jna.examples.WindowUtils;
  */
 class NativeComponentProxyPanel extends NativeComponentProxy {
 
-  protected boolean isLayered;
+  protected boolean isProxiedFiliation;
 
   protected NativeComponentProxyPanel(NativeComponent nativeComponent) {
     super(nativeComponent);
-    isLayered = NativeComponent.getNextInstanceOptions().getLayering() != Layering.NO_LAYERING;
+    isProxiedFiliation = NativeComponent.getNextInstanceOptions().getFiliationType() != FiliationType.DIRECT;
     addFocusListener(new FocusAdapter() {
       @Override
       public void focusGained(FocusEvent e) {
@@ -133,7 +133,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     if(!(windowAncestor instanceof RootPaneContainer)) {
       throw new IllegalStateException("The window ancestor must be a root pane container!");
     }
-    if(isLayered) {
+    if(isProxiedFiliation) {
       JLayeredPane layeredPane = ((RootPaneContainer)windowAncestor).getLayeredPane();
       layeredPane.setLayer(panel, Integer.MIN_VALUE);
       layeredPane.add(panel);
@@ -171,7 +171,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
   
   @Override
   protected void adjustPeerBounds() {
-    if(!isLayered) {
+    if(!isProxiedFiliation) {
       return;
     }
     super.adjustPeerBounds();

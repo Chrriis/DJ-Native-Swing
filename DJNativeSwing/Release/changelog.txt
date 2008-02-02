@@ -7,10 +7,10 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.3 (xxxxxxxxxxxxxxxx):
 
-- Shaping of native components is possible (requires JNA).
-- Layering of native components is possible using 2 modes.
-- With layers, a destruction mode allows to destroy on finalization.
-- Explicit dispose() is added, mainly for the finalization mode.
+- Constraining the visibility of native components is possible (requires JNA).
+- Proxied filiation of native components allows re-parenting and Z-order change.
+- With proxied filiation, a destruction mode allows to destroy on finalization.
+- Explicit dispose() is added, for the finalization mode.
 - Better cleanup at exit time fixes some freezes (observed with Ole).
 - "default" and "next instance" options to tweak native components' behaviors.
 - Web Server is improved.
