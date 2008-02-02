@@ -19,14 +19,15 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 
+import chrriis.dj.nativeswing.demo.examples.componentoptions.DesktopPaneComponentLayeringExample;
+import chrriis.dj.nativeswing.demo.examples.componentoptions.DesktopPaneWindowLayeringExample;
+import chrriis.dj.nativeswing.demo.examples.componentoptions.ShapingOptions;
 import chrriis.dj.nativeswing.demo.examples.evolutions.WorkInProgress;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.Interactions;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
 import chrriis.dj.nativeswing.demo.examples.introduction.Codewise;
 import chrriis.dj.nativeswing.demo.examples.introduction.NativeIntegration;
 import chrriis.dj.nativeswing.demo.examples.introduction.TheSolution;
-import chrriis.dj.nativeswing.demo.examples.layering.DesktopPaneComponentLayeringExample;
-import chrriis.dj.nativeswing.demo.examples.layering.DesktopPaneWindowLayeringExample;
 import chrriis.dj.nativeswing.demo.examples.utilities.FileAssociations;
 import chrriis.dj.nativeswing.demo.examples.webbrowser.JavascriptExecution;
 import chrriis.dj.nativeswing.demo.examples.webbrowser.NavigationControl;
@@ -61,15 +62,16 @@ public class DemoTree extends JTree {
         new Example("Simple Example", SimpleFlashExample.class, "Display a flash application.", true),
         new Example("Interactions", Interactions.class, "Control a flash animation, and get/set variables.", true),
     }));
+    exampleGroupList.add(new ExampleGroup("Component Options", new Example[] {
+        new Example("Shaping", ShapingOptions.class, "Use the shaping option to superimpose Swing and native components.", true),
+        new Example("Component Layering", DesktopPaneComponentLayeringExample.class, "Demonstrate layering of native components, using the component layering mode.", true),
+        new Example("Window Layering", DesktopPaneWindowLayeringExample.class, "Demonstrate layering of native components, using the window layering mode. Note that the component layering mode is generally preferred.", true),
+    }));
     if(System.getProperty("os.name").startsWith("Windows")) {
       exampleGroupList.add(new ExampleGroup("JMultiMediaPlayer (win32)", new Example[] {
           new Example("Simple Example", SimpleMultiMediaPlayerExample.class, "Load a movie/sound file to an embedded multimedia player.", true),
       }));
     }
-    exampleGroupList.add(new ExampleGroup("Layering", new Example[] {
-        new Example("Component Layers", DesktopPaneComponentLayeringExample.class, "Demonstrate layering of native components, using the component layering mode.", true),
-        new Example("Window Layers", DesktopPaneWindowLayeringExample.class, "Demonstrate layering of native components, using the window layering mode. Note that the component layering mode is generally preferred.", true),
-    }));
     exampleGroupList.add(new ExampleGroup("Utilities", new Example[] {
         new Example("File Associations", FileAssociations.class, "Get the file type associations, and use them to launch files.", true),
     }));

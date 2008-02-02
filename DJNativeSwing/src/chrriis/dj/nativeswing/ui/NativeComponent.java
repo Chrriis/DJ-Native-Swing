@@ -43,9 +43,9 @@ import org.eclipse.swt.widgets.Shell;
 
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.NativeInterfaceHandler;
-import chrriis.dj.nativeswing.ui.NativeComponent.Preferences.Destruction;
-import chrriis.dj.nativeswing.ui.NativeComponent.Preferences.Layering;
-import chrriis.dj.nativeswing.ui.NativeComponent.Preferences.Shaping;
+import chrriis.dj.nativeswing.ui.NativeComponent.Options.Destruction;
+import chrriis.dj.nativeswing.ui.NativeComponent.Options.Layering;
+import chrriis.dj.nativeswing.ui.NativeComponent.Options.Shaping;
 import chrriis.dj.nativeswing.ui.event.InitializationEvent;
 import chrriis.dj.nativeswing.ui.event.InitializationListener;
 
@@ -453,7 +453,7 @@ public abstract class NativeComponent extends Canvas {
     });
   }
   
-  public static class Preferences implements Cloneable {
+  public static class Options implements Cloneable {
     
     public static enum Layering {
       DEFAULT,
@@ -534,30 +534,30 @@ public abstract class NativeComponent extends Canvas {
     
   }
   
-  protected static Preferences defaultPreferences;
+  protected static Options defaultOptions;
   
-  public static Preferences getDefaultPreferences() {
-    if(defaultPreferences == null) {
-      defaultPreferences = new Preferences();
+  public static Options getDefaultOptions() {
+    if(defaultOptions == null) {
+      defaultOptions = new Options();
     }
-    return defaultPreferences;
+    return defaultOptions;
   }
   
-  public static void setDefaultPreferences(Preferences defaultPreferences) {
-    NativeComponent.defaultPreferences = defaultPreferences;
+  public static void setDefaultOptions(Options defaultOptions) {
+    NativeComponent.defaultOptions = defaultOptions;
   }
   
-  protected static Preferences nextInstancePreferences;
+  protected static Options nextInstanceOptions;
   
-  public static Preferences getNextInstancePreferences() {
-    if(nextInstancePreferences == null) {
-      nextInstancePreferences = (Preferences)getDefaultPreferences().clone();
+  public static Options getNextInstanceOptions() {
+    if(nextInstanceOptions == null) {
+      nextInstanceOptions = (Options)getDefaultOptions().clone();
     }
-    return nextInstancePreferences;
+    return nextInstanceOptions;
   }
   
-  public static void setNextInstancePreferences(Preferences nextInstancePreferences) {
-    NativeComponent.nextInstancePreferences = nextInstancePreferences;
+  public static void setNextInstanceOptions(Options nextInstanceOptions) {
+    NativeComponent.nextInstanceOptions = nextInstanceOptions;
   }
   
   static {
@@ -579,10 +579,10 @@ public abstract class NativeComponent extends Canvas {
   
   protected Component createEmbeddableComponent() {
     try {
-      Preferences nextInstancePreferences = getNextInstancePreferences();
-      Layering layering = nextInstancePreferences.getLayering();
-      Destruction destruction = nextInstancePreferences.getDestruction();
-      Shaping shaping = nextInstancePreferences.getShaping();
+      Options nextInstanceOptions = getNextInstanceOptions();
+      Layering layering = nextInstanceOptions.getLayering();
+      Destruction destruction = nextInstanceOptions.getDestruction();
+      Shaping shaping = nextInstanceOptions.getShaping();
       if(destruction == Destruction.ON_FINALIZATION && layering == Layering.DEFAULT) {
         layering = Layering.COMPONENT_LAYERING;
         if(shaping == Shaping.DEFAULT) {
@@ -611,7 +611,7 @@ public abstract class NativeComponent extends Canvas {
           }
       }
     } finally {
-      nextInstancePreferences = null;
+      nextInstanceOptions = null;
     }
   }
   

@@ -32,9 +32,9 @@ import javax.swing.SwingUtilities;
 
 import chrriis.dj.nativeswing.Disposable;
 import chrriis.dj.nativeswing.NativeInterfaceHandler;
-import chrriis.dj.nativeswing.ui.NativeComponent.Preferences;
-import chrriis.dj.nativeswing.ui.NativeComponent.Preferences.Destruction;
-import chrriis.dj.nativeswing.ui.NativeComponent.Preferences.Shaping;
+import chrriis.dj.nativeswing.ui.NativeComponent.Options;
+import chrriis.dj.nativeswing.ui.NativeComponent.Options.Destruction;
+import chrriis.dj.nativeswing.ui.NativeComponent.Options.Shaping;
 import chrriis.dj.nativeswing.ui.NativeComponentProxyWindow.EmbeddedWindow;
 
 /**
@@ -49,10 +49,10 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
   protected AWTEventListener shapeAdjustmentEventListener;
 
   protected NativeComponentProxy(NativeComponent nativeComponent) {
-    Preferences preferences = NativeComponent.getNextInstancePreferences();
-    Destruction destruction = preferences.getDestruction();
+    Options options = NativeComponent.getNextInstanceOptions();
+    Destruction destruction = options.getDestruction();
     isDestructionOnFinalization = destruction == Destruction.ON_FINALIZATION;
-    Shaping shaping = preferences.getShaping();
+    Shaping shaping = options.getShaping();
     isShaping = shaping == Shaping.DEFAULT || shaping == Shaping.ENABLED;
     boolean isJNAPresent = isJNAPresent();
     if(!isJNAPresent) {

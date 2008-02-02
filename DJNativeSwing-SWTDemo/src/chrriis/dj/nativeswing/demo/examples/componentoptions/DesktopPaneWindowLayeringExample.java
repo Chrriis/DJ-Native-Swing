@@ -5,7 +5,7 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.dj.nativeswing.demo.examples.layering;
+package chrriis.dj.nativeswing.demo.examples.componentoptions;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -22,8 +22,8 @@ import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
 import chrriis.dj.nativeswing.ui.JFlashPlayer;
 import chrriis.dj.nativeswing.ui.JWebBrowser;
 import chrriis.dj.nativeswing.ui.NativeComponent;
-import chrriis.dj.nativeswing.ui.NativeComponent.Preferences.Destruction;
-import chrriis.dj.nativeswing.ui.NativeComponent.Preferences.Layering;
+import chrriis.dj.nativeswing.ui.NativeComponent.Options.Destruction;
+import chrriis.dj.nativeswing.ui.NativeComponent.Options.Layering;
 
 /**
  * @author Christopher Deckers
@@ -40,7 +40,7 @@ public class DesktopPaneWindowLayeringExample extends JPanel implements Disposab
     webBrowser1InternalFrame.setBounds(10, 10, 400, 300);
     webBrowser1InternalFrame.setResizable(true);
     webBrowser1InternalFrame.setVisible(true);
-    NativeComponent.getNextInstancePreferences().setLayering(Layering.WINDOW_LAYERING);
+    NativeComponent.getNextInstanceOptions().setLayering(Layering.WINDOW_LAYERING);
     JWebBrowser webBrowser1 = new JWebBrowser();
     webBrowser1.setURL("http://djproject.sf.net");
     webBrowser1InternalFrame.add(webBrowser1, BorderLayout.CENTER);
@@ -50,7 +50,7 @@ public class DesktopPaneWindowLayeringExample extends JPanel implements Disposab
     flashPlayerInternalFrame.setBounds(110, 110, 400, 300);
     flashPlayerInternalFrame.setResizable(true);
     flashPlayerInternalFrame.setVisible(true);
-    NativeComponent.getNextInstancePreferences().setLayering(Layering.WINDOW_LAYERING);
+    NativeComponent.getNextInstanceOptions().setLayering(Layering.WINDOW_LAYERING);
     JFlashPlayer flashPlayer = new JFlashPlayer();
     flashPlayer.setControlBarVisible(false);
     String resourceURL = WebServer.getDefaultWebServer().getClassPathResourceURL(SimpleFlashExample.class.getName(), "resource/Movement-pointer_or_click.swf");
@@ -73,9 +73,9 @@ public class DesktopPaneWindowLayeringExample extends JPanel implements Disposab
         return false;
       }
     };
-    NativeComponent.getNextInstancePreferences().setLayering(Layering.WINDOW_LAYERING);
+    NativeComponent.getNextInstanceOptions().setLayering(Layering.WINDOW_LAYERING);
     // When a frame is iconified, components are destroyed. To avoid this, we use the option to destroy on finalization.
-    NativeComponent.getNextInstancePreferences().setDestruction(Destruction.ON_FINALIZATION);
+    NativeComponent.getNextInstanceOptions().setDestruction(Destruction.ON_FINALIZATION);
     webBrowser2 = new JWebBrowser();
     webBrowser2.setURL("http://www.google.com");
     cons.weightx = 1;

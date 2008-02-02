@@ -28,7 +28,7 @@ import javax.swing.RootPaneContainer;
 import javax.swing.SwingUtilities;
 
 import chrriis.dj.nativeswing.ui.NativeComponent.NativeComponentHolder;
-import chrriis.dj.nativeswing.ui.NativeComponent.Preferences.Layering;
+import chrriis.dj.nativeswing.ui.NativeComponent.Options.Layering;
 
 import com.sun.jna.examples.WindowUtils;
 
@@ -42,7 +42,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
 
   protected NativeComponentProxyPanel(NativeComponent nativeComponent) {
     super(nativeComponent);
-    isLayered = NativeComponent.getNextInstancePreferences().getLayering() != Layering.NO_LAYERING;
+    isLayered = NativeComponent.getNextInstanceOptions().getLayering() != Layering.NO_LAYERING;
     addFocusListener(new FocusAdapter() {
       @Override
       public void focusGained(FocusEvent e) {
