@@ -28,11 +28,11 @@ import chrriis.dj.nativeswing.ui.NativeComponent.Options.Layering;
 /**
  * @author Christopher Deckers
  */
-public class DesktopPaneWindowLayeringExample extends JPanel implements Disposable {
+public class LayeringOption extends JPanel implements Disposable {
 
   private JWebBrowser webBrowser2;
   
-  public DesktopPaneWindowLayeringExample() {
+  public LayeringOption() {
     super(new BorderLayout(0, 0));
     JDesktopPane desktopPane = new JDesktopPane();
     // Web Browser 1 internal frame
@@ -40,7 +40,7 @@ public class DesktopPaneWindowLayeringExample extends JPanel implements Disposab
     webBrowser1InternalFrame.setBounds(10, 10, 400, 300);
     webBrowser1InternalFrame.setResizable(true);
     webBrowser1InternalFrame.setVisible(true);
-    NativeComponent.getNextInstanceOptions().setLayering(Layering.WINDOW_LAYERING);
+    NativeComponent.getNextInstanceOptions().setLayering(Layering.COMPONENT_LAYERING);
     JWebBrowser webBrowser1 = new JWebBrowser();
     webBrowser1.setURL("http://djproject.sf.net");
     webBrowser1InternalFrame.add(webBrowser1, BorderLayout.CENTER);
@@ -50,7 +50,7 @@ public class DesktopPaneWindowLayeringExample extends JPanel implements Disposab
     flashPlayerInternalFrame.setBounds(110, 110, 400, 300);
     flashPlayerInternalFrame.setResizable(true);
     flashPlayerInternalFrame.setVisible(true);
-    NativeComponent.getNextInstanceOptions().setLayering(Layering.WINDOW_LAYERING);
+    NativeComponent.getNextInstanceOptions().setLayering(Layering.COMPONENT_LAYERING);
     JFlashPlayer flashPlayer = new JFlashPlayer();
     flashPlayer.setControlBarVisible(false);
     String resourceURL = WebServer.getDefaultWebServer().getClassPathResourceURL(SimpleFlashExample.class.getName(), "resource/Movement-pointer_or_click.swf");
@@ -73,7 +73,7 @@ public class DesktopPaneWindowLayeringExample extends JPanel implements Disposab
         return false;
       }
     };
-    NativeComponent.getNextInstanceOptions().setLayering(Layering.WINDOW_LAYERING);
+    NativeComponent.getNextInstanceOptions().setLayering(Layering.COMPONENT_LAYERING);
     // When a frame is iconified, components are destroyed. To avoid this, we use the option to destroy on finalization.
     NativeComponent.getNextInstanceOptions().setDestruction(Destruction.ON_FINALIZATION);
     webBrowser2 = new JWebBrowser();

@@ -27,7 +27,7 @@ import chrriis.dj.nativeswing.ui.NativeComponent.Options.Shaping;
 /**
  * @author Christopher Deckers
  */
-public class ShapingOptions extends JPanel {
+public class ShapingOption extends JPanel {
 
   protected static final String LS = System.getProperty("line.separator");
   protected static final int OFFSET_X = 150;
@@ -35,7 +35,7 @@ public class ShapingOptions extends JPanel {
   protected static final int WIDTH = 200;
   protected static final int HEIGHT = 200;
 
-  public ShapingOptions() {
+  public ShapingOption() {
     super(new BorderLayout(0, 0));
     JLayeredPane layeredPane = new JLayeredPane();
     int layerIndex = 0;
@@ -63,7 +63,7 @@ public class ShapingOptions extends JPanel {
     webBrowser.setText(
         "<html>" + LS +
         "  <body>" + LS +
-        "    <h1>Some header</h1>" + LS +
+        "    <h1>A web page</h1>" + LS +
         "    <p>A paragraph with a <a href=\"http://www.google.com\">link</a>.</p>" + LS +
         "  </body>" + LS +
         "</html>");

@@ -19,10 +19,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 
-import chrriis.dj.nativeswing.demo.examples.componentoptions.DesktopPaneComponentLayeringExample;
-import chrriis.dj.nativeswing.demo.examples.componentoptions.DesktopPaneWindowLayeringExample;
-import chrriis.dj.nativeswing.demo.examples.componentoptions.DestructionOptions;
-import chrriis.dj.nativeswing.demo.examples.componentoptions.ShapingOptions;
+import chrriis.dj.nativeswing.demo.examples.componentoptions.DestructionOption;
+import chrriis.dj.nativeswing.demo.examples.componentoptions.LayeringOption;
+import chrriis.dj.nativeswing.demo.examples.componentoptions.ShapingOption;
 import chrriis.dj.nativeswing.demo.examples.evolutions.WorkInProgress;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.Interactions;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
@@ -64,10 +63,9 @@ public class DemoTree extends JTree {
         new Example("Interactions", Interactions.class, "Control a flash animation, and get/set variables.", true),
     }));
     exampleGroupList.add(new ExampleGroup("Component Options", new Example[] {
-        new Example("Shaping", ShapingOptions.class, "Use the shaping option to superimpose Swing and native components.", true),
-        new Example("Deferred Destruction", DestructionOptions.class, "Use the deferred destruction option to add/remove the same component: it is not destroyed when removed but on explicit dispose() or at garbage collection time.", true),
-        new Example("Component Layering", DesktopPaneComponentLayeringExample.class, "Demonstrate layering of native components, using the component layering mode.", true),
-        new Example("Window Layering", DesktopPaneWindowLayeringExample.class, "Demonstrate layering of native components, using the window layering mode. Note that the component layering mode is generally preferred.", true),
+        new Example("Shaping", ShapingOption.class, "Use the shaping option to superimpose Swing and native components.", true),
+        new Example("Deferred Destruction", DestructionOption.class, "Use the deferred destruction option to add/remove the same component: it is not destroyed when removed but on explicit dispose() or at garbage collection time.", true),
+        new Example("Layering", LayeringOption.class, "Use layering of native components, to allow re-parenting and change of component Z-order.", true),
     }));
     if(System.getProperty("os.name").startsWith("Windows")) {
       exampleGroupList.add(new ExampleGroup("JMultiMediaPlayer (win32)", new Example[] {

@@ -25,11 +25,11 @@ import chrriis.dj.nativeswing.ui.NativeComponent.Options.Destruction;
 /**
  * @author Christopher Deckers
  */
-public class DestructionOptions extends JPanel implements Disposable {
+public class DestructionOption extends JPanel implements Disposable {
 
   protected JFlashPlayer flashPlayer;
   
-  public DestructionOptions() {
+  public DestructionOption() {
     super(new BorderLayout(0, 0));
     NativeComponent.getNextInstanceOptions().setDestruction(Destruction.ON_FINALIZATION);
     flashPlayer = new JFlashPlayer();
