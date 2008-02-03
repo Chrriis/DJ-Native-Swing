@@ -513,4 +513,8 @@ public class JWebBrowser extends JPanel implements Disposable {
     }
   }
   
+  public boolean isDisposed() {
+    return nativeComponent.isDisposed();
+  }
+  
 }

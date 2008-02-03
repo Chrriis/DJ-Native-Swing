@@ -374,5 +374,9 @@ public class JFlashPlayer extends JPanel implements Disposable {
   public void dispose() {
     webBrowser.dispose();
   }
+  
+  public boolean isDisposed() {
+    return webBrowser.isDisposed();
+  }
 
 }

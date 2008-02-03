@@ -329,6 +329,10 @@ public abstract class NativeComponent extends Canvas {
   
   private boolean isDisposed;
   
+  public boolean isDisposed() {
+    return isDisposed;
+  }
+  
   @Override
   public void removeNotify() {
     if(shell != null) {

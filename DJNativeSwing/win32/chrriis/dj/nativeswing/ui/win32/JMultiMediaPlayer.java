@@ -189,4 +189,8 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
     }
   }
   
+  public boolean isDisposed() {
+    return nativeComponent.isDisposed();
+  }
+  
 }
