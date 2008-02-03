@@ -38,6 +38,8 @@ public class VisibilityConstraintOption extends JPanel {
   public VisibilityConstraintOption() {
     super(new BorderLayout(0, 0));
     JLayeredPane layeredPane = new JLayeredPane();
+    layeredPane.setOpaque(true);
+    layeredPane.setBackground(new Color(200, 200, 255));
     int layerIndex = 0;
     // A flash player
     NativeComponent.getNextInstanceOptions().setVisibilityConstraint(VisibilityConstraint.FULL_COMPONENT_TREE);
@@ -51,7 +53,7 @@ public class VisibilityConstraintOption extends JPanel {
     // A swing panel
     JPanel swingPanel = new JPanel();
     swingPanel.setBorder(BorderFactory.createTitledBorder("Swing JPanel"));
-    swingPanel.setBackground(Color.CYAN);
+    swingPanel.setBackground(Color.GREEN);
     swingPanel.setBounds(OFFSET_X * layerIndex, OFFSET_Y * layerIndex, WIDTH, HEIGHT);
     layeredPane.setLayer(swingPanel, layerIndex++);
     layeredPane.add(swingPanel);
