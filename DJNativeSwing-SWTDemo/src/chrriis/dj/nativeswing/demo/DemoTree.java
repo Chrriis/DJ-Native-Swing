@@ -62,7 +62,7 @@ public class DemoTree extends JTree {
         new Example("Simple Example", SimpleFlashExample.class, "Display a flash application.", true),
         new Example("Interactions", Interactions.class, "Control a flash animation, and get/set variables.", true),
     }));
-    exampleGroupList.add(new ExampleGroup("Component Behaviors", new Example[] {
+    exampleGroupList.add(new ExampleGroup("Component Options", new Example[] {
         new Example("Visibility Constraint", VisibilityConstraintOption.class, "Constrain the visibility to superimpose Swing and native components.", true),
         new Example("Destruction Time", DestructionTimeOption.class, "Defer destruction until finalization to add/remove the same component. It is not destroyed when removed but on explicit dispose() or during garbage collection.", true),
         new Example("Filiation Type", FiliationTypeOption.class, "Use a proxied filiation of native components to allow re-parenting and change of component Z-order. By default, the visibility gets automatically constrained.", true),
