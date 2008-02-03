@@ -40,11 +40,13 @@ import chrriis.dj.nativeswing.ui.NativeComponent;
  */
 public class NativeInterfaceHandler {
 
-  protected static volatile Thread displayThread;
-  protected static volatile Display display;
-  protected static volatile boolean isRunning;
+  private NativeInterfaceHandler() {}
+  
+  private static volatile Thread displayThread;
+  private static volatile Display display;
+  private static volatile boolean isRunning;
 
-  protected static Set<Window> windowSet;
+  private static Set<Window> windowSet;
   
   public static Window[] getWindows() {
     if(Utils.IS_JAVA_6_OR_GREATER) {
@@ -250,7 +252,7 @@ public class NativeInterfaceHandler {
     autoShutdownThread.start();
   }
   
-  protected static void cleanUp() {
+  private static void cleanUp() {
     for(Shell shell: shellList) {
       try {
         shell.dispose();
@@ -293,7 +295,7 @@ public class NativeInterfaceHandler {
     cleanUp();
   }
   
-  protected static void dispatch() {
+  private static void dispatch() {
     try {
       if(display.readAndDispatch()) {
         if(isRunning) {
@@ -310,13 +312,13 @@ public class NativeInterfaceHandler {
     return display;
   }
   
-  protected static final Object SWING_LOCK = new Object();
-  protected static final Object SWT_LOCK = new Object();
+  private static final Object SWING_LOCK = new Object();
+  private static final Object SWT_LOCK = new Object();
   
-  protected static List<Runnable> swingRunnableList = new ArrayList<Runnable>();
-  protected static List<Runnable> swtRunnableList = new ArrayList<Runnable>();
-  protected static volatile boolean hasSwingRun;
-  protected static volatile boolean hasSWTRun;
+  private static List<Runnable> swingRunnableList = new ArrayList<Runnable>();
+  private static List<Runnable> swtRunnableList = new ArrayList<Runnable>();
+  private static volatile boolean hasSwingRun;
+  private static volatile boolean hasSWTRun;
   
   /**
    * Invoke some code in the Swing UI thread synchronously.
@@ -420,8 +422,8 @@ public class NativeInterfaceHandler {
     }
   }
   
-  protected static volatile List<Shell> shellList = new ArrayList<Shell>();
-  protected static volatile List<Canvas> canvasList = new ArrayList<Canvas>();
+  private static volatile List<Shell> shellList = new ArrayList<Shell>();
+  private static volatile List<Canvas> canvasList = new ArrayList<Canvas>();
   
   public static Shell createShell(Canvas canvas) {
     checkPump();
@@ -463,7 +465,7 @@ public class NativeInterfaceHandler {
     runEventPump();
   }
 
-  protected static void checkPump() {
+  private static void checkPump() {
     if(displayThread == null) {
       throw new IllegalStateException("The native interface handler is not initialized! Please refer to the instructions to set it up properly.");
       // Following code works on Windows, but not on other platforms...

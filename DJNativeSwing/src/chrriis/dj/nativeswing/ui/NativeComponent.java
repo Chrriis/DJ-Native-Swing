@@ -116,9 +116,9 @@ public abstract class NativeComponent extends Canvas {
 
   static interface NativeComponentHolder {}
   
-  protected NativeComponentProxy componentProxy;
+  private NativeComponentProxy componentProxy;
   
-  protected void setComponentProxy(NativeComponentProxy componentProxy) {
+  void setComponentProxy(NativeComponentProxy componentProxy) {
     this.componentProxy = componentProxy;
   }
   
@@ -126,8 +126,8 @@ public abstract class NativeComponent extends Canvas {
     return componentProxy;
   }
   
-  protected int buttonPressedCount;
-  protected Point lastLocation = new Point(-1, -1);
+  private int buttonPressedCount;
+  private Point lastLocation = new Point(-1, -1);
   
   protected void dispatchMouseEvent(org.eclipse.swt.events.MouseEvent e, int type) {
     if(!isShowing()) {
@@ -327,7 +327,7 @@ public abstract class NativeComponent extends Canvas {
     return control != null && initializationRunnableList == null;
   }
   
-  protected boolean isDisposed;
+  private boolean isDisposed;
   
   @Override
   public void removeNotify() {
@@ -412,10 +412,11 @@ public abstract class NativeComponent extends Canvas {
     return listenerList.getListeners(InitializationListener.class);
   }
   
-  protected static Method redrawMethod;
-  protected static Method updateMethod;
+  private static Method redrawMethod;
+  private static Method updateMethod;
   
   static {
+    System.setProperty("jna.force_hw_popups", "false");
     try {
       redrawMethod = Control.class.getDeclaredMethod("redraw", new Class[] {boolean.class});
       redrawMethod.setAccessible(true);
@@ -453,6 +454,16 @@ public abstract class NativeComponent extends Canvas {
     });
   }
   
+  private Options options;
+  
+  private void setOptions(Options options) {
+    this.options = options;
+  }
+  
+  public Options getOptions() {
+    return options;
+  }
+  
   public static class Options implements Cloneable {
     
     public static enum FiliationType {
@@ -462,7 +473,7 @@ public abstract class NativeComponent extends Canvas {
       WINDOW_PROXYING,
     }
     
-    protected FiliationType filiationType = FiliationType.AUTO;
+    private FiliationType filiationType = FiliationType.AUTO;
     
     /**
      * Proxied filiation allows re-parenting and change of component Z-order.
@@ -484,7 +495,7 @@ public abstract class NativeComponent extends Canvas {
       ON_FINALIZATION,
     }
     
-    protected DestructionTime destructionTime = DestructionTime.AUTO;
+    private DestructionTime destructionTime = DestructionTime.AUTO;
     
     /**
      * Destruction on finalization allows removal and later re-addition to the user interface. It requires a proxied filiation, and will select one automatically if it is set to default. It is also possible to explicitely dispose the component rather than waiting until finalization.
@@ -507,7 +518,7 @@ public abstract class NativeComponent extends Canvas {
       FULL_COMPONENT_TREE,
     }
     
-    protected VisibilityConstraint visibilityConstraint = VisibilityConstraint.AUTO;
+    private VisibilityConstraint visibilityConstraint = VisibilityConstraint.AUTO;
     
     /**
      * Visibility constraints allow to superimpose native components and Swing components.
@@ -535,7 +546,7 @@ public abstract class NativeComponent extends Canvas {
     
   }
   
-  protected static Options defaultOptions;
+  private static Options defaultOptions;
   
   public static Options getDefaultOptions() {
     if(defaultOptions == null) {
@@ -548,8 +559,11 @@ public abstract class NativeComponent extends Canvas {
     NativeComponent.defaultOptions = defaultOptions;
   }
   
-  protected static Options nextInstanceOptions;
+  private static Options nextInstanceOptions;
   
+  /**
+   * The next instance options are a copy of the default options from the moment this method is called the first time before a new instance is created.
+   */
   public static Options getNextInstanceOptions() {
     if(nextInstanceOptions == null) {
       nextInstanceOptions = (Options)getDefaultOptions().clone();
@@ -559,10 +573,6 @@ public abstract class NativeComponent extends Canvas {
   
   public static void setNextInstanceOptions(Options nextInstanceOptions) {
     NativeComponent.nextInstanceOptions = nextInstanceOptions;
-  }
-  
-  static {
-    System.setProperty("jna.force_hw_popups", "false");
   }
   
   static class SimpleNativeComponentHolder extends JPanel implements NativeComponentHolder {
@@ -578,7 +588,7 @@ public abstract class NativeComponent extends Canvas {
     
   }
   
-  protected static boolean isJNAPresent() {
+  private static boolean isJNAPresent() {
     try {
       Class.forName("com.sun.jna.examples.WindowUtils");
       Class.forName("com.sun.jna.Platform");
@@ -589,62 +599,59 @@ public abstract class NativeComponent extends Canvas {
   }
   
   protected Component createEmbeddableComponent() {
-    try {
-      Options nextInstanceOptions = getNextInstanceOptions();
-      FiliationType filiationType = nextInstanceOptions.getFiliationType();
-      DestructionTime destructionTime = nextInstanceOptions.getDestructionTime();
-      if(destructionTime == DestructionTime.AUTO) {
-        destructionTime = DestructionTime.WHEN_REMOVED;
-      }
-      VisibilityConstraint visibilityConstraint = nextInstanceOptions.getVisibilityConstraint();
-      boolean isJNAPresent = isJNAPresent();
-      if(visibilityConstraint == VisibilityConstraint.AUTO) {
-        if(!isJNAPresent) {
-          visibilityConstraint = VisibilityConstraint.NONE;
-        } else {
-          switch(filiationType) {
-            case COMPONENT_PROXYING:
-            case WINDOW_PROXYING:
-              visibilityConstraint = VisibilityConstraint.FULL_COMPONENT_TREE;
-              break;
-            default:
-              visibilityConstraint = VisibilityConstraint.NONE;
+    Options nextInstanceOptions = getNextInstanceOptions();
+    FiliationType filiationType = nextInstanceOptions.getFiliationType();
+    DestructionTime destructionTime = nextInstanceOptions.getDestructionTime();
+    if(destructionTime == DestructionTime.AUTO) {
+      destructionTime = DestructionTime.WHEN_REMOVED;
+    }
+    VisibilityConstraint visibilityConstraint = nextInstanceOptions.getVisibilityConstraint();
+    boolean isJNAPresent = isJNAPresent();
+    if(visibilityConstraint == VisibilityConstraint.AUTO) {
+      if(!isJNAPresent) {
+        visibilityConstraint = VisibilityConstraint.NONE;
+      } else {
+        switch(filiationType) {
+          case COMPONENT_PROXYING:
+          case WINDOW_PROXYING:
+            visibilityConstraint = VisibilityConstraint.FULL_COMPONENT_TREE;
             break;
-          }
+          default:
+            visibilityConstraint = VisibilityConstraint.NONE;
+          break;
         }
       }
-      if(visibilityConstraint != VisibilityConstraint.NONE && !isJNAPresent) {
-        throw new IllegalStateException("The JNA libraries are required to use the visibility constraints!");
-      }
-      if(destructionTime == DestructionTime.ON_FINALIZATION && filiationType == FiliationType.AUTO) {
-        filiationType = FiliationType.COMPONENT_PROXYING;
-      }
-      nextInstanceOptions = (Options)nextInstanceOptions.clone();
-      setNextInstanceOptions(nextInstanceOptions);
-      nextInstanceOptions.setDestructionTime(destructionTime);
-      nextInstanceOptions.setFiliationType(filiationType);
-      nextInstanceOptions.setVisibilityConstraint(visibilityConstraint);
-      switch(filiationType) {
-        case COMPONENT_PROXYING:
-          return new NativeComponentProxyPanel(this);
-        case WINDOW_PROXYING:
-          return new NativeComponentProxyWindow(this);
-        default:
-          switch(destructionTime) {
-            case WHEN_REMOVED:
-              break;
-            default:
-              throw new IllegalStateException("Finalization-time destruction cannot be used without a proxied filiation!");
-          }
-          switch(visibilityConstraint) {
-            case NONE:
-              return new SimpleNativeComponentHolder(this);
-            default:
-              return new NativeComponentProxyPanel(this);
-          }
-      }
-    } finally {
-      nextInstanceOptions = null;
+    }
+    if(visibilityConstraint != VisibilityConstraint.NONE && !isJNAPresent) {
+      throw new IllegalStateException("The JNA libraries are required to use the visibility constraints!");
+    }
+    if(destructionTime == DestructionTime.ON_FINALIZATION && filiationType == FiliationType.AUTO) {
+      filiationType = FiliationType.COMPONENT_PROXYING;
+    }
+    Options options = (Options)nextInstanceOptions.clone();
+    options.setDestructionTime(destructionTime);
+    options.setFiliationType(filiationType);
+    options.setVisibilityConstraint(visibilityConstraint);
+    setOptions(options);
+    nextInstanceOptions = null;
+    switch(filiationType) {
+      case COMPONENT_PROXYING:
+        return new NativeComponentProxyPanel(this);
+      case WINDOW_PROXYING:
+        return new NativeComponentProxyWindow(this);
+      default:
+        switch(destructionTime) {
+          case WHEN_REMOVED:
+            break;
+          default:
+            throw new IllegalStateException("Finalization-time destruction cannot be used without a proxied filiation!");
+        }
+        switch(visibilityConstraint) {
+          case NONE:
+            return new SimpleNativeComponentHolder(this);
+          default:
+            return new NativeComponentProxyPanel(this);
+        }
     }
   }
   

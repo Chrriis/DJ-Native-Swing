@@ -47,10 +47,10 @@ import chrriis.dj.nativeswing.ui.event.WebBrowserWindowOpeningEvent;
  */
 class NativeWebBrowser extends NativeComponent {
 
-  protected static final String COMMAND_PREFIX = "command://";
+  private static final String COMMAND_PREFIX = "command://";
 
-  protected Browser browser;
-  protected Reference<JWebBrowser> webBrowser;
+  private Browser browser;
+  private Reference<JWebBrowser> webBrowser;
   
   public NativeWebBrowser(JWebBrowser webBrowser) {
     this.webBrowser = new WeakReference<JWebBrowser>(webBrowser);
@@ -425,9 +425,9 @@ class NativeWebBrowser extends NativeComponent {
     return result[0];
   }
   
-  protected String status;
+  private String status;
   
-  protected void updateStatus(String status) {
+  private void updateStatus(String status) {
     JWebBrowser webBrowser = NativeWebBrowser.this.webBrowser.get();
     if(webBrowser == null) {
       return;
@@ -449,9 +449,9 @@ class NativeWebBrowser extends NativeComponent {
     return status == null? "": status;
   }
   
-  protected String title;
+  private String title;
   
-  protected void updateTitle(String title) {
+  private void updateTitle(String title) {
     JWebBrowser webBrowser = NativeWebBrowser.this.webBrowser.get();
     if(webBrowser == null) {
       return;
@@ -473,9 +473,9 @@ class NativeWebBrowser extends NativeComponent {
     return title == null? "": title;
   }
   
-  protected int pageLoadingProgressValue = 100;
+  private int pageLoadingProgressValue = 100;
   
-  protected void updateProgress(int loadingProgressValue) {
+  private void updateProgress(int loadingProgressValue) {
     if(this.pageLoadingProgressValue == loadingProgressValue) {
       return;
     }

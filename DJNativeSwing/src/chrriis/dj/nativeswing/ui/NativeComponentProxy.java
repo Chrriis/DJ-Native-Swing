@@ -42,15 +42,15 @@ import chrriis.dj.nativeswing.ui.NativeComponentProxyWindow.EmbeddedWindow;
  */
 abstract class NativeComponentProxy extends JComponent implements Disposable {
 
-  protected NativeComponent nativeComponent;
-  protected boolean isDestructionOnFinalization;
-  protected boolean isVisibilityConstrained;
-  protected VisibilityConstraint visibilityConstraint;
+  NativeComponent nativeComponent;
+  boolean isDestructionOnFinalization;
+  boolean isVisibilityConstrained;
+  VisibilityConstraint visibilityConstraint;
 
-  protected AWTEventListener shapeAdjustmentEventListener;
+  private AWTEventListener shapeAdjustmentEventListener;
 
   protected NativeComponentProxy(NativeComponent nativeComponent) {
-    Options options = NativeComponent.getNextInstanceOptions();
+    Options options = nativeComponent.getOptions();
     DestructionTime destructionTime = options.getDestructionTime();
     isDestructionOnFinalization = destructionTime == DestructionTime.ON_FINALIZATION;
     visibilityConstraint = options.getVisibilityConstraint();
@@ -91,7 +91,7 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
     }
   }
   
-  protected HierarchyListener hierarchyListener;
+  private HierarchyListener hierarchyListener;
   
   @Override
   public void addNotify() {
@@ -162,7 +162,7 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
     peer = null;
   }
 
-  protected Component peer;
+  private Component peer;
   
   protected abstract Component createPeer();
 

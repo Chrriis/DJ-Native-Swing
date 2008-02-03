@@ -42,17 +42,17 @@ import chrriis.dj.nativeswing.ui.event.WebBrowserWindowOpeningEvent;
  */
 public class JFlashPlayer extends JPanel implements Disposable {
 
-  protected final ResourceBundle RESOURCES = ResourceBundle.getBundle(JFlashPlayer.class.getPackage().getName().replace('.', '/') + "/resource/FlashPlayer");
+  private final ResourceBundle RESOURCES = ResourceBundle.getBundle(JFlashPlayer.class.getPackage().getName().replace('.', '/') + "/resource/FlashPlayer");
 
-  protected JPanel webBrowserPanel;
-  protected JWebBrowser webBrowser;
+  private JPanel webBrowserPanel;
+  private JWebBrowser webBrowser;
   
-  protected JPanel controlBarPane;
-  protected JButton playButton;
-  protected JButton pauseButton;
-  protected JButton stopButton;
+  private JPanel controlBarPane;
+  private JButton playButton;
+  private JButton pauseButton;
+  private JButton stopButton;
 
-  protected static class NWebBrowserListener extends WebBrowserAdapter {
+  private static class NWebBrowserListener extends WebBrowserAdapter {
     protected Reference<JFlashPlayer> flashPlayer;
     protected NWebBrowserListener(JFlashPlayer flashPlayer) {
       this.flashPlayer = new WeakReference<JFlashPlayer>(flashPlayer);
@@ -124,7 +124,7 @@ public class JFlashPlayer extends JPanel implements Disposable {
     adjustBorder();
   }
   
-  protected void adjustBorder() {
+  private void adjustBorder() {
     if(isControlBarVisible()) {
       webBrowserPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
     } else {
@@ -132,12 +132,12 @@ public class JFlashPlayer extends JPanel implements Disposable {
     }
   }
   
-  protected Icon createIcon(String resourceKey) {
+  private Icon createIcon(String resourceKey) {
     String value = RESOURCES.getString(resourceKey);
     return value.length() == 0? null: new ImageIcon(JWebBrowser.class.getResource(value));
   }
   
-  protected String url;
+  private String url;
   
   public String getURL() {
     return url;
@@ -159,7 +159,7 @@ public class JFlashPlayer extends JPanel implements Disposable {
     webBrowser.setURL(url);
   }
 
-  protected boolean isAutoStart;
+  private boolean isAutoStart;
 
   public void setAutoStart(boolean isAutoStart) {
     this.isAutoStart = isAutoStart;
@@ -257,7 +257,7 @@ public class JFlashPlayer extends JPanel implements Disposable {
     return listenerList.getListeners(FlashPlayerListener.class);
   }
   
-  protected static final String LS = System.getProperty("line.separator");
+  private static final String LS = System.getProperty("line.separator");
 
   protected static WebServerContent getWebServerContent(String resourcePath) {
     int index = resourcePath.indexOf('/');

@@ -28,9 +28,9 @@ import chrriis.dj.nativeswing.ui.event.WebBrowserEvent;
  */
 public class JWebBrowserWindow extends JFrame {
 
-  protected final ResourceBundle RESOURCES = ResourceBundle.getBundle(JWebBrowserWindow.class.getPackage().getName().replace('.', '/') + "/resource/WebBrowser");
+  private final ResourceBundle RESOURCES = ResourceBundle.getBundle(JWebBrowserWindow.class.getPackage().getName().replace('.', '/') + "/resource/WebBrowser");
   
-  protected JWebBrowser webBrowser;
+  private JWebBrowser webBrowser;
   
   public JWebBrowserWindow() {
     this(new JWebBrowser());
@@ -111,10 +111,6 @@ public class JWebBrowserWindow extends JFrame {
   
   public boolean isAddressBarVisisble() {
     return webBrowser.isAddressBarVisible();
-  }
-  
-  protected NativeWebBrowser createWebBrowser() {
-    return new NativeWebBrowser(webBrowser);
   }
   
 }

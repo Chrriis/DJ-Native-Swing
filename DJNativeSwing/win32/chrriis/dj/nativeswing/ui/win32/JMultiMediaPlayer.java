@@ -26,10 +26,10 @@ import chrriis.dj.nativeswing.ui.event.InitializationListener;
  */
 public class JMultiMediaPlayer extends JPanel implements Disposable {
 
-  protected Component embeddableComponent;
-  protected NativeMultimediaPlayer nativeComponent;
+  private Component embeddableComponent;
+  private NativeMultimediaPlayer nativeComponent;
   
-  protected static class NInitializationListener implements InitializationListener {
+  private static class NInitializationListener implements InitializationListener {
     protected Reference<JMultiMediaPlayer> multiMediaPlayer;
     protected NInitializationListener(JMultiMediaPlayer multiMediaPlayer) {
       this.multiMediaPlayer = new WeakReference<JMultiMediaPlayer>(multiMediaPlayer);

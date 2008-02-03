@@ -44,10 +44,10 @@ import com.sun.jna.examples.WindowUtils;
  */
 class NativeComponentProxyWindow extends NativeComponentProxy {
 
-  protected static int instanceCount;
-  protected static volatile boolean isFocusBlocked;
+  private static int instanceCount;
+  private static volatile boolean isFocusBlocked;
   
-  protected static AWTEventListener focusAdjustmentEventListener = new AWTEventListener() {
+  private static AWTEventListener focusAdjustmentEventListener = new AWTEventListener() {
     public void eventDispatched(AWTEvent e) {
       if(e.getSource() instanceof NativeComponent) {
         return;
@@ -83,7 +83,7 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
     });
   }
 
-  protected static class EmbeddedWindow extends JDialog {
+  static class EmbeddedWindow extends JDialog {
     
     protected Reference<NativeComponentProxyWindow> nativeComponentEmbedder;
     
@@ -119,7 +119,7 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
     }
   }
   
-  protected HierarchyBoundsListener hierarchyBoundsListener = new HierarchyBoundsListener() {
+  private HierarchyBoundsListener hierarchyBoundsListener = new HierarchyBoundsListener() {
     public void ancestorMoved(HierarchyEvent e) {
       adjustPeerBounds();
     }
@@ -128,7 +128,7 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
     }
   };
 
-  protected static class NWindowFocusListener implements WindowFocusListener {
+  private static class NWindowFocusListener implements WindowFocusListener {
     protected Reference<NativeComponentProxyWindow> nativeComponentEmbedder;
     protected NWindowFocusListener(NativeComponentProxyWindow nativeComponentEmbedder) {
       this.nativeComponentEmbedder = new WeakReference<NativeComponentProxyWindow>(nativeComponentEmbedder);
@@ -159,7 +159,7 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
     }
   }
   
-  protected EmbeddedWindow window;
+  private EmbeddedWindow window;
   
   @Override
   protected Component createPeer() {
@@ -208,7 +208,7 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
     }
   }
   
-  protected volatile boolean isInvoking;
+  private volatile boolean isInvoking;
   
   protected void adjustPeerShape() {
     if(isInvoking) {
@@ -223,7 +223,7 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
     });
   }
   
-  protected Area lastArea = new Area();
+  private Area lastArea = new Area();
   
   protected void adjustPeerShape_() {
     if(window == null) {

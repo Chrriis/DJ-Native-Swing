@@ -33,11 +33,11 @@ class NativeMultimediaPlayer extends NativeComponent {
     setErrorDialogsEnabled(false);
   }
 
-  protected OleClientSite site;
+  private OleClientSite site;
   
-  protected int type;
-  protected static final int WM_PLAYER = 1;
-  protected static final int MEDIA_PLAYER = 2;
+  private int type;
+  private static final int WM_PLAYER = 1;
+  private static final int MEDIA_PLAYER = 2;
 
   @Override
   protected Control createControl(Shell shell) {
@@ -74,7 +74,7 @@ class NativeMultimediaPlayer extends NativeComponent {
     return frame;
   }
   
-  protected boolean setErrorDialogsEnabled(final boolean isErrorDialogEnabled) {
+  private boolean setErrorDialogsEnabled(final boolean isErrorDialogEnabled) {
     final boolean[] result = new boolean[1];
     run(new Runnable() {
       public void run() {

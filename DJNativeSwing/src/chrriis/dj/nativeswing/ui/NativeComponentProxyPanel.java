@@ -38,11 +38,11 @@ import com.sun.jna.examples.WindowUtils;
  */
 class NativeComponentProxyPanel extends NativeComponentProxy {
 
-  protected boolean isProxiedFiliation;
+  private boolean isProxiedFiliation;
 
   protected NativeComponentProxyPanel(NativeComponent nativeComponent) {
     super(nativeComponent);
-    isProxiedFiliation = NativeComponent.getNextInstanceOptions().getFiliationType() != FiliationType.DIRECT;
+    isProxiedFiliation = nativeComponent.getOptions().getFiliationType() != FiliationType.DIRECT;
     addFocusListener(new FocusAdapter() {
       @Override
       public void focusGained(FocusEvent e) {
@@ -51,7 +51,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     });
   }
 
-  protected static class EmbeddedPanel extends Panel implements NativeComponentHolder {
+  private static class EmbeddedPanel extends Panel implements NativeComponentHolder {
     
     public EmbeddedPanel() {
       super(new BorderLayout(0, 0));
@@ -69,7 +69,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     
   }
   
-  protected HierarchyBoundsListener hierarchyBoundsListener = new HierarchyBoundsListener() {
+  private HierarchyBoundsListener hierarchyBoundsListener = new HierarchyBoundsListener() {
     public void ancestorMoved(HierarchyEvent e) {
       Component component = e.getChanged();
       if(component instanceof Window) {
@@ -82,7 +82,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     }
   };
 
-  protected MouseAdapter mouseListener = new MouseAdapter() {
+  private MouseAdapter mouseListener = new MouseAdapter() {
     @Override
     public void mousePressed(MouseEvent e) {
       adjustFocus();
@@ -106,7 +106,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     }
   };
   
-  protected EmbeddedPanel panel;
+  private EmbeddedPanel panel;
   
   @Override
   protected Component createPeer() {
@@ -154,7 +154,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     panel = null;
   }
   
-  protected volatile boolean isInvoking;
+  private volatile boolean isInvoking;
   
   protected void adjustPeerShape() {
     if(isInvoking) {
@@ -177,7 +177,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     super.adjustPeerBounds();
   }
   
-  protected Area lastArea = new Area();
+  private Area lastArea = new Area();
   
   protected void adjustPeerShape_() {
     if(panel == null) {

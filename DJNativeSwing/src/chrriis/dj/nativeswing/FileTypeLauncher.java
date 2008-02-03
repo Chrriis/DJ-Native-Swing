@@ -33,16 +33,16 @@ import chrriis.dj.nativeswing.ui.UIUtils;
  */
 public class FileTypeLauncher {
 
-  protected Program program;
-  protected List<String> registeredExtensionList;
-  protected int hashCode;
+  private Program program;
+  private List<String> registeredExtensionList;
+  private int hashCode;
   
-  protected FileTypeLauncher(Program program) {
+  private FileTypeLauncher(Program program) {
     this.program = program;
     hashCode = program.hashCode();
   }
   
-  protected void addExtension(String extension) {
+  private void addExtension(String extension) {
     if(registeredExtensionList == null) {
       registeredExtensionList = new ArrayList<String>(1);
     }
@@ -73,9 +73,9 @@ public class FileTypeLauncher {
     initializeLaunchers();
   }
   
-  protected static boolean hasInitializedExtensions;
+  private static boolean hasInitializedExtensions;
   
-  protected static void initializeExtensions() {
+  private static void initializeExtensions() {
     if(hasInitializedExtensions) {
       return;
     }
@@ -99,9 +99,9 @@ public class FileTypeLauncher {
     });
   }
   
-  protected static boolean hasInitializedLaunchers;
+  private static boolean hasInitializedLaunchers;
   
-  protected static void initializeLaunchers() {
+  private static void initializeLaunchers() {
     if(hasInitializedLaunchers) {
       return;
     }
@@ -117,12 +117,12 @@ public class FileTypeLauncher {
     });
   }
   
-  protected static boolean isProgramValid(Program program) {
+  private static boolean isProgramValid(Program program) {
     String name = program.getName();
     return name != null && name.length() > 0 /*&& program.getImageData() != null*/;
   }
   
-  protected static Map<Program, FileTypeLauncher> programToFileTypeLauncherMap = new HashMap<Program, FileTypeLauncher>();
+  private static Map<Program, FileTypeLauncher> programToFileTypeLauncherMap = new HashMap<Program, FileTypeLauncher>();
   
   /**
    * Get the launcher for a given file name, which may or may not represent an existing file. The name can also simply be the extension of a file (including the '.').
@@ -190,7 +190,7 @@ public class FileTypeLauncher {
     return result[0];
   }
   
-  protected static final ImageIcon DEFAULT_ICON;
+  private static final ImageIcon DEFAULT_ICON;
   
   static {
     Icon defaultIcon;
@@ -220,7 +220,7 @@ public class FileTypeLauncher {
     return DEFAULT_ICON;
   }
   
-  protected ImageIcon icon;
+  private ImageIcon icon;
   
   public ImageIcon getIcon() {
     if(icon == null) {

@@ -50,34 +50,34 @@ import chrriis.dj.nativeswing.ui.event.WebBrowserNavigationEvent;
  */
 public class JWebBrowser extends JPanel implements Disposable {
 
-  protected final ResourceBundle RESOURCES = ResourceBundle.getBundle(JWebBrowser.class.getPackage().getName().replace('.', '/') + "/resource/WebBrowser");
+  private final ResourceBundle RESOURCES = ResourceBundle.getBundle(JWebBrowser.class.getPackage().getName().replace('.', '/') + "/resource/WebBrowser");
   
-  protected Component embeddableComponent;
-  protected NativeWebBrowser nativeComponent;
+  private Component embeddableComponent;
+  private NativeWebBrowser nativeComponent;
 
-  protected JMenuBar menuBar;
-  protected JMenu fileMenu;
-  protected JMenu viewMenu;
-  protected JPanel buttonBarPanel;
-  protected JCheckBoxMenuItem buttonBarCheckBoxMenuItem;
-  protected JPanel addressBarPanel;
-  protected JCheckBoxMenuItem addressBarCheckBoxMenuItem;
-  protected JPanel statusBarPanel;
-  protected JCheckBoxMenuItem statusBarCheckBoxMenuItem;
-  protected JPanel webBrowserPanel;
+  private JMenuBar menuBar;
+  private JMenu fileMenu;
+  private JMenu viewMenu;
+  private JPanel buttonBarPanel;
+  private JCheckBoxMenuItem buttonBarCheckBoxMenuItem;
+  private JPanel addressBarPanel;
+  private JCheckBoxMenuItem addressBarCheckBoxMenuItem;
+  private JPanel statusBarPanel;
+  private JCheckBoxMenuItem statusBarCheckBoxMenuItem;
+  private JPanel webBrowserPanel;
   
-  protected JTextField addressField;
-  protected JLabel statusLabel;
-  protected JButton backButton;
-  protected JMenuItem backMenuItem;
-  protected JButton forwardButton;
-  protected JMenuItem forwardMenuItem;
-  protected JButton refreshButton;
-  protected JMenuItem refreshMenuItem;
-  protected JButton stopButton;
-  protected JMenuItem stopMenuItem;
+  private JTextField addressField;
+  private JLabel statusLabel;
+  private JButton backButton;
+  private JMenuItem backMenuItem;
+  private JButton forwardButton;
+  private JMenuItem forwardMenuItem;
+  private JButton refreshButton;
+  private JMenuItem refreshMenuItem;
+  private JButton stopButton;
+  private JMenuItem stopMenuItem;
 
-  protected static class NInitializationListener implements InitializationListener {
+  private static class NInitializationListener implements InitializationListener {
     protected Reference<JWebBrowser> webBrowser;
     protected NInitializationListener(JWebBrowser webBrowser) {
       this.webBrowser = new WeakReference<JWebBrowser>(webBrowser);
@@ -100,7 +100,7 @@ public class JWebBrowser extends JPanel implements Disposable {
     }
   }
   
-  protected static class NWebBrowserListener extends WebBrowserAdapter {
+  private static class NWebBrowserListener extends WebBrowserAdapter {
     protected Reference<JWebBrowser> webBrowser;
     protected NWebBrowserListener(JWebBrowser webBrowser) {
       this.webBrowser = new WeakReference<JWebBrowser>(webBrowser);
@@ -329,7 +329,7 @@ public class JWebBrowser extends JPanel implements Disposable {
     menuBar.add(viewMenu);
   }
   
-  protected Icon createIcon(String resourceKey) {
+  private Icon createIcon(String resourceKey) {
     String value = RESOURCES.getString(resourceKey);
     return value.length() == 0? null: new ImageIcon(JWebBrowser.class.getResource(value));
   }
@@ -453,7 +453,7 @@ public class JWebBrowser extends JPanel implements Disposable {
     setStatusBarVisible(areBarsVisible);
   }
   
-  protected void adjustBorder() {
+  private void adjustBorder() {
     if(isMenuBarVisible() || isButtonBarVisible() || isAddressBarVisible() || isStatusBarVisible()) {
       webBrowserPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
     } else {
