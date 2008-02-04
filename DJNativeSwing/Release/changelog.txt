@@ -5,7 +5,7 @@ Licence terms: LGPL (see licence.txt)
 
 ---------------------------------- Change log ----------------------------------
 
-* Version 0.9.3 (xxxxxxxxxxxxxxxx):
+* Version 0.9.3 (February 8, 2008):
 
 - Constraining the visibility of native components is possible (requires JNA).
 - Proxied filiation of native components allows re-parenting and Z-order change.
