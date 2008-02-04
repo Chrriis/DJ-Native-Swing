@@ -518,7 +518,6 @@ public abstract class NativeComponent extends Canvas {
     public static enum VisibilityConstraint {
       AUTO,
       NONE,
-      ANCESTORS_BOUNDS,
       FULL_COMPONENT_TREE,
     }
     
