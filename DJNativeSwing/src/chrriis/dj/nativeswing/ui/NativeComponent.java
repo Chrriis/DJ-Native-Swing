@@ -495,7 +495,7 @@ public abstract class NativeComponent extends Canvas {
     
     public static enum DestructionTime {
       AUTO,
-      WHEN_REMOVED,
+      ON_REMOVAL,
       ON_FINALIZATION,
     }
     
@@ -607,7 +607,7 @@ public abstract class NativeComponent extends Canvas {
     FiliationType filiationType = nextInstanceOptions.getFiliationType();
     DestructionTime destructionTime = nextInstanceOptions.getDestructionTime();
     if(destructionTime == DestructionTime.AUTO) {
-      destructionTime = DestructionTime.WHEN_REMOVED;
+      destructionTime = DestructionTime.ON_REMOVAL;
     }
     VisibilityConstraint visibilityConstraint = nextInstanceOptions.getVisibilityConstraint();
     boolean isJNAPresent = isJNAPresent();
@@ -645,7 +645,7 @@ public abstract class NativeComponent extends Canvas {
         return new NativeComponentProxyWindow(this);
       default:
         switch(destructionTime) {
-          case WHEN_REMOVED:
+          case ON_REMOVAL:
             break;
           default:
             throw new IllegalStateException("Finalization-time destruction cannot be used without a proxied filiation!");
