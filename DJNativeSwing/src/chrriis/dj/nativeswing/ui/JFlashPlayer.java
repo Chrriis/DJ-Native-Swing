@@ -17,7 +17,10 @@ import java.io.InputStream;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -26,6 +29,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
+import chrriis.common.Registry;
 import chrriis.common.Utils;
 import chrriis.common.WebServer;
 import chrriis.common.WebServer.WebServerContent;
@@ -42,6 +46,45 @@ import chrriis.dj.nativeswing.ui.event.WebBrowserWindowOpeningEvent;
  */
 public class JFlashPlayer extends JPanel implements Disposable {
 
+  public static class FlashLoadingOptions {
+    
+    public FlashLoadingOptions() {
+      this(null, null);
+    }
+    
+    public FlashLoadingOptions(Map<String, String> parameters, Map<String, String> variables) {
+      setParameters(parameters);
+      setVariables(variables);
+    }
+    
+    protected Map<String, String> keyToValueVariableMap = new HashMap<String, String>();
+    
+    public Map<String, String> getVariables() {
+      return keyToValueVariableMap;
+    }
+    
+    public void setVariables(Map<String, String> keyToValueVariableMap) {
+      if(keyToValueVariableMap == null) {
+        keyToValueVariableMap = new HashMap<String, String>();
+      }
+      this.keyToValueVariableMap = keyToValueVariableMap;
+    }
+    
+    protected Map<String, String> keyToValueParameterMap = new HashMap<String, String>();
+    
+    public Map<String, String> getParameters() {
+      return keyToValueParameterMap;
+    }
+    
+    public void setParameters(Map<String, String> keyToValueParameterMap) {
+      if(keyToValueParameterMap == null) {
+        keyToValueParameterMap = new HashMap<String, String>();
+      }
+      this.keyToValueParameterMap = keyToValueParameterMap;
+    }
+    
+  }
+  
   private final ResourceBundle RESOURCES = ResourceBundle.getBundle(JFlashPlayer.class.getPackage().getName().replace('.', '/') + "/resource/FlashPlayer");
 
   private JPanel webBrowserPanel;
@@ -87,6 +130,8 @@ public class JFlashPlayer extends JPanel implements Disposable {
     }
   }
   
+  private int instanceID;
+  
   public JFlashPlayer() {
     super(new BorderLayout(0, 0));
     webBrowserPanel = new JPanel(new BorderLayout(0, 0));
@@ -122,6 +167,7 @@ public class JFlashPlayer extends JPanel implements Disposable {
     controlBarPane.add(stopButton);
     add(controlBarPane, BorderLayout.SOUTH);
     adjustBorder();
+    instanceID = Registry.getInstance().add(this);
   }
   
   private void adjustBorder() {
@@ -143,11 +189,18 @@ public class JFlashPlayer extends JPanel implements Disposable {
     return url;
   }
   
-  @SuppressWarnings("deprecation")
   public void setURL(String url) {
-    this.url = url;
+    setURL(url, new FlashLoadingOptions());
+  }
+  
+  private FlashLoadingOptions loadingOptions;
+  
+  @SuppressWarnings("deprecation")
+  public void setURL(String url, FlashLoadingOptions loadingOptions) {
+    this.loadingOptions = loadingOptions;
     if(url == null) {
       webBrowser.setText("");
+      this.url = url;
       return;
     }
     try {
@@ -155,20 +208,11 @@ public class JFlashPlayer extends JPanel implements Disposable {
     } catch(Exception e) {
       url = new File(url).toURI().toString();
     }
-    url = WebServer.getDefaultWebServer().getDynamicContentURL(JFlashPlayer.class.getName(), "html/" + isAutoStart + "/" + url);
+    this.url = url;
+    url = WebServer.getDefaultWebServer().getDynamicContentURL(JFlashPlayer.class.getName(), "html/" + instanceID);
     webBrowser.setURL(url);
   }
 
-  private boolean isAutoStart;
-
-  public void setAutoStart(boolean isAutoStart) {
-    this.isAutoStart = isAutoStart;
-  }
-  
-  public boolean isAutoStart() {
-    return isAutoStart;
-  }
-  
   public void play() {
     if(url == null) {
       return;
@@ -264,9 +308,11 @@ public class JFlashPlayer extends JPanel implements Disposable {
     String type = resourcePath.substring(0, index);
     resourcePath = resourcePath.substring(index + 1);
     if("html".equals(type)) {
-      index = resourcePath.indexOf('/');
-      final boolean isAutoStart = Boolean.parseBoolean(resourcePath.substring(0, index));
-      final String url = resourcePath.substring(index + 1);
+      final int instanceID = Integer.parseInt(resourcePath);
+      JFlashPlayer player = (JFlashPlayer)Registry.getInstance().get(instanceID);
+      if(player == null) {
+        return null;
+      }
       return new WebServerContent() {
         @Override
         public String getContentType() {
@@ -329,7 +375,7 @@ public class JFlashPlayer extends JPanel implements Disposable {
                 "    </style>" + LS +
                 "  </head>" + LS +
                 "  <body height=\"*\">" + LS +
-                "    <script src=\"" + WebServer.getDefaultWebServer().getDynamicContentURL(JFlashPlayer.class.getName(), "js/" + isAutoStart + "/" + url) + "\"></script>" + LS +
+                "    <script src=\"" + WebServer.getDefaultWebServer().getDynamicContentURL(JFlashPlayer.class.getName(), "js/" + instanceID) + "\"></script>" + LS +
                 "  </body>" + LS +
                 "</html>" + LS;
             return new ByteArrayInputStream(content.getBytes("UTF-8"));
@@ -341,9 +387,18 @@ public class JFlashPlayer extends JPanel implements Disposable {
       };
     }
     if("js".equals(type)) {
-      index = resourcePath.indexOf('/');
-      final boolean isAutoStart = Boolean.parseBoolean(resourcePath.substring(0, index));
-      String url = resourcePath.substring(index + 1);
+      final int instanceID = Integer.parseInt(resourcePath);
+      JFlashPlayer player = (JFlashPlayer)Registry.getInstance().get(instanceID);
+      if(player == null) {
+        return null;
+      }
+      String url = player.url;
+      // local files may have some security restrictions, so let's use our proxy.
+      if(url.startsWith("file:/")) {
+        url = WebServer.getDefaultWebServer().getResourcePathURL(url);
+      }
+      final FlashLoadingOptions loadingOptions = player.loadingOptions;
+      player.loadingOptions = null;
       final String escapedURL = Utils.escapeXML(url);
       return new WebServerContent() {
         @Override
@@ -352,11 +407,35 @@ public class JFlashPlayer extends JPanel implements Disposable {
         }
         public InputStream getInputStream() {
           try {
+            StringBuffer objectParameters = new StringBuffer();
+            StringBuffer embedParameters = new StringBuffer();
+            HashMap<String, String> parameters = new HashMap<String, String>(loadingOptions.getParameters());
+            StringBuffer variablesSB = new StringBuffer();
+            for(Entry<String, String> variable: loadingOptions.getVariables().entrySet()) {
+              if(variablesSB.length() > 0) {
+                variablesSB.append('&');
+              }
+              variablesSB.append(Utils.escapeXML(variable.getKey())).append('=').append(Utils.escapeXML(variable.getValue()));
+            }
+            if(variablesSB.length() > 0) {
+              parameters.put("flashvars", variablesSB.toString());
+            }
+            parameters.remove("swliveconnect");
+            parameters.remove("name");
+            parameters.remove("src");
+            parameters.remove("type");
+            for(Entry<String, String> param: parameters.entrySet()) {
+              String name = Utils.escapeXML(param.getKey());
+              String value = Utils.escapeXML(param.getValue());
+              embedParameters.append(' ').append(name).append("=\"").append(value).append("\"");
+              objectParameters.append("window.document.write('  <param name=\"").append(name).append("\" value=\"").append(value).append("\">');" + LS);
+            }
             String content =
                 "<!--" + LS +
                 "window.document.write('<object classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\" codebase=\"\" id=\"myFlashMovie\">');" + LS +
                 "window.document.write('  <param name=\"movie\" value=\"' + decodeURIComponent('" + escapedURL + "') + '\";\">');" + LS +
-                "window.document.write('  <embed play=\"" + isAutoStart + "\" swliveconnect=\"true\" name=\"myFlashMovie\" src=\"" + escapedURL + "\" quality=\"high\" type=\"application/x-shockwave-flash\">');" + LS +
+                objectParameters +
+                "window.document.write('  <embed" + embedParameters + " swliveconnect=\"true\" name=\"myFlashMovie\" src=\"" + escapedURL + "\" type=\"application/x-shockwave-flash\">');" + LS +
                 "window.document.write('  </embed>');" + LS +
                 "window.document.write('</object>');" + LS +
                 "//-->" + LS;

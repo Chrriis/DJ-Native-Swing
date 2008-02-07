@@ -5,6 +5,12 @@ Licence terms: LGPL (see licence.txt)
 
 ---------------------------------- Change log ----------------------------------
 
+* Version 0.9.4 (xxxxxxxxxxxxxxxx):
+
+- Flash player uses a proxy for local files to bypass security restrictions.
+- Flash player allows to set parameters and variables.
+
+
 * Version 0.9.3 (February 8, 2008):
 
 - Constraining the visibility of native components is possible (requires JNA).

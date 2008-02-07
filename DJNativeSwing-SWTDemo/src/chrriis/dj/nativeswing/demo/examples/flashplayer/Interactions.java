@@ -11,19 +11,20 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 
 import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.ui.JFlashPlayer;
+import chrriis.dj.nativeswing.ui.JFlashPlayer.FlashLoadingOptions;
 
 /**
  * @author Christopher Deckers
@@ -35,23 +36,10 @@ public class Interactions extends JPanel {
     JPanel flashPlayerPanel = new JPanel(new BorderLayout(0, 0));
     flashPlayerPanel.setBorder(BorderFactory.createTitledBorder("Native Flash Player component"));
     final JFlashPlayer flashPlayer = new JFlashPlayer();
-    flashPlayer.setAutoStart(true);
     String resourceURL = WebServer.getDefaultWebServer().getClassPathResourceURL(Interactions.class.getName(), "resource/dyn_text_moving.swf");
-    flashPlayer.setURL(resourceURL);
-    new Thread() {
-      @Override
-      public void run() {
-        try {
-          sleep(2000);
-        } catch(Exception e) {}
-        SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
-            // We have to delay, because setting a variable only works when the flash application is loaded.
-            flashPlayer.setVariable("mytext", "My Text");
-          }
-        });
-      }
-    }.start();
+    FlashLoadingOptions flashLoadingOptions = new FlashLoadingOptions();
+    flashLoadingOptions.setVariables(new HashMap<String, String>() {{put("mytext", "My Text");}});
+    flashPlayer.setURL(resourceURL, flashLoadingOptions);
     flashPlayerPanel.add(flashPlayer, BorderLayout.CENTER);
     add(flashPlayerPanel, BorderLayout.CENTER);
     JPanel variablePanel = new JPanel(new BorderLayout(0, 0));
