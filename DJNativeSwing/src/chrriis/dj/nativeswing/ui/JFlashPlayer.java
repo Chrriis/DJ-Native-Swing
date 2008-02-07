@@ -432,10 +432,10 @@ public class JFlashPlayer extends JPanel implements Disposable {
             }
             String content =
                 "<!--" + LS +
-                "window.document.write('<object classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\" codebase=\"\" id=\"myFlashMovie\">');" + LS +
+                "window.document.write('<object classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\" id=\"myFlashMovie\" codebase=\"http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,0,0\">');" + LS +
                 "window.document.write('  <param name=\"movie\" value=\"' + decodeURIComponent('" + escapedURL + "') + '\";\">');" + LS +
                 objectParameters +
-                "window.document.write('  <embed" + embedParameters + " swliveconnect=\"true\" name=\"myFlashMovie\" src=\"" + escapedURL + "\" type=\"application/x-shockwave-flash\">');" + LS +
+                "window.document.write('  <embed" + embedParameters + " swliveconnect=\"true\" name=\"myFlashMovie\" src=\"" + escapedURL + "\" type=\"application/x-shockwave-flash\" pluginspage=\"http://www.adobe.com/go/getflashplayer\">');" + LS +
                 "window.document.write('  </embed>');" + LS +
                 "window.document.write('</object>');" + LS +
                 "//-->" + LS;

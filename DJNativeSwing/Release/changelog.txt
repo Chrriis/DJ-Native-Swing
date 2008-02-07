@@ -7,6 +7,7 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.4 (xxxxxxxxxxxxxxxx):
 
+- Downloading Flash plugin should be made possible if not present.
 - Flash player uses a proxy for local files to bypass security restrictions.
 - Flash player allows to set parameters and variables.
 
