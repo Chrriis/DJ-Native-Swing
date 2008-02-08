@@ -34,7 +34,7 @@ public class Registry {
             } catch(Exception e) {
             }
             synchronized (LOCK) {
-              for(Integer instanceID: instanceIDToObjectReferenceMap.keySet()) {
+              for(Integer instanceID: instanceIDToObjectReferenceMap.keySet().toArray(new Integer[0])) {
                 if(instanceIDToObjectReferenceMap.get(instanceID).get() == null) {
                   instanceIDToObjectReferenceMap.remove(instanceID);
                 }
