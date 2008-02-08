@@ -38,6 +38,7 @@ import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
@@ -337,18 +338,29 @@ public abstract class NativeComponent extends Canvas {
   public void removeNotify() {
     if(shell != null) {
       isDisposed = true;
-      // Postponing removal seems a bit more stable on Linux, mainly when disposing straight after creation.
-      SwingUtilities.invokeLater(new Runnable() {
+      final Shell shell_ = shell;
+      // We have to differ, because on Linux with the web browser, there are often some asynchronous calls that fail...
+      Thread disposeThread = new Thread() {
+        @Override
         public void run() {
-          NativeInterfaceHandler.invokeSWT(new Runnable() {
-            public void run() {
-              NativeInterfaceHandler.disposeShell(shell);
-              shell = null;
-              control = null;
-            }
-          });
+          try {
+            sleep(5000);
+          } catch(Exception e) {
+          }
+          Display display = NativeInterfaceHandler.getDisplay();
+          if(display != null && !display.isDisposed()) {
+            display.asyncExec(new Runnable() {
+              public void run() {
+                NativeInterfaceHandler.disposeShell(shell_);
+              }
+            });
+          }
         }
-      });
+      };
+      disposeThread.setDaemon(true);
+      disposeThread.start();
+      shell = null;
+      control = null;
     }
     super.removeNotify();
   }
