@@ -339,12 +339,18 @@ public abstract class NativeComponent extends Canvas {
     if(shell != null) {
       isDisposed = true;
       final Shell shell_ = shell;
-      // We have to differ, because on Linux with the web browser, there are often some asynchronous calls that fail...
+      NativeInterfaceHandler.invokeSWT(new Runnable() {
+        public void run() {
+          shell.setEnabled(false);
+          control.setEnabled(false);
+        }
+      });
+      // We have to defer, because on Linux with the web browser, there are often some asynchronous calls that fail...
       Thread disposeThread = new Thread() {
         @Override
         public void run() {
           try {
-            sleep(5000);
+            sleep(500);
           } catch(Exception e) {
           }
           Display display = NativeInterfaceHandler.getDisplay();

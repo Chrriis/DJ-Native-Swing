@@ -222,34 +222,6 @@ public class NativeInterfaceHandler {
         });
       }
     });
-    Thread autoShutdownThread = new Thread("DJNativeSwing Auto-Shutdown") {
-      protected Thread[] activeThreads = new Thread[1024];
-      @Override
-      public void run() {
-        while(true) {
-          try {
-            Thread.sleep(500);
-          } catch(Exception e) {
-          }
-          ThreadGroup group = Thread.currentThread().getThreadGroup();
-          for(ThreadGroup parentGroup = group; (parentGroup = parentGroup.getParent()) != null; group = parentGroup);
-          boolean isAlive = false;
-          for(int i=group.enumerate(activeThreads, true)-1; i>=0; i--) {
-            Thread t = activeThreads[i];
-            if(t != displayThread && !t.isDaemon() && t.isAlive()) {
-              isAlive = true;
-              break;
-            }
-          }
-          if(!isAlive) {
-            isRunning = false;
-            display.wake();
-          }
-        }
-      }
-    };
-    autoShutdownThread.setDaemon(true);
-    autoShutdownThread.start();
   }
   
   private static void cleanUp() {
@@ -268,27 +240,6 @@ public class NativeInterfaceHandler {
   }
   
   public static void runEventPump() {
-    Thread wakeUpThread = new Thread("DJNativeSwing SWT wake-up") {
-      @Override
-      public void run() {
-        while(display != null) {
-          try {
-            sleep(50);
-            if(display != null && !display.isDisposed()) {
-              // for some reasons, need to wake up everytime it sleeps using a fake event
-              display.asyncExec(new Runnable() {
-                public void run() {
-                }
-              });
-            }
-          } catch(Exception e) {
-            e.printStackTrace();
-          }
-        }
-      }
-    };
-    wakeUpThread.setDaemon(true);
-    wakeUpThread.start();
     while(isRunning) {
       dispatch();
     }
@@ -297,7 +248,7 @@ public class NativeInterfaceHandler {
   
   private static void dispatch() {
     try {
-      if(display.readAndDispatch()) {
+      if(!display.readAndDispatch()) {
         if(isRunning) {
           display.sleep();
         }
