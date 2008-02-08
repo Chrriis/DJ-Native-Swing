@@ -424,6 +424,8 @@ public class JFlashPlayer extends JPanel implements Disposable {
             parameters.remove("name");
             parameters.remove("src");
             parameters.remove("type");
+            parameters.remove("width");
+            parameters.remove("height");
             for(Entry<String, String> param: parameters.entrySet()) {
               String name = Utils.escapeXML(param.getKey());
               String value = Utils.escapeXML(param.getValue());
