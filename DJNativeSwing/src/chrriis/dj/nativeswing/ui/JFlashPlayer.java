@@ -155,30 +155,30 @@ public class JFlashPlayer extends JPanel implements Disposable {
     }
     
     @Override
-    protected String getJavascriptFunctions() {
+    protected String getJavascriptDefinitions() {
       return
-      "      function playFM() {" + LS +
+      "      function playEO() {" + LS +
       "        var flashMovie = getEmbeddedObject();" + LS +
       "        flashMovie.Play();" + LS +
       "      }" + LS +
-      "      function stopFM() {" + LS +
+      "      function pauseEO() {" + LS +
       "        var flashMovie = getEmbeddedObject();" + LS +
       "        flashMovie.StopPlay();" + LS +
       "      }" + LS +
-      "      function rewindFM() {" + LS +
+      "      function stopEO() {" + LS +
       "        var flashMovie = getEmbeddedObject();" + LS +
       "        flashMovie.Rewind();" + LS +
       "      }" + LS +
-      "      function setVariableFM(variableName, variableValue) {" + LS +
+      "      function setVariableEO(variableName, variableValue) {" + LS +
       "        var flashMovie = getEmbeddedObject();" + LS +
       "        flashMovie.SetVariable(decodeURIComponent(variableName), decodeURIComponent(variableValue));" + LS +
       "      }" + LS +
-      "      function getVariableFM(variableName) {" + LS +
+      "      function getVariableEO(variableName) {" + LS +
       "        var flashMovie = getEmbeddedObject();" + LS +
       "        try {" + LS +
-      "          sendCommand('getVariableFM:' + flashMovie.GetVariable(decodeURIComponent(variableName)));" + LS +
+      "          sendCommand('getVariableEO:' + flashMovie.GetVariable(decodeURIComponent(variableName)));" + LS +
       "        } catch(e) {" + LS +
-      "          sendCommand('getVariableFM:');" + LS +
+      "          sendCommand('getVariableEO:');" + LS +
       "        }" + LS +
       "      }" + LS;
     }
@@ -252,28 +252,28 @@ public class JFlashPlayer extends JPanel implements Disposable {
     if(!webBrowserObject.hasContent()) {
       return;
     }
-    webBrowser.execute("playFM();");
+    webBrowser.execute("playEO();");
   }
   
   public void pause() {
     if(!webBrowserObject.hasContent()) {
       return;
     }
-    webBrowser.execute("stopFM();");
+    webBrowser.execute("pauseEO();");
   }
   
   public void stop() {
     if(!webBrowserObject.hasContent()) {
       return;
     }
-    webBrowser.execute("rewindFM();");
+    webBrowser.execute("stopEO();");
   }
   
   public void setVariable(String name, String value) {
     if(!webBrowserObject.hasContent()) {
       return;
     }
-    webBrowser.execute("setVariableFM('" + Utils.encodeURL(name) + "', '" + Utils.encodeURL(value) + "')");
+    webBrowser.execute("setVariableEO('" + Utils.encodeURL(name) + "', '" + Utils.encodeURL(value) + "')");
   }
   
   /**
@@ -288,13 +288,13 @@ public class JFlashPlayer extends JPanel implements Disposable {
     webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
       @Override
       public void commandReceived(WebBrowserEvent e, String command) {
-        if(command.startsWith("getVariableFM:")) {
-          getVariableResult[0] = command.substring("getVariableFM:".length());
+        if(command.startsWith("getVariableEO:")) {
+          getVariableResult[0] = command.substring("getVariableEO:".length());
           webBrowser.removeWebBrowserListener(this);
         }
       }
     });
-    webBrowser.execute("getVariableFM('" + Utils.encodeURL(name) + "');");
+    webBrowser.execute("getVariableEO('" + Utils.encodeURL(name) + "');");
     for(int i=0; i<20; i++) {
       if(getVariableResult[0] != TEMP_RESULT) {
         break;

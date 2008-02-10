@@ -105,7 +105,7 @@ public abstract class WebBrowserObject implements Disposable {
                 "          return document.getElementById(movieName);" + LS +
                 "        }" + LS +
                 "      }" + LS +
-                component.getJavascriptFunctions() +
+                component.getJavascriptDefinitions() + LS +
                 "      //-->" + LS +
                 "    </script>" + LS +
                 "    <style type=\"text/css\">" + LS +
@@ -168,6 +168,9 @@ public abstract class WebBrowserObject implements Disposable {
                 "window.document.write('  <embed" + embedParameters + " name=\"myEmbeddedObject\" " + objectHtmlConfiguration.getParamName() + "=\"" + escapedURL + "\" type=\"" + objectHtmlConfiguration.getMimeType() + "\" pluginspage=\"" + objectHtmlConfiguration.getInstallationURL() + "\">');" + LS +
                 "window.document.write('  </embed>');" + LS +
                 "window.document.write('</object>');" + LS +
+                "var embeddedObject = getEmbeddedObject();" + LS +
+                "embeddedObject.style.width = '100%';" + LS +
+                "embeddedObject.style.height = '100%';" + LS +
                 "//-->" + LS;
             return new ByteArrayInputStream(content.getBytes("UTF-8"));
           } catch(Exception e) {
@@ -263,6 +266,6 @@ public abstract class WebBrowserObject implements Disposable {
   
   protected abstract ObjectHTMLConfiguration getObjectHtmlConfiguration();
  
-  protected abstract String getJavascriptFunctions();
+  protected abstract String getJavascriptDefinitions();
   
 }
