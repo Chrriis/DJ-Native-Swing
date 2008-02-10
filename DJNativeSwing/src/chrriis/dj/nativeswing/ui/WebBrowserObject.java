@@ -109,7 +109,7 @@ public abstract class WebBrowserObject implements Disposable {
                 "      //-->" + LS +
                 "    </script>" + LS +
                 "    <style type=\"text/css\">" + LS +
-                "      html, object, embed, div, body { width: 100%; height: 100%; min-height: 100%; margin: 0; padding: 0; overflow: hidden; }" + LS +
+                "      html, object, embed, div, body { position: absolute; left:0; top:0; vertical-align: middle; text-align: center; width: 100%; height: 100%; min-height: 100%; margin: 0; padding: 0; overflow: hidden; }" + LS +
                 "      div { background-color: #FFFFFF; }" + LS +
                 "    </style>" + LS +
                 "  </head>" + LS +
@@ -168,6 +168,7 @@ public abstract class WebBrowserObject implements Disposable {
                 "window.document.write('  <embed" + embedParameters + " name=\"myEmbeddedObject\" " + objectHtmlConfiguration.getParamName() + "=\"" + escapedURL + "\" type=\"" + objectHtmlConfiguration.getMimeType() + "\" pluginspage=\"" + objectHtmlConfiguration.getInstallationURL() + "\">');" + LS +
                 "window.document.write('  </embed>');" + LS +
                 "window.document.write('</object>');" + LS +
+                "window.document.write('<div>" + objectHtmlConfiguration.getHTMLLoadingMessage() + "</div>');" + LS +
                 "var embeddedObject = getEmbeddedObject();" + LS +
                 "embeddedObject.style.width = '100%';" + LS +
                 "embeddedObject.style.height = '100%';" + LS +
@@ -192,6 +193,17 @@ public abstract class WebBrowserObject implements Disposable {
   }
 
   protected static class ObjectHTMLConfiguration {
+    
+    private String htmlLoadingMessage;
+    
+    public void setHTMLLoadingMessage(String htmlLoadingMessage) {
+      this.htmlLoadingMessage = htmlLoadingMessage;
+    }
+    
+    public String getHTMLLoadingMessage() {
+      return htmlLoadingMessage;
+    }
+    
     private String windowsClassID;
     
     public void setWindowsClassID(String windowsClassID) {
