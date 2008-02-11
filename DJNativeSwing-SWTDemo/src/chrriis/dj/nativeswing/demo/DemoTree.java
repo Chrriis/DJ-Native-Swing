@@ -29,6 +29,7 @@ import chrriis.dj.nativeswing.demo.examples.introduction.Codewise;
 import chrriis.dj.nativeswing.demo.examples.introduction.NativeIntegration;
 import chrriis.dj.nativeswing.demo.examples.introduction.TheSolution;
 import chrriis.dj.nativeswing.demo.examples.utilities.FileAssociations;
+import chrriis.dj.nativeswing.demo.examples.vlcplayer.SimpleVLCPlayerExample;
 import chrriis.dj.nativeswing.demo.examples.webbrowser.JavascriptExecution;
 import chrriis.dj.nativeswing.demo.examples.webbrowser.NavigationControl;
 import chrriis.dj.nativeswing.demo.examples.webbrowser.SendingCommands;
@@ -61,6 +62,9 @@ public class DemoTree extends JTree {
     exampleGroupList.add(new ExampleGroup("JFlashPlayer", new Example[] {
         new Example("Simple Example", SimpleFlashExample.class, "Display a flash application.", true),
         new Example("Interactions", Interactions.class, "Control a flash animation, and get/set variables.", true),
+    }));
+    exampleGroupList.add(new ExampleGroup("JVLCPlayer", new Example[] {
+        new Example("Simple Example", SimpleVLCPlayerExample.class, "Load a movie/sound file to an embedded VLC player.", true),
     }));
     exampleGroupList.add(new ExampleGroup("Component Options", new Example[] {
         new Example("Visibility Constraint", VisibilityConstraintOption.class, "Constrain the visibility to superimpose Swing and native components.", true),

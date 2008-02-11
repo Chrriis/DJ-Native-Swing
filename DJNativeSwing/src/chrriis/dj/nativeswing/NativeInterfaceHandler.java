@@ -79,7 +79,7 @@ public class NativeInterfaceHandler {
             String className = stackTraceElement.getClassName();
             String methodName = stackTraceElement.getMethodName();
             if("java.lang.Runtime".equals(className) && ("exit".equals(methodName) || "halt".equals(methodName)) || "java.lang.System".equals(className) && "exit".equals(methodName)) {
-              display.syncExec(new Runnable() {
+              invokeSWT(new Runnable() {
                 public void run() {
                   cleanUp();
                 }
@@ -225,7 +225,9 @@ public class NativeInterfaceHandler {
   }
   
   private static void cleanUp() {
-    for(Shell shell: shellList) {
+    for(int i=canvasList.size()-1; i>=0; i--) {
+      canvasList.get(i).removeNotify();
+      Shell shell = shellList.get(i);
       try {
         shell.dispose();
       } catch(Exception e) {
