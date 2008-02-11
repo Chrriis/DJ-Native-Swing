@@ -49,7 +49,7 @@ public class SimpleVLCPlayerExample extends JPanel {
     cons.fill = GridBagConstraints.HORIZONTAL;
     gridBag.setConstraints(playerFileLabel, cons);
     playerFilePanel.add(playerFileLabel);
-    final JTextField playerFileTextField = new JTextField("http://80.118.196.219/webtv-asx.cgi?channel=nrj_hits");
+    final JTextField playerFileTextField = new JTextField();
     cons.gridx++;
     cons.weightx = 1;
     gridBag.setConstraints(playerFileTextField, cons);
