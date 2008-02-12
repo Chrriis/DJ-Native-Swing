@@ -7,6 +7,7 @@
  */
 package chrriis.common;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -69,4 +70,24 @@ public class Utils {
     return sb.toString();
   }
 
+  /**
+   * @return null or a valid File if the path is a URL or path to a valid local file (that exists).
+   */
+  public static File getLocalFile(String path) {
+    if(path == null) {
+      return null;
+    }
+    if(path.startsWith("file:")) {
+      File file = new File(path.substring("file:".length()));
+      if(file.exists()) {
+        return file;
+      }
+    }
+    File file = new File(path);
+    if(file.exists()) {
+      return file;
+    }
+    return null;
+  }
+  
 }

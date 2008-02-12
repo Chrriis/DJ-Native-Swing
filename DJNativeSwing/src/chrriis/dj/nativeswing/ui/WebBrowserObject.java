@@ -10,7 +10,6 @@ package chrriis.dj.nativeswing.ui;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -33,7 +32,6 @@ public abstract class WebBrowserObject implements Disposable {
   public WebBrowserObject(JWebBrowser webBrowser) {
     this.webBrowser = webBrowser;
     webBrowser.setBarsVisible(false);
-    instanceID = Registry.getInstance().add(this);
   }
   
   private String url;
@@ -52,6 +50,8 @@ public abstract class WebBrowserObject implements Disposable {
     if(url == null) {
       webBrowser.setText("");
     }
+    Registry.getInstance().remove(instanceID);
+    instanceID = Registry.getInstance().add(this);
     url = WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "html/" + instanceID);
     webBrowser.setURL(url);
   }
@@ -126,13 +126,8 @@ public abstract class WebBrowserObject implements Disposable {
       }
       String url = component.url;
       // local files may have some security restrictions, so let's use our proxy.
-      try {
-        new URL(url);
-      } catch(Exception e) {
-        url = new File(url).toURI().toString();
-      }
-      if(url.startsWith("file:")) {
-        File file = new File(url.substring("file:".length()));
+      File file = Utils.getLocalFile(url);
+      if(file != null) {
         url = WebServer.getDefaultWebServer().getResourcePathURL(file.getParent(), file.getName());
       }
       final String escapedURL = Utils.escapeXML(url);

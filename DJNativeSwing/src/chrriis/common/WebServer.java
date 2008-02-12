@@ -495,7 +495,12 @@ public class WebServer {
           resourceURL += path.startsWith("/")? path: "/" + path;
         }
       } catch(Exception e) {
-        resourceURL = new File(codeBase, parameter).toURI().toString();
+        File file = Utils.getLocalFile(new File(codeBase, parameter).getAbsolutePath());
+        if(file != null) {
+          resourceURL = new File(codeBase, parameter).toURI().toString();
+        } else {
+          resourceURL = codeBase + "/" + parameter;
+        }
       }
       final String resourceURL_ = resourceURL;
       return new WebServerContent() {

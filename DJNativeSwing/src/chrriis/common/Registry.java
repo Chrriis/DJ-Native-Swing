@@ -82,6 +82,10 @@ public class Registry {
     }
   }
   
+  public void remove(int instanceID) {
+    instanceIDToObjectReferenceMap.remove(instanceID);
+  }
+  
   private static Registry registry = new Registry();
   
   public static Registry getInstance() {
