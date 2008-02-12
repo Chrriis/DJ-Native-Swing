@@ -334,10 +334,9 @@ public abstract class NativeComponent extends Canvas {
     return isDisposed;
   }
   
-  @Override
-  public void removeNotify() {
+  protected void releaseResources() {
+    isDisposed = true;
     if(shell != null) {
-      isDisposed = true;
       final Shell shell_ = shell;
       NativeInterfaceHandler.invokeSWT(new Runnable() {
         public void run() {
@@ -365,9 +364,14 @@ public abstract class NativeComponent extends Canvas {
       };
       disposeThread.setDaemon(true);
       disposeThread.start();
-      shell = null;
-      control = null;
     }
+    shell = null;
+    control = null;
+  }
+  
+  @Override
+  public void removeNotify() {
+    releaseResources();
     super.removeNotify();
   }
 

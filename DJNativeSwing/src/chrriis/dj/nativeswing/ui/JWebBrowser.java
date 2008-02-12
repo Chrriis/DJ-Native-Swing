@@ -511,6 +511,7 @@ public class JWebBrowser extends JPanel implements Disposable {
     if(embeddableComponent instanceof Disposable) {
       ((Disposable)embeddableComponent).dispose();
     }
+    nativeComponent.releaseResources();
   }
   
   public boolean isDisposed() {
