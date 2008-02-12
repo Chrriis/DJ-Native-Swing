@@ -48,17 +48,10 @@ public abstract class WebBrowserObject implements Disposable {
   
   @SuppressWarnings("deprecation")
   public void setURL(String url) {
+    this.url = url;
     if(url == null) {
       webBrowser.setText("");
-      this.url = url;
-      return;
     }
-    try {
-      new URL(url);
-    } catch(Exception e) {
-      url = new File(url).toURI().toString();
-    }
-    this.url = url;
     url = WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "html/" + instanceID);
     webBrowser.setURL(url);
   }
@@ -133,8 +126,14 @@ public abstract class WebBrowserObject implements Disposable {
       }
       String url = component.url;
       // local files may have some security restrictions, so let's use our proxy.
-      if(url.startsWith("file:/")) {
-        url = WebServer.getDefaultWebServer().getResourcePathURL(url);
+      try {
+        new URL(url);
+      } catch(Exception e) {
+        url = new File(url).toURI().toString();
+      }
+      if(url.startsWith("file:")) {
+        File file = new File(url.substring("file:".length()));
+        url = WebServer.getDefaultWebServer().getResourcePathURL(file.getParent(), file.getName());
       }
       final String escapedURL = Utils.escapeXML(url);
       return new WebServerContent() {

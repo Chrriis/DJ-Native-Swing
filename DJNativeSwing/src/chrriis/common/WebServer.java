@@ -422,10 +422,6 @@ public class WebServer {
     return getURLPrefix() + "/classpath" + resourcePath;
   }
   
-  public String getResourcePathURL(String resourcePath) {
-    return getResourcePathURL(null, resourcePath);
-  }
-  
   public String getResourcePathURL(String codeBase, String resourcePath) {
     if(codeBase == null) {
       codeBase = ".";
