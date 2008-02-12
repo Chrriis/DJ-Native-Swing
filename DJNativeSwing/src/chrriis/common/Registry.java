@@ -56,6 +56,9 @@ public class Registry {
   private int nextInstanceID;
   private Map<Integer, WeakReference<Object>> instanceIDToObjectReferenceMap = new HashMap<Integer, WeakReference<Object>>();
   
+  /**
+   * @return an instance ID that is strictly greater than 0.
+   */
   public int add(Object o) {
     synchronized (LOCK) {
       int instanceID = nextInstanceID++;

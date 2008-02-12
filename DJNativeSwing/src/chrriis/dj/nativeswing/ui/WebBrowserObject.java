@@ -47,13 +47,23 @@ public abstract class WebBrowserObject implements Disposable {
   @SuppressWarnings("deprecation")
   public void setURL(String url) {
     this.url = url;
+    Registry.getInstance().remove(instanceID);
     if(url == null) {
       webBrowser.setText("");
+      return;
     }
-    Registry.getInstance().remove(instanceID);
     instanceID = Registry.getInstance().add(this);
-    url = WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "html/" + instanceID);
-    webBrowser.setURL(url);
+    new Thread() {
+      @Override
+      public void run() {
+        try {
+          sleep(1500);
+        } catch(Exception e) {
+        }
+        String url = WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "html/" + instanceID);
+        webBrowser.setURL(url);
+      }
+    }.start();
   }
 
   protected static final String LS = System.getProperty("line.separator");
