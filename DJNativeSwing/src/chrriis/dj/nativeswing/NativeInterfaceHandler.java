@@ -59,13 +59,15 @@ public class NativeInterfaceHandler {
     if(isRunning) {
       return;
     }
-    try {
-      String systemLookAndFeelClassName = UIManager.getSystemLookAndFeelClassName();
-      if(!"com.sun.java.swing.plaf.gtk.GTKLookAndFeel".equals(systemLookAndFeelClassName)) {
-        UIManager.setLookAndFeel(systemLookAndFeelClassName);
+    if(!Boolean.parseBoolean(System.getProperty("dj.nativeswing.preservelaf"))) {
+      try {
+        String systemLookAndFeelClassName = UIManager.getSystemLookAndFeelClassName();
+        if(!"com.sun.java.swing.plaf.gtk.GTKLookAndFeel".equals(systemLookAndFeelClassName)) {
+          UIManager.setLookAndFeel(systemLookAndFeelClassName);
+        }
+      } catch(Exception e) {
+        e.printStackTrace();
       }
-    } catch(Exception e) {
-      e.printStackTrace();
     }
     // We set up a new security manager to track exit calls.
     // When this happens, we dispose native resources to avoid freezes.
