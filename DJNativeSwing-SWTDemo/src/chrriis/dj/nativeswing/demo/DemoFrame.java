@@ -180,6 +180,7 @@ public class DemoFrame extends JFrame {
   }
   
   public static void main(String[] args) {
+    NativeInterfaceHandler.setPreferredLookAndFeel();
     NativeInterfaceHandler.init();
     Toolkit.getDefaultToolkit().setDynamicLayout(true);
     SwingUtilities.invokeLater(new Runnable() {

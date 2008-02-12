@@ -54,20 +54,21 @@ public class NativeInterfaceHandler {
     }
     return windowSet == null? new Window[0]: windowSet.toArray(new Window[0]);
   }
+
+  public static void setPreferredLookAndFeel() {
+    try {
+      String systemLookAndFeelClassName = UIManager.getSystemLookAndFeelClassName();
+      if(!"com.sun.java.swing.plaf.gtk.GTKLookAndFeel".equals(systemLookAndFeelClassName)) {
+        UIManager.setLookAndFeel(systemLookAndFeelClassName);
+      }
+    } catch(Exception e) {
+      e.printStackTrace();
+    }
+  }
   
   public static void init() {
     if(isRunning) {
       return;
-    }
-    if(!Boolean.parseBoolean(System.getProperty("dj.nativeswing.preservelaf"))) {
-      try {
-        String systemLookAndFeelClassName = UIManager.getSystemLookAndFeelClassName();
-        if(!"com.sun.java.swing.plaf.gtk.GTKLookAndFeel".equals(systemLookAndFeelClassName)) {
-          UIManager.setLookAndFeel(systemLookAndFeelClassName);
-        }
-      } catch(Exception e) {
-        e.printStackTrace();
-      }
     }
     // We set up a new security manager to track exit calls.
     // When this happens, we dispose native resources to avoid freezes.
