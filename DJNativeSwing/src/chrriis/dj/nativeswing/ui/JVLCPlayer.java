@@ -70,9 +70,9 @@ public class JVLCPlayer extends JPanel implements Disposable {
       ObjectHTMLConfiguration objectHTMLConfiguration = new ObjectHTMLConfiguration();
       objectHTMLConfiguration.setHTMLLoadingMessage(RESOURCES.getString("LoadingMessage"));
       objectHTMLConfiguration.setHTMLParameters(loadingOptions.getParameters());
-      objectHTMLConfiguration.setWindowsClassID("E23FE9C6-778E-49D4-B537-38FCDE4887D8_____________");
+      objectHTMLConfiguration.setWindowsClassID("E23FE9C6-778E-49D4-B537-38FCDE4887D8");
       objectHTMLConfiguration.setWindowsInstallationURL("http://downloads.videolan.org/pub/videolan/vlc/latest/win32/axvlc.cab");
-      objectHTMLConfiguration.setMimeType("application/x-vlc-plugin________________");
+      objectHTMLConfiguration.setMimeType("application/x-vlc-plugin");
       objectHTMLConfiguration.setInstallationURL("http://www.videolan.org");
       objectHTMLConfiguration.setWindowsParamName("Src");
       objectHTMLConfiguration.setParamName("target");
