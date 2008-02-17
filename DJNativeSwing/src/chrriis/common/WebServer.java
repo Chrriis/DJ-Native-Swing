@@ -426,7 +426,7 @@ public class WebServer {
     if(codeBase == null) {
       codeBase = ".";
     }
-    return getURLPrefix() + "/resource/" + Utils.encodeURL(codeBase) + "/" + resourcePath;
+    return getURLPrefix() + "/resource/" + Utils.encodeURL(codeBase) + "/" + Utils.encodeURL(resourcePath);
   }
   
   public WebServerContent getURLContent(String resourceURL) {
@@ -479,6 +479,7 @@ public class WebServer {
       };
     }
     if("resource".equals(type)) {
+      parameter = Utils.decodeURL(parameter);
       index = parameter.indexOf('/');
       String codeBase = Utils.decodeURL(parameter.substring(0, index));
       parameter = parameter.substring(index + 1);
