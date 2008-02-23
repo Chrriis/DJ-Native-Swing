@@ -163,12 +163,12 @@ public abstract class WebBrowserObject implements Disposable {
               String name = Utils.escapeXML(param.getKey());
               String value = Utils.escapeXML(param.getValue());
               embedParameters.append(' ').append(name).append("=\"").append(value).append("\"");
-              objectParameters.append("window.document.write('  <param name=\"").append(name).append("\" value=\"").append(value).append("\">');" + LS);
+              objectParameters.append("window.document.write('  <param name=\"").append(name).append("\" value=\"").append(value).append("\"/>');" + LS);
             }
             String content =
                 "<!--" + LS +
                 "window.document.write('<object classid=\"clsid:" + objectHtmlConfiguration.getWindowsClassID() + "\" id=\"myEmbeddedObject\" codebase=\"" + objectHtmlConfiguration.getWindowsInstallationURL() + "\" events=\"true\">');" + LS +
-                "window.document.write('  <param name=\"" + objectHtmlConfiguration.getWindowsParamName() + "\" value=\"' + decodeURIComponent('" + escapedURL + "') + '\";\">');" + LS +
+                "window.document.write('  <param name=\"" + objectHtmlConfiguration.getWindowsParamName() + "\" value=\"' + decodeURIComponent('" + escapedURL + "') + '\";\"/>');" + LS +
                 objectParameters +
                 "window.document.write('  <embed" + embedParameters + " name=\"myEmbeddedObject\" " + objectHtmlConfiguration.getParamName() + "=\"" + escapedURL + "\" type=\"" + objectHtmlConfiguration.getMimeType() + "\" pluginspage=\"" + objectHtmlConfiguration.getInstallationURL() + "\">');" + LS +
                 "window.document.write('  </embed>');" + LS +
