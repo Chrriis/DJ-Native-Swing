@@ -763,7 +763,7 @@ public abstract class NativeComponent extends Canvas {
   @Override
   public boolean hasFocus() {
     boolean hasFocus = super.hasFocus();
-    if(!hasFocus) {
+    if(!hasFocus && isValidControl && !isDisposed) {
       return (Boolean)syncExec(new CMN_hasFocus());
     }
     return hasFocus;
