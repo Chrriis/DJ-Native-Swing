@@ -112,6 +112,8 @@ public class NativeInterfaceHandler {
     ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
     JPopupMenu.setDefaultLightWeightPopupEnabled(false);
     System.setProperty("JPopupMenu.defaultLWPopupEnabledKey", "false");
+    // We use our own HW forcing, so we disable the one from JNA
+    System.setProperty("jna.force_hw_popups", "false");
     // Create the interface to communicate with the process handling the native side
     messagingInterface = createMessagingInterface();
     // Create window monitor
