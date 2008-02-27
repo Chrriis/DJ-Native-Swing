@@ -62,7 +62,7 @@ public class FileAssociations extends JPanel {
   }
   
   protected void initialize() {
-    new Thread() {
+    new Thread("NativeSwingDemo File Association Loader") {
       @Override
       public void run() {
         final FileTypeLauncher[] fileTypeLaunchers = FileTypeLauncher.getLaunchers();

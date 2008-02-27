@@ -12,8 +12,8 @@ import java.awt.Canvas;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.HierarchyEvent;
@@ -21,6 +21,9 @@ import java.awt.event.HierarchyListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+import java.io.BufferedReader;
+import java.io.StringReader;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.EventListener;
@@ -39,10 +42,12 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import chrriis.common.Registry;
 import chrriis.common.Utils;
+import chrriis.dj.nativeswing.CommandMessage;
+import chrriis.dj.nativeswing.Message;
 import chrriis.dj.nativeswing.NativeInterfaceHandler;
 import chrriis.dj.nativeswing.ui.NativeComponent.Options.DestructionTime;
 import chrriis.dj.nativeswing.ui.NativeComponent.Options.FiliationType;
@@ -50,55 +55,126 @@ import chrriis.dj.nativeswing.ui.NativeComponent.Options.VisibilityConstraint;
 import chrriis.dj.nativeswing.ui.event.InitializationEvent;
 import chrriis.dj.nativeswing.ui.event.InitializationListener;
 
+import com.sun.jna.Native;
+
 /**
  * @author Christopher Deckers
  */
 public abstract class NativeComponent extends Canvas {
 
-  private Shell shell;
-  private volatile Control control;
-  private volatile List<Runnable> initializationRunnableList = new ArrayList<Runnable>();
+  static Object syncExec(Control control, CommandMessage commandMessage, Object... args) {
+    NativeInterfaceHandler.checkUIThread();
+    if(commandMessage instanceof ControlCommandMessage) {
+      ((ControlCommandMessage)commandMessage).setControl(control);
+    }
+    return commandMessage.syncExecArgs(args);
+  }
+  
+  static void asyncExec(Control control, CommandMessage commandMessage, Object... args) {
+    NativeInterfaceHandler.checkUIThread();
+    if(commandMessage instanceof ControlCommandMessage) {
+      ((ControlCommandMessage)commandMessage).setControl(control);
+    }
+    commandMessage.asyncExecArgs(args);
+  }
+  
+  Object syncExec(CommandMessage commandMessage, Object... args) {
+    NativeInterfaceHandler.checkUIThread();
+    if(commandMessage instanceof ControlCommandMessage) {
+      ((ControlCommandMessage)commandMessage).setNativeComponent(this);
+    }
+    return commandMessage.syncExecArgs(args);
+  }
+  
+  void asyncExec(CommandMessage commandMessage, Object... args) {
+    NativeInterfaceHandler.checkUIThread();
+    if(commandMessage instanceof ControlCommandMessage) {
+      ((ControlCommandMessage)commandMessage).setNativeComponent(this);
+    }
+    commandMessage.asyncExecArgs(args);
+  }
+  
+  private volatile List<CommandMessage> initializationCommandMessageList = new ArrayList<CommandMessage>();
+
+  /**
+   * Run the given command if the control is created, or store it to play it when the creation occurs.
+   * If the component is disposed before the command has a chance to run, it is ignored silently.
+   */
+  protected Object run(CommandMessage commandMessage, Object... args) {
+    NativeInterfaceHandler.checkUIThread();
+    if(initializationCommandMessageList != null) {
+      commandMessage.setArgs(args);
+      if(commandMessage instanceof ControlCommandMessage) {
+        ((ControlCommandMessage)commandMessage).setNativeComponent(this);
+      }
+      initializationCommandMessageList.add(commandMessage);
+      return null;
+    }
+    if(!isValidControl) {
+      commandMessage.setArgs(args);
+      printFailedInvocation(commandMessage);
+      return null;
+    }
+    return syncExec(commandMessage, args);
+  }
+  
+  private void printFailedInvocation(Message message) {
+    System.err.println("Invalid " + getClass().getName() + "[" + hashCode() + "]: " + message);
+  }
+  
+  private static Registry registry = new Registry();
+  
+  protected abstract static class ControlCommandMessage extends CommandMessage {
+    private int componentID;
+    public int getComponentID() {
+      return componentID;
+    }
+    public void setControl(Control control) {
+      this.componentID = (Integer)control.getData("NS_ID");
+    }
+    public void setNativeComponent(NativeComponent nativeComponent) {
+      this.componentID = nativeComponent.id;
+    }
+    public Control getControl() {
+      return (Control)NativeComponent.registry.get(componentID);
+    }
+    public NativeComponent getComponent() {
+      return (NativeComponent)NativeComponent.registry.get(componentID);
+    }
+    @Override
+    public boolean isValid() {
+      if(NativeInterfaceHandler.isNativeSide()) {
+        return getControl() != null;
+      }
+      return getComponent() != null;
+    }
+  }
+  
+  private static class CMN_reshape extends ControlCommandMessage {
+    @Override
+    public Object run() throws Exception {
+      getControl().getShell().setSize((Integer)args[0], (Integer)args[1]);
+      return null;
+    }
+  }
+
+  private int id;
+
+  private static class CMN_transferFocus extends ControlCommandMessage {
+    @Override
+    public Object run() throws Exception {
+      getControl().traverse(SWT.TRAVERSE_TAB_NEXT);
+      return null;
+    }
+  }
 
   public NativeComponent() {
+    id = NativeComponent.registry.add(this);
     addFocusListener(new FocusAdapter() {
       @Override
       public void focusGained(FocusEvent e) {
-        if(control != null) {
-          NativeInterfaceHandler.invokeSWT(new Runnable() {
-            public void run() {
-              if(control != null && !control.isDisposed()) {
-                control.traverse(SWT.TRAVERSE_TAB_NEXT);
-              }
-            }
-          });
-        }
-      }
-    });
-    // Setting the width/height to Integer.MAX_VALUE is not enough.
-    // The following code sets the size one pixel bigger after the first resize and revalidates.
-    // This fixes wrong computations of native scrollbars in components like the web browser.
-    addComponentListener(new ComponentAdapter() {
-      @Override
-      public void componentResized(ComponentEvent e) {
-        if(control != null) {
-          int width = getWidth();
-          int height = getHeight();
-          if(width != 0 && height != 0) {
-            removeComponentListener(this);
-            control.getDisplay().asyncExec(new Runnable() {
-              public void run() {
-                if(!control.isDisposed()) {
-                  control.setSize(getWidth() + 1, getHeight() + 1);
-                  SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                      doLayout();
-                      repaint();
-                    }
-                  });
-                }
-              }
-            });
-          }
+        if(isValidControl && !isDisposed()) {
+          run(new CMN_transferFocus());
         }
       }
     });
@@ -114,259 +190,301 @@ public abstract class NativeComponent extends Canvas {
       }
     });
   }
-
-  static interface NativeComponentHolder {}
   
-  private NativeComponentProxy componentProxy;
+  protected Thread resizeThread;
   
-  void setComponentProxy(NativeComponentProxy componentProxy) {
-    this.componentProxy = componentProxy;
-  }
-  
-  public Component getComponentProxy() {
-    return componentProxy;
-  }
-  
-  private int buttonPressedCount;
-  private Point lastLocation = new Point(-1, -1);
-  
-  protected void dispatchMouseEvent(org.eclipse.swt.events.MouseEvent e, int type) {
-    if(!isShowing()) {
-      return;
-    }
-    switch(type) {
-      case MouseEvent.MOUSE_PRESSED:
-        buttonPressedCount++;
-        break;
-      case MouseEvent.MOUSE_RELEASED:
-        buttonPressedCount--;
-        break;
-      case MouseEvent.MOUSE_DRAGGED:
-      case MouseEvent.MOUSE_MOVED:
-        Point newLocation = new Point(e.x, e.y);
-        if(newLocation.equals(lastLocation)) {
-          return;
-        }
-        lastLocation = newLocation;
-        break;
-    }
-    int button = UIUtils.translateMouseButton(e.button);
-    if(button == 0) {
-      switch(type) {
-        case MouseEvent.MOUSE_PRESSED:
-        case MouseEvent.MOUSE_RELEASED:
-        case MouseEvent.MOUSE_CLICKED:
-          return;
-      }
-    }
-    if(buttonPressedCount != 0 && type == MouseEvent.MOUSE_MOVED) {
-      type = MouseEvent.MOUSE_DRAGGED;
-    }
-    final MouseEvent me;
-    if(Utils.IS_JAVA_6_OR_GREATER) {
-      // Not specifying the absX and Y in Java 6 results in a deadlock when pressing alt+F4 while moving the mouse over a native control
-      Point cursorLocation = e.display.getCursorLocation();
-      if(type == MouseEvent.MOUSE_WHEEL) {
-        me = new MouseWheelEvent(this, type, System.currentTimeMillis(), UIUtils.translateModifiers(e.stateMask), e.x, e.y, cursorLocation.x, cursorLocation.y, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, e.count, 1);
-      } else {
-        me = new MouseEvent(this, type, System.currentTimeMillis(), UIUtils.translateModifiers(e.stateMask), e.x, e.y, cursorLocation.x, cursorLocation.y, e.count, false, button);
-      }
-    } else {
-      if(type == MouseEvent.MOUSE_WHEEL) {
-        me = new MouseWheelEvent(this, type, System.currentTimeMillis(), UIUtils.translateModifiers(e.stateMask), e.x, e.y, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, e.count, 1);
-      } else {
-        me = new MouseEvent(this, type, System.currentTimeMillis(), UIUtils.translateModifiers(e.stateMask), e.x, e.y, e.count, false, button);
-      }
-    }
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        dispatchEvent(me);
-      }
-    });
-  }
-  
-  protected void dispatchKeyEvent(org.eclipse.swt.events.KeyEvent e, int type) {
-    if(!isShowing()) {
-      return;
-    }
-    char character = e.character;
-    int keyCode;
-    if(type == KeyEvent.KEY_TYPED) {
-      if(character == '\0') {
-        return;
-      }
-      keyCode = KeyEvent.VK_UNDEFINED;
-    } else {
-      keyCode = UIUtils.translateKeyCode(e.keyCode);
-    }
-    final KeyEvent ke = new KeyEvent(this, type, System.currentTimeMillis(), UIUtils.translateModifiers(e.stateMask), keyCode, character);
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        dispatchEvent(ke);
-      }
-    });
-  }
-
+  @SuppressWarnings("deprecation")
   @Override
-  public void addNotify() {
-    super.addNotify();
-    if(initializationRunnableList == null) {
-      throw new IllegalStateException("A native component cannot be re-created after having been disposed! To achieve re-parenting, set the options to use a proxied filiation and a finalization-time destruction.");
-    }
-    NativeInterfaceHandler.invokeSWT(new Runnable() {
-      public void run() {
-        shell = NativeInterfaceHandler.createShell(NativeComponent.this);
-        shell.setLayout (new FillLayout());
-        if(!NativeComponent.this.isShowing()) {
-          shell.setEnabled(false);
-        }
-        control = createControl(shell);
-        if(control != null) {
-          // Setting a big size rather than the default (0, 0) helps having proper scrollbars
-          control.setSize(Integer.MAX_VALUE, Integer.MAX_VALUE);
-          control.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseDown(org.eclipse.swt.events.MouseEvent e) {
-              dispatchMouseEvent(e, MouseEvent.MOUSE_PRESSED);
-            }
-            @Override
-            public void mouseUp(org.eclipse.swt.events.MouseEvent e) {
-              dispatchMouseEvent(e, MouseEvent.MOUSE_RELEASED);
-            }
-          });
-          control.addMouseMoveListener(new MouseMoveListener() {
-            public void mouseMove(org.eclipse.swt.events.MouseEvent e) {
-              dispatchMouseEvent(e, MouseEvent.MOUSE_MOVED);
-            }
-          });
-          control.addMouseWheelListener(new MouseWheelListener() {
-            public void mouseScrolled(org.eclipse.swt.events.MouseEvent e) {
-              dispatchMouseEvent(e, MouseEvent.MOUSE_WHEEL);
-            }
-          });
-          control.addKeyListener(new KeyListener() {
-            public void keyPressed(org.eclipse.swt.events.KeyEvent e) {
-              if((e.stateMask & SWT.CONTROL) != 0 && e.keyCode == SWT.TAB) {
-                final boolean isBackward = (e.stateMask & SWT.SHIFT) != 0;
-                SwingUtilities.invokeLater(new Runnable() {
-                  public void run() {
-                    if(isBackward) {
-                      NativeComponent.this.transferFocusBackward();
-                    } else {
-                      NativeComponent.this.transferFocus();
-                    }
-                  }
-                });
-                e.doit = false;
-              }
-              dispatchKeyEvent(e, KeyEvent.KEY_PRESSED);
-            }
-            public void keyReleased(org.eclipse.swt.events.KeyEvent e) {
-              dispatchKeyEvent(e, KeyEvent.KEY_RELEASED);
-              // Maybe innacurate: swing may issue pressed events when a key is stuck. verify this behavior some day.
-              dispatchKeyEvent(e, KeyEvent.KEY_TYPED);
-            }
-          });
-        } else {
-          Label label = new Label(shell, SWT.NONE);
-          label.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
-          label.setText("Failed to create object " + NativeComponent.this.getClass().getName() + "[" + NativeComponent.this.hashCode() + "]");
-        }
-        List<Runnable> initializationRunnableList_ = initializationRunnableList;
-        initializationRunnableList = null;
-        for(Runnable initRunnable: initializationRunnableList_) {
-          NativeComponent.this.run(initRunnable);
-        }
-        NativeInterfaceHandler.invokeSwing(new Runnable() {
-          public void run() {
-            Object[] listeners = listenerList.getListenerList();
-            InitializationEvent e = null;
-            for(int i=listeners.length-2; i>=0; i-=2) {
-              if(listeners[i] == InitializationEvent.class) {
-                if(e == null) {
-                  e = new InitializationEvent(NativeComponent.this);
-                }
-                ((InitializationListener)listeners[i + 1]).componentInitialized(e);
-              }
-            }
-          }
-        });
-      }
-    });
-  }
-  
-  /**
-   * Run the given command if the control is created, or store it to play it when the creation occurs.
-   * If the component is disposed before the command has a chance to run, it is ignored silently.
-   */
-  protected void run(Runnable runnable) {
-    if(isDisposed) {
-      return;
-    }
-    if(initializationRunnableList != null) {
-      initializationRunnableList.add(runnable);
-    } else if(isValidControl()) {
-      NativeInterfaceHandler.invokeSWT(runnable);
-    } else {
-      System.err.println(getClass().getName() + "[" + hashCode() + "]: invocation failed: " + runnable.getClass().getName());
-    }
-  }
-  
-  protected abstract Control createControl(Shell shell);
-  
-  /**
-   * @return true if the control was initialized. If the initialization failed, this would return true but isValidControl would return false.
-   */
-  public boolean isInitialized() {
-    return initializationRunnableList == null;
-  }
-  
-  /**
-   * @return true if the component is initialized and is properly created.
-   */
-  public boolean isValidControl() {
-    return control != null && initializationRunnableList == null;
-  }
-  
-  private boolean isDisposed;
-  
-  public boolean isDisposed() {
-    return isDisposed;
-  }
-  
-  protected void releaseResources() {
-    isDisposed = true;
-    if(shell != null) {
-      final Shell shell_ = shell;
-      NativeInterfaceHandler.invokeSWT(new Runnable() {
-        public void run() {
-          shell.setEnabled(false);
-          control.setEnabled(false);
-        }
-      });
-      // We have to defer, because on Linux with the web browser, there are often some asynchronous calls that fail...
-      Thread disposeThread = new Thread() {
+  public void reshape(int x, int y, int width, int height) {
+    if(resizeThread == null && width != getWidth() || height != getHeight()) {
+      resizeThread = new Thread("NativeSwing Resize") {
         @Override
         public void run() {
           try {
-            sleep(500);
+            sleep(50);
           } catch(Exception e) {
           }
-          Display display = NativeInterfaceHandler.getDisplay();
-          if(display != null && !display.isDisposed()) {
-            display.asyncExec(new Runnable() {
-              public void run() {
-                NativeInterfaceHandler.disposeShell(shell_);
-              }
-            });
-          }
+          SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+              resizeThread = null;
+              asyncExec(new CMN_reshape(), getWidth(), getHeight());
+            }
+          });
         }
       };
-      disposeThread.setDaemon(true);
-      disposeThread.start();
+      resizeThread.start();
     }
-    shell = null;
-    control = null;
+    super.reshape(x, y, width, height);
+  }
+  
+  private static class CMJ_dispatchMouseEvent extends ControlCommandMessage {
+    private static int buttonPressedCount;
+    private static Point lastLocation = new Point(-1, -1);
+    @Override
+    public void setArgs(Object... args) {
+      org.eclipse.swt.events.MouseEvent e = (org.eclipse.swt.events.MouseEvent)args[0];
+      super.setArgs(args[1], e.x, e.y, e.button, e.count, e.stateMask, e.display.getCursorLocation());
+    }
+    @Override
+    public Object run() {
+      NativeComponent nativeComponent = getComponent();
+      if(!nativeComponent.isShowing()) {
+        return null;
+      }
+      int type = (Integer)args[0];
+      int e_x = (Integer)args[1];
+      int e_y = (Integer)args[2];
+      int e_button = (Integer)args[3];
+      int e_count = (Integer)args[4];
+      int e_stateMask = (Integer)args[5];
+      Point e_cursorLocation = (Point)args[6];
+      switch(type) {
+        case MouseEvent.MOUSE_PRESSED:
+          buttonPressedCount++;
+          break;
+        case MouseEvent.MOUSE_RELEASED:
+          buttonPressedCount--;
+          break;
+        case MouseEvent.MOUSE_DRAGGED:
+        case MouseEvent.MOUSE_MOVED:
+          Point newLocation = new Point(e_x, e_y);
+          if(newLocation.equals(lastLocation)) {
+            return null;
+          }
+          lastLocation = newLocation;
+          break;
+      }
+      int button = UIUtils.translateMouseButton(e_button);
+      if(button == 0) {
+        switch(type) {
+          case MouseEvent.MOUSE_PRESSED:
+          case MouseEvent.MOUSE_RELEASED:
+          case MouseEvent.MOUSE_CLICKED:
+            return null;
+        }
+      }
+      if(buttonPressedCount != 0 && type == MouseEvent.MOUSE_MOVED) {
+        type = MouseEvent.MOUSE_DRAGGED;
+      }
+      final MouseEvent me;
+      if(Utils.IS_JAVA_6_OR_GREATER) {
+        // Not specifying the absX and Y in Java 6 results in a deadlock when pressing alt+F4 while moving the mouse over a native control
+        if(type == MouseEvent.MOUSE_WHEEL) {
+          me = new MouseWheelEvent(nativeComponent, type, System.currentTimeMillis(), UIUtils.translateModifiers(e_stateMask), e_x, e_y, e_cursorLocation.x, e_cursorLocation.y, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, e_count, 1);
+        } else {
+          me = new MouseEvent(nativeComponent, type, System.currentTimeMillis(), UIUtils.translateModifiers(e_stateMask), e_x, e_y, e_cursorLocation.x, e_cursorLocation.y, e_count, false, button);
+        }
+      } else {
+        if(type == MouseEvent.MOUSE_WHEEL) {
+          me = new MouseWheelEvent(nativeComponent, type, System.currentTimeMillis(), UIUtils.translateModifiers(e_stateMask), e_x, e_y, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, e_count, 1);
+        } else {
+          me = new MouseEvent(nativeComponent, type, System.currentTimeMillis(), UIUtils.translateModifiers(e_stateMask), e_x, e_y, e_count, false, button);
+        }
+      }
+      nativeComponent.dispatchEvent(me);
+      return null;
+    }
+  }
+  
+  private static class CMJ_dispatchKeyEvent extends ControlCommandMessage {
+    @Override
+    public void setArgs(Object... args) {
+      org.eclipse.swt.events.KeyEvent e = (org.eclipse.swt.events.KeyEvent)args[0];
+      super.setArgs(args[1], e.stateMask, e.character, e.keyCode);
+    }
+    @Override
+    public Object run() {
+      NativeComponent nativeComponent = getComponent();
+      if(!nativeComponent.isShowing()) {
+        return null;
+      }
+      int type = (Integer)args[0];
+      int e_stateMask = (Integer)args[1];
+      char e_character = (Character)args[2];
+      int e_keyCode = (Integer)args[3];
+      if(e_keyCode == SWT.TAB) {
+        if(type == KeyEvent.KEY_PRESSED) {
+          if((e_stateMask & SWT.CONTROL) != 0) {
+            boolean isBackward = (e_stateMask & SWT.SHIFT) != 0;
+            if(isBackward) {
+              nativeComponent.transferFocusBackward();
+            } else {
+              nativeComponent.transferFocus();
+            }
+          }
+        }
+        return null;
+      }
+      char character = e_character;
+      int keyCode;
+      if(type == KeyEvent.KEY_TYPED) {
+        if(character == '\0') {
+          return null;
+        }
+        keyCode = KeyEvent.VK_UNDEFINED;
+      } else {
+        keyCode = UIUtils.translateKeyCode(e_keyCode);
+      }
+      final KeyEvent ke = new KeyEvent(nativeComponent, type, System.currentTimeMillis(), UIUtils.translateModifiers(e_stateMask), keyCode, character);
+      nativeComponent.dispatchEvent(ke);
+      return null;
+    }
+  }
+  
+  private static class CMN_createControl extends CommandMessage {
+    public Shell createShell(long handle) throws Exception {
+      // these are the methods that are in the Shell class, and can create the embedded shell:
+      // win32: public static Shell win32_new (Display display, int handle) {
+      // photon: public static Shell photon_new (Display display, int handle) {
+      // motif: public static Shell motif_new (Display display, int handle) {
+      // gtk: public static Shell gtk_new (Display display, int /*long*/ handle) {
+      // carbon: Shell (Display display, Shell parent, int style, int handle) {
+      Method shellCreationMethod = null;
+      try {
+        shellCreationMethod = Shell.class.getMethod(SWT.getPlatform() + "_new", Display.class, int.class); 
+      } catch(Exception e) {}
+      if(shellCreationMethod != null) {
+        return (Shell)shellCreationMethod.invoke(null, NativeInterfaceHandler.getDisplay(), (int)handle);
+      }
+      try {
+        shellCreationMethod = Shell.class.getMethod(SWT.getPlatform() + "_new", Display.class, long.class); 
+      } catch(Exception e) {}
+      if(shellCreationMethod != null) {
+        return (Shell)shellCreationMethod.invoke(null, NativeInterfaceHandler.getDisplay(), handle);
+      }
+      Constructor<Shell> shellConstructor = null;
+      try {
+        shellConstructor = Shell.class.getConstructor(Display.class, Shell.class, int.class, int.class); 
+      } catch(Exception e) {}
+      if(shellConstructor != null) {
+        shellConstructor.setAccessible(true);
+        return shellConstructor.newInstance(NativeInterfaceHandler.getDisplay(), null, SWT.NO_TRIM, (int)handle);
+      }
+      try {
+        shellConstructor = Shell.class.getConstructor(Display.class, Shell.class, int.class, long.class); 
+      } catch(Exception e) {}
+      if(shellConstructor != null) {
+        shellConstructor.setAccessible(true);
+        return shellConstructor.newInstance(NativeInterfaceHandler.getDisplay(), null, SWT.NO_TRIM, handle);
+      }
+      throw new IllegalStateException("Failed to create a Shell!");
+    }
+    @Override
+    public Object run() throws Exception {
+      Shell shell = createShell((Long)args[2]);
+      shell.setVisible (true);
+      shell.setLayout(new FillLayout());
+      Method createControlMethod = Class.forName((String)args[1]).getDeclaredMethod("createControl", Shell.class);
+      createControlMethod.setAccessible(true);
+      final Control control = (Control)createControlMethod.invoke(null, shell);
+      Integer id = (Integer)args[0];
+      control.setData("NS_ID", id);
+      NativeComponent.registry.add(control, (Integer)args[0]);
+      control.addMouseListener(new MouseAdapter() {
+        @Override
+        public void mouseDown(org.eclipse.swt.events.MouseEvent e) {
+          NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), e, MouseEvent.MOUSE_PRESSED);
+        }
+        @Override
+        public void mouseUp(org.eclipse.swt.events.MouseEvent e) {
+          NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), e, MouseEvent.MOUSE_RELEASED);
+        }
+      });
+      control.addMouseMoveListener(new MouseMoveListener() {
+        public void mouseMove(org.eclipse.swt.events.MouseEvent e) {
+          NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), e, MouseEvent.MOUSE_MOVED);
+        }
+      });
+      control.addMouseWheelListener(new MouseWheelListener() {
+        public void mouseScrolled(org.eclipse.swt.events.MouseEvent e) {
+          NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), e, MouseEvent.MOUSE_WHEEL);
+        }
+      });
+      control.addKeyListener(new KeyListener() {
+        public void keyPressed(org.eclipse.swt.events.KeyEvent e) {
+          if((e.stateMask & SWT.CONTROL) != 0 && e.keyCode == SWT.TAB) {
+            e.doit = false;
+          }
+          NativeComponent.asyncExec(control, new CMJ_dispatchKeyEvent(), e, KeyEvent.KEY_PRESSED);
+        }
+        public void keyReleased(org.eclipse.swt.events.KeyEvent e) {
+          NativeComponent.asyncExec(control, new CMJ_dispatchKeyEvent(), e, KeyEvent.KEY_RELEASED);
+          // TODO: Maybe innacurate: swing may issue pressed events when a key is stuck. verify this behavior some day.
+          NativeComponent.asyncExec(control, new CMJ_dispatchKeyEvent(), e, KeyEvent.KEY_TYPED);
+        }
+      });
+      return null;
+    }
+  }
+
+  @Override
+  public void paint(Graphics g) {
+    super.paint(g);
+    if(!isValidControl) {
+      FontMetrics fm = g.getFontMetrics();
+      BufferedReader r = new BufferedReader(new StringReader(invalidControlText));
+      int lineHeight = fm.getHeight();
+      int ascent = fm.getAscent();
+      try {
+        String line;
+        for(int i=0; (line=r.readLine()) != null; i++) {
+          g.drawString(line, 5, ascent + 5 + lineHeight * i);
+        }
+      } catch(Exception e) {
+      }
+    }
+  }
+  
+  @Override
+  public void addNotify() {
+    super.addNotify();
+    NativeInterfaceHandler.checkUIThread();
+    NativeInterfaceHandler.addCanvas(this);
+    if(initializationCommandMessageList == null) {
+      throw new IllegalStateException("A native component cannot be re-created after having been disposed! To achieve re-parenting, set the options to use a proxied filiation and a finalization-time destruction.");
+    }
+    List<CommandMessage> initializationCommandMessageList_ = initializationCommandMessageList;
+    initializationCommandMessageList = null;
+    isInitialized = true;
+    isValidControl = true;
+    try {
+      run(new CMN_createControl(), id, NativeComponent.this.getClass().getName(), Native.getComponentID(this));
+    } catch(Exception e) {
+      isValidControl = false;
+      StringBuilder sb = new StringBuilder();
+      for(Throwable t = e; t != null; t = t.getCause()) {
+        sb.append("    " + t.toString() + "\n");
+      }
+      invalidControlText = "Failed to create " + NativeComponent.this.getClass().getName() + "[" + NativeComponent.this.hashCode() + "]\n\nReason:\n" + sb.toString();
+      e.printStackTrace();
+    }
+    for(CommandMessage initCommandMessage: initializationCommandMessageList_) {
+      if(!isValidControl) {
+        printFailedInvocation(initCommandMessage);
+      } else {
+        initCommandMessage.syncExec();
+      }
+    }
+    Object[] listeners = listenerList.getListenerList();
+    InitializationEvent e = null;
+    for(int i=listeners.length-2; i>=0; i-=2) {
+      if(listeners[i] == InitializationEvent.class) {
+        if(e == null) {
+          e = new InitializationEvent(NativeComponent.this);
+        }
+        ((InitializationListener)listeners[i + 1]).componentInitialized(e);
+      }
+    }
+  }
+  
+  private static class CMN_destroyControl extends ControlCommandMessage {
+    @Override
+    public Object run() throws Exception {
+      Control control = getControl();
+      NativeComponent.registry.remove(getComponentID());
+      control.getShell().dispose();
+      return null;
+    }
   }
   
   @Override
@@ -374,110 +492,31 @@ public abstract class NativeComponent extends Canvas {
     releaseResources();
     super.removeNotify();
   }
-
-  @Override
-  public boolean hasFocus() {
-    final boolean[] result = new boolean[1];
-    if(control != null) {
-      NativeInterfaceHandler.invokeSWT(new Runnable() {
-        public void run() {
-          if(control != null && !control.isDisposed()) {
-            result[0] = control.isFocusControl();
-          }
-        }
-      });
-    }
-    return result[0] || super.hasFocus();
-  }
   
-  public Control getControl() {
-    return control;
-  }
+  private boolean isValidControl;
+  private String invalidControlText;
+  private boolean isInitialized;
+  private boolean isDisposed;
   
-  @Override
-  public Dimension getPreferredSize() {
-    final Dimension result = super.getPreferredSize();
-    if(control != null) {
-      NativeInterfaceHandler.invokeSWT(new Runnable() {
-        public void run() {
-          if(control != null && !control.isDisposed()) {
-            Point cSize = control.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-            result.width = cSize.x;
-            result.height = cSize.y;
-          }
-        }
-      });
-    }
-    return result;
-  }
-  
-  @Override
-  public Dimension getMinimumSize() {
-    return new Dimension(0, 0);
-  }
-  
-  protected EventListenerList listenerList = new EventListenerList();
-  
-  public <T extends EventListener> T[] getListeners(Class<T> listenerType) {
-    T[] result = listenerList.getListeners(listenerType);
-    if(result.length == 0) { 
-      return super.getListeners(listenerType); 
-    }
-    return result; 
-  }
-  
-  public void addInitializationListener(InitializationListener listener) {
-    listenerList.add(InitializationListener.class, listener);
-  }
-  
-  public void removeWebBrowserListener(InitializationListener listener) {
-    listenerList.remove(InitializationListener.class, listener);
-  }
-  
-  public InitializationListener[] getInitializationListeners() {
-    return listenerList.getListeners(InitializationListener.class);
-  }
-  
-  private static Method redrawMethod;
-  private static Method updateMethod;
-  
-  static {
-    System.setProperty("jna.force_hw_popups", "false");
-    try {
-      redrawMethod = Control.class.getDeclaredMethod("redraw", new Class[] {boolean.class});
-      redrawMethod.setAccessible(true);
-      updateMethod = Control.class.getDeclaredMethod("update", new Class[] {boolean.class});
-      updateMethod.setAccessible(true);
-    } catch(Exception e) {
-      redrawMethod = null;
-      updateMethod = null;
-      // Swallow. Not a big deal if we can't have it working.
+  protected void releaseResources() {
+    if(!isDisposed) {
+      isDisposed = true;
+      NativeInterfaceHandler.removeCanvas(this);
+      run(new CMN_destroyControl());
+      NativeComponent.registry.remove(id);
     }
   }
   
-  /**
-   * Attempt to force a redraw of the native control. This is useful when a native control shows rendering problems. 
-   */
-  protected void repaintNativeControl() {
-    if(control == null || control.isDisposed()) {
-      return;
-    }
-    if(redrawMethod == null) {
-      return;
-    }
-    control.getDisplay().asyncExec(new Runnable() {
-      public void run() {
-        try {
-          if(control == null || control.isDisposed()) {
-            return;
-          }
-          redrawMethod.invoke(control, Boolean.TRUE);
-          updateMethod.invoke(control, Boolean.TRUE);
-        } catch(Exception e) {
-          // Swallow. Not a big deal if we can't have it working.
-        }
-      }
-    });
+  public boolean isDisposed() {
+    return isDisposed;
+  }
+  
+  public boolean isInitialized() {
+    return isInitialized;
+  }
+  
+  public boolean isValidControl() {
+    return isValidControl;
   }
   
   private Options options;
@@ -600,6 +639,18 @@ public abstract class NativeComponent extends Canvas {
     NativeComponent.nextInstanceOptions = nextInstanceOptions;
   }
   
+  static interface NativeComponentHolder {}
+  
+  private NativeComponentProxy componentProxy;
+  
+  void setComponentProxy(NativeComponentProxy componentProxy) {
+    this.componentProxy = componentProxy;
+  }
+  
+  public Component getComponentProxy() {
+    return componentProxy;
+  }
+  
   static class SimpleNativeComponentHolder extends JPanel implements NativeComponentHolder {
     
     public SimpleNativeComponentHolder(NativeComponent nativeComponent) {
@@ -678,6 +729,92 @@ public abstract class NativeComponent extends Canvas {
             return new NativeComponentProxyPanel(this);
         }
     }
+  }
+  
+  private static class CMN_setShellEnabled extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      getControl().getShell().setEnabled((Boolean)args[0]);
+      return null;
+    }
+  }
+
+  private boolean isShellEnabled = true;
+  
+  /**
+   * This method is not part of the public API!
+   */
+  public void setShellEnabled(boolean isEnabled) {
+    if(isEnabled == isShellEnabled) {
+      return;
+    }
+    isShellEnabled = isEnabled;
+    run(new CMN_setShellEnabled(), isEnabled);
+  }
+
+  private static class CMN_hasFocus extends ControlCommandMessage {
+    @Override
+    public Object run() throws Exception {
+      Control control = getControl();
+      return control.isFocusControl();
+    }
+  }
+
+  @Override
+  public boolean hasFocus() {
+    boolean hasFocus = super.hasFocus();
+    if(!hasFocus) {
+      return (Boolean)syncExec(new CMN_hasFocus());
+    }
+    return hasFocus;
+  }
+  
+  private static class CMN_getPreferredSize extends ControlCommandMessage {
+    @Override
+    public Object run() throws Exception {
+      Control control = getControl();
+      Point cSize = control.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+      return new Dimension(cSize.x, cSize.y);
+    }
+  }
+
+  @Override
+  public Dimension getPreferredSize() {
+    Dimension result = null;
+    if(isValidControl && !isDisposed) {
+      result = (Dimension)syncExec(new CMN_getPreferredSize());
+    }
+    if(result == null) {
+      result = super.getPreferredSize();
+    }
+    return result;
+  }
+  
+  @Override
+  public Dimension getMinimumSize() {
+    return new Dimension(0, 0);
+  }
+  
+  protected EventListenerList listenerList = new EventListenerList();
+  
+  public <T extends EventListener> T[] getListeners(Class<T> listenerType) {
+    T[] result = listenerList.getListeners(listenerType);
+    if(result.length == 0) { 
+      return super.getListeners(listenerType); 
+    }
+    return result; 
+  }
+  
+  public void addInitializationListener(InitializationListener listener) {
+    listenerList.add(InitializationListener.class, listener);
+  }
+  
+  public void removeWebBrowserListener(InitializationListener listener) {
+    listenerList.remove(InitializationListener.class, listener);
+  }
+  
+  public InitializationListener[] getInitializationListeners() {
+    return listenerList.getListeners(InitializationListener.class);
   }
   
 }

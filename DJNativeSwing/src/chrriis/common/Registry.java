@@ -16,8 +16,6 @@ import java.util.Map;
  */
 public class Registry {
 
-  protected Registry() {}
-
   private Thread cleanUpThread;
   
   private void startThread() {
@@ -53,7 +51,7 @@ public class Registry {
   }
   
   protected Object LOCK = new Object();
-  private int nextInstanceID;
+  private int nextInstanceID = 1;
   private Map<Integer, WeakReference<Object>> instanceIDToObjectReferenceMap = new HashMap<Integer, WeakReference<Object>>();
   
   /**
@@ -68,6 +66,17 @@ public class Registry {
       instanceIDToObjectReferenceMap.put(instanceID, new WeakReference<Object>(o));
       startThread();
       return instanceID;
+    }
+  }
+  
+  public void add(Object o, int instanceID) {
+    synchronized (LOCK) {
+      Object o2 = get(instanceID);
+      if(o2 != null && o2 != o) {
+        throw new IllegalStateException("An object is already registered with the id \"" + instanceID + "\" for object: " + o);
+      }
+      instanceIDToObjectReferenceMap.put(instanceID, new WeakReference<Object>(o));
+      startThread();
     }
   }
   

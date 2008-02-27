@@ -11,6 +11,7 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.io.BufferedInputStream;
@@ -22,6 +23,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
@@ -89,17 +91,28 @@ public class DemoFrame extends JFrame {
         if(userObject instanceof Example) {
           final Example example = (Example)userObject;
           if(selectedExample != example) {
-            new Thread() {
+            new Thread("NativeSwingDemo Example Loader") {
               @Override
               public void run() {
                 SwingUtilities.invokeLater(new Runnable() {
                   public void run() {
                     JComponent c;
-                    try {
-                      c = example.getComponentClass().newInstance();
-                    } catch(Throwable t) {
-                      t.printStackTrace();
-                      return;
+                    Class<? extends JComponent> componentClass = example.getComponentClass();
+                    if(!example.isAvailable()) {
+                      JPanel panel = new JPanel(new GridBagLayout());
+                      panel.add(new JLabel(example.getNotAvailableMessage()));
+                      c = panel;
+                    } else {
+                      if(componentClass == null) {
+                        c = new JPanel();
+                      } else {
+                        try {
+                          c = componentClass.newInstance();
+                        } catch(Throwable t) {
+                          t.printStackTrace();
+                          return;
+                        }
+                      }
                     }
                     if(component instanceof Disposable) {
                       ((Disposable)component).dispose();
@@ -130,7 +143,7 @@ public class DemoFrame extends JFrame {
                       contentPane.add(descriptionPanel, BorderLayout.NORTH);
                     }
                     contentPane.add(component, BorderLayout.CENTER);
-                    if(example.isShowingSources()) {
+                    if(componentClass != null && example.isShowingSources()) {
                       final JTabbedPane tabbedPane = new JTabbedPane();
                       tabbedPane.addTab("Demo", contentPane);
                       final JPanel sourcePanel = new JPanel(new BorderLayout(0, 0));
@@ -188,7 +201,6 @@ public class DemoFrame extends JFrame {
         new DemoFrame().setVisible(true);
       }
     });
-    NativeInterfaceHandler.runEventPump();
   }
 
 }

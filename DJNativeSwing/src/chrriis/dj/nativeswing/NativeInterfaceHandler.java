@@ -16,11 +16,21 @@ import java.awt.Window;
 import java.awt.event.AWTEventListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowEvent;
-import java.lang.reflect.Method;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.security.Permission;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.swing.JPopupMenu;
@@ -28,82 +38,72 @@ import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 
-import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.ui.NativeComponent;
+
+import com.sun.jna.Native;
+import com.sun.jna.examples.WindowUtils;
 
 /**
  * @author Christopher Deckers
  */
 public class NativeInterfaceHandler {
 
-  private NativeInterfaceHandler() {}
-  
-  private static volatile Thread displayThread;
-  private static volatile Display display;
-  private static volatile boolean isRunning;
+  private static volatile List<Canvas> canvasList;
 
+  /**
+   * This method is not part of the public API!
+   */
+  public static Canvas[] getCanvas() {
+    return canvasList.toArray(new Canvas[0]);
+  }
+  
+  /**
+   * This method is not part of the public API!
+   */
+  public static void addCanvas(Canvas canvas) {
+    canvasList.add(canvas);
+  }
+  
+  /**
+   * This method is not part of the public API!
+   */
+  public static void removeCanvas(Canvas canvas) {
+    canvasList.remove(canvas);
+  }
+  
   private static Set<Window> windowSet;
   
+  /**
+   * This method is not part of the public API!
+   */
   public static Window[] getWindows() {
     if(Utils.IS_JAVA_6_OR_GREATER) {
       return Window.getWindows();
     }
     return windowSet == null? new Window[0]: windowSet.toArray(new Window[0]);
   }
-
-  public static void setPreferredLookAndFeel() {
-    try {
-      String systemLookAndFeelClassName = UIManager.getSystemLookAndFeelClassName();
-      if(!"com.sun.java.swing.plaf.gtk.GTKLookAndFeel".equals(systemLookAndFeelClassName)) {
-        UIManager.setLookAndFeel(systemLookAndFeelClassName);
-      }
-    } catch(Exception e) {
-      e.printStackTrace();
-    }
+  
+  private static boolean isInitialized;
+  
+  private static boolean isInitialized() {
+    return isInitialized;
   }
   
+  private static void checkInitialized() {
+    if(!isInitialized()) {
+      throw new IllegalStateException("The native interface handler is not initialized! Please refer to the instructions to set it up properly.");
+    }
+  }
+
   public static void init() {
-    if(isRunning) {
+    if(isInitialized()) {
       return;
     }
-    // We set up a new security manager to track exit calls.
-    // When this happens, we dispose native resources to avoid freezes.
-    try {
-      System.setSecurityManager(new SecurityManager() {
-        protected SecurityManager securityManager = System.getSecurityManager();
-        @Override
-        public void checkExit(int status) {
-          super.checkExit(status);
-          for(StackTraceElement stackTraceElement: Thread.currentThread().getStackTrace()) {
-            String className = stackTraceElement.getClassName();
-            String methodName = stackTraceElement.getMethodName();
-            if("java.lang.Runtime".equals(className) && ("exit".equals(methodName) || "halt".equals(methodName)) || "java.lang.System".equals(className) && "exit".equals(methodName)) {
-              invokeSWT(new Runnable() {
-                public void run() {
-                  cleanUp();
-                }
-              });
-              break;
-            }
-          }
-        }
-        @Override
-        public void checkPermission(Permission perm) {
-          if(securityManager != null) {
-            securityManager.checkPermission(perm);
-          }
-        }
-      });
-    } catch(Exception e) {
-      e.printStackTrace();
-    }
-    displayThread = Thread.currentThread();
-    display = new Display();
-    isRunning = true;
+    isInitialized = true;
+    canvasList = new ArrayList<Canvas>();
     // Specific Sun property to prevent heavyweight components from erasing their background.
     System.setProperty("sun.awt.noerasebackground", "true");
     // It seems on Linux this is required to get the component visible.
@@ -112,53 +112,33 @@ public class NativeInterfaceHandler {
     ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
     JPopupMenu.setDefaultLightWeightPopupEnabled(false);
     System.setProperty("JPopupMenu.defaultLWPopupEnabledKey", "false");
-    // Disable components when they go out of visibility to avoid focus grabbing
+    // Create the interface to communicate with the process handling the native side
+    messagingInterface = createMessagingInterface();
+    // Create window monitor
     Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
       protected Set<Dialog> dialogSet = new HashSet<Dialog>();
       protected volatile Set<Window> blockedWindowSet = new HashSet<Window>();
-//      protected volatile boolean isInvoking;
       protected void adjustNativeComponents() {
-//        if(isInvoking) {
-//          return;
-//        }
-//        isInvoking = true;
-//        SwingUtilities.invokeLater(new Runnable() {
-//          public void run() {
-//            isInvoking = false;
-//            adjustNativeComponents_();
-//          }
-//        });
-//      }
-//      protected void adjustNativeComponents_() {
-        invokeSWT(new Runnable() {
-          public void run() {
-            for(int i=canvasList.size()-1; i>=0; i--) {
-              Shell shell = shellList.get(i);
-              final Canvas canvas = canvasList.get(i);
-              Component c = canvas;
-              if(canvas instanceof NativeComponent) {
-                Component componentProxy = ((NativeComponent)canvas).getComponentProxy();
-                if(componentProxy != null) {
-                  c = componentProxy;
-                }
-              }
-              Window embedderWindowAncestor = SwingUtilities.getWindowAncestor(c);
-              boolean isBlocked = blockedWindowSet.contains(embedderWindowAncestor);
-              final boolean isShowing = c.isShowing();
-              if(!shell.isDisposed()) {
-                shell.setEnabled(!isBlocked && isShowing);
-                SwingUtilities.invokeLater(new Runnable() {
-                  public void run() {
-                    boolean hasFocus = canvas.hasFocus();
-                    if(!isShowing && hasFocus) {
-                      canvas.transferFocus();
-                    }
-                  }
-                });
-              }
+        for(int i=canvasList.size()-1; i>=0; i--) {
+          final Canvas canvas = canvasList.get(i);
+          Component c = canvas;
+          if(canvas instanceof NativeComponent) {
+            Component componentProxy = ((NativeComponent)canvas).getComponentProxy();
+            if(componentProxy != null) {
+              c = componentProxy;
             }
           }
-        });
+          Window embedderWindowAncestor = SwingUtilities.getWindowAncestor(c);
+          boolean isBlocked = blockedWindowSet.contains(embedderWindowAncestor);
+          final boolean isShowing = c.isShowing();
+          if(canvas instanceof NativeComponent) {
+            ((NativeComponent)canvas).setShellEnabled(!isBlocked && isShowing);
+          }
+          boolean hasFocus = canvas.hasFocus();
+          if(!isShowing && hasFocus) {
+            canvas.transferFocus();
+          }
+        }
       }
       public void eventDispatched(AWTEvent e) {
         boolean isAdjusting = false;
@@ -215,236 +195,303 @@ public class NativeInterfaceHandler {
         }
       }
     }, WindowEvent.WINDOW_EVENT_MASK | ComponentEvent.COMPONENT_EVENT_MASK);
-    Runtime.getRuntime().addShutdownHook(new Thread("DJNativeSwing Shutdown Hook") {
+  }
+  
+  private static MessagingInterface createMessagingInterface() {
+    int port = Integer.parseInt(System.getProperty("dj.nativeswing.port", "-1"));
+    if(port <= 0) {
+      ServerSocket serverSocket;
+      try {
+        serverSocket = new ServerSocket();
+        serverSocket.setReuseAddress(false);
+        serverSocket.bind(new InetSocketAddress(0));
+      } catch(IOException e) {
+        throw new RuntimeException(e);
+      }
+      port = serverSocket.getLocalPort();
+      try {
+        serverSocket.close();
+      } catch(IOException e) {
+      }
+    }
+    String javaHome = System.getProperty("java.home");
+    ProcessBuilder builder = new ProcessBuilder();
+    List<String> classPathList = new ArrayList<String>();
+    String classPath = System.getProperty("java.class.path");
+    if(classPath != null && classPath.length() != 0) {
+      classPathList.add(classPath);
+    }
+    Class<?>[] classList = new Class[] {
+        NativeInterfaceHandler.class,
+        Display.class,
+        Native.class,
+        WindowUtils.class,
+    };
+    for(Class<?> clazz: classList) {
+      File clazzClassPath = Utils.getClassPathFile(clazz);
+      if(clazzClassPath != null) {
+        classPathList.add(clazzClassPath.getAbsolutePath());
+      }
+    }
+    if(classPathList.isEmpty()) {
+      throw new IllegalStateException("Cannot find a suitable classpath to spawn VM!");
+    }
+    StringBuilder sb = new StringBuilder();
+    String pathSeparator = System.getProperty("path.separator");
+    for(int i=0; i<classPathList.size(); i++) {
+      if(i > 0) {
+        sb.append(pathSeparator);
+      }
+      sb.append(classPathList.get(i));
+    }
+    String[] candidateBinaries = new String[] {
+        new File(javaHome, "bin/java").getAbsolutePath(),
+        new File("/usr/lib/java").getAbsolutePath(),
+        "java",
+    };
+    Process p = null;
+    for(String candidateBinary: candidateBinaries) {
+      List<String> argList = new ArrayList<String>();
+      argList.add(candidateBinary);
+      argList.add("-classpath");
+      argList.add(sb.toString());
+      argList.add(NativeInterfaceHandler.class.getName());
+      argList.add(String.valueOf(port));
+      builder.command(argList);
+      try {
+        p = builder.start();
+        break;
+      } catch(IOException e) {
+      }
+    }
+    if(p == null) {
+      throw new IllegalStateException("Failed to spawn the VM!");
+    }
+    connectStream(System.err, p.getErrorStream());
+    connectStream(System.out, p.getInputStream());
+    Socket socket = null;
+    for(int i=19; i>=0; i--) {
+      try {
+        socket = new Socket(InetAddress.getLocalHost(), port);
+        break;
+      } catch(IOException e) {
+        if(i == 0) {
+          throw new RuntimeException(e);
+        }
+      }
+      try {
+        Thread.sleep(100);
+      } catch(Exception e) {
+      }
+    }
+    if(socket == null) {
+      p.destroy();
+      throw new IllegalStateException("Failed to connect to spawn VM!");
+    }
+    return new MessagingInterface(socket, false) {
+      @Override
+      protected void asyncUIExec(Runnable runnable) {
+        SwingUtilities.invokeLater(runnable);
+      }
+      @Override
+      public boolean isUIThread() {
+        return SwingUtilities.isEventDispatchThread();
+      }
+    };
+  }
+  
+  private static void connectStream(final PrintStream out, InputStream in) {
+    final BufferedInputStream bin = new BufferedInputStream(in);
+    Thread streamThread = new Thread("NativeSwing Stream Connector") {
       @Override
       public void run() {
-        display.asyncExec(new Runnable() {
-          public void run() {
-            cleanUp();
+        try {
+          ByteArrayOutputStream baos = new ByteArrayOutputStream();
+          String lineSeparator = System.getProperty("line.separator");
+          byte lastByte = (byte)lineSeparator.charAt(lineSeparator.length() - 1);
+          boolean addMessage = true;
+          byte[] bytes = new byte[1024];
+          for(int i; (i=bin.read(bytes)) != -1; ) {
+            baos.reset();
+            for(int j=0; j<i; j++) {
+              byte b = bytes[j];
+              if(addMessage) {
+                baos.write("NativeSwing: ".getBytes());
+              }
+              addMessage = b == lastByte;
+              baos.write(b);
+            }
+            final byte[] byteArray = baos.toByteArray();
+            // Flushing directly to the out stream freezes in Webstart.
+            SwingUtilities.invokeLater(new Runnable() {
+              public void run() {
+                try {
+                  out.write(byteArray);
+                } catch(Exception e) {
+                  e.printStackTrace();
+                }
+              }
+            });
           }
-        });
-      }
-    });
-  }
-  
-  private static void cleanUp() {
-    for(int i=canvasList.size()-1; i>=0; i--) {
-      canvasList.get(i).removeNotify();
-      Shell shell = shellList.get(i);
-      try {
-        shell.dispose();
-      } catch(Exception e) {
-        // Swallow exceptions. These are de-activation of controls when the display is already disposed.
-      }
-    }
-    shellList = new ArrayList<Shell>();
-    canvasList = new ArrayList<Canvas>();
-    // Note: display is not disposed because it makes the JVM to crash. Anyway, its resources are released on system exit.
-//    display.dispose();
-//    display = null;
-  }
-  
-  public static void runEventPump() {
-    while(isRunning) {
-      dispatch();
-    }
-    cleanUp();
-  }
-  
-  private static void dispatch() {
-    try {
-      if(!display.readAndDispatch()) {
-        if(isRunning) {
-          display.sleep();
+        } catch(Exception e) {
         }
+      }
+    };
+    streamThread.setDaemon(true);
+    streamThread.start();
+  }
+  
+  private NativeInterfaceHandler() {}
+  
+  private static volatile MessagingInterface messagingInterface;
+
+  static MessagingInterface getMessagingInterface() {
+    return messagingInterface;
+  }
+  
+  public static Object syncExec(final Message message) {
+    checkInitialized();
+    return messagingInterface.syncExec(message);
+  }
+  
+  public static void asyncExec(final Message message) {
+    checkInitialized();
+    messagingInterface.asyncExec(message);
+  }
+  
+  public static void setPreferredLookAndFeel() {
+    try {
+      String systemLookAndFeelClassName = UIManager.getSystemLookAndFeelClassName();
+      if(!"com.sun.java.swing.plaf.gtk.GTKLookAndFeel".equals(systemLookAndFeelClassName)) {
+        UIManager.setLookAndFeel(systemLookAndFeelClassName);
       }
     } catch(Exception e) {
       e.printStackTrace();
     }
   }
   
+  private static Display display;
+  
+  /**
+   * Only possible when in the native context
+   */
   public static Display getDisplay() {
-    checkPump();
     return display;
   }
   
-  private static final Object SWING_LOCK = new Object();
-  private static final Object SWT_LOCK = new Object();
+  public static boolean isNativeSide() {
+    return display != null;
+  }
   
-  private static List<Runnable> swingRunnableList = new ArrayList<Runnable>();
-  private static List<Runnable> swtRunnableList = new ArrayList<Runnable>();
-  private static volatile boolean hasSwingRun;
-  private static volatile boolean hasSWTRun;
+  public static void checkUIThread() {
+    messagingInterface.checkUIThread();
+  }
   
-  /**
-   * Invoke some code in the Swing UI thread synchronously.
-   */
-  @SuppressWarnings("unchecked")
-  public static void invokeSwing(final Runnable runnable) {
-    checkPump();
-    if(displayThread == Thread.currentThread()) {
-      synchronized(SWING_LOCK) {
-        swingRunnableList.add(runnable);
-        if(swingRunnableList.size() == 1) {
-          hasSwingRun = false;
-          SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-              while(true) {
-                Runnable r;
-                synchronized(SWING_LOCK) {
-                  if(swingRunnableList.isEmpty()) {
-                    hasSwingRun = true;
-                    break;
-                  }
-                  r = swingRunnableList.remove(0);
-                }
-                r.run();
-              }
-            }
-          });
-        }
-      }
-      while(!hasSwingRun) {
-        Runnable r = null;
-        synchronized(SWT_LOCK) {
-          if(swtRunnableList.isEmpty()) {
-            hasSWTRun = true;
-          } else {
-            r = swtRunnableList.remove(0);
-          }
-        }
-        if(r != null) {
-          r.run();
-        }
-//        try {
-//          Thread.sleep(50);
-//        } catch(Exception e) {
-//        }
-        dispatch();
-      }
-    } else if(SwingUtilities.isEventDispatchThread()) {
-      runnable.run();
-    } else {
+  private static class CMJ_getProperties extends CommandMessage {
+    @Override
+    public Object run() throws Exception {
+      return System.getProperties();
+    }
+  }
+  
+  public static void main(String[] args) throws Exception {
+    isInitialized = true;
+    int port = Integer.parseInt(args[0]);
+    ServerSocket serverSocket = null;
+    for(int i=19; i>=0; i--) {
       try {
-        SwingUtilities.invokeAndWait(runnable);
-      } catch(Exception e) {
-        e.printStackTrace();
-      }
-    }
-  }
-  
-  @SuppressWarnings("unchecked")
-  public static void invokeSWT(final Runnable runnable) {
-    checkPump();
-    if(SwingUtilities.isEventDispatchThread()) {
-      synchronized(SWT_LOCK) {
-        swtRunnableList.add(runnable);
-        if(swtRunnableList.size() == 1) {
-          hasSWTRun = false;
-          display.asyncExec(new Runnable() {
-            public void run() {
-              while(true) {
-                Runnable r;
-                synchronized(SWT_LOCK) {
-                  if(swtRunnableList.isEmpty()) {
-                    hasSWTRun = true;
-                    break;
-                  }
-                  r = swtRunnableList.remove(0);
-                }
-                r.run();
-              }
-            }
-          });
+        serverSocket = new ServerSocket();
+        serverSocket.setReuseAddress(true);
+        serverSocket.bind(new InetSocketAddress(port));
+        break;
+      } catch(IOException e) {
+        if(i == 0) {
+          throw e;
         }
       }
-      while(!hasSWTRun) {
-        Runnable r = null;
-        synchronized(SWING_LOCK) {
-          if(swingRunnableList.isEmpty()) {
-            hasSwingRun = true;
-          } else {
-            r = swingRunnableList.remove(0);
+      try {
+        Thread.sleep(100);
+      } catch(Exception e) {
+      }
+    }
+    final ServerSocket serverSocket_ = serverSocket;
+    Thread shutdownThread = new Thread("NativeSwing Shutdown") {
+      @Override
+      public void run() {
+        try {
+          sleep(5000);
+        } catch(Exception e) {
+        }
+        if(messagingInterface == null) {
+          try {
+            serverSocket_.close();
+          } catch(Exception e) {
           }
         }
-        if(r != null) {
-          r.run();
+      }
+    };
+    shutdownThread.setDaemon(true);
+    shutdownThread.start();
+    // We set up a new security manager to track exit calls.
+    // When this happens, we dispose native resources to avoid freezes.
+    try {
+      System.setSecurityManager(new SecurityManager() {
+        protected SecurityManager securityManager = System.getSecurityManager();
+        @Override
+        public void checkExit(int status) {
+          super.checkExit(status);
+          for(StackTraceElement stackTraceElement: Thread.currentThread().getStackTrace()) {
+            String className = stackTraceElement.getClassName();
+            String methodName = stackTraceElement.getMethodName();
+            if("java.lang.Runtime".equals(className) && ("exit".equals(methodName) || "halt".equals(methodName)) || "java.lang.System".equals(className) && "exit".equals(methodName)) {
+              System.err.println("cleanup");
+              //TODO: perform cleanup
+              break;
+            }
+          }
+        }
+        @Override
+        public void checkPermission(Permission perm) {
+          if(securityManager != null) {
+            securityManager.checkPermission(perm);
+          }
+        }
+      });
+    } catch(Exception e) {
+      e.printStackTrace();
+    }
+    Socket socket;
+    try {
+      socket = serverSocket.accept();
+    } catch(Exception e) {
+      throw new IllegalStateException("The native side did not receive an incoming connection!");
+    }
+    display = new Display();
+    final Thread uiThread = Thread.currentThread();
+    messagingInterface = new MessagingInterface(socket, true) {
+      @Override
+      protected void asyncUIExec(Runnable runnable) {
+        display.asyncExec(runnable);
+      }
+      @Override
+      public boolean isUIThread() {
+        return Thread.currentThread() == uiThread;
+      }
+    };
+    Properties systemProperties = System.getProperties();
+    Properties properties = (Properties)new CMJ_getProperties().syncExec();
+    for(Object o: properties.keySet()) {
+      if(!systemProperties.containsKey(o)) {
+        try {
+          System.setProperty((String)o, properties.getProperty((String)o));
+        } catch(Exception e) {
         }
       }
-    } else if(displayThread == Thread.currentThread()) {
-      runnable.run();
-    } else {
-      display.syncExec(runnable);
     }
-  }
-  
-  private static volatile List<Shell> shellList = new ArrayList<Shell>();
-  private static volatile List<Canvas> canvasList = new ArrayList<Canvas>();
-  
-  public static Shell createShell(Canvas canvas) {
-    checkPump();
-    Shell shell = SWT_AWT.new_Shell(getDisplay(), canvas);
-    canvasList.add(canvas);
-    shellList.add(shell);
-    return shell;
-  }
-  
-  public static void disposeShell(Shell shell) {
-    int index = shellList.indexOf(shell);
-    if(index >= 0) {
-      canvasList.remove(index);
-      shellList.remove(index);
-      shell.dispose();
-    }
-  }
-  
-  public static Canvas[] getCanvas() {
-    return canvasList.toArray(new Canvas[0]);
-  }
-  
-  public static void main(String[] args) {
-    init();
-    String mainClass = System.getProperty("dj.nativeswing.mainclass");
-    if(mainClass == null) {
-      mainClass = args[0];
-      String[] newArgs = new String[args.length - 1];
-      System.arraycopy(args, 1, newArgs, 0, newArgs.length);
-      args = newArgs;
-    }
-    try {
-      Method method = Class.forName(mainClass).getDeclaredMethod("main", new Class[] {String[].class});
-      method.invoke(null, new Object[] {args});
-    } catch(Throwable t) {
-      t.printStackTrace();
-      System.exit(-1);
-    }
-    runEventPump();
-  }
-
-  private static void checkPump() {
-    if(displayThread == null) {
-      throw new IllegalStateException("The native interface handler is not initialized! Please refer to the instructions to set it up properly.");
-      // Following code works on Windows, but not on other platforms...
-//      final Object LOCK = new Object();
-//      synchronized(LOCK) {
-//        new Thread("SWT-EventQueue") {
-//          @Override
-//          public void run() {
-//            init();
-//            synchronized(LOCK) {
-//              LOCK.notifyAll();
-//            }
-//            runEventPump();
-//          }
-//        }.start();
-//        while(displayThread == null) {
-//          try {
-//            LOCK.wait();
-//          } catch(Exception e) {
-//            e.printStackTrace();
-//          }
-//        }
-//      }
+    while(display != null && !display.isDisposed()) {
+      if(!display.readAndDispatch()) {
+        display.sleep();
+      }
     }
   }
   

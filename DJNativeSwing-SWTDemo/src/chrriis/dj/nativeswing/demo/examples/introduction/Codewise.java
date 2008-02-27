@@ -26,15 +26,14 @@ public class Codewise extends JPanel {
         "<html>" + LS +
         "  <body>" + LS +
         "    <h1>Using the library is straightforward</h1>" + LS +
-        "    <p>There are only two mandatory calls to add to the main method, and the rest is just using the API exposed by the components:<br/>" + LS +
+        "    <p>There is only one mandatory call to add to the main method, and the rest is just using the API exposed by the components:<br/>" + LS +
         "    <pre>" + LS +
         "      public static void main(String[] args) {" + LS +
+        "        // NativeInterfaceHandler.setPreferredLookAndFeel();" + LS +
         "        NativeInterfaceHandler.init();" + LS +
         "        // Here goes the rest of the initialization" + LS +
-        "        NativeInterfaceHandler.runEventPump();" + LS +
         "      }</pre>" + LS +
         "    </p>" + LS +
-        "    <p>Note that the last call is blocking until all non-daemon threads are terminated. This is a paranoid check as Swing applications usually terminate using a System.exit(int) call.</p>" + LS +
         "    <h1>Native components are Swing-like</h1>" + LS +
         "    <p>Try the next examples and look at the source code: they could not be easier to manipulate.</p>" + LS +
         "  </body>" + LS +

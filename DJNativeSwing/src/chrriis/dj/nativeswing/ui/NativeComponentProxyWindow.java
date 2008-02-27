@@ -246,7 +246,7 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
           window.setSize(size);
         }
         WindowUtils.setWindowMask(window, area);
-        nativeComponent.repaintNativeControl();
+//        nativeComponent.repaintNativeControl();
       }
     }
   }

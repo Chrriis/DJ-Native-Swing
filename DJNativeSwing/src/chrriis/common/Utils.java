@@ -90,4 +90,37 @@ public class Utils {
     return null;
   }
   
+  public static File getClassPathFile(Class<?> clazz) {
+    File file = getJARFile(clazz);
+    return file != null? file: getDirectory(clazz);
+  }
+  
+  public static File getJARFile(Class<?> clazz) {
+    String classResourcePath = "/" + clazz.getName().replace('.', '/') + ".class";
+    String classResourceURL = clazz.getResource(classResourcePath).toExternalForm();
+    if(classResourceURL != null && classResourceURL.startsWith("jar:file:")) {
+      classResourceURL = classResourceURL.substring("jar:file:".length());
+      if(classResourceURL.endsWith("!" + classResourcePath)) {
+        return new File(decodeURL(classResourceURL.substring(0, classResourceURL.length() - 1 - classResourcePath.length())));
+      }
+    }
+    return null;
+  }
+  
+  public static File getDirectory(Class<?> clazz) {
+    String className = clazz.getName();
+    String classResourcePath = "/" + className.replace('.', '/') + ".class";
+    String classResourceURL = clazz.getResource(classResourcePath).toExternalForm();
+    if(classResourceURL != null && classResourceURL.startsWith("file:")) {
+      File dir = new File(decodeURL(classResourceURL.substring("file:".length()))).getParentFile();
+      for(int i=0; i<className.length(); i++) {
+        if(className.charAt(i) == '.') {
+          dir = dir.getParentFile();
+        }
+      }
+      return dir;
+    }
+    return null;
+  }
+  
 }

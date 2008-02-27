@@ -337,7 +337,7 @@ public class WebServer {
           in.close();
         }
       } catch(Exception e) {
-        e.printStackTrace();
+//        e.printStackTrace();
       }
     }
     

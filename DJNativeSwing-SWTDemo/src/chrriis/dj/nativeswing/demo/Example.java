@@ -15,12 +15,20 @@ class Example {
   protected Class<? extends JComponent> componentClass;
   protected String description;
   protected boolean isShowingSources;
+  protected boolean isAvailable;
+  protected String notAvailableMessage;
   
   public Example(String name, Class<? extends JComponent> componentClass, String description, boolean isShowingSources) {
+    this(name, componentClass, description, isShowingSources, true, null);
+  }
+
+  public Example(String name, Class<? extends JComponent> componentClass, String description, boolean isShowingSources, boolean isAvailable, String notAvailableMessage) {
     this.name = name;
     this.componentClass = componentClass;
     this.description = description;
     this.isShowingSources = isShowingSources;
+    this.isAvailable = isAvailable;
+    this.notAvailableMessage = notAvailableMessage;
   }
   
   public Class<? extends JComponent> getComponentClass() {
@@ -33,6 +41,14 @@ class Example {
   
   public boolean isShowingSources() {
     return isShowingSources;
+  }
+  
+  public boolean isAvailable() {
+    return isAvailable;
+  }
+  
+  public String getNotAvailableMessage() {
+    return notAvailableMessage;
   }
   
   @Override

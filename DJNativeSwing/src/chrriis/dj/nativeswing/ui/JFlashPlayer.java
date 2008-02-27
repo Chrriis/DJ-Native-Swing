@@ -28,6 +28,7 @@ import javax.swing.border.BevelBorder;
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.Disposable;
 import chrriis.dj.nativeswing.NativeInterfaceHandler;
+import chrriis.dj.nativeswing.Message.EmptyMessage;
 import chrriis.dj.nativeswing.ui.event.FlashPlayerListener;
 import chrriis.dj.nativeswing.ui.event.FlashPlayerWindowOpeningEvent;
 import chrriis.dj.nativeswing.ui.event.WebBrowserAdapter;
@@ -300,17 +301,7 @@ public class JFlashPlayer extends JPanel implements Disposable {
       if(getVariableResult[0] != TEMP_RESULT) {
         break;
       }
-      NativeInterfaceHandler.invokeSWT(new Runnable() {
-        public void run() {
-          if(getVariableResult[0] != TEMP_RESULT) {
-            return;
-          }
-          try {
-            Thread.sleep(50);
-          } catch(Exception e) {
-          }
-        }
-      });
+      NativeInterfaceHandler.syncExec(new EmptyMessage());
     }
     String result = getVariableResult[0];
     return result == TEMP_RESULT? null: result;

@@ -80,20 +80,6 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
     return listenerList.getListeners(InitializationListener.class);
   }
 
-  /**
-   * @return true if the control was initialized. If the initialization failed, this would return true but isValidControl would return false.
-   */
-  public boolean isInitialized() {
-    return nativeComponent.isInitialized();
-  }
-  
-  /**
-   * @return true if the component is initialized and is properly created.
-   */
-  public boolean isValidControl() {
-    return nativeComponent.isValidControl();
-  }
-
   public boolean setURL(String url) {
     return nativeComponent.setURL(url);
   }

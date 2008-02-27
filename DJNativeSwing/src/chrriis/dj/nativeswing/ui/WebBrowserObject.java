@@ -53,17 +53,8 @@ public abstract class WebBrowserObject implements Disposable {
       return;
     }
     instanceID = Registry.getInstance().add(this);
-    new Thread() {
-      @Override
-      public void run() {
-        try {
-          sleep(1500);
-        } catch(Exception e) {
-        }
-        String url = WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "html/" + instanceID);
-        webBrowser.setURL(url);
-      }
-    }.start();
+    url = WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "html/" + instanceID);
+    webBrowser.setURL(url);
   }
 
   protected static final String LS = System.getProperty("line.separator");
@@ -191,14 +182,6 @@ public abstract class WebBrowserObject implements Disposable {
     return null;
   }
   
-  public void dispose() {
-    webBrowser.dispose();
-  }
-  
-  public boolean isDisposed() {
-    return webBrowser.isDisposed();
-  }
-
   protected static class ObjectHTMLConfiguration {
     
     private String htmlLoadingMessage;
@@ -287,4 +270,12 @@ public abstract class WebBrowserObject implements Disposable {
  
   protected abstract String getJavascriptDefinitions();
   
+  public void dispose() {
+    webBrowser.dispose();
+  }
+  
+  public boolean isDisposed() {
+    return webBrowser.isDisposed();
+  }
+
 }

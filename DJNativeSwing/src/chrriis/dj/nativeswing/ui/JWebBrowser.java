@@ -35,23 +35,22 @@ import javax.swing.JToolBar;
 import javax.swing.border.BevelBorder;
 
 import chrriis.dj.nativeswing.Disposable;
-import chrriis.dj.nativeswing.ui.event.InitializationEvent;
-import chrriis.dj.nativeswing.ui.event.InitializationListener;
 import chrriis.dj.nativeswing.ui.event.WebBrowserAdapter;
 import chrriis.dj.nativeswing.ui.event.WebBrowserEvent;
 import chrriis.dj.nativeswing.ui.event.WebBrowserListener;
 import chrriis.dj.nativeswing.ui.event.WebBrowserNavigationEvent;
 
 /**
- * A web browser.
- * Methods execute when this component is initialized. If the component is not initialized, methods will be executed as soon as it gets initialized.
- * If the initialization fail, the methods will not have any effect. The results from methods have relevant values only when the component is valid. 
  * @author Christopher Deckers
  */
 public class JWebBrowser extends JPanel implements Disposable {
 
-  private final ResourceBundle RESOURCES = ResourceBundle.getBundle(JWebBrowser.class.getPackage().getName().replace('.', '/') + "/resource/WebBrowser");
+  public static void clearSessions() {
+    NativeWebBrowser.clearSessions();
+  }
   
+  private final ResourceBundle RESOURCES = ResourceBundle.getBundle(JWebBrowser.class.getPackage().getName().replace('.', '/') + "/resource/WebBrowser");
+
   private Component embeddableComponent;
   private NativeWebBrowser nativeComponent;
 
@@ -77,29 +76,6 @@ public class JWebBrowser extends JPanel implements Disposable {
   private JButton stopButton;
   private JMenuItem stopMenuItem;
 
-  private static class NInitializationListener implements InitializationListener {
-    protected Reference<JWebBrowser> webBrowser;
-    protected NInitializationListener(JWebBrowser webBrowser) {
-      this.webBrowser = new WeakReference<JWebBrowser>(webBrowser);
-    }
-    public void componentInitialized(InitializationEvent e) {
-      JWebBrowser webBrowser = this.webBrowser.get();
-      if(webBrowser == null) {
-        return;
-      }
-      Object[] listeners = webBrowser.listenerList.getListenerList();
-      e = null;
-      for(int i=listeners.length-2; i>=0; i-=2) {
-        if(listeners[i] == InitializationEvent.class) {
-          if(e == null) {
-            e = new InitializationEvent(webBrowser);
-          }
-          ((InitializationListener)listeners[i + 1]).componentInitialized(e);
-        }
-      }
-    }
-  }
-  
   private static class NWebBrowserListener extends WebBrowserAdapter {
     protected Reference<JWebBrowser> webBrowser;
     protected NWebBrowserListener(JWebBrowser webBrowser) {
@@ -161,7 +137,6 @@ public class JWebBrowser extends JPanel implements Disposable {
   public JWebBrowser() {
     setLayout(new BorderLayout(0, 0));
     nativeComponent = new NativeWebBrowser(this);
-    nativeComponent.addInitializationListener(new NInitializationListener(this));
     JPanel menuToolAndAddressBarPanel = new JPanel(new BorderLayout(0, 0));
     menuBar = new JMenuBar();
     menuToolAndAddressBarPanel.add(menuBar, BorderLayout.NORTH);
@@ -174,7 +149,7 @@ public class JWebBrowser extends JPanel implements Disposable {
     backButton.setToolTipText(RESOURCES.getString("BackText"));
     ActionListener backActionListener = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        nativeComponent.back();
+        back();
         nativeComponent.requestFocus();
       }
     };
@@ -185,7 +160,7 @@ public class JWebBrowser extends JPanel implements Disposable {
     forwardButton.setEnabled(false);
     ActionListener forwardActionListener = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        nativeComponent.forward();
+        forward();
         nativeComponent.requestFocus();
       }
     };
@@ -195,7 +170,7 @@ public class JWebBrowser extends JPanel implements Disposable {
     refreshButton.setToolTipText(RESOURCES.getString("RefreshText"));
     ActionListener refreshActionListener = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        nativeComponent.refresh();
+        refresh();
         nativeComponent.requestFocus();
       }
     };
@@ -206,7 +181,7 @@ public class JWebBrowser extends JPanel implements Disposable {
     stopButton.setEnabled(false);
     ActionListener stopActionListener = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        nativeComponent.stop();
+        stop();
       }
     };
     stopButton.addActionListener(stopActionListener);
@@ -222,7 +197,7 @@ public class JWebBrowser extends JPanel implements Disposable {
     addressField = new JTextField();
     ActionListener goActionListener = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        nativeComponent.setURL(addressField.getText());
+        setURL(addressField.getText());
         nativeComponent.requestFocus();
       }
     };
@@ -251,9 +226,10 @@ public class JWebBrowser extends JPanel implements Disposable {
     JMenuItem fileNewWindowMenuItem = new JMenuItem(RESOURCES.getString("FileNewWindowMenu"));
     fileNewWindowMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        JWebBrowserWindow webBrowserWindow = new JWebBrowserWindow();
-        webBrowserWindow.getWebBrowser().setURL(getURL());
-        webBrowserWindow.setVisible(true);
+        // TODO: implement
+//        JWebBrowserWindow webBrowserWindow = new JWebBrowserWindow();
+//        webBrowserWindow.getWebBrowser().setURL(getURL());
+//        webBrowserWindow.setVisible(true);
       }
     });
     fileMenu.add(fileNewWindowMenuItem);
@@ -327,18 +303,6 @@ public class JWebBrowser extends JPanel implements Disposable {
     stopMenuItem.setEnabled(stopButton.isEnabled());
     viewMenu.add(stopMenuItem);
     menuBar.add(viewMenu);
-  }
-  
-  private Icon createIcon(String resourceKey) {
-    String value = RESOURCES.getString(resourceKey);
-    return value.length() == 0? null: new ImageIcon(JWebBrowser.class.getResource(value));
-  }
-  
-  @SuppressWarnings("deprecation")
-  @Override
-  public void show() {
-    super.show();
-    nativeComponent.requestFocus();
   }
   
   public void setStatusBarVisible(boolean isStatusBarVisible) {
@@ -469,32 +433,6 @@ public class JWebBrowser extends JPanel implements Disposable {
     return nativeComponent;
   }
   
-  public void addInitializationListener(InitializationListener listener) {
-    listenerList.add(InitializationListener.class, listener);
-  }
-  
-  public void removeWebBrowserListener(InitializationListener listener) {
-    listenerList.remove(InitializationListener.class, listener);
-  }
-  
-  public InitializationListener[] getInitializationListeners() {
-    return listenerList.getListeners(InitializationListener.class);
-  }
-
-  /**
-   * @return true if the control was initialized. If the initialization failed, this would return true but isValidControl would return false.
-   */
-  public boolean isInitialized() {
-    return nativeComponent.isInitialized();
-  }
-  
-  /**
-   * @return true if the component is initialized and is properly created.
-   */
-  public boolean isValidControl() {
-    return nativeComponent.isValidControl();
-  }
-  
   public JMenuBar getMenuBar() {
     return menuBar;
   }
@@ -503,10 +441,11 @@ public class JWebBrowser extends JPanel implements Disposable {
     return fileMenu;
   }
   
-  public static void clearSessions() {
-    NativeWebBrowser.clearSessions();
+  private Icon createIcon(String resourceKey) {
+    String value = RESOURCES.getString(resourceKey);
+    return value.length() == 0? null: new ImageIcon(JWebBrowser.class.getResource(value));
   }
-
+  
   public void dispose() {
     if(embeddableComponent instanceof Disposable) {
       ((Disposable)embeddableComponent).dispose();

@@ -27,20 +27,17 @@ import chrriis.dj.nativeswing.ui.NativeComponent;
 class NativeMultimediaPlayer extends NativeComponent {
   
   public NativeMultimediaPlayer() {
-    // Set the default properties
     setAutoStart(true);
     setControlBarVisible(true);
     setErrorDialogsEnabled(false);
   }
-
-  private OleClientSite site;
   
-  private int type;
   private static final int WM_PLAYER = 1;
   private static final int MEDIA_PLAYER = 2;
 
-  @Override
-  protected Control createControl(Shell shell) {
+  protected static Control createControl(Shell shell) {
+    int type;
+    OleClientSite site;
     OleFrame frame = new OleFrame(shell, SWT.NONE);
     try {
       try {
@@ -51,685 +48,693 @@ class NativeMultimediaPlayer extends NativeComponent {
         site = new OleClientSite(frame, SWT.NONE, "MediaPlayer.MediaPlayer.1");
         type = MEDIA_PLAYER;
       }
+      frame.setData("NS_type", type);
+      frame.setData("NS_site", site);
     } catch(SWTException e) {
-      System.err.print(getClass().getName() + " [" + hashCode() + "]: ");
       e.printStackTrace();
       frame.dispose();
       return null;
     }
-//    clientSite.doVerb(OLE.OLEIVERB_SHOW);
     site.doVerb(OLE.OLEIVERB_INPLACEACTIVATE);
-//    OleAutomation automation = new OleAutomation(site);
-//    int[] ids = automation.getIDsOfNames(new String[] {"settings"});
-//    if(ids != null) {
-//      automation = automation.getProperty(ids[0]).getAutomation();
-//      for(int i=0; ; i++) {
-//        OleFunctionDescription functionDescription = automation.getFunctionDescription(i);
-//        if(functionDescription == null) {
-//          break;
-//        }
-//        System.err.println(functionDescription.name + ": " + functionDescription.documentation);
-//      }
-//    }
     return frame;
   }
   
-  private boolean setErrorDialogsEnabled(final boolean isErrorDialogEnabled) {
-    final boolean[] result = new boolean[1];
-    run(new Runnable() {
-      public void run() {
-        OleAutomation automation = new OleAutomation(site);
-        switch(type) {
-          case WM_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"settings"});
+  private static class CMN_setErrorDialogsEnabled extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      boolean result = false;
+      OleFrame frame = (OleFrame)getControl();
+      OleAutomation automation = new OleAutomation((OleClientSite)frame.getData("NS_site"));
+      switch((Integer)frame.getData("NS_type")) {
+        case WM_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"settings"});
+          if(ids != null) {
+            automation = automation.getProperty(ids[0]).getAutomation();
+            ids = automation.getIDsOfNames(new String[] {"enableErrorDialogs"});
             if(ids != null) {
-              automation = automation.getProperty(ids[0]).getAutomation();
-              ids = automation.getIDsOfNames(new String[] {"enableErrorDialogs"});
-              if(ids != null) {
-                result[0] = automation.setProperty(ids[0], new Variant(isErrorDialogEnabled));
-              }
+              result = automation.setProperty(ids[0], new Variant((Boolean)args[0]));
             }
-            break;
           }
+          break;
         }
-        automation.dispose();
       }
-    });
-    return result[0];
+      automation.dispose();
+      return result;
+    }
   }
   
+  public boolean setErrorDialogsEnabled(boolean isErrorDialogEnabled) {
+    return Boolean.TRUE.equals(run(new CMN_setErrorDialogsEnabled(), isErrorDialogEnabled));
+  }
+  
+  private static class CMN_getURL extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      String result = null;
+      OleFrame frame = (OleFrame)getControl();
+      OleAutomation automation = new OleAutomation((OleClientSite)frame.getData("NS_site"));
+      switch((Integer)frame.getData("NS_type")) {
+        case WM_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"url"});
+          if(ids != null) {
+            result = automation.getProperty(ids[0]).getString();
+          }
+          break;
+        }
+        case MEDIA_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"fileName"});
+          if(ids != null) {
+            result = automation.getProperty(ids[0]).getString();
+          }
+          break;
+        }
+      }
+      automation.dispose();
+      return result;
+    }
+  }
+
   public String getURL() {
-    final String[] result = new String[1];
-    run(new Runnable() {
-      public void run() {
-        OleAutomation automation = new OleAutomation(site);
-        switch(type) {
-          case WM_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"url"});
-            if(ids != null) {
-              result[0] = automation.getProperty(ids[0]).getString();
-            }
-            break;
-          }
-          case MEDIA_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"fileName"});
-            if(ids != null) {
-              result[0] = automation.getProperty(ids[0]).getString();
-            }
-            break;
-          }
-        }
-        automation.dispose();
-      }
-    });
-    return result[0];
+    return (String)run(new CMN_getURL());
   }
   
-  public boolean setURL(final String url) {
-    final boolean[] result = new boolean[1];
-    run(new Runnable() {
-      public void run() {
-        OleAutomation automation = new OleAutomation(site);
-        switch(type) {
-          case WM_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"url"});
-            if(ids != null) {
-              result[0] = automation.setProperty(ids[0], new Variant(url == null? "": url));
-            }
-            break;
+  private static class CMN_setURL extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      boolean result = false;
+      String url = (String)args[0];
+      OleFrame frame = (OleFrame)getControl();
+      OleAutomation automation = new OleAutomation((OleClientSite)frame.getData("NS_site"));
+      switch((Integer)frame.getData("NS_type")) {
+        case WM_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"url"});
+          if(ids != null) {
+            result = automation.setProperty(ids[0], new Variant(url == null? "": url));
           }
-          case MEDIA_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"fileName"});
-            if(ids != null) {
-              result[0] = automation.setProperty(ids[0], new Variant(url == null? "": url));
-            }
-            break;
-          }
+          break;
         }
-        automation.dispose();
+        case MEDIA_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"fileName"});
+          if(ids != null) {
+            result = automation.setProperty(ids[0], new Variant(url == null? "": url));
+          }
+          break;
+        }
       }
-    });
-    return result[0];
+      automation.dispose();
+      return result;
+    }
+  }
+
+  public boolean setURL(final String url) {
+    return Boolean.TRUE.equals(run(new CMN_setURL(), url));
+  }
+  
+  private static class CMN_setControlBarVisible extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      boolean result = false;
+      boolean isControlBarVisible = (Boolean)args[0];
+      OleFrame frame = (OleFrame)getControl();
+      OleAutomation automation = new OleAutomation((OleClientSite)frame.getData("NS_site"));
+      switch((Integer)frame.getData("NS_type")) {
+        case WM_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"uiMode"});
+          if(ids != null) {
+            automation.setProperty(ids[0], new Variant[] {new Variant(isControlBarVisible? "full": "none")});
+            result = true;
+          }
+          break;
+        }
+        case MEDIA_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"showControls"});
+          if(ids != null) {
+            automation.setProperty(ids[0], new Variant[] {new Variant(isControlBarVisible)});
+            result = true;
+          }
+          break;
+        }
+      }
+      automation.dispose();
+      return result;
+    }
   }
   
   public boolean setControlBarVisible(final boolean isControlBarVisible) {
-    final boolean[] result = new boolean[1];
-    run(new Runnable() {
-      public void run() {
-        OleAutomation automation = new OleAutomation(site);
-        switch(type) {
-          case WM_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"uiMode"});
-            if(ids != null) {
-              automation.setProperty(ids[0], new Variant[] {new Variant(isControlBarVisible? "full": "none")});
-              result[0] = true;
-            }
-            break;
-          }
-          case MEDIA_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"showControls"});
-            if(ids != null) {
-              automation.setProperty(ids[0], new Variant[] {new Variant(isControlBarVisible)});
-              result[0] = true;
-            }
-            break;
-          }
-        }
-        automation.dispose();
-      }
-    });
-    return result[0];
+    return Boolean.TRUE.equals(run(new CMN_setControlBarVisible(), isControlBarVisible));
   }
 
-  public boolean isControlBarVisible() {
-    final boolean[] result = new boolean[1];
-    run(new Runnable() {
-      public void run() {
-        OleAutomation automation = new OleAutomation(site);
-        switch(type) {
-          case WM_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"uiMode"});
-            if(ids != null) {
-              result[0] = "full".equals(automation.getProperty(ids[0]).getString());
-            }
-            break;
+  private static class CMN_isControlBarVisible extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      boolean result = false;
+      OleFrame frame = (OleFrame)getControl();
+      OleAutomation automation = new OleAutomation((OleClientSite)frame.getData("NS_site"));
+      switch((Integer)frame.getData("NS_type")) {
+        case WM_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"uiMode"});
+          if(ids != null) {
+            result = "full".equals(automation.getProperty(ids[0]).getString());
           }
-          case MEDIA_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"showControls"});
-            if(ids != null) {
-              result[0] = automation.getProperty(ids[0]).getBoolean();
-            }
-            break;
-          }
+          break;
         }
-        automation.dispose();
+        case MEDIA_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"showControls"});
+          if(ids != null) {
+            result = automation.getProperty(ids[0]).getBoolean();
+          }
+          break;
+        }
       }
-    });
-    return result[0];
+      automation.dispose();
+      return result;
+    }
   }
   
-//  public boolean setDisplayVisible(final boolean isDisplayVisible) {
-//    final boolean[] result = new boolean[1];
-//    run(new Runnable() {
-//      @Override
-//      public void run() {
-//        OleAutomation automation = new OleAutomation(clientSite);
-//        int[] ids = automation.getIDsOfNames(new String[] {"ShowDisplay"});
-//        if(ids != null) {
-//          automation.setProperty(ids[0], new Variant[] {new Variant(isDisplayVisible)});
-//          result[0] = true;
-//        }
-//        automation.dispose();
-//      }
-//    });
-//    return result[0];
-//  }
-//  
-//  public boolean isDisplayVisible() {
-//    final boolean[] result = new boolean[1];
-//    run(new Runnable() {
-//      @Override
-//      public void run() {
-//        OleAutomation automation = new OleAutomation(clientSite);
-//        int[] ids = automation.getIDsOfNames(new String[] {"ShowDisplay"});
-//        if(ids != null) {
-//          result[0] = automation.getProperty(ids[0]).getBoolean();
-//        }
-//        automation.dispose();
-//      }
-//    });
-//    return result[0];
-//  }
+  public boolean isControlBarVisible() {
+    return Boolean.TRUE.equals(run(new CMN_isControlBarVisible()));
+  }
   
+  private static class CMN_setVolume extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      boolean result = false;
+      int volume = (Integer)args[0];
+      OleFrame frame = (OleFrame)getControl();
+      OleAutomation automation = new OleAutomation((OleClientSite)frame.getData("NS_site"));
+      switch((Integer)frame.getData("NS_type")) {
+        case WM_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"settings"});
+          if(ids != null) {
+            automation = automation.getProperty(ids[0]).getAutomation();
+            ids = automation.getIDsOfNames(new String[] {"volume"});
+            if(ids != null) {
+              result = automation.setProperty(ids[0], new Variant(volume));
+            }
+          }
+          break;
+        }
+        case MEDIA_PLAYER: {
+          int volume_ = -(int)Math.round(Math.pow((100 - volume) / 2.0, 2));
+          int[] ids = automation.getIDsOfNames(new String[] {"volume"});
+          if(ids != null) {
+            result = automation.setProperty(ids[0], new Variant(volume_));
+          }
+          break;
+        }
+      }
+      automation.dispose();
+      return result;
+    }
+  }
+
   public boolean setVolume(final int volume) {
     if(volume < 0 || volume > 100) {
       throw new IllegalArgumentException("The volume must be between 0 and 100");
     }
-    final boolean[] result = new boolean[1];
-    run(new Runnable() {
-      public void run() {
-        OleAutomation automation = new OleAutomation(site);
-        switch(type) {
-          case WM_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"settings"});
-            if(ids != null) {
-              automation = automation.getProperty(ids[0]).getAutomation();
-              ids = automation.getIDsOfNames(new String[] {"volume"});
-              if(ids != null) {
-                result[0] = automation.setProperty(ids[0], new Variant(volume));
-              }
-            }
-            break;
-          }
-          case MEDIA_PLAYER: {
-            int volume_ = -(int)Math.round(Math.pow((100 - volume) / 2.0, 2));
-            int[] ids = automation.getIDsOfNames(new String[] {"volume"});
-            if(ids != null) {
-              result[0] = automation.setProperty(ids[0], new Variant(volume_));
-            }
-            break;
-          }
-        }
-        automation.dispose();
-      }
-    });
-    return result[0];
+    return Boolean.TRUE.equals(run(new CMN_setVolume()));
   }
   
+  private static class CMN_getVolume extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      int result = -1;
+      OleFrame frame = (OleFrame)getControl();
+      OleAutomation automation = new OleAutomation((OleClientSite)frame.getData("NS_site"));
+      switch((Integer)frame.getData("NS_type")) {
+        case WM_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"settings"});
+          if(ids != null) {
+            automation = automation.getProperty(ids[0]).getAutomation();
+            ids = automation.getIDsOfNames(new String[] {"volume"});
+            if(ids != null) {
+              result = automation.getProperty(ids[0]).getInt();
+            }
+          }
+          break;
+        }
+        case MEDIA_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"volume"});
+          if(ids != null) {
+            int volume = automation.getProperty(ids[0]).getInt();
+            volume = 100 - (int)Math.round(Math.sqrt(-volume) * 2);
+            result = volume;
+          }
+          break;
+        }
+      }
+      automation.dispose();
+      return result;
+    }
+  }
+
   public int getVolume() {
-    final int[] result = new int[] {-1};
-    run(new Runnable() {
-      public void run() {
-        OleAutomation automation = new OleAutomation(site);
-        switch(type) {
-          case WM_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"settings"});
-            if(ids != null) {
-              automation = automation.getProperty(ids[0]).getAutomation();
-              ids = automation.getIDsOfNames(new String[] {"volume"});
-              if(ids != null) {
-                result[0] = automation.getProperty(ids[0]).getInt();
-              }
-            }
-            break;
-          }
-          case MEDIA_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"volume"});
-            if(ids != null) {
-              int volume = automation.getProperty(ids[0]).getInt();
-              volume = 100 - (int)Math.round(Math.sqrt(-volume) * 2);
-              result[0] = volume;
-            }
-            break;
-          }
-        }
-        automation.dispose();
-      }
-    });
-    return result[0];
+    Object result = run(new CMN_getVolume());
+    return result == null? -1: (Integer)result;
   }
   
+  private static class CMN_setStereoBalance extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      boolean result = false;
+      int stereoBalance = (Integer)args[0];
+      OleFrame frame = (OleFrame)getControl();
+      OleAutomation automation = new OleAutomation((OleClientSite)frame.getData("NS_site"));
+      switch((Integer)frame.getData("NS_type")) {
+        case WM_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"settings"});
+          if(ids != null) {
+            automation = automation.getProperty(ids[0]).getAutomation();
+            ids = automation.getIDsOfNames(new String[] {"balance"});
+            if(ids != null) {
+              result = automation.setProperty(ids[0], new Variant(stereoBalance));
+            }
+          }
+          break;
+        }
+        case MEDIA_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"balance"});
+          if(ids != null) {
+            result = automation.setProperty(ids[0], new Variant(stereoBalance));
+          }
+          break;
+        }
+      }
+      automation.dispose();
+      return result;
+    }
+  }
+
   public boolean setStereoBalance(final int stereoBalance) {
     if(stereoBalance < 100 || stereoBalance > 100) {
       throw new IllegalArgumentException("The stereo balance must be between -100 and 100");
     }
-    final boolean[] result = new boolean[1];
-    run(new Runnable() {
-      public void run() {
-        OleAutomation automation = new OleAutomation(site);
-        switch(type) {
-          case WM_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"settings"});
-            if(ids != null) {
-              automation = automation.getProperty(ids[0]).getAutomation();
-              ids = automation.getIDsOfNames(new String[] {"balance"});
-              if(ids != null) {
-                result[0] = automation.setProperty(ids[0], new Variant(stereoBalance));
-              }
-            }
-            break;
-          }
-          case MEDIA_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"balance"});
-            if(ids != null) {
-              result[0] = automation.setProperty(ids[0], new Variant(stereoBalance));
-            }
-            break;
-          }
-        }
-        automation.dispose();
-      }
-    });
-    return result[0];
+    return Boolean.TRUE.equals(run(new CMN_setStereoBalance()));
   }
   
-  public int getStereoBalance() {
-    final int[] result = new int[] {0};
-    run(new Runnable() {
-      public void run() {
-        OleAutomation automation = new OleAutomation(site);
-        switch(type) {
-          case WM_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"settings"});
+  private static class CMN_getStereoBalance extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      int result = -1;
+      OleFrame frame = (OleFrame)getControl();
+      OleAutomation automation = new OleAutomation((OleClientSite)frame.getData("NS_site"));
+      switch((Integer)frame.getData("NS_type")) {
+        case WM_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"settings"});
+          if(ids != null) {
+            automation = automation.getProperty(ids[0]).getAutomation();
+            ids = automation.getIDsOfNames(new String[] {"balance"});
             if(ids != null) {
-              automation = automation.getProperty(ids[0]).getAutomation();
-              ids = automation.getIDsOfNames(new String[] {"balance"});
-              if(ids != null) {
-                result[0] = automation.getProperty(ids[0]).getInt();
-              }
+              result = automation.getProperty(ids[0]).getInt();
             }
-            break;
           }
-          case MEDIA_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"balance"});
-            if(ids != null) {
-              result[0] = automation.getProperty(ids[0]).getInt();
-            }
-            break;
-          }
+          break;
         }
-        automation.dispose();
+        case MEDIA_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"balance"});
+          if(ids != null) {
+            result = automation.getProperty(ids[0]).getInt();
+          }
+          break;
+        }
       }
-    });
-    return result[0];
+      automation.dispose();
+      return result;
+    }
+  }
+
+  public int getStereoBalance() {
+    Object result = run(new CMN_getStereoBalance());
+    return result == null? -1: (Integer)result;
+  }
+  
+  private static class CMN_setAutoStart extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      boolean result = false;
+      boolean isAutoStart = (Boolean)args[0];
+      OleFrame frame = (OleFrame)getControl();
+      OleAutomation automation = new OleAutomation((OleClientSite)frame.getData("NS_site"));
+      switch((Integer)frame.getData("NS_type")) {
+        case WM_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"settings"});
+          if(ids != null) {
+            automation = automation.getProperty(ids[0]).getAutomation();
+            ids = automation.getIDsOfNames(new String[] {"autoStart"});
+            if(ids != null) {
+              result = automation.setProperty(ids[0], new Variant(isAutoStart));
+            }
+          }
+          break;
+        }
+        case MEDIA_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"autoStart"});
+          if(ids != null) {
+            result = automation.setProperty(ids[0], new Variant(isAutoStart));
+          }
+          break;
+        }
+      }
+      automation.dispose();
+      return result;
+    }
   }
   
   public boolean setAutoStart(final boolean isAutoStart) {
-    final boolean[] result = new boolean[1];
-    run(new Runnable() {
-      public void run() {
-        OleAutomation automation = new OleAutomation(site);
-        switch(type) {
-          case WM_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"settings"});
+    return Boolean.TRUE.equals(run(new CMN_setAutoStart(), isAutoStart));
+  }
+  
+  private static class CMN_isAutoStart extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      boolean result = false;
+      OleFrame frame = (OleFrame)getControl();
+      OleAutomation automation = new OleAutomation((OleClientSite)frame.getData("NS_site"));
+      switch((Integer)frame.getData("NS_type")) {
+        case WM_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"settings"});
+          if(ids != null) {
+            automation = automation.getProperty(ids[0]).getAutomation();
+            ids = automation.getIDsOfNames(new String[] {"autoStart"});
             if(ids != null) {
-              automation = automation.getProperty(ids[0]).getAutomation();
-              ids = automation.getIDsOfNames(new String[] {"autoStart"});
-              if(ids != null) {
-                result[0] = automation.setProperty(ids[0], new Variant(isAutoStart));
-              }
+              result = automation.getProperty(ids[0]).getBoolean();
             }
-            break;
           }
-          case MEDIA_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"autoStart"});
-            if(ids != null) {
-              result[0] = automation.setProperty(ids[0], new Variant(isAutoStart));
-            }
-            break;
-          }
+          break;
         }
-        automation.dispose();
+        case MEDIA_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"autoStart"});
+          if(ids != null) {
+            result = automation.getProperty(ids[0]).getBoolean();
+          }
+          break;
+        }
       }
-    });
-    return result[0];
+      automation.dispose();
+      return result;
+    }
   }
   
   public boolean isAutoStart() {
-    final boolean[] result = new boolean[1];
-    run(new Runnable() {
-      public void run() {
-        OleAutomation automation = new OleAutomation(site);
-        switch(type) {
-          case WM_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"settings"});
-            if(ids != null) {
-              automation = automation.getProperty(ids[0]).getAutomation();
-              ids = automation.getIDsOfNames(new String[] {"autoStart"});
-              if(ids != null) {
-                result[0] = automation.getProperty(ids[0]).getBoolean();
-              }
-            }
-            break;
-          }
-          case MEDIA_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"autoStart"});
-            if(ids != null) {
-              result[0] = automation.getProperty(ids[0]).getBoolean();
-            }
-            break;
-          }
-        }
-        automation.dispose();
-      }
-    });
-    return result[0];
+    return Boolean.TRUE.equals(run(new CMN_isAutoStart()));
   }
   
-//  public boolean setFullScreen(final boolean isFullScreen) {
-//    final boolean[] result = new boolean[1];
-//    run(new Runnable() {
-//      public void run() {
-//        OleAutomation automation = new OleAutomation(clientSite);
-//        int[] ids = automation.getIDsOfNames(new String[] {"fullScreen"});
-//        if(ids != null) {
-//          automation.setProperty(ids[0], new Variant(isFullScreen));
-//          result[0] = true;
-//        }
-//        automation.dispose();
-//      }
-//    });
-//    return result[0];
-//  }
-//  
-//  public boolean isFullScreen() {
-//    final boolean[] result = new boolean[1];
-//    run(new Runnable() {
-//      public void run() {
-//        OleAutomation automation = new OleAutomation(clientSite);
-//        int[] ids = automation.getIDsOfNames(new String[] {"fullScreen"});
-//        if(ids != null) {
-//          result[0] = automation.getProperty(ids[0]).getBoolean();
-//        }
-//        automation.dispose();
-//      }
-//    });
-//    return result[0];
-//  }
+  private static class CMN_setMute extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      boolean result = false;
+      boolean isMute = (Boolean)args[0];
+      OleFrame frame = (OleFrame)getControl();
+      OleAutomation automation = new OleAutomation((OleClientSite)frame.getData("NS_site"));
+      switch((Integer)frame.getData("NS_type")) {
+        case WM_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"settings"});
+          if(ids != null) {
+            automation = automation.getProperty(ids[0]).getAutomation();
+            ids = automation.getIDsOfNames(new String[] {"mute"});
+            if(ids != null) {
+              result = automation.setProperty(ids[0], new Variant(isMute));
+            }
+          }
+          break;
+        }
+        case MEDIA_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"mute"});
+          if(ids != null) {
+            result = automation.setProperty(ids[0], new Variant(isMute));
+          }
+          break;
+        }
+      }
+      automation.dispose();
+      return result;
+    }
+  }
   
   public boolean setMute(final boolean isMute) {
-    final boolean[] result = new boolean[1];
-    run(new Runnable() {
-      public void run() {
-        OleAutomation automation = new OleAutomation(site);
-        switch(type) {
-          case WM_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"settings"});
+    return Boolean.TRUE.equals(run(new CMN_setMute(), isMute));
+  }
+  
+  private static class CMN_isMute extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      boolean result = false;
+      OleFrame frame = (OleFrame)getControl();
+      OleAutomation automation = new OleAutomation((OleClientSite)frame.getData("NS_site"));
+      switch((Integer)frame.getData("NS_type")) {
+        case WM_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"settings"});
+          if(ids != null) {
+            automation = automation.getProperty(ids[0]).getAutomation();
+            ids = automation.getIDsOfNames(new String[] {"mute"});
             if(ids != null) {
-              automation = automation.getProperty(ids[0]).getAutomation();
-              ids = automation.getIDsOfNames(new String[] {"mute"});
-              if(ids != null) {
-                result[0] = automation.setProperty(ids[0], new Variant(isMute));
-              }
+              result = automation.getProperty(ids[0]).getBoolean();
             }
-            break;
           }
-          case MEDIA_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"mute"});
-            if(ids != null) {
-              result[0] = automation.setProperty(ids[0], new Variant(isMute));
-            }
-            break;
-          }
+          break;
         }
-        automation.dispose();
+        case MEDIA_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"mute"});
+          if(ids != null) {
+            result = automation.getProperty(ids[0]).getBoolean();
+          }
+          break;
+        }
       }
-    });
-    return result[0];
+      automation.dispose();
+      return result;
+    }
   }
   
   public boolean isMute() {
-    final boolean[] result = new boolean[1];
-    run(new Runnable() {
-      public void run() {
-        OleAutomation automation = new OleAutomation(site);
-        switch(type) {
-          case WM_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"settings"});
+    return Boolean.TRUE.equals(run(new CMN_isMute()));
+  }
+  
+  private static class CMN_isPlayEnabled extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      boolean result = false;
+      OleFrame frame = (OleFrame)getControl();
+      OleAutomation automation = new OleAutomation((OleClientSite)frame.getData("NS_site"));
+      switch((Integer)frame.getData("NS_type")) {
+        case WM_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"controls"});
+          if(ids != null) {
+            automation = automation.getProperty(ids[0]).getAutomation();
+            ids = automation.getIDsOfNames(new String[] {"isAvailable"});
             if(ids != null) {
-              automation = automation.getProperty(ids[0]).getAutomation();
-              ids = automation.getIDsOfNames(new String[] {"mute"});
-              if(ids != null) {
-                result[0] = automation.getProperty(ids[0]).getBoolean();
-              }
+              result = automation.getProperty(ids[0], new Variant[] {new Variant("Play")}).getBoolean();
             }
-            break;
           }
-          case MEDIA_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"mute"});
-            if(ids != null) {
-              result[0] = automation.getProperty(ids[0]).getBoolean();
-            }
-            break;
-          }
+          break;
         }
-        automation.dispose();
+        case MEDIA_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"playState"});
+          if(ids != null) {
+            switch(automation.getProperty(ids[0]).getInt()) {
+              case 0: // File loaded but not playing
+              case 1: // Paused
+                result = true;
+            }
+          }
+          break;
+        }
       }
-    });
-    return result[0];
+      automation.dispose();
+      return result;
+    }
   }
   
   public boolean isPlayEnabled() {
-    final boolean[] result = new boolean[1];
-    run(new Runnable() {
-      public void run() {
-        OleAutomation automation = new OleAutomation(site);
-        switch(type) {
-          case WM_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"controls"});
+    return Boolean.TRUE.equals(run(new CMN_isPlayEnabled()));
+  }
+  
+  private static class CMN_play extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      boolean result = false;
+      OleFrame frame = (OleFrame)getControl();
+      OleAutomation automation = new OleAutomation((OleClientSite)frame.getData("NS_site"));
+      switch((Integer)frame.getData("NS_type")) {
+        case WM_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"controls"});
+          if(ids != null) {
+            automation = automation.getProperty(ids[0]).getAutomation();
+            ids = automation.getIDsOfNames(new String[] {"Play"});
             if(ids != null) {
-              automation = automation.getProperty(ids[0]).getAutomation();
-              ids = automation.getIDsOfNames(new String[] {"isAvailable"});
-              if(ids != null) {
-                result[0] = automation.getProperty(ids[0], new Variant[] {new Variant("Play")}).getBoolean();
-              }
+              automation.invoke(ids[0]);
+              result = true;
             }
-            break;
           }
-          case MEDIA_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"playState"});
-            if(ids != null) {
-              switch(automation.getProperty(ids[0]).getInt()) {
-                case 0: // File loaded but not playing
-                case 1: // Paused
-                  result[0] = true;
-              }
-            }
-            break;
-          }
+          break;
         }
-        automation.dispose();
+        case MEDIA_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"Play"});
+          if(ids != null) {
+            automation.invoke(ids[0]);
+            result = true;
+          }
+          break;
+        }
       }
-    });
-    return result[0];
+      automation.dispose();
+      return result;
+    }
   }
   
   public boolean play() {
-    final boolean[] result = new boolean[1];
-    run(new Runnable() {
-      public void run() {
-        OleAutomation automation = new OleAutomation(site);
-        switch(type) {
-          case WM_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"controls"});
+    return Boolean.TRUE.equals(run(new CMN_play()));
+  }
+  
+  private static class CMN_isStopEnabled extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      boolean result = false;
+      OleFrame frame = (OleFrame)getControl();
+      OleAutomation automation = new OleAutomation((OleClientSite)frame.getData("NS_site"));
+      switch((Integer)frame.getData("NS_type")) {
+        case WM_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"controls"});
+          if(ids != null) {
+            automation = automation.getProperty(ids[0]).getAutomation();
+            ids = automation.getIDsOfNames(new String[] {"isAvailable"});
             if(ids != null) {
-              automation = automation.getProperty(ids[0]).getAutomation();
-              ids = automation.getIDsOfNames(new String[] {"Play"});
-              if(ids != null) {
-                automation.invoke(ids[0]);
-                result[0] = true;
-              }
+              result = automation.getProperty(ids[0], new Variant[] {new Variant("Stop")}).getBoolean();
             }
-            break;
           }
-          case MEDIA_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"Play"});
-            if(ids != null) {
-              automation.invoke(ids[0]);
-              result[0] = true;
-            }
-            break;
-          }
+          break;
         }
-        automation.dispose();
+        case MEDIA_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"playState"});
+          if(ids != null) {
+            switch(automation.getProperty(ids[0]).getInt()) {
+              case 1: // Paused
+              case 2: // File loaded and playing
+                result = true;
+            }
+          }
+          break;
+        }
       }
-    });
-    return result[0];
+      automation.dispose();
+      return result;
+    }
   }
   
   public boolean isStopEnabled() {
-    final boolean[] result = new boolean[1];
-    run(new Runnable() {
-      public void run() {
-        OleAutomation automation = new OleAutomation(site);
-        switch(type) {
-          case WM_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"controls"});
+    return Boolean.TRUE.equals(run(new CMN_isStopEnabled()));
+  }
+  
+  private static class CMN_stop extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      boolean result = false;
+      OleFrame frame = (OleFrame)getControl();
+      OleAutomation automation = new OleAutomation((OleClientSite)frame.getData("NS_site"));
+      switch((Integer)frame.getData("NS_type")) {
+        case WM_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"controls"});
+          if(ids != null) {
+            automation = automation.getProperty(ids[0]).getAutomation();
+            ids = automation.getIDsOfNames(new String[] {"Stop"});
             if(ids != null) {
-              automation = automation.getProperty(ids[0]).getAutomation();
-              ids = automation.getIDsOfNames(new String[] {"isAvailable"});
-              if(ids != null) {
-                result[0] = automation.getProperty(ids[0], new Variant[] {new Variant("Stop")}).getBoolean();
-              }
+              automation.invoke(ids[0]);
+              result = true;
             }
-            break;
           }
-          case MEDIA_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"playState"});
-            if(ids != null) {
-              switch(automation.getProperty(ids[0]).getInt()) {
-                case 1: // Paused
-                case 2: // File loaded and playing
-                  result[0] = true;
-              }
-            }
-            break;
-          }
+          break;
         }
-        automation.dispose();
+        case MEDIA_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"Stop"});
+          if(ids != null) {
+            automation.invoke(ids[0]);
+            result = true;
+          }
+          break;
+        }
       }
-    });
-    return result[0];
+      automation.dispose();
+      return result;
+    }
   }
   
   public boolean stop() {
-    final boolean[] result = new boolean[1];
-    run(new Runnable() {
-      public void run() {
-        OleAutomation automation = new OleAutomation(site);
-        switch(type) {
-          case WM_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"controls"});
+    return Boolean.TRUE.equals(run(new CMN_stop()));
+  }
+  
+  private static class CMN_isPauseEnabled extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      boolean result = false;
+      OleFrame frame = (OleFrame)getControl();
+      OleAutomation automation = new OleAutomation((OleClientSite)frame.getData("NS_site"));
+      switch((Integer)frame.getData("NS_type")) {
+        case WM_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"controls"});
+          if(ids != null) {
+            automation = automation.getProperty(ids[0]).getAutomation();
+            ids = automation.getIDsOfNames(new String[] {"isAvailable"});
             if(ids != null) {
-              automation = automation.getProperty(ids[0]).getAutomation();
-              ids = automation.getIDsOfNames(new String[] {"Stop"});
-              if(ids != null) {
-                automation.invoke(ids[0]);
-                result[0] = true;
-              }
+              result = automation.getProperty(ids[0], new Variant[] {new Variant("Pause")}).getBoolean();
             }
-            break;
           }
-          case MEDIA_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"Stop"});
-            if(ids != null) {
-              automation.invoke(ids[0]);
-              result[0] = true;
-            }
-            break;
-          }
+          break;
         }
-        automation.dispose();
+        case MEDIA_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"playState"});
+          if(ids != null) {
+            switch(automation.getProperty(ids[0]).getInt()) {
+              case 2: // File loaded and playing
+                result = true;
+            }
+          }
+          break;
+        }
       }
-    });
-    return result[0];
+      automation.dispose();
+      return result;
+    }
   }
   
   public boolean isPauseEnabled() {
-    final boolean[] result = new boolean[1];
-    run(new Runnable() {
-      public void run() {
-        OleAutomation automation = new OleAutomation(site);
-        switch(type) {
-          case WM_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"controls"});
+    return Boolean.TRUE.equals(run(new CMN_isPauseEnabled()));
+  }
+  
+  private static class CMN_pause extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      boolean result = false;
+      OleFrame frame = (OleFrame)getControl();
+      OleAutomation automation = new OleAutomation((OleClientSite)frame.getData("NS_site"));
+      switch((Integer)frame.getData("NS_type")) {
+        case WM_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"controls"});
+          if(ids != null) {
+            automation = automation.getProperty(ids[0]).getAutomation();
+            ids = automation.getIDsOfNames(new String[] {"Pause"});
             if(ids != null) {
-              automation = automation.getProperty(ids[0]).getAutomation();
-              ids = automation.getIDsOfNames(new String[] {"isAvailable"});
-              if(ids != null) {
-                result[0] = automation.getProperty(ids[0], new Variant[] {new Variant("Pause")}).getBoolean();
-              }
+              automation.invoke(ids[0]);
+              result = true;
             }
-            break;
           }
-          case MEDIA_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"playState"});
-            if(ids != null) {
-              switch(automation.getProperty(ids[0]).getInt()) {
-                case 2: // File loaded and playing
-                  result[0] = true;
-              }
-            }
-            break;
-          }
+          break;
         }
-        automation.dispose();
+        case MEDIA_PLAYER: {
+          int[] ids = automation.getIDsOfNames(new String[] {"Pause"});
+          if(ids != null) {
+            automation.invoke(ids[0]);
+            result = true;
+          }
+          break;
+        }
       }
-    });
-    return result[0];
+      automation.dispose();
+      return result;
+    }
   }
   
   public boolean pause() {
-    final boolean[] result = new boolean[1];
-    run(new Runnable() {
-      public void run() {
-        OleAutomation automation = new OleAutomation(site);
-        switch(type) {
-          case WM_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"controls"});
-            if(ids != null) {
-              automation = automation.getProperty(ids[0]).getAutomation();
-              ids = automation.getIDsOfNames(new String[] {"Pause"});
-              if(ids != null) {
-                automation.invoke(ids[0]);
-                result[0] = true;
-              }
-            }
-            break;
-          }
-          case MEDIA_PLAYER: {
-            int[] ids = automation.getIDsOfNames(new String[] {"Pause"});
-            if(ids != null) {
-              automation.invoke(ids[0]);
-              result[0] = true;
-            }
-            break;
-          }
-        }
-        automation.dispose();
-      }
-    });
-    return result[0];
+    return Boolean.TRUE.equals(run(new CMN_pause()));
   }
   
   protected Component createEmbeddableComponent() {

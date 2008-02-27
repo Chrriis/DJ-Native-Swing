@@ -7,13 +7,12 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.4 (xxxxxxxxxxxxxxxx):
 
-- The L&F is not set anymore (use the corresponding method to apply it).
-- Browser-based components display loading messages usually visible on failure.
 - JVLCPlayer component is added.
-- Wake up thread and auto shutdown thread are removed (no effect...)
-- Stability is improved, especially on Linux.
-- Downloading Flash plugin should be made possible if not present.
-- Flash player uses a proxy for local files to bypass security restrictions.
+- Complete change of the internal native communication: dual process.
+- The L&F is not set anymore (use the corresponding method to apply it).
+- Browser components display messages on failure.
+- Browser components are easier to create.
+- Browser components use a proxy for local files: no security restrictions.
 - Flash player allows to set parameters and variables.
 
 

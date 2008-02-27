@@ -28,43 +28,69 @@ import org.eclipse.swt.program.Program;
 
 import chrriis.dj.nativeswing.ui.UIUtils;
 
+
 /**
  * @author Christopher Deckers
  */
 public class FileTypeLauncher {
 
-  private Program program;
-  private List<String> registeredExtensionList;
-  private int hashCode;
-  
-  private FileTypeLauncher(Program program) {
-    this.program = program;
-    hashCode = program.hashCode();
-  }
-  
-  private void addExtension(String extension) {
-    if(registeredExtensionList == null) {
-      registeredExtensionList = new ArrayList<String>(1);
+  private static class FileTypeLauncherInfo {
+    public static int nextID = 1;
+    private int id = nextID++;
+    private Program program;
+    private List<String> registeredExtensionList;
+    public FileTypeLauncherInfo(Program program) {
+      this.program = program;
+      idToFileTypeLauncherInfoMap.put(getID(), this);
     }
-    if(!registeredExtensionList.contains(extension)) {
-      registeredExtensionList.add(extension);
-    }
-  }
-  
-  /**
-   * Some global loading of data is performed the first time, if it is needed.
-   */
-  public static FileTypeLauncher[] getLaunchers() {
-    load();
-    FileTypeLauncher[] fileTypeLaunchers = programToFileTypeLauncherMap.values().toArray(new FileTypeLauncher[0]);
-    Arrays.sort(fileTypeLaunchers, new Comparator<FileTypeLauncher>() {
-      public int compare(FileTypeLauncher o1, FileTypeLauncher o2) {
-        return o1.getName().toLowerCase().compareTo(o2.getName().toLowerCase());
+    private void addExtension(String extension) {
+      if(registeredExtensionList == null) {
+        registeredExtensionList = new ArrayList<String>(1);
       }
-    });
-    return fileTypeLaunchers;
+      if(!registeredExtensionList.contains(extension)) {
+        registeredExtensionList.add(extension);
+      }
+    }
+    public int getID() {
+      return id;
+    }
+    public String[] getRegisteredExtensions() {
+      return registeredExtensionList == null? new String[0]: registeredExtensionList.toArray(new String[0]);
+    }
+    public Program getProgram() {
+      return program;
+    }
+    private boolean isIconInitialized;
+    private ImageIcon icon;
+    public ImageIcon getIcon() {
+      if(!isIconInitialized) {
+        isIconInitialized = true;
+        ImageData imageData = program.getImageData();
+        icon = imageData == null? null: new ImageIcon(UIUtils.convertImage(imageData));
+      }
+      return icon;
+    }
   }
+  
+  private static boolean isProgramValid(Program program) {
+    String name = program.getName();
+    return name != null && name.length() > 0 /*&& program.getImageData() != null*/;
+  }
+  
+  private static Map<Integer, FileTypeLauncherInfo> idToFileTypeLauncherInfoMap;
+  private static Map<Program, FileTypeLauncherInfo> programToFileTypeLauncherInfoMap;
 
+  private static boolean isNativeInitialized;
+  
+  private static void initNative() {
+    if(isNativeInitialized) {
+      return;
+    }
+    isNativeInitialized = true;
+    programToFileTypeLauncherInfoMap = new HashMap<Program, FileTypeLauncherInfo>();
+    idToFileTypeLauncherInfoMap = new HashMap<Integer, FileTypeLauncherInfo>();
+  }
+  
   /**
    * Explicitely load the data if it is not yet loaded, instead of letting the system perform the appropriate loading when needed.
    */
@@ -73,30 +99,16 @@ public class FileTypeLauncher {
     initializeLaunchers();
   }
   
-  private static boolean hasInitializedExtensions;
-  
-  private static void initializeExtensions() {
-    if(hasInitializedExtensions) {
-      return;
-    }
-    hasInitializedExtensions = true;
-    NativeInterfaceHandler.invokeSWT(new Runnable() {
-      public void run() {
-        for(String extension: Program.getExtensions()) {
-          Program program = Program.findProgram(extension);
-          if(program != null) {
-            FileTypeLauncher fileTypeLauncher = programToFileTypeLauncherMap.get(program);
-            if(fileTypeLauncher == null && isProgramValid(program)) {
-              fileTypeLauncher = new FileTypeLauncher(program);
-              programToFileTypeLauncherMap.put(program, fileTypeLauncher);
-            }
-            if(fileTypeLauncher != null) {
-              fileTypeLauncher.addExtension(extension);
-            }
-          }
+  private static class CMN_initializeLaunchers extends CommandMessage {
+    @Override
+    public Object run() {
+      for(Program program: Program.getPrograms()) {
+        if(!programToFileTypeLauncherInfoMap.containsKey(program) && isProgramValid(program) && program.getImageData() != null) {
+          programToFileTypeLauncherInfoMap.put(program, new FileTypeLauncherInfo(program));
         }
       }
-    });
+      return null;
+    }
   }
   
   private static boolean hasInitializedLaunchers;
@@ -106,23 +118,178 @@ public class FileTypeLauncher {
       return;
     }
     hasInitializedLaunchers = true;
-    NativeInterfaceHandler.invokeSWT(new Runnable() {
-      public void run() {
-        for(Program program: Program.getPrograms()) {
-          if(!programToFileTypeLauncherMap.containsKey(program) && isProgramValid(program) && program.getImageData() != null) {
-            programToFileTypeLauncherMap.put(program, new FileTypeLauncher(program));
+    new CMN_initializeLaunchers().syncExec();
+  }
+
+  private static class CMN_initializeExtensions extends CommandMessage {
+    @Override
+    public Object run() {
+      for(String extension: Program.getExtensions()) {
+        Program program = Program.findProgram(extension);
+        if(program != null) {
+          initNative();
+          FileTypeLauncherInfo fileTypeLauncherInfo = programToFileTypeLauncherInfoMap.get(program);
+          if(fileTypeLauncherInfo == null && isProgramValid(program)) {
+            fileTypeLauncherInfo = new FileTypeLauncherInfo(program);
+            programToFileTypeLauncherInfoMap.put(program, fileTypeLauncherInfo);
+          }
+          if(fileTypeLauncherInfo != null) {
+            fileTypeLauncherInfo.addExtension(extension);
           }
         }
       }
-    });
+      return null;
+    }
   }
   
-  private static boolean isProgramValid(Program program) {
-    String name = program.getName();
-    return name != null && name.length() > 0 /*&& program.getImageData() != null*/;
+  private static boolean hasInitializedExtensions;
+
+  private static void initializeExtensions() {
+    if(hasInitializedExtensions) {
+      return;
+    }
+    hasInitializedExtensions = true;
+    new CMN_initializeExtensions().syncExec();
   }
   
-  private static Map<Program, FileTypeLauncher> programToFileTypeLauncherMap = new HashMap<Program, FileTypeLauncher>();
+  private static class CMN_getAllRegisteredExtensions extends CommandMessage {
+    @Override
+    public Object run() {
+      List<String> extensionList = new ArrayList<String>();
+      for(FileTypeLauncherInfo launcherInfo: programToFileTypeLauncherInfoMap.values()) {
+        for(String registeredExtension: launcherInfo.getRegisteredExtensions()) {
+          extensionList.add(registeredExtension);
+        }
+      }
+      return extensionList.toArray(new String[0]);
+    }
+  }
+  
+  /**
+   * Some global loading of data is performed the first time, if it is needed.
+   */
+  public static String[] getAllRegisteredExtensions() {
+    initializeExtensions();
+    return (String[])new CMN_getAllRegisteredExtensions().syncExec();
+  }
+  
+  private int id;
+  
+  private FileTypeLauncher(int id) {
+    this.id = id;
+  }
+
+  private static class CMN_getRegisteredExtensions extends CommandMessage {
+    @Override
+    public Object run() {
+      return idToFileTypeLauncherInfoMap.get(args[0]).getRegisteredExtensions();
+    }
+  }
+  
+  private String[] registeredExtensions;
+
+  /**
+   * Some global loading of data is performed the first time, if it is needed.
+   */
+  public String[] getRegisteredExtensions() {
+    if(registeredExtensions == null) {
+      initializeExtensions();
+      registeredExtensions = (String[])new CMN_getRegisteredExtensions().syncExecArgs(id);
+    }
+    return registeredExtensions;
+  }
+  
+  private String name;
+  
+  private static class CMN_getName extends CommandMessage {
+    @Override
+    public Object run() {
+      return idToFileTypeLauncherInfoMap.get(args[0]).getProgram().getName();
+    }
+  }
+  
+  public String getName() {
+    if(name == null) {
+      name = (String)new CMN_getName().syncExecArgs(id);
+    }
+    return name;
+  }
+  
+  private ImageIcon icon;
+  private boolean isIconInitialized;
+  
+  private static class CMN_getIcon extends CommandMessage {
+    @Override
+    public Object run() {
+      return idToFileTypeLauncherInfoMap.get(args[0]).getIcon();
+    }
+  }
+  
+  public ImageIcon getIcon() {
+    if(!isIconInitialized) {
+      isIconInitialized = true;
+      icon = (ImageIcon)new CMN_getIcon().syncExecArgs(id);
+    }
+    return icon == null? getDefaultIcon(): icon;
+  }
+  
+  @Override
+  public boolean equals(Object o) {
+    return this == o;
+  }
+  
+  private Integer hashCode;
+  
+  private static class CMN_hashCode extends CommandMessage {
+    @Override
+    public Object run() {
+      return idToFileTypeLauncherInfoMap.get(args[0]).getProgram().hashCode();
+    }
+  }
+  
+  public int hashCode() {
+    if(hashCode == null) {
+      hashCode = (Integer)new CMN_hashCode().syncExecArgs(id);
+    }
+    return hashCode;
+  }
+  
+  private static class CMN_launch extends CommandMessage {
+    @Override
+    public Object run() {
+      idToFileTypeLauncherInfoMap.get(args[0]).getProgram().execute((String)args[1]);
+      return null;
+    }
+  }
+  
+  public void launch(String fileName) {
+    new CMN_launch().asyncExecArgs(id, fileName);
+  }
+  
+  private static Map<Integer, FileTypeLauncher> idToFileTypeLauncherMap;
+  
+  private static class CMN_getLauncherID extends CommandMessage {
+    @Override
+    public Object run() {
+      String extension = (String)args[0];
+      Program program = Program.findProgram(extension);
+      if(program == null) {
+        return null;
+      }
+      FileTypeLauncherInfo fileTypeLauncher = programToFileTypeLauncherInfoMap.get(program);
+      if(fileTypeLauncher == null && isProgramValid(program)) {
+        fileTypeLauncher = new FileTypeLauncherInfo(program);
+        programToFileTypeLauncherInfoMap.put(program, fileTypeLauncher);
+      }
+      if(fileTypeLauncher != null) {
+        if(!hasInitializedExtensions) {
+          fileTypeLauncher.addExtension(extension);
+        }
+        return fileTypeLauncher.getID();
+      }
+      return null;
+    }
+  }
   
   /**
    * Get the launcher for a given file name, which may or may not represent an existing file. The name can also simply be the extension of a file (including the '.').
@@ -133,128 +300,92 @@ public class FileTypeLauncher {
       return null;
     }
     final String extension = fileName.substring(index);
-    final FileTypeLauncher[] fileTypeLauncherArray = new FileTypeLauncher[1];
-    NativeInterfaceHandler.invokeSWT(new Runnable() {
-      public void run() {
-        Program program = Program.findProgram(extension);
-        if(program == null) {
-          return;
-        }
-        FileTypeLauncher fileTypeLauncher = programToFileTypeLauncherMap.get(program);
-        if(fileTypeLauncher == null && isProgramValid(program)) {
-          fileTypeLauncher = new FileTypeLauncher(program);
-          programToFileTypeLauncherMap.put(program, fileTypeLauncher);
-        }
-        if(fileTypeLauncher != null) {
-          if(!hasInitializedExtensions) {
-            fileTypeLauncher.addExtension(extension);
-          }
-          fileTypeLauncherArray[0] = fileTypeLauncher;
-        }
-      }
-    });
-    return fileTypeLauncherArray[0];
-  }
-  
-  /**
-   * Some global loading of data is performed the first time, if it is needed.
-   */
-  public static String[] getAllRegisteredExtensions() {
-    initializeExtensions();
-    List<String> extensionList = new ArrayList<String>();
-    for(FileTypeLauncher launcher: programToFileTypeLauncherMap.values()) {
-      for(String registeredExtension: launcher.getRegisteredExtensions()) {
-        extensionList.add(registeredExtension);
-      }
+    Integer id = (Integer)new CMN_getLauncherID().syncExecArgs(extension);
+    if(id == null) {
+      return null;
     }
-    return extensionList.toArray(new String[0]);
-  }
-  
-  @Override
-  public int hashCode() {
-    return hashCode;
-  }
-  
-  @Override
-  public boolean equals(Object o) {
-    return this == o;
-  }
-  
-  public String getName() {
-    final String[] result = new String[1];
-    NativeInterfaceHandler.invokeSWT(new Runnable() {
-      public void run() {
-        result[0] = FileTypeLauncher.this.program.getName();
-      }
-    });
-    return result[0];
-  }
-  
-  private static final ImageIcon DEFAULT_ICON;
-  
-  static {
-    Icon defaultIcon;
-    try {
-      File tmpFile = File.createTempFile("~djn", "~.qwertyuiop");
-      tmpFile.deleteOnExit();
-      defaultIcon = FileSystemView.getFileSystemView().getSystemIcon(tmpFile);
-      tmpFile.delete();
-    } catch(Exception e) {
-      defaultIcon = UIManager.getIcon("FileView.fileIcon");
+    FileTypeLauncher fileTypeLauncher = idToFileTypeLauncherMap.get(id);
+    if(fileTypeLauncher == null) {
+      fileTypeLauncher = new FileTypeLauncher(id);
+      idToFileTypeLauncherMap.put(id, fileTypeLauncher);
     }
-    if(!(defaultIcon instanceof ImageIcon)) {
-      int width = defaultIcon.getIconWidth();
-      int height = defaultIcon.getIconHeight();
-      BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-      Graphics gc = image.getGraphics();
-//      gc.setColor(Color.WHITE);
-//      gc.fillRect(0, 0, width, height);
-      defaultIcon.paintIcon(null, gc, 0, 0);
-      gc.dispose();
-      defaultIcon = new ImageIcon(image);
-    }
-      DEFAULT_ICON = (ImageIcon)defaultIcon;
+    return fileTypeLauncher;
   }
   
-  public static ImageIcon getDefaultIcon() {
-    return DEFAULT_ICON;
-  }
-  
-  private ImageIcon icon;
-  
-  public ImageIcon getIcon() {
-    if(icon == null) {
-      final ImageIcon[] result = new ImageIcon[1];
-      NativeInterfaceHandler.invokeSWT(new Runnable() {
-        public void run() {
-          ImageData imageData = FileTypeLauncher.this.program.getImageData();
-          result[0] = imageData == null? DEFAULT_ICON: new ImageIcon(UIUtils.convertImage(imageData));
+  private static class CMN_getLauncherIDs extends CommandMessage {
+    @Override
+    public Object run() {
+      FileTypeLauncherInfo[] fileTypeLaunchers = programToFileTypeLauncherInfoMap.values().toArray(new FileTypeLauncherInfo[0]);
+      Arrays.sort(fileTypeLaunchers, new Comparator<FileTypeLauncherInfo>() {
+        public int compare(FileTypeLauncherInfo o1, FileTypeLauncherInfo o2) {
+          return o1.getProgram().getName().toLowerCase().compareTo(o2.getProgram().getName().toLowerCase());
         }
       });
-      icon = result[0];
+      int[] ids = new int[fileTypeLaunchers.length];
+      for(int i=0; i<fileTypeLaunchers.length; i++) {
+        ids[i] = fileTypeLaunchers[i].getID();
+      }
+      return ids;
     }
-    return icon;
   }
   
   /**
    * Some global loading of data is performed the first time, if it is needed.
    */
-  public String[] getRegisteredExtensions() {
-    initializeExtensions();
-    return registeredExtensionList == null? new String[0]: registeredExtensionList.toArray(new String[0]);
-  }
-  
-  public void launch(final String fileName) {
-    NativeInterfaceHandler.invokeSWT(new Runnable() {
-      public void run() {
-        program.execute(fileName);
+  public static FileTypeLauncher[] getLaunchers() {
+    load();
+    int[] ids = (int[])new CMN_getLauncherIDs().syncExec();
+    if(idToFileTypeLauncherMap == null) {
+      idToFileTypeLauncherMap = new HashMap<Integer, FileTypeLauncher>();
+    }
+    FileTypeLauncher[] fileTypeLaunchers = new FileTypeLauncher[ids.length];
+    for(int i=0; i<ids.length; i++) {
+      int id = ids[i];
+      FileTypeLauncher fileTypeLauncher = idToFileTypeLauncherMap.get(id);
+      if(fileTypeLauncher == null) {
+        fileTypeLauncher = new FileTypeLauncher(id);
+        idToFileTypeLauncherMap.put(id, fileTypeLauncher);
       }
-    });
+      fileTypeLaunchers[i] = fileTypeLauncher;
+    }
+    return fileTypeLaunchers;
+  }
+
+  private static boolean isDefaultIconLoaded;
+  private static ImageIcon defaultIcon;
+
+  public static ImageIcon getDefaultIcon() {
+    if(!isDefaultIconLoaded) {
+      isDefaultIconLoaded = true;
+      Icon defaultIcon_;
+      try {
+        File tmpFile = File.createTempFile("~djn", "~.qwertyuiop");
+        tmpFile.deleteOnExit();
+        defaultIcon_ = FileSystemView.getFileSystemView().getSystemIcon(tmpFile);
+        tmpFile.delete();
+      } catch(Exception e) {
+        defaultIcon_ = UIManager.getIcon("FileView.fileIcon");
+      }
+      if(!(defaultIcon_ instanceof ImageIcon)) {
+        int width = defaultIcon_.getIconWidth();
+        int height = defaultIcon_.getIconHeight();
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics gc = image.getGraphics();
+//        gc.setColor(Color.WHITE);
+//        gc.fillRect(0, 0, width, height);
+        defaultIcon_.paintIcon(null, gc, 0, 0);
+        gc.dispose();
+        defaultIcon_ = new ImageIcon(image);
+      }
+      defaultIcon = (ImageIcon)defaultIcon_;
+    }
+    return defaultIcon;
   }
   
   public static Dimension getIconSize() {
+    ImageIcon defaultIcon = getDefaultIcon();
     // TODO: check if a null default icon can happen, and if yes find alternate code
-    return DEFAULT_ICON == null? new Dimension(16, 16): new Dimension(DEFAULT_ICON.getIconWidth(), DEFAULT_ICON.getIconHeight());
+    return defaultIcon == null? new Dimension(16, 16): new Dimension(defaultIcon.getIconWidth(), defaultIcon.getIconHeight());
   }
   
 }

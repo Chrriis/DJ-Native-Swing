@@ -20,6 +20,7 @@ The key components are a rich native web browser and a flash player.
 
 Simply place the NativeSwing.jar library in your classpath, as well as the SWT
 3.4 library corresponding to your platform (visit http://www.eclipse.org/swt).
+You also need jna.jar in your classpath.
 You may need to refer to the SWT FAQ (http://www.eclipse.org/swt/faq.php) to get
 it working on certain platforms (like the need to install XULRunner on Linux).
 Java 5.0 or later is required.
@@ -29,13 +30,10 @@ Then, you need to add the following to your main method:
 public static void main(String[] args) {
   NativeInterfaceHandler.init();
   // Here goes the rest of the initialization
-  NativeInterfaceHandler.runEventPump();
 }
 
-The last call is blocking. It expects the application to call System.exit(int).
-
 If you want to use the shaping mode for native components (cf the demo), you
-need the JNA files "jna.jar" and "jna_WindowUtils.jar" in your classpath.
+need "jna_WindowUtils.jar" in your classpath.
 
 3. Any tutorial or demo?
 
