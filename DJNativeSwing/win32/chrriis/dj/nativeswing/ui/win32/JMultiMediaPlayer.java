@@ -121,13 +121,13 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
     return nativeComponent.getStereoBalance();
   }
   
-  public boolean setAutoStart(boolean isAutoStart) {
-    return nativeComponent.setAutoStart(isAutoStart);
-  }
-  
-  public boolean isAutoStart() {
-    return nativeComponent.isAutoStart();
-  }
+//  public boolean setAutoStart(boolean isAutoStart) {
+//    return nativeComponent.setAutoStart(isAutoStart);
+//  }
+//  
+//  public boolean isAutoStart() {
+//    return nativeComponent.isAutoStart();
+//  }
   
 //  public boolean setFullScreen(boolean isFullScreen) {
 //    return nativeComponent.setFullScreen(isFullScreen);
