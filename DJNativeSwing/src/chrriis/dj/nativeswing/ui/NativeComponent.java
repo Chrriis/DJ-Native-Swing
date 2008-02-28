@@ -439,7 +439,7 @@ public abstract class NativeComponent extends Canvas {
   public void addNotify() {
     super.addNotify();
     NativeInterfaceHandler.checkUIThread();
-    NativeInterfaceHandler.addCanvas(this);
+    NativeInterfaceHandler._Internal_.addCanvas(this);
     if(initializationCommandMessageList == null) {
       throw new IllegalStateException("A native component cannot be re-created after having been disposed! To achieve re-parenting, set the options to use a proxied filiation and a finalization-time destruction.");
     }
@@ -501,7 +501,7 @@ public abstract class NativeComponent extends Canvas {
   protected void releaseResources() {
     if(!isDisposed) {
       isDisposed = true;
-      NativeInterfaceHandler.removeCanvas(this);
+      NativeInterfaceHandler._Internal_.removeCanvas(this);
       run(new CMN_destroyControl());
       NativeComponent.registry.remove(id);
     }

@@ -90,31 +90,56 @@ public class Utils {
     return null;
   }
   
+  public static File getClassPathFile(String resourcePath) {
+    File file = getJARFile(resourcePath);
+    return file != null? file: getDirectory(resourcePath);
+  }
+  
   public static File getClassPathFile(Class<?> clazz) {
     File file = getJARFile(clazz);
     return file != null? file: getDirectory(clazz);
   }
   
+  public static File getJARFile(String resourcePath) {
+    return getJARFile(Utils.class, resourcePath);
+  }
+  
   public static File getJARFile(Class<?> clazz) {
-    String classResourcePath = "/" + clazz.getName().replace('.', '/') + ".class";
-    String classResourceURL = clazz.getResource(classResourcePath).toExternalForm();
+    return getJARFile(clazz, "/" + clazz.getName().replace('.', '/') + ".class");
+  }
+  
+  private static File getJARFile(Class<?> clazz, String resourcePath) {
+    String classResourceURL = clazz.getResource(resourcePath).toExternalForm();
     if(classResourceURL != null && classResourceURL.startsWith("jar:file:")) {
       classResourceURL = classResourceURL.substring("jar:file:".length());
-      if(classResourceURL.endsWith("!" + classResourcePath)) {
-        return new File(decodeURL(classResourceURL.substring(0, classResourceURL.length() - 1 - classResourcePath.length())));
+      if(classResourceURL.endsWith("!" + resourcePath)) {
+        return new File(decodeURL(classResourceURL.substring(0, classResourceURL.length() - 1 - resourcePath.length())));
       }
     }
     return null;
   }
   
+  public static File getDirectory(String resourcePath) {
+    if(!resourcePath.startsWith("/")) {
+      resourcePath = '/' + resourcePath;
+    }
+    return getDirectory(Utils.class, resourcePath);
+  }
+  
   public static File getDirectory(Class<?> clazz) {
-    String className = clazz.getName();
-    String classResourcePath = "/" + className.replace('.', '/') + ".class";
-    String classResourceURL = clazz.getResource(classResourcePath).toExternalForm();
+    return getDirectory(clazz, "/" + clazz.getName().replace('.', '/') + ".class");
+  }
+  
+  private static File getDirectory(Class<?> clazz, String resourcePath) {
+    String resourceName = resourcePath;
+    if(resourceName.startsWith("/")) {
+      resourceName = resourceName.substring(1);
+    }
+    String classResourceURL = clazz.getResource(resourcePath).toExternalForm();
     if(classResourceURL != null && classResourceURL.startsWith("file:")) {
       File dir = new File(decodeURL(classResourceURL.substring("file:".length()))).getParentFile();
-      for(int i=0; i<className.length(); i++) {
-        if(className.charAt(i) == '.') {
+      for(int i=0; i<resourceName.length(); i++) {
+        if(resourceName.charAt(i) == '/') {
           dir = dir.getParentFile();
         }
       }

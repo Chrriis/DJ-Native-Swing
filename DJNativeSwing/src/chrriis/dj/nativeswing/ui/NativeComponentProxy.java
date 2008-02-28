@@ -208,7 +208,7 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
     super.paint(g);
     // On Linux, a JInternalFrame brought to the front may generate a paint call only to that one.
     // We need to adjust the shape of the frames that go to the back as well.
-    for(Canvas canvas: NativeInterfaceHandler.getCanvas()) {
+    for(Canvas canvas: NativeInterfaceHandler._Internal_.getCanvas()) {
       if(canvas instanceof NativeComponent) {
         Component componentProxy = ((NativeComponent)canvas).getComponentProxy();
         if(componentProxy instanceof NativeComponentProxy) {
@@ -303,7 +303,7 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
       c = parent;
       parent = c.getParent();
     }
-    for(Window window: NativeInterfaceHandler.getWindows()) {
+    for(Window window: NativeInterfaceHandler._Internal_.getWindows()) {
       if(!(window instanceof EmbeddedWindow) && window.isVisible()) {
         for(Window owner = window; (owner=owner.getOwner()) != null; ) {
           if(owner == windowAncestor) {

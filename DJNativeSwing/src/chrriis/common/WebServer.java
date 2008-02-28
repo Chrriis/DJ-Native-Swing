@@ -20,6 +20,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -219,7 +220,7 @@ public class WebServer {
       extensionToMimeTypeMap.put("xls", "application/vnd.ms-excel");
       extensionToMimeTypeMap.put("xlt", "application/vnd.ms-excel");
       extensionToMimeTypeMap.put("xlw", "application/vnd.ms-excel");
-      extensionToMimeTypeMap.put("xml", "application/xhtml+xml");
+      extensionToMimeTypeMap.put("xml", "application/xml");
       extensionToMimeTypeMap.put("xof", "x-world/x-vrml");
       extensionToMimeTypeMap.put("xpm", "image/x-xpixmap");
       extensionToMimeTypeMap.put("xwd", "image/x-xwindowdump");
@@ -240,7 +241,7 @@ public class WebServer {
     
     public abstract InputStream getInputStream();
     public abstract String getContentType();
-    public int getContentLength() {
+    public long getContentLength() {
       return -1;
     }
     public long getLastModified() {
@@ -461,9 +462,24 @@ public class WebServer {
     }
     if("classpath".equals(type)) {
       final String resourcePath = parameter;
+      URLConnection connection = null;
+      try {
+        connection = WebServer.class.getResource('/' + resourcePath).openConnection();
+      } catch(Exception e) {
+      }
+      final Long contentLength = connection == null? null: (long)connection.getContentLength();
+      final String contentType = connection == null? null: connection.getContentType();
+
       return new WebServerContent() {
         @Override
+        public long getContentLength() {
+          return contentLength != null? contentLength: super.getContentLength();
+        }
+        @Override
         public String getContentType() {
+          if(contentType != null && !"content/unknown".equals(contentType)) {
+            return contentType;
+          }
           int index = resourcePath.lastIndexOf('.');
           return getDefaultMimeType(index == -1? null: resourcePath.substring(index));
         }
@@ -505,6 +521,14 @@ public class WebServer {
       }
       final String resourceURL_ = resourceURL;
       return new WebServerContent() {
+        @Override
+        public long getContentLength() {
+          File file = Utils.getLocalFile(resourceURL_);
+          if(file != null) {
+            return file.length();
+          }
+          return super.getContentLength();
+        }
         @Override
         public String getContentType() {
           int index = resourceURL_.lastIndexOf('.');

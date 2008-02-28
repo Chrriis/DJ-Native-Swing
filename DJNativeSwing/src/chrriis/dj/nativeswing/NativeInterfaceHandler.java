@@ -28,6 +28,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.Permission;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -51,39 +52,67 @@ import com.sun.jna.examples.WindowUtils;
  */
 public class NativeInterfaceHandler {
 
-  private static volatile List<Canvas> canvasList;
-
-  /**
-   * This method is not part of the public API!
-   */
-  public static Canvas[] getCanvas() {
-    return canvasList.toArray(new Canvas[0]);
-  }
-  
-  /**
-   * This method is not part of the public API!
-   */
-  public static void addCanvas(Canvas canvas) {
-    canvasList.add(canvas);
-  }
-  
-  /**
-   * This method is not part of the public API!
-   */
-  public static void removeCanvas(Canvas canvas) {
-    canvasList.remove(canvas);
-  }
-  
-  private static Set<Window> windowSet;
-  
-  /**
-   * This method is not part of the public API!
-   */
-  public static Window[] getWindows() {
-    if(Utils.IS_JAVA_6_OR_GREATER) {
-      return Window.getWindows();
+  public static class NativeInterfaceInitOptions {
+    
+    private boolean isPreferredLookAndFeelApplied;
+    private Class<?>[] nativeClassPathReferenceClasses;
+    private String[] nativeClassPathReferenceResources;
+    
+    public void setPreferredLookAndFeelApplied(boolean isPreferredLookAndFeelApplied) {
+      this.isPreferredLookAndFeelApplied = isPreferredLookAndFeelApplied;
     }
-    return windowSet == null? new Window[0]: windowSet.toArray(new Window[0]);
+    
+    public boolean isPreferredLookAndFeelApplied() {
+      return isPreferredLookAndFeelApplied;
+    }
+    
+    public void setNativeClassPathReferenceClasses(Class<?>[] nativeClassPathReferenceClasses) {
+      this.nativeClassPathReferenceClasses = nativeClassPathReferenceClasses;
+    }
+    
+    public Class<?>[] getNativeClassPathReferenceClasses() {
+      return nativeClassPathReferenceClasses;
+    }
+    
+    public void setNativeClassPathReferenceResources(String[] nativeClassPathReferenceResources) {
+      this.nativeClassPathReferenceResources = nativeClassPathReferenceResources;
+    }
+    
+    public String[] getNativeClassPathReferenceResources() {
+      return nativeClassPathReferenceResources;
+    }
+    
+  }
+  
+  /**
+   * This class is not part of the public API.
+   * @author Christopher Deckers
+   */
+  public static class _Internal_ {
+    
+    private static volatile List<Canvas> canvasList;
+
+    public static Canvas[] getCanvas() {
+      return canvasList.toArray(new Canvas[0]);
+    }
+    
+    public static void addCanvas(Canvas canvas) {
+      canvasList.add(canvas);
+    }
+    
+    public static void removeCanvas(Canvas canvas) {
+      canvasList.remove(canvas);
+    }
+    
+    private static Set<Window> windowSet;
+    
+    public static Window[] getWindows() {
+      if(Utils.IS_JAVA_6_OR_GREATER) {
+        return Window.getWindows();
+      }
+      return windowSet == null? new Window[0]: windowSet.toArray(new Window[0]);
+    }
+    
   }
   
   private static boolean isInitialized;
@@ -97,13 +126,20 @@ public class NativeInterfaceHandler {
       throw new IllegalStateException("The native interface handler is not initialized! Please refer to the instructions to set it up properly.");
     }
   }
-
+  
   public static void init() {
+    init(new NativeInterfaceInitOptions());
+  }
+
+  public static void init(NativeInterfaceInitOptions nativeInterfaceInitOptions) {
     if(isInitialized()) {
       return;
     }
     isInitialized = true;
-    canvasList = new ArrayList<Canvas>();
+    if(nativeInterfaceInitOptions.isPreferredLookAndFeelApplied()) {
+      setPreferredLookAndFeel();
+    }
+    _Internal_.canvasList = new ArrayList<Canvas>();
     // Specific Sun property to prevent heavyweight components from erasing their background.
     System.setProperty("sun.awt.noerasebackground", "true");
     // It seems on Linux this is required to get the component visible.
@@ -115,14 +151,14 @@ public class NativeInterfaceHandler {
     // We use our own HW forcing, so we disable the one from JNA
     System.setProperty("jna.force_hw_popups", "false");
     // Create the interface to communicate with the process handling the native side
-    messagingInterface = createMessagingInterface();
+    messagingInterface = createMessagingInterface(nativeInterfaceInitOptions);
     // Create window monitor
     Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
       protected Set<Dialog> dialogSet = new HashSet<Dialog>();
       protected volatile Set<Window> blockedWindowSet = new HashSet<Window>();
       protected void adjustNativeComponents() {
-        for(int i=canvasList.size()-1; i>=0; i--) {
-          final Canvas canvas = canvasList.get(i);
+        for(int i=_Internal_.canvasList.size()-1; i>=0; i--) {
+          final Canvas canvas = _Internal_.canvasList.get(i);
           Component c = canvas;
           if(canvas instanceof NativeComponent) {
             Component componentProxy = ((NativeComponent)canvas).getComponentProxy();
@@ -151,17 +187,17 @@ public class NativeInterfaceHandler {
             break;
         }
         if(!Utils.IS_JAVA_6_OR_GREATER && e.getSource() instanceof Window) {
-          if(windowSet == null) {
-            windowSet = new HashSet<Window>();
+          if(_Internal_.windowSet == null) {
+            _Internal_.windowSet = new HashSet<Window>();
           }
           switch(e.getID()) {
             case WindowEvent.WINDOW_OPENED:
             case ComponentEvent.COMPONENT_SHOWN:
-              windowSet.add((Window)e.getSource());
+              _Internal_.windowSet.add((Window)e.getSource());
               break;
             case WindowEvent.WINDOW_CLOSED:
             case ComponentEvent.COMPONENT_HIDDEN:
-              windowSet.remove(e.getSource());
+              _Internal_.windowSet.remove(e.getSource());
               break;
           }
         }
@@ -199,7 +235,7 @@ public class NativeInterfaceHandler {
     }, WindowEvent.WINDOW_EVENT_MASK | ComponentEvent.COMPONENT_EVENT_MASK);
   }
   
-  private static MessagingInterface createMessagingInterface() {
+  private static MessagingInterface createMessagingInterface(NativeInterfaceInitOptions nativeInterfaceInitOptions) {
     int port = Integer.parseInt(System.getProperty("dj.nativeswing.port", "-1"));
     if(port <= 0) {
       ServerSocket serverSocket;
@@ -219,27 +255,49 @@ public class NativeInterfaceHandler {
     String javaHome = System.getProperty("java.home");
     ProcessBuilder builder = new ProcessBuilder();
     List<String> classPathList = new ArrayList<String>();
+    String pathSeparator = System.getProperty("path.separator");
     String classPath = System.getProperty("java.class.path");
     if(classPath != null && classPath.length() != 0) {
-      classPathList.add(classPath);
+      for(String path: classPath.split(pathSeparator)) {
+        if(!classPathList.contains(path)) {
+          classPathList.add(path);
+        }
+      }
     }
-    Class<?>[] classList = new Class[] {
-        NativeInterfaceHandler.class,
-        Display.class,
-        Native.class,
-        WindowUtils.class,
-    };
-    for(Class<?> clazz: classList) {
+    List<Class<?>> referenceList = new ArrayList<Class<?>>();
+    referenceList.add(NativeInterfaceHandler.class);
+    referenceList.add(Display.class);
+    referenceList.add(Native.class);
+    referenceList.add(WindowUtils.class);
+    Class<?>[] nativeClassPathReferenceClasses = nativeInterfaceInitOptions.getNativeClassPathReferenceClasses();
+    if(nativeClassPathReferenceClasses != null) {
+      referenceList.addAll(Arrays.asList(nativeClassPathReferenceClasses));
+    }
+    for(Class<?> clazz: referenceList) {
       File clazzClassPath = Utils.getClassPathFile(clazz);
       if(clazzClassPath != null) {
-        classPathList.add(clazzClassPath.getAbsolutePath());
+        String path = clazzClassPath.getAbsolutePath();
+        if(!classPathList.contains(path)) {
+          classPathList.add(path);
+        }
+      }
+    }
+    String[] nativeClassPathReferenceResources = nativeInterfaceInitOptions.getNativeClassPathReferenceResources();
+    if(nativeClassPathReferenceResources != null) {
+      for(String resourcePath: nativeClassPathReferenceResources) {
+        File resourceClassPath = Utils.getClassPathFile(resourcePath);
+        if(resourceClassPath != null) { 
+          String path = resourceClassPath.getAbsolutePath();
+          if(!classPathList.contains(path)) {
+            classPathList.add(path);
+          }
+        }
       }
     }
     if(classPathList.isEmpty()) {
       throw new IllegalStateException("Cannot find a suitable classpath to spawn VM!");
     }
     StringBuilder sb = new StringBuilder();
-    String pathSeparator = System.getProperty("path.separator");
     for(int i=0; i<classPathList.size(); i++) {
       if(i > 0) {
         sb.append(pathSeparator);
@@ -361,7 +419,7 @@ public class NativeInterfaceHandler {
     messagingInterface.asyncExec(message);
   }
   
-  public static void setPreferredLookAndFeel() {
+  private static void setPreferredLookAndFeel() {
     try {
       String systemLookAndFeelClassName = UIManager.getSystemLookAndFeelClassName();
       if(!"com.sun.java.swing.plaf.gtk.GTKLookAndFeel".equals(systemLookAndFeelClassName)) {
