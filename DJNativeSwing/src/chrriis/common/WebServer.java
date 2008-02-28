@@ -308,7 +308,7 @@ public class WebServer {
           if(request == null || !request.startsWith("GET ") || !(request.endsWith(" HTTP/1.0") || request.endsWith("HTTP/1.1"))) {
             writeHTTPError(out, 500, "Invalid Method.");
             return;
-          }            
+          }
           String resourcePath = request.substring("GET ".length(), request.length() - " HTTP/1.0".length());
 //          System.err.println("--> " + resourcePath);
 //          for(String line=request; line != null && line.length() > 0; line = in.readLine()) {
