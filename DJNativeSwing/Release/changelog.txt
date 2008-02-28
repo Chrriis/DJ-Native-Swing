@@ -12,7 +12,7 @@ Licence terms: LGPL (see licence.txt)
 - The L&F is not set anymore (use the corresponding method to apply it).
 - Browser components display messages on failure.
 - Browser components are easier to create.
-- Browser components use a proxy for local files: no security restrictions.
+- Flash player uses a proxy for local files to bypass security restrictions.
 - Flash player allows to set parameters and variables.
 
 

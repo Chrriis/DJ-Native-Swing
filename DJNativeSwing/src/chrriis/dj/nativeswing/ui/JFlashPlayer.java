@@ -11,6 +11,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
 import chrriis.common.Utils;
+import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.Disposable;
 import chrriis.dj.nativeswing.NativeInterfaceHandler;
 import chrriis.dj.nativeswing.Message.EmptyMessage;
@@ -185,6 +187,12 @@ public class JFlashPlayer extends JPanel implements Disposable {
       "      }" + LS;
     }
     
+    @Override
+    protected String getLocalFileURL(File localFile) {
+      // Local files cannot be played due to security restrictions. We need to proxy.
+      return WebServer.getDefaultWebServer().getResourcePathURL(localFile.getParent(), localFile.getName());
+    }
+
   };
 
   public JFlashPlayer() {

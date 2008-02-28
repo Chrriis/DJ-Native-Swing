@@ -56,6 +56,14 @@ public abstract class WebBrowserObject implements Disposable {
     url = WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "html/" + instanceID);
     webBrowser.setURL(url);
   }
+  
+  protected String getLocalFileURL(File localFile) {
+    try {
+      return localFile.toURI().toURL().toExternalForm();
+    } catch(Exception e) {
+    }
+    return WebServer.getDefaultWebServer().getResourcePathURL(localFile.getParent(), localFile.getName());
+  }
 
   protected static final String LS = System.getProperty("line.separator");
 
@@ -122,15 +130,15 @@ public abstract class WebBrowserObject implements Disposable {
     }
     if("js".equals(type)) {
       final int instanceID = Integer.parseInt(resourcePath);
-      final WebBrowserObject component = (WebBrowserObject)Registry.getInstance().get(instanceID);
-      if(component == null) {
+      final WebBrowserObject webBrowserObject = (WebBrowserObject)Registry.getInstance().get(instanceID);
+      if(webBrowserObject == null) {
         return null;
       }
-      String url = component.url;
+      String url = webBrowserObject.url;
       // local files may have some security restrictions, so let's use our proxy.
       File file = Utils.getLocalFile(url);
       if(file != null) {
-        url = WebServer.getDefaultWebServer().getResourcePathURL(file.getParent(), file.getName());
+        url = webBrowserObject.getLocalFileURL(file);
       }
       final String escapedURL = Utils.escapeXML(url);
       return new WebServerContent() {
@@ -139,7 +147,7 @@ public abstract class WebBrowserObject implements Disposable {
           return getDefaultMimeType(".js");
         }
         public InputStream getInputStream() {
-          ObjectHTMLConfiguration objectHtmlConfiguration = component.getObjectHtmlConfiguration();
+          ObjectHTMLConfiguration objectHtmlConfiguration = webBrowserObject.getObjectHtmlConfiguration();
           try {
             StringBuffer objectParameters = new StringBuffer();
             StringBuffer embedParameters = new StringBuffer();
