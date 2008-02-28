@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -332,7 +331,7 @@ public class NativeInterfaceHandler {
     Socket socket = null;
     for(int i=19; i>=0; i--) {
       try {
-        socket = new Socket(InetAddress.getLocalHost(), port);
+        socket = new Socket("127.0.0.1", port);
         break;
       } catch(IOException e) {
         if(i == 0) {
