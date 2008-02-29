@@ -52,6 +52,7 @@ public abstract class WebBrowserObject implements Disposable {
       webBrowser.setText("");
       return;
     }
+    Registry.getInstance().remove(instanceID);
     instanceID = Registry.getInstance().add(this);
     url = WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "html/" + instanceID);
     webBrowser.setURL(url);

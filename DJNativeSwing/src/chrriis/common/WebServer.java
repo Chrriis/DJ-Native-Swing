@@ -690,6 +690,13 @@ public class WebServer {
     return getURLPrefix() + "/class/" + className + "/" + Utils.encodeURL(parameter);
   }
   
+  /**
+   * @return A URL that when accessed will invoke the method <code>static WebServerContent getWebServerContent(HTTPRequest)</code> of the parameter class (the method visibility does not matter).
+   */
+  public String getDynamicContentURL(String className, String codebase, String parameter) {
+    return getURLPrefix() + "/class/" + className + "/" + codebase + "/" + Utils.encodeURL(parameter);
+  }
+  
   public String getClassPathResourceURL(String className, String resourcePath) {
     if(!resourcePath.startsWith("/")) {
       String classPath = className.replace('.', '/');
