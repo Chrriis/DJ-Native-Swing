@@ -459,6 +459,14 @@ public class WebServer {
         inputStream.close();
       }
       @Override
+      public int read(byte[] b) throws IOException {
+        return inputStream.read(b);
+      }
+      @Override
+      public int read(byte[] b, int off, int len) throws IOException {
+        return inputStream.read(b, off, len);
+      }
+      @Override
       public int read() throws IOException {
         int n = inputStream.read();
         return n;
@@ -547,21 +555,23 @@ public class WebServer {
                 httpData.setBytes(aos.toByteArray());
               }
             } else {
-              StringBuilder sb = new StringBuilder();
               InputStreamReader reader = new InputStreamReader(in, "UTF-8");
+              String dataContent;
               if(contentLength > 0) {
-                for(int i=0; i<contentLength; i++) {
-                  sb.append((char)reader.read());
-                }
+                char[] chars = new char[contentLength];
+                reader.read(chars);
+                dataContent = new String(chars);
               } else {
+                StringBuilder sb = new StringBuilder();
                 char[] chars = new char[1024];
                 for(int i; (i=reader.read(chars)) != -1; ) {
                   sb.append(chars, 0, i);
                 }
+                dataContent = sb.toString();
               }
               HTTPData httpData = new HTTPData();
               Map<String, String> headerMap = httpData.getHeaderMap();
-              for(String content: sb.toString().split("&")) {
+              for(String content: dataContent.split("&")) {
                 String key = content.substring(0, content.indexOf('='));
                 String value = Utils.decodeURL(content.substring(key.length() + 1));
                 headerMap.put(key, value);
