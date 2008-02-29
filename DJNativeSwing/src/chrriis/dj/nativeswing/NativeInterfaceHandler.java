@@ -243,23 +243,7 @@ public class NativeInterfaceHandler {
     }, WindowEvent.WINDOW_EVENT_MASK | ComponentEvent.COMPONENT_EVENT_MASK);
   }
   
-  private static MessagingInterface createMessagingInterface(NativeInterfaceInitOptions nativeInterfaceInitOptions) {
-    int port = Integer.parseInt(System.getProperty("dj.nativeswing.port", "-1"));
-    if(port <= 0) {
-      ServerSocket serverSocket;
-      try {
-        serverSocket = new ServerSocket();
-        serverSocket.setReuseAddress(false);
-        serverSocket.bind(new InetSocketAddress(0));
-      } catch(IOException e) {
-        throw new RuntimeException(e);
-      }
-      port = serverSocket.getLocalPort();
-      try {
-        serverSocket.close();
-      } catch(IOException e) {
-      }
-    }
+  private static Process createProcess(NativeInterfaceInitOptions nativeInterfaceInitOptions, int port) {
     String javaHome = System.getProperty("java.home");
     ProcessBuilder builder = new ProcessBuilder();
     List<String> classPathList = new ArrayList<String>();
@@ -342,6 +326,32 @@ public class NativeInterfaceHandler {
     }
     connectStream(System.err, p.getErrorStream());
     connectStream(System.out, p.getInputStream());
+    return p;
+  }
+  
+  private static MessagingInterface createMessagingInterface(NativeInterfaceInitOptions nativeInterfaceInitOptions) {
+    int port = Integer.parseInt(System.getProperty("dj.nativeswing.port", "-1"));
+    if(port <= 0) {
+      ServerSocket serverSocket;
+      try {
+        serverSocket = new ServerSocket();
+        serverSocket.setReuseAddress(false);
+        serverSocket.bind(new InetSocketAddress(0));
+      } catch(IOException e) {
+        throw new RuntimeException(e);
+      }
+      port = serverSocket.getLocalPort();
+      try {
+        serverSocket.close();
+      } catch(IOException e) {
+      }
+    }
+    Process p;
+    if(Boolean.valueOf(System.getProperty("dj.nativeswing.connect"))) {
+      p = null;
+    } else {
+      p = createProcess(nativeInterfaceInitOptions, port);
+    }
     Socket socket = null;
     for(int i=19; i>=0; i--) {
       try {
@@ -358,7 +368,9 @@ public class NativeInterfaceHandler {
       }
     }
     if(socket == null) {
-      p.destroy();
+      if(p != null) {
+        p.destroy();
+      }
       throw new IllegalStateException("Failed to connect to spawn VM!");
     }
     return new MessagingInterface(socket, false) {
@@ -488,23 +500,25 @@ public class NativeInterfaceHandler {
       }
     }
     final ServerSocket serverSocket_ = serverSocket;
-    Thread shutdownThread = new Thread("NativeSwing Shutdown") {
-      @Override
-      public void run() {
-        try {
-          sleep(5000);
-        } catch(Exception e) {
-        }
-        if(messagingInterface == null) {
+    if(!Boolean.valueOf(System.getProperty("dj.nativeswing.native.keepalive"))) {
+      Thread shutdownThread = new Thread("NativeSwing Shutdown") {
+        @Override
+        public void run() {
           try {
-            serverSocket_.close();
+            sleep(5000);
           } catch(Exception e) {
           }
+          if(messagingInterface == null) {
+            try {
+              serverSocket_.close();
+            } catch(Exception e) {
+            }
+          }
         }
-      }
-    };
-    shutdownThread.setDaemon(true);
-    shutdownThread.start();
+      };
+      shutdownThread.setDaemon(true);
+      shutdownThread.start();
+    }
     // We set up a new security manager to track exit calls.
     // When this happens, we dispose native resources to avoid freezes.
     try {
