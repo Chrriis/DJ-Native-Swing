@@ -9,7 +9,8 @@ package chrriis.common;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -20,8 +21,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -30,6 +34,44 @@ import java.util.Map;
  */
 public class WebServer {
 
+  public static class HTTPRequest {
+    HTTPRequest() {
+    }
+    private boolean isPostMethod;
+    void setPostMethod(boolean isPostMethod) {
+      this.isPostMethod = isPostMethod;
+    }
+    public boolean isPostMethod() {
+      return isPostMethod;
+    }
+    private HTTPData[] httpDataArray;
+    void setHttpDataArray(HTTPData[] httpDataArray) {
+      this.httpDataArray = httpDataArray;
+    }
+    public HTTPData[] getHttpDataArray() {
+      return httpDataArray;
+    }
+  }
+  
+  public static class HTTPData {
+    private Map<String, String> headerMap = new HashMap<String, String>();
+    HTTPData() {
+    }
+    public Map<String, String> getHeaderMap() {
+      return Collections.unmodifiableMap(headerMap);
+    }
+    Map<String, String> getModifiableHeaderMap() {
+      return headerMap;
+    }
+    private byte[] bytes;
+    public byte[] getBytes() {
+      return bytes;
+    }
+    void setBytes(byte[] bytes) {
+      this.bytes = bytes;
+    }
+  }
+  
   public static abstract class WebServerContent {
     
     public static final String MIME_APPLICATION_OCTET_STREAM = "application/octet-stream";
@@ -297,24 +339,208 @@ public class WebServer {
       }
     }
     
+    private static class HTTPInputStream extends InputStream {
+      static enum LineSeparator {
+        CR,
+        LF,
+        CRLF,
+      }
+      private InputStream inputStream;
+      private int readCount;
+      public HTTPInputStream(InputStream inputStream) {
+        this.inputStream = inputStream;
+      }
+      public String getLineSeparator() {
+        switch(lineSeparator) {
+          case CR: return "\r";
+          case LF: return "\n";
+          case CRLF: return "\r\n";
+        }
+        return null;
+      }
+      public int getReadCount() {
+        return readCount;
+      }
+      private LineSeparator lineSeparator;
+      private int lastByte = -1;
+      public String readAsciiLine() throws IOException {
+        if(lineSeparator == null) {
+          ByteArrayOutputStream baos = new ByteArrayOutputStream();
+          while(true) {
+            int b = read();
+            if(b == '\n') {
+              lineSeparator = LineSeparator.LF;
+              return new String(baos.toByteArray(), "UTF-8");
+            }
+            if(b == '\r') {
+              int b2 = read();
+              if(b2 == '\n') {
+                lineSeparator = LineSeparator.CRLF;
+              } else {
+                lineSeparator = LineSeparator.CR;
+                lastByte = b2;
+              }
+              return new String(baos.toByteArray(), "UTF-8");
+            }
+            baos.write(b);
+          }
+        }
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        if(lastByte != -1) {
+          baos.write(lastByte);
+          lastByte = -1;
+        }
+        switch(lineSeparator) {
+          case CR:
+            for(int b; (b=read()) != '\r'; ) {
+              baos.write(b);
+            }
+            break;
+          case LF:
+            for(int b; (b=read()) != '\n'; ) {
+              baos.write(b);
+            }
+            break;
+          case CRLF:
+            for(int b; (b=read()) != '\r'; ) {
+              baos.write(b);
+            }
+            read();
+            break;
+        }
+        return new String(baos.toByteArray(), "UTF-8");
+      }
+      public void close() throws IOException {
+        inputStream.close();
+      }
+      @Override
+      public int read() throws IOException {
+        int n = inputStream.read();
+        readCount++;
+        return n;
+      }
+    }
+    
     @Override
     public void run() {
       try {
-        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        HTTPInputStream in = new HTTPInputStream(new BufferedInputStream(socket.getInputStream()));
         BufferedOutputStream out = new BufferedOutputStream(socket.getOutputStream());
         try {
-          String request = in.readLine();
-          if(request == null || !request.startsWith("GET ") || !(request.endsWith(" HTTP/1.0") || request.endsWith("HTTP/1.1"))) {
+          String request = in.readAsciiLine();
+          if(request == null || !(request.endsWith(" HTTP/1.0") || request.endsWith("HTTP/1.1"))) {
             writeHTTPError(out, 500, "Invalid Method.");
             return;
           }
-          String resourcePath = request.substring("GET ".length(), request.length() - " HTTP/1.0".length());
-//          System.err.println("--> " + resourcePath);
-//          for(String line=request; line != null && line.length() > 0; line = in.readLine()) {
-//            System.err.println(line);
-//          }
-//          System.err.println(resourcePath);
-          WebServerContent webServerContent = getWebServerContent(resourcePath);
+          boolean isPostMethod = false;
+          if(request.startsWith("POST ")) {
+            isPostMethod = true;
+          } else if(!request.startsWith("GET ")) {
+            writeHTTPError(out, 500, "Invalid Method.");
+            return;
+          }
+          String resourcePath = request.substring((isPostMethod? "POST ": "GET ").length(), request.length() - " HTTP/1.0".length());
+          HTTPRequest httpRequest = new HTTPRequest();
+          httpRequest.setPostMethod(isPostMethod);
+          HTTPData[] httpDataArray;
+          if(!isPostMethod) {
+            HTTPData httpData = new HTTPData();
+            int index = resourcePath.indexOf('?');
+            if(index != -1) {
+              String queryString = resourcePath.substring(index + 1);
+              resourcePath = resourcePath.substring(0, index);
+              Map<String, String> headerMap = httpData.getModifiableHeaderMap();
+              for(String content: queryString.split("&")) {
+                String key = content.substring(0, content.indexOf('='));
+                String value = Utils.decodeURL(content.substring(key.length() + 1));
+                headerMap.put(key, value);
+              }
+            }
+            httpDataArray = new HTTPData[] {httpData};
+          } else {
+            String contentType = null;
+            int contentLength = -1;
+            for(String header; (header = in.readAsciiLine()).length() > 0; ) {
+              if(header.startsWith("Content-Length: ")) {
+                contentLength = Integer.parseInt(header.substring("Content-Length: ".length()));
+              } else if(header.startsWith("Content-Type: ")) {
+                contentType = header.substring("Content-Type: ".length());
+              }
+            }
+            if(contentType != null && contentType.startsWith("multipart/")) {
+              byte[] dataBytes;
+              if(contentLength > 0) {
+                dataBytes = new byte[contentLength];
+                in.read(dataBytes);
+              } else {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                byte[] bytes = new byte[1024];
+                for(int i; (i=in.read(bytes)) != -1; ) {
+                  baos.write(bytes, 0, i);
+                }
+                dataBytes = baos.toByteArray();
+              }
+              String boundary = "--" + contentType.substring(contentType.indexOf("boundary=") + "boundary=".length());
+              byte[] boundaryBytes = boundary.getBytes("UTF-8");
+              List<Integer> indexList = new ArrayList<Integer>();
+              for(int i=0; i<dataBytes.length - boundaryBytes.length; i++) {
+                boolean isFound = true;
+                for(int j=0; j<boundaryBytes.length; j++) {
+                  if(dataBytes[i + j] != boundaryBytes[j]) {
+                    isFound = false;
+                    break;
+                  }
+                }
+                if(isFound) {
+                  indexList.add(i);
+                  i += boundaryBytes.length;
+                }
+              }
+              httpDataArray = new HTTPData[indexList.size() - 1];
+              for(int i=0; i<httpDataArray.length; i++) {
+                HTTPData httpData = new HTTPData();
+                httpDataArray[i] = httpData;
+                int start = indexList.get(i);
+                ByteArrayInputStream bais = new ByteArrayInputStream(dataBytes, start, indexList.get(i + 1) - start - in.getLineSeparator().length());
+                HTTPInputStream din = new HTTPInputStream(bais);
+                din.readAsciiLine();
+                Map<String, String> headerMap = httpData.getModifiableHeaderMap();
+                for(String header; (header = din.readAsciiLine()).length() > 0; ) {
+                  String key = header.substring(header.indexOf(": "));
+                  String value = header.substring(key.length() + ": ".length());
+                  headerMap.put(key, value);
+                }
+                ByteArrayOutputStream aos = new ByteArrayOutputStream();
+                for(int n; (n=din.read()) != -1; ) {
+                  aos.write(n);
+                }
+                httpData.setBytes(aos.toByteArray());
+              }
+            } else {
+              StringBuilder sb = new StringBuilder();
+              InputStreamReader reader = new InputStreamReader(in, "UTF-8");
+              if(contentLength > 0) {
+                for(int i=0; i<contentLength; i++) {
+                  sb.append((char)reader.read());
+                }
+              } else {
+                char[] chars = new char[1024];
+                for(int i; (i=reader.read(chars)) != -1; ) {
+                  sb.append(chars, 0, i);
+                }
+              }
+              HTTPData httpData = new HTTPData();
+              Map<String, String> headerMap = httpData.getModifiableHeaderMap();
+              for(String content: sb.toString().split("&")) {
+                String key = content.substring(0, content.indexOf('='));
+                String value = Utils.decodeURL(content.substring(key.length() + 1));
+                headerMap.put(key, value);
+              }
+              httpDataArray = new HTTPData[] {httpData};
+            }
+          }
+          httpRequest.setHttpDataArray(httpDataArray);
+          WebServerContent webServerContent = getWebServerContent(resourcePath, httpRequest);
           InputStream resourceStream_ = webServerContent == null? null: webServerContent.getInputStream();
           if(resourceStream_ == null) {
             writeHTTPError(out, 404, "File Not Found.");
@@ -335,6 +561,7 @@ public class WebServer {
           out.flush();
           out.close();
           in.close();
+          socket.close();
         }
       } catch(Exception e) {
 //        e.printStackTrace();
@@ -407,7 +634,7 @@ public class WebServer {
   }
   
   /**
-   * @return A URL that when accessed will invoke the method <code>static WebServerContent getWebServerContent(String parameter)</code> of the parameter class (the method visibility does not matter).
+   * @return A URL that when accessed will invoke the method <code>static WebServerContent getWebServerContent(String, HTTPRequest)</code> of the parameter class (the method visibility does not matter).
    */
   public String getDynamicContentURL(String className, String parameter) {
     return getURLPrefix() + "/class/" + className + "/" + Utils.encodeURL(parameter);
@@ -429,16 +656,16 @@ public class WebServer {
     return getURLPrefix() + "/resource/" + Utils.encodeURL(codeBase) + "/" + Utils.encodeURL(resourcePath);
   }
   
-  public WebServerContent getURLContent(String resourceURL) {
+  public WebServerContent getURLContent(String resourceURL, HTTPRequest httpRequest) {
     try {
-      return getWebServerContent(new URL(resourceURL).getPath());
+      return getWebServerContent(new URL(resourceURL).getPath(), httpRequest);
     } catch(Exception e) {
       e.printStackTrace();
       return null;
     }
   }
   
-  protected static WebServerContent getWebServerContent(String parameter) {
+  protected static WebServerContent getWebServerContent(String parameter, HTTPRequest httpRequest) {
     if(parameter.startsWith("/")) {
       parameter = parameter.substring(1);
     }
@@ -451,9 +678,9 @@ public class WebServer {
       parameter = Utils.decodeURL(parameter.substring(index + 1));
       try {
         Class<?> clazz = Class.forName(className);
-        Method getWebServerContentMethod = clazz.getDeclaredMethod("getWebServerContent", String.class);
+        Method getWebServerContentMethod = clazz.getDeclaredMethod("getWebServerContent", String.class, HTTPRequest.class);
         getWebServerContentMethod.setAccessible(true);
-        return (WebServerContent)getWebServerContentMethod.invoke(null, parameter);
+        return (WebServerContent)getWebServerContentMethod.invoke(null, parameter, httpRequest);
       } catch(Exception e) {
         e.printStackTrace();
         return null;

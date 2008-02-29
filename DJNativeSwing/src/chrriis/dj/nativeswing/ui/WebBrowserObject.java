@@ -17,6 +17,7 @@ import java.util.Map.Entry;
 import chrriis.common.Registry;
 import chrriis.common.Utils;
 import chrriis.common.WebServer;
+import chrriis.common.WebServer.HTTPRequest;
 import chrriis.common.WebServer.WebServerContent;
 import chrriis.dj.nativeswing.Disposable;
 
@@ -67,7 +68,7 @@ public abstract class WebBrowserObject implements Disposable {
 
   protected static final String LS = System.getProperty("line.separator");
 
-  protected static WebServerContent getWebServerContent(String resourcePath) {
+  protected static WebServerContent getWebServerContent(String resourcePath, HTTPRequest httpRequest) {
     int index = resourcePath.indexOf('/');
     String type = resourcePath.substring(0, index);
     resourcePath = resourcePath.substring(index + 1);

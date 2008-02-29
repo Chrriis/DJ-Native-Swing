@@ -56,6 +56,7 @@ public class NativeInterfaceHandler {
     private boolean isPreferredLookAndFeelApplied;
     private Class<?>[] nativeClassPathReferenceClasses;
     private String[] nativeClassPathReferenceResources;
+    private String[] peerVMParams;
     
     public void setPreferredLookAndFeelApplied(boolean isPreferredLookAndFeelApplied) {
       this.isPreferredLookAndFeelApplied = isPreferredLookAndFeelApplied;
@@ -79,6 +80,14 @@ public class NativeInterfaceHandler {
     
     public String[] getNativeClassPathReferenceResources() {
       return nativeClassPathReferenceResources;
+    }
+    
+    public void setPeerVMParams(String[] peerVMParams) {
+      this.peerVMParams = peerVMParams;
+    }
+    
+    public String[] getPeerVMParams() {
+      return peerVMParams;
     }
     
   }
@@ -312,6 +321,11 @@ public class NativeInterfaceHandler {
     for(String candidateBinary: candidateBinaries) {
       List<String> argList = new ArrayList<String>();
       argList.add(candidateBinary);
+      if(nativeInterfaceInitOptions.peerVMParams != null) {
+        for(String param: nativeInterfaceInitOptions.peerVMParams) {
+          argList.add(param);
+        }
+      }
       argList.add("-classpath");
       argList.add(sb.toString());
       argList.add(NativeInterfaceHandler.class.getName());
