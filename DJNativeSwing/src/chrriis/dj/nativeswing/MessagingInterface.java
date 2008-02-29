@@ -7,6 +7,7 @@
  */
 package chrriis.dj.nativeswing;
 
+import java.awt.Canvas;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -16,6 +17,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
+import javax.swing.SwingUtilities;
 
 import chrriis.common.Registry;
 
@@ -84,6 +87,15 @@ abstract class MessagingInterface {
             }
             isEndOfStream = true;
             e.printStackTrace();
+            if(!NativeInterfaceHandler.isNativeSide()) {
+              SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                  for(Canvas c: NativeInterfaceHandler._Internal_.getCanvas()) {
+                    c.repaint();
+                  }
+                }
+              });
+            }
           }
           if(message != null) {
             if(!message.isUI()) {
