@@ -121,6 +121,10 @@ public class NativeInterfaceHandler {
       return windowSet == null? new Window[0]: windowSet.toArray(new Window[0]);
     }
     
+    public static boolean isInterfaceAlive() {
+      return messagingInterface.isAlive();
+    }
+    
   }
   
   private static boolean isInitialized;

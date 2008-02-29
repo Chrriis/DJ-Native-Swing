@@ -55,6 +55,12 @@ abstract class MessagingInterface {
   private ObjectOutputStream oos;
   private ObjectInputStream ois;
 
+  private boolean isAlive = true;
+  
+  public boolean isAlive() {
+    return isAlive;
+  }
+  
   public MessagingInterface(final Socket socket, final boolean exitOnEndOfStream) {
     try {
       oos = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
@@ -66,14 +72,17 @@ abstract class MessagingInterface {
     Thread receiverThread = new Thread("NativeSwing Receiver") {
       @Override
       public void run() {
-        while(true) {
+        boolean isEndOfStream = false;
+        while(!isEndOfStream) {
           Message message = null;
           try {
             message = readMessage();
           } catch(Exception e) {
+            isAlive = false;
             if(exitOnEndOfStream) {
               System.exit(0);
             }
+            isEndOfStream = true;
             e.printStackTrace();
           }
           if(message != null) {

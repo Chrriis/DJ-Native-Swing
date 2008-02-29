@@ -110,7 +110,7 @@ public abstract class NativeComponent extends Canvas {
       initializationCommandMessageList.add(commandMessage);
       return null;
     }
-    if(!isValidControl) {
+    if(!isValidControl()) {
       commandMessage.setArgs(args);
       printFailedInvocation(commandMessage);
       return null;
@@ -173,7 +173,7 @@ public abstract class NativeComponent extends Canvas {
     addFocusListener(new FocusAdapter() {
       @Override
       public void focusGained(FocusEvent e) {
-        if(isValidControl && !isDisposed()) {
+        if(isValidControl() && !isDisposed()) {
           run(new CMN_transferFocus());
         }
       }
@@ -206,8 +206,10 @@ public abstract class NativeComponent extends Canvas {
           }
           SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-              resizeThread = null;
-              asyncExec(new CMN_reshape(), getWidth(), getHeight());
+              if(isValidControl()) {
+                resizeThread = null;
+                asyncExec(new CMN_reshape(), getWidth(), getHeight());
+              }
             }
           });
         }
@@ -420,9 +422,13 @@ public abstract class NativeComponent extends Canvas {
   @Override
   public void paint(Graphics g) {
     super.paint(g);
-    if(!isValidControl) {
+    String text = invalidControlText;
+    if(text == null) {
+      text = "Invalid " + getClass().getName() + "[" + hashCode() + "]";
+    }
+    if(!isValidControl()) {
       FontMetrics fm = g.getFontMetrics();
-      BufferedReader r = new BufferedReader(new StringReader(invalidControlText));
+      BufferedReader r = new BufferedReader(new StringReader(text));
       int lineHeight = fm.getHeight();
       int ascent = fm.getAscent();
       try {
@@ -459,7 +465,7 @@ public abstract class NativeComponent extends Canvas {
       e.printStackTrace();
     }
     for(CommandMessage initCommandMessage: initializationCommandMessageList_) {
-      if(!isValidControl) {
+      if(!isValidControl()) {
         printFailedInvocation(initCommandMessage);
       } else {
         initCommandMessage.syncExec();
@@ -516,7 +522,7 @@ public abstract class NativeComponent extends Canvas {
   }
   
   public boolean isValidControl() {
-    return isValidControl;
+    return isValidControl && NativeInterfaceHandler._Internal_.isInterfaceAlive();
   }
   
   private Options options;
@@ -763,7 +769,7 @@ public abstract class NativeComponent extends Canvas {
   @Override
   public boolean hasFocus() {
     boolean hasFocus = super.hasFocus();
-    if(!hasFocus && isValidControl && !isDisposed) {
+    if(!hasFocus && isValidControl() && !isDisposed) {
       return (Boolean)syncExec(new CMN_hasFocus());
     }
     return hasFocus;
@@ -781,7 +787,7 @@ public abstract class NativeComponent extends Canvas {
   @Override
   public Dimension getPreferredSize() {
     Dimension result = null;
-    if(isValidControl && !isDisposed) {
+    if(isValidControl() && !isDisposed) {
       result = (Dimension)syncExec(new CMN_getPreferredSize());
     }
     if(result == null) {
