@@ -7,7 +7,6 @@
  */
 package chrriis.dj.nativeswing.ui;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -81,52 +80,43 @@ public abstract class WebBrowserObject implements Disposable {
       }
       return new WebServerContent() {
         @Override
-        public String getContentType() {
-          return getDefaultMimeType(".html");
-        }
-        @Override
         public InputStream getInputStream() {
-          try {
-            String content =
-                "<html>" + LS +
-                "  <head>" + LS +
-                "    <script language=\"JavaScript\" type=\"text/javascript\">" + LS +
-                "      <!--" + LS +
-                "      function sendCommand(command) {" + LS +
-                "        command = command == null? '': encodeURIComponent(command);" + LS +
-                "        window.location = 'command://' + command;" + LS +
-                "      }" + LS +
-                "      function getEmbeddedObject() {" + LS +
-                "        var movieName = \"myEmbeddedObject\";" + LS +
-                "        if(window.document[movieName]) {" + LS +
-                "          return window.document[movieName];" + LS +
-                "        }" + LS +
-                "        if(navigator.appName.indexOf(\"Microsoft Internet\") == -1) {" + LS +
-                "          if(document.embeds && document.embeds[movieName]) {" + LS +
-                "            return document.embeds[movieName];" + LS +
-                "          }" + LS +
-                "        } else {" + LS +
-                "          return document.getElementById(movieName);" + LS +
-                "        }" + LS +
-                "      }" + LS +
-                component.getJavascriptDefinitions() + LS +
-                "      //-->" + LS +
-                "    </script>" + LS +
-                "    <style type=\"text/css\">" + LS +
-                "      html, object, embed, div, body, table { width: 100%; height: 100%; min-height: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #FFFFFF; text-align: center; }" + LS +
-                "      object, embed, div { position: absolute; left:0; top:0;}" + LS +
-                "      td { vertical-align: middle; }" + LS +
-                "    </style>" + LS +
-                "  </head>" + LS +
-                "  <body height=\"*\">" + LS +
-                "    <script src=\"" + WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "js/" + instanceID) + "\"></script>" + LS +
-                "  </body>" + LS +
-                "</html>" + LS;
-            return new ByteArrayInputStream(content.getBytes("UTF-8"));
-          } catch(Exception e) {
-            e.printStackTrace();
-            return null;
-          }
+          String content =
+            "<html>" + LS +
+            "  <head>" + LS +
+            "    <script language=\"JavaScript\" type=\"text/javascript\">" + LS +
+            "      <!--" + LS +
+            "      function sendCommand(command) {" + LS +
+            "        command = command == null? '': encodeURIComponent(command);" + LS +
+            "        window.location = 'command://' + command;" + LS +
+            "      }" + LS +
+            "      function getEmbeddedObject() {" + LS +
+            "        var movieName = \"myEmbeddedObject\";" + LS +
+            "        if(window.document[movieName]) {" + LS +
+            "          return window.document[movieName];" + LS +
+            "        }" + LS +
+            "        if(navigator.appName.indexOf(\"Microsoft Internet\") == -1) {" + LS +
+            "          if(document.embeds && document.embeds[movieName]) {" + LS +
+            "            return document.embeds[movieName];" + LS +
+            "          }" + LS +
+            "        } else {" + LS +
+            "          return document.getElementById(movieName);" + LS +
+            "        }" + LS +
+            "      }" + LS +
+            component.getJavascriptDefinitions() + LS +
+            "      //-->" + LS +
+            "    </script>" + LS +
+            "    <style type=\"text/css\">" + LS +
+            "      html, object, embed, div, body, table { width: 100%; height: 100%; min-height: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #FFFFFF; text-align: center; }" + LS +
+            "      object, embed, div { position: absolute; left:0; top:0;}" + LS +
+            "      td { vertical-align: middle; }" + LS +
+            "    </style>" + LS +
+            "  </head>" + LS +
+            "  <body height=\"*\">" + LS +
+            "    <script src=\"" + WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "js/" + instanceID) + "\"></script>" + LS +
+            "  </body>" + LS +
+            "</html>" + LS;
+          return getInputStream(content);
         }
       };
     }
@@ -150,42 +140,37 @@ public abstract class WebBrowserObject implements Disposable {
         }
         public InputStream getInputStream() {
           ObjectHTMLConfiguration objectHtmlConfiguration = webBrowserObject.getObjectHtmlConfiguration();
-          try {
-            StringBuffer objectParameters = new StringBuffer();
-            StringBuffer embedParameters = new StringBuffer();
-            HashMap<String, String> htmlParameters = new HashMap<String, String>(objectHtmlConfiguration.getHTMLParameters());
-            htmlParameters.remove("width");
-            htmlParameters.remove("height");
-            htmlParameters.remove("type");
-            htmlParameters.remove("name");
-            htmlParameters.remove(objectHtmlConfiguration.getWindowsParamName());
-            htmlParameters.remove(objectHtmlConfiguration.getParamName());
-            for(Entry<String, String> param: htmlParameters.entrySet()) {
-              String name = Utils.escapeXML(param.getKey());
-              String value = Utils.escapeXML(param.getValue());
-              embedParameters.append(' ').append(name).append("=\"").append(value).append("\"");
-              objectParameters.append("window.document.write('  <param name=\"").append(name).append("\" value=\"").append(value).append("\"/>');" + LS);
-            }
-            String content =
-                "<!--" + LS +
-                "window.document.write('<object classid=\"clsid:" + objectHtmlConfiguration.getWindowsClassID() + "\" id=\"myEmbeddedObject\" codebase=\"" + objectHtmlConfiguration.getWindowsInstallationURL() + "\" events=\"true\">');" + LS +
-                "window.document.write('  <param name=\"" + objectHtmlConfiguration.getWindowsParamName() + "\" value=\"' + decodeURIComponent('" + escapedURL + "') + '\";\"/>');" + LS +
-                objectParameters +
-                "window.document.write('  <embed" + embedParameters + " name=\"myEmbeddedObject\" " + objectHtmlConfiguration.getParamName() + "=\"" + escapedURL + "\" type=\"" + objectHtmlConfiguration.getMimeType() + "\" pluginspage=\"" + objectHtmlConfiguration.getInstallationURL() + "\">');" + LS +
-                "window.document.write('  </embed>');" + LS +
-                "window.document.write('</object>');" + LS +
-                "window.document.write('<div></div>');" + LS +
-                "window.document.write('<div id=\"messageDiv\" style=\"display:none;\"><table><tr><td>" + objectHtmlConfiguration.getHTMLLoadingMessage() + "</td></tr></table></div>');" + LS +
-                "setTimeout('document.getElementById(\\'messageDiv\\').style.display = \\'inline\\'', 2000);" + LS +
-                "var embeddedObject = getEmbeddedObject();" + LS +
-                "embeddedObject.style.width = '100%';" + LS +
-                "embeddedObject.style.height = '100%';" + LS +
-                "//-->" + LS;
-            return new ByteArrayInputStream(content.getBytes("UTF-8"));
-          } catch(Exception e) {
-            e.printStackTrace();
-            return null;
+          StringBuffer objectParameters = new StringBuffer();
+          StringBuffer embedParameters = new StringBuffer();
+          HashMap<String, String> htmlParameters = new HashMap<String, String>(objectHtmlConfiguration.getHTMLParameters());
+          htmlParameters.remove("width");
+          htmlParameters.remove("height");
+          htmlParameters.remove("type");
+          htmlParameters.remove("name");
+          htmlParameters.remove(objectHtmlConfiguration.getWindowsParamName());
+          htmlParameters.remove(objectHtmlConfiguration.getParamName());
+          for(Entry<String, String> param: htmlParameters.entrySet()) {
+            String name = Utils.escapeXML(param.getKey());
+            String value = Utils.escapeXML(param.getValue());
+            embedParameters.append(' ').append(name).append("=\"").append(value).append("\"");
+            objectParameters.append("window.document.write('  <param name=\"").append(name).append("\" value=\"").append(value).append("\"/>');" + LS);
           }
+          String content =
+            "<!--" + LS +
+            "window.document.write('<object classid=\"clsid:" + objectHtmlConfiguration.getWindowsClassID() + "\" id=\"myEmbeddedObject\" codebase=\"" + objectHtmlConfiguration.getWindowsInstallationURL() + "\" events=\"true\">');" + LS +
+            "window.document.write('  <param name=\"" + objectHtmlConfiguration.getWindowsParamName() + "\" value=\"' + decodeURIComponent('" + escapedURL + "') + '\";\"/>');" + LS +
+            objectParameters +
+            "window.document.write('  <embed" + embedParameters + " name=\"myEmbeddedObject\" " + objectHtmlConfiguration.getParamName() + "=\"" + escapedURL + "\" type=\"" + objectHtmlConfiguration.getMimeType() + "\" pluginspage=\"" + objectHtmlConfiguration.getInstallationURL() + "\">');" + LS +
+            "window.document.write('  </embed>');" + LS +
+            "window.document.write('</object>');" + LS +
+            "window.document.write('<div></div>');" + LS +
+            "window.document.write('<div id=\"messageDiv\" style=\"display:none;\"><table><tr><td>" + objectHtmlConfiguration.getHTMLLoadingMessage() + "</td></tr></table></div>');" + LS +
+            "setTimeout('document.getElementById(\\'messageDiv\\').style.display = \\'inline\\'', 2000);" + LS +
+            "var embeddedObject = getEmbeddedObject();" + LS +
+            "embeddedObject.style.width = '100%';" + LS +
+            "embeddedObject.style.height = '100%';" + LS +
+            "//-->" + LS;
+          return getInputStream(content);
         }
       };
     }

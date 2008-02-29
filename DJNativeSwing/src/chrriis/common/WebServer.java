@@ -330,7 +330,17 @@ public class WebServer {
     }
     
     public abstract InputStream getInputStream();
-    public abstract String getContentType();
+    public static InputStream getInputStream(String content) {
+      try {
+        return new ByteArrayInputStream(content.getBytes("UTF-8"));
+      } catch(Exception e) {
+        e.printStackTrace();
+        return null;
+      }
+    }
+    public String getContentType() {
+      return getDefaultMimeType(".html");
+    }
     public long getContentLength() {
       return -1;
     }
