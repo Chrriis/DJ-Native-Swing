@@ -68,7 +68,8 @@ public abstract class WebBrowserObject implements Disposable {
 
   protected static final String LS = System.getProperty("line.separator");
 
-  protected static WebServerContent getWebServerContent(String resourcePath, HTTPRequest httpRequest) {
+  protected static WebServerContent getWebServerContent(HTTPRequest httpRequest) {
+    String resourcePath = httpRequest.getResourcePath();
     int index = resourcePath.indexOf('/');
     String type = resourcePath.substring(0, index);
     resourcePath = resourcePath.substring(index + 1);

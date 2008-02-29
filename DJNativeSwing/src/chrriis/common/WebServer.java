@@ -22,7 +22,6 @@ import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -34,8 +33,51 @@ import java.util.Map;
  */
 public class WebServer {
 
-  public static class HTTPRequest {
-    HTTPRequest() {
+  public static class HTTPRequest implements Cloneable {
+    HTTPRequest(String urlPath) {
+      setURLPath(urlPath);
+    }
+    private String endQuery = "";
+    private String urlPath;
+    void setURLPath(String urlPath) {
+      this.urlPath = urlPath;
+      resourcePath = urlPath;
+      int index = resourcePath.indexOf('?');
+      if(index != -1) {
+        String queryString = resourcePath.substring(index + 1);
+        endQuery = '?' + queryString;
+        resourcePath = resourcePath.substring(0, index);
+        for(String content: queryString.split("&")) {
+          String key = content.substring(0, content.indexOf('='));
+          String value = Utils.decodeURL(content.substring(key.length() + 1));
+          queryParameterMap.put(key, value);
+        }
+      }
+      index = resourcePath.indexOf('#');
+      if(index != -1) {
+        anchor = resourcePath.substring(index + 1);
+        endQuery = '#' + anchor + endQuery;
+        resourcePath = resourcePath.substring(0, index);
+      }
+    }
+    public String getURLPath() {
+      return urlPath;
+    }
+    private String resourcePath;
+    void setResourcePath(String resourcePath) {
+      this.resourcePath = resourcePath;
+      this.urlPath = resourcePath + endQuery;
+    }
+    public String getResourcePath() {
+      return resourcePath;
+    }
+    private String anchor;
+    public String getAnchor() {
+      return anchor;
+    }
+    private Map<String, String> queryParameterMap = new HashMap<String, String>();
+    public Map<String, String> getQueryParameterMap() {
+      return queryParameterMap;
     }
     private boolean isPostMethod;
     void setPostMethod(boolean isPostMethod) {
@@ -44,12 +86,22 @@ public class WebServer {
     public boolean isPostMethod() {
       return isPostMethod;
     }
-    private HTTPData[] httpDataArray;
-    void setHttpDataArray(HTTPData[] httpDataArray) {
-      this.httpDataArray = httpDataArray;
+    private HTTPData[] httpPostDataArray;
+    void setHTTPPostDataArray(HTTPData[] httpPostDataArray) {
+      this.httpPostDataArray = httpPostDataArray;
     }
-    public HTTPData[] getHttpDataArray() {
-      return httpDataArray;
+    public HTTPData[] getHTTPPostDataArray() {
+      return httpPostDataArray;
+    }
+    @Override
+    protected HTTPRequest clone() {
+      try {
+        HTTPRequest httpRequest = (HTTPRequest)super.clone();
+        httpRequest.queryParameterMap = new HashMap<String, String>(queryParameterMap);
+        return httpRequest;
+      } catch (CloneNotSupportedException e) {
+        throw new RuntimeException(e);
+      }
     }
   }
   
@@ -58,9 +110,6 @@ public class WebServer {
     HTTPData() {
     }
     public Map<String, String> getHeaderMap() {
-      return Collections.unmodifiableMap(headerMap);
-    }
-    Map<String, String> getModifiableHeaderMap() {
       return headerMap;
     }
     private byte[] bytes;
@@ -346,7 +395,6 @@ public class WebServer {
         CRLF,
       }
       private InputStream inputStream;
-      private int readCount;
       public HTTPInputStream(InputStream inputStream) {
         this.inputStream = inputStream;
       }
@@ -357,9 +405,6 @@ public class WebServer {
           case CRLF: return "\r\n";
         }
         return null;
-      }
-      public int getReadCount() {
-        return readCount;
       }
       private LineSeparator lineSeparator;
       private int lastByte = -1;
@@ -416,7 +461,6 @@ public class WebServer {
       @Override
       public int read() throws IOException {
         int n = inputStream.read();
-        readCount++;
         return n;
       }
     }
@@ -440,24 +484,10 @@ public class WebServer {
             return;
           }
           String resourcePath = request.substring((isPostMethod? "POST ": "GET ").length(), request.length() - " HTTP/1.0".length());
-          HTTPRequest httpRequest = new HTTPRequest();
+          HTTPRequest httpRequest = new HTTPRequest(resourcePath);
           httpRequest.setPostMethod(isPostMethod);
-          HTTPData[] httpDataArray;
-          if(!isPostMethod) {
-            HTTPData httpData = new HTTPData();
-            int index = resourcePath.indexOf('?');
-            if(index != -1) {
-              String queryString = resourcePath.substring(index + 1);
-              resourcePath = resourcePath.substring(0, index);
-              Map<String, String> headerMap = httpData.getModifiableHeaderMap();
-              for(String content: queryString.split("&")) {
-                String key = content.substring(0, content.indexOf('='));
-                String value = Utils.decodeURL(content.substring(key.length() + 1));
-                headerMap.put(key, value);
-              }
-            }
-            httpDataArray = new HTTPData[] {httpData};
-          } else {
+          if(isPostMethod) {
+            HTTPData[] httpDataArray;
             String contentType = null;
             int contentLength = -1;
             for(String header; (header = in.readAsciiLine()).length() > 0; ) {
@@ -504,7 +534,7 @@ public class WebServer {
                 ByteArrayInputStream bais = new ByteArrayInputStream(dataBytes, start, indexList.get(i + 1) - start - in.getLineSeparator().length());
                 HTTPInputStream din = new HTTPInputStream(bais);
                 din.readAsciiLine();
-                Map<String, String> headerMap = httpData.getModifiableHeaderMap();
+                Map<String, String> headerMap = httpData.getHeaderMap();
                 for(String header; (header = din.readAsciiLine()).length() > 0; ) {
                   String key = header.substring(header.indexOf(": "));
                   String value = header.substring(key.length() + ": ".length());
@@ -530,7 +560,7 @@ public class WebServer {
                 }
               }
               HTTPData httpData = new HTTPData();
-              Map<String, String> headerMap = httpData.getModifiableHeaderMap();
+              Map<String, String> headerMap = httpData.getHeaderMap();
               for(String content: sb.toString().split("&")) {
                 String key = content.substring(0, content.indexOf('='));
                 String value = Utils.decodeURL(content.substring(key.length() + 1));
@@ -538,9 +568,9 @@ public class WebServer {
               }
               httpDataArray = new HTTPData[] {httpData};
             }
+            httpRequest.setHTTPPostDataArray(httpDataArray);
           }
-          httpRequest.setHttpDataArray(httpDataArray);
-          WebServerContent webServerContent = getWebServerContent(resourcePath, httpRequest);
+          WebServerContent webServerContent = getWebServerContent(httpRequest);
           InputStream resourceStream_ = webServerContent == null? null: webServerContent.getInputStream();
           if(resourceStream_ == null) {
             writeHTTPError(out, 404, "File Not Found.");
@@ -634,7 +664,7 @@ public class WebServer {
   }
   
   /**
-   * @return A URL that when accessed will invoke the method <code>static WebServerContent getWebServerContent(String, HTTPRequest)</code> of the parameter class (the method visibility does not matter).
+   * @return A URL that when accessed will invoke the method <code>static WebServerContent getWebServerContent(HTTPRequest)</code> of the parameter class (the method visibility does not matter).
    */
   public String getDynamicContentURL(String className, String parameter) {
     return getURLPrefix() + "/class/" + className + "/" + Utils.encodeURL(parameter);
@@ -656,16 +686,18 @@ public class WebServer {
     return getURLPrefix() + "/resource/" + Utils.encodeURL(codeBase) + "/" + Utils.encodeURL(resourcePath);
   }
   
-  public WebServerContent getURLContent(String resourceURL, HTTPRequest httpRequest) {
+  public WebServerContent getURLContent(String resourceURL) {
     try {
-      return getWebServerContent(new URL(resourceURL).getPath(), httpRequest);
+      HTTPRequest httpRequest = new HTTPRequest(new URL(resourceURL).getPath());
+      return getWebServerContent(httpRequest);
     } catch(Exception e) {
       e.printStackTrace();
       return null;
     }
   }
   
-  protected static WebServerContent getWebServerContent(String parameter, HTTPRequest httpRequest) {
+  protected static WebServerContent getWebServerContent(HTTPRequest httpRequest) {
+    String parameter = httpRequest.getResourcePath();
     if(parameter.startsWith("/")) {
       parameter = parameter.substring(1);
     }
@@ -676,11 +708,13 @@ public class WebServer {
       index = parameter.indexOf('/');
       String className = parameter.substring(0, index);
       parameter = Utils.decodeURL(parameter.substring(index + 1));
+      httpRequest = httpRequest.clone();
       try {
         Class<?> clazz = Class.forName(className);
-        Method getWebServerContentMethod = clazz.getDeclaredMethod("getWebServerContent", String.class, HTTPRequest.class);
+        Method getWebServerContentMethod = clazz.getDeclaredMethod("getWebServerContent", HTTPRequest.class);
         getWebServerContentMethod.setAccessible(true);
-        return (WebServerContent)getWebServerContentMethod.invoke(null, parameter, httpRequest);
+        httpRequest.setResourcePath(parameter);
+        return (WebServerContent)getWebServerContentMethod.invoke(null, httpRequest);
       } catch(Exception e) {
         e.printStackTrace();
         return null;
