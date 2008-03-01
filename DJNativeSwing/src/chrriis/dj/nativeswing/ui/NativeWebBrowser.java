@@ -327,9 +327,9 @@ class NativeWebBrowser extends NativeComponent {
             browserAttributes.hasToolBar = e.toolBar;
             browserAttributes.hasAddressBar = e.addressBar;
             browserAttributes.hasStatusBar = e.statusBar;
-            asyncExec(browser, new CMJ_showWindow(), browserAttributes);
             display.asyncExec(new Runnable() {
               public void run() {
+                asyncExec(browser, new CMJ_showWindow(), browserAttributes);
                 shell.dispose();
               }
             });
