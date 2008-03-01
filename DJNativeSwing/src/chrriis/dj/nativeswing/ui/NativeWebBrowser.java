@@ -314,7 +314,7 @@ class NativeWebBrowser extends NativeComponent {
         e.required = true;
         final Display display = NativeInterfaceHandler.getDisplay();
         final Shell shell = new Shell(display);
-        Browser browser_ = new Browser(shell, browser.getStyle());
+        final Browser browser_ = new Browser(shell, browser.getStyle());
         e.browser = browser_;
         final BrowserAttributes browserAttributes = new BrowserAttributes();
         browser_.addVisibilityWindowListener(new VisibilityWindowAdapter() {

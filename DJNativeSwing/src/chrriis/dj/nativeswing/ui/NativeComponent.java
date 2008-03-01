@@ -124,6 +124,10 @@ public abstract class NativeComponent extends Canvas {
   
   private static Registry registry = new Registry();
   
+  protected static Registry getRegistry() {
+    return registry;
+  }
+  
   protected abstract static class ControlCommandMessage extends CommandMessage {
     private int componentID;
     public int getComponentID() {
@@ -133,7 +137,7 @@ public abstract class NativeComponent extends Canvas {
       this.componentID = (Integer)control.getData("NS_ID");
     }
     public void setNativeComponent(NativeComponent nativeComponent) {
-      this.componentID = nativeComponent.id;
+      this.componentID = nativeComponent.componentID;
     }
     public Control getControl() {
       return (Control)NativeComponent.registry.get(componentID);
@@ -158,7 +162,11 @@ public abstract class NativeComponent extends Canvas {
     }
   }
 
-  private int id;
+  private int componentID;
+  
+  protected int getComponentID() {
+    return componentID;
+  }
 
   private static class CMN_transferFocus extends ControlCommandMessage {
     @Override
@@ -169,7 +177,7 @@ public abstract class NativeComponent extends Canvas {
   }
 
   public NativeComponent() {
-    id = NativeComponent.registry.add(this);
+    componentID = NativeComponent.registry.add(this);
     addFocusListener(new FocusAdapter() {
       @Override
       public void focusGained(FocusEvent e) {
@@ -376,47 +384,51 @@ public abstract class NativeComponent extends Canvas {
       Shell shell = createShell((Long)args[2]);
       shell.setVisible (true);
       shell.setLayout(new FillLayout());
+      int componentID = (Integer)args[0];
       Method createControlMethod = Class.forName((String)args[1]).getDeclaredMethod("createControl", Shell.class);
       createControlMethod.setAccessible(true);
-      final Control control = (Control)createControlMethod.invoke(null, shell);
-      Integer id = (Integer)args[0];
-      control.setData("NS_ID", id);
-      NativeComponent.registry.add(control, (Integer)args[0]);
-      control.addMouseListener(new MouseAdapter() {
-        @Override
-        public void mouseDown(org.eclipse.swt.events.MouseEvent e) {
-          NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), e, MouseEvent.MOUSE_PRESSED);
-        }
-        @Override
-        public void mouseUp(org.eclipse.swt.events.MouseEvent e) {
-          NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), e, MouseEvent.MOUSE_RELEASED);
-        }
-      });
-      control.addMouseMoveListener(new MouseMoveListener() {
-        public void mouseMove(org.eclipse.swt.events.MouseEvent e) {
-          NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), e, MouseEvent.MOUSE_MOVED);
-        }
-      });
-      control.addMouseWheelListener(new MouseWheelListener() {
-        public void mouseScrolled(org.eclipse.swt.events.MouseEvent e) {
-          NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), e, MouseEvent.MOUSE_WHEEL);
-        }
-      });
-      control.addKeyListener(new KeyListener() {
-        public void keyPressed(org.eclipse.swt.events.KeyEvent e) {
-          if((e.stateMask & SWT.CONTROL) != 0 && e.keyCode == SWT.TAB) {
-            e.doit = false;
-          }
-          NativeComponent.asyncExec(control, new CMJ_dispatchKeyEvent(), e, KeyEvent.KEY_PRESSED);
-        }
-        public void keyReleased(org.eclipse.swt.events.KeyEvent e) {
-          NativeComponent.asyncExec(control, new CMJ_dispatchKeyEvent(), e, KeyEvent.KEY_RELEASED);
-          // TODO: Maybe innacurate: swing may issue pressed events when a key is stuck. verify this behavior some day.
-          NativeComponent.asyncExec(control, new CMJ_dispatchKeyEvent(), e, KeyEvent.KEY_TYPED);
-        }
-      });
+      Control control = (Control)createControlMethod.invoke(null, shell);
+      NativeComponent.registry.add(control, componentID);
+      configureControl(control, componentID);
       return null;
     }
+  }
+
+  protected static void configureControl(final Control control, int componentID) {
+    control.setData("NS_ID", componentID);
+    control.addMouseListener(new MouseAdapter() {
+      @Override
+      public void mouseDown(org.eclipse.swt.events.MouseEvent e) {
+        NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), e, MouseEvent.MOUSE_PRESSED);
+      }
+      @Override
+      public void mouseUp(org.eclipse.swt.events.MouseEvent e) {
+        NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), e, MouseEvent.MOUSE_RELEASED);
+      }
+    });
+    control.addMouseMoveListener(new MouseMoveListener() {
+      public void mouseMove(org.eclipse.swt.events.MouseEvent e) {
+        NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), e, MouseEvent.MOUSE_MOVED);
+      }
+    });
+    control.addMouseWheelListener(new MouseWheelListener() {
+      public void mouseScrolled(org.eclipse.swt.events.MouseEvent e) {
+        NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), e, MouseEvent.MOUSE_WHEEL);
+      }
+    });
+    control.addKeyListener(new KeyListener() {
+      public void keyPressed(org.eclipse.swt.events.KeyEvent e) {
+        if((e.stateMask & SWT.CONTROL) != 0 && e.keyCode == SWT.TAB) {
+          e.doit = false;
+        }
+        NativeComponent.asyncExec(control, new CMJ_dispatchKeyEvent(), e, KeyEvent.KEY_PRESSED);
+      }
+      public void keyReleased(org.eclipse.swt.events.KeyEvent e) {
+        NativeComponent.asyncExec(control, new CMJ_dispatchKeyEvent(), e, KeyEvent.KEY_RELEASED);
+        // TODO: Maybe innacurate: swing may issue pressed events when a key is stuck. verify this behavior some day.
+        NativeComponent.asyncExec(control, new CMJ_dispatchKeyEvent(), e, KeyEvent.KEY_TYPED);
+      }
+    });
   }
 
   @Override
@@ -454,7 +466,7 @@ public abstract class NativeComponent extends Canvas {
     isInitialized = true;
     isValidControl = true;
     try {
-      run(new CMN_createControl(), id, NativeComponent.this.getClass().getName(), Native.getComponentID(this));
+      run(new CMN_createControl(), componentID, NativeComponent.this.getClass().getName(), Native.getComponentID(this));
     } catch(Exception e) {
       isValidControl = false;
       StringBuilder sb = new StringBuilder();
@@ -509,7 +521,7 @@ public abstract class NativeComponent extends Canvas {
       isDisposed = true;
       NativeInterfaceHandler._Internal_.removeCanvas(this);
       run(new CMN_destroyControl());
-      NativeComponent.registry.remove(id);
+      NativeComponent.registry.remove(componentID);
     }
   }
   
@@ -761,8 +773,7 @@ public abstract class NativeComponent extends Canvas {
   private static class CMN_hasFocus extends ControlCommandMessage {
     @Override
     public Object run() throws Exception {
-      Control control = getControl();
-      return control.isFocusControl();
+      return getControl().isFocusControl();
     }
   }
 
