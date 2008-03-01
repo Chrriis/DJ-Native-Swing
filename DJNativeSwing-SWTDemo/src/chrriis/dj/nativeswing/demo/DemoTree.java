@@ -73,7 +73,6 @@ public class DemoTree extends JTree {
     }));
     exampleGroupList.add(new ExampleGroup("JMultiMediaPlayer (win32)", new Example[] {
         new Example("Simple Example", SimpleMultiMediaPlayerExample.class, "Load a movie/sound file to an embedded multimedia player.", true, System.getProperty("os.name").startsWith("Windows"), "This example is only available on a Windows operating system."),
-//        new Example("Simple Example", SimpleMultiMediaPlayerExample.class, "Load a movie/sound file to an embedded multimedia player.", true),
     }));
     exampleGroupList.add(new ExampleGroup("Utilities", new Example[] {
         new Example("File Associations", FileAssociations.class, "Get the file type associations, and use them to launch files.", true),
