@@ -142,6 +142,23 @@ public class NativeInterfaceHandler {
   public static void init() {
     init(new NativeInterfaceInitOptions());
   }
+  
+  private static class CMN_setProperties extends CommandMessage {
+    @Override
+    public Object run() throws Exception {
+      Properties systemProperties = System.getProperties();
+      Properties properties = (Properties)args[0];
+      for(Object o: properties.keySet()) {
+        if(!systemProperties.containsKey(o)) {
+          try {
+            System.setProperty((String)o, properties.getProperty((String)o));
+          } catch(Exception e) {
+          }
+        }
+      }
+      return null;
+    }
+  }
 
   public static void init(NativeInterfaceInitOptions nativeInterfaceInitOptions) {
     if(isInitialized()) {
@@ -164,6 +181,8 @@ public class NativeInterfaceHandler {
     System.setProperty("jna.force_hw_popups", "false");
     // Create the interface to communicate with the process handling the native side
     messagingInterface = createMessagingInterface(nativeInterfaceInitOptions);
+    // Set the system properties
+    new CMN_setProperties().syncExecArgs(System.getProperties());
     // Create window monitor
     Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
       protected Set<Dialog> dialogSet = new HashSet<Dialog>();
@@ -476,13 +495,6 @@ public class NativeInterfaceHandler {
     messagingInterface.checkUIThread();
   }
   
-  private static class CMJ_getProperties extends CommandMessage {
-    @Override
-    public Object run() throws Exception {
-      return System.getProperties();
-    }
-  }
-  
   public static void main(String[] args) throws Exception {
     isInitialized = true;
     int port = Integer.parseInt(args[0]);
@@ -569,16 +581,6 @@ public class NativeInterfaceHandler {
         return Thread.currentThread() == uiThread;
       }
     };
-    Properties systemProperties = System.getProperties();
-    Properties properties = (Properties)new CMJ_getProperties().syncExec();
-    for(Object o: properties.keySet()) {
-      if(!systemProperties.containsKey(o)) {
-        try {
-          System.setProperty((String)o, properties.getProperty((String)o));
-        } catch(Exception e) {
-        }
-      }
-    }
     while(display != null && !display.isDisposed()) {
       if(!display.readAndDispatch()) {
         display.sleep();
