@@ -35,6 +35,7 @@ import javax.swing.JToolBar;
 import javax.swing.border.BevelBorder;
 
 import chrriis.dj.nativeswing.Disposable;
+import chrriis.dj.nativeswing.ui.event.InitializationListener;
 import chrriis.dj.nativeswing.ui.event.WebBrowserAdapter;
 import chrriis.dj.nativeswing.ui.event.WebBrowserEvent;
 import chrriis.dj.nativeswing.ui.event.WebBrowserListener;
@@ -431,6 +432,32 @@ public class JWebBrowser extends JPanel implements Disposable {
    */
   public Component getDisplayComponent() {
     return nativeComponent;
+  }
+  
+  public void addInitializationListener(InitializationListener listener) {
+    listenerList.add(InitializationListener.class, listener);
+  }
+  
+  public void removeWebBrowserListener(InitializationListener listener) {
+    listenerList.remove(InitializationListener.class, listener);
+  }
+  
+  public InitializationListener[] getInitializationListeners() {
+    return listenerList.getListeners(InitializationListener.class);
+  }
+
+  /**
+   * @return true if the control was initialized. If the initialization failed, this would return true but isValidControl would return false.
+   */
+  public boolean isInitialized() {
+    return nativeComponent.isInitialized();
+  }
+  
+  /**
+   * @return true if the component is initialized and is properly created.
+   */
+  public boolean isValidControl() {
+    return nativeComponent.isValidControl();
   }
   
   public JMenuBar getMenuBar() {
