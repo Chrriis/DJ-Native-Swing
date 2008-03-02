@@ -7,6 +7,7 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.4 (xxxxxxxxxxxxxxxx):
 
+- JHTMLEditor is added.
 - Closing a browser window now disposes it.
 - Web browser events API is modified to fix window referencing in JS.
 - Web browser "new window" menu is implemented.
