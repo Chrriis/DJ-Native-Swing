@@ -13,7 +13,7 @@ package chrriis.dj.nativeswing.ui.event;
  */
 public abstract class WebBrowserAdapter implements WebBrowserListener {
 
-  public void windowCreation(WebBrowserWindowCreationEvent e) {}
+  public void windowWillOpen(WebBrowserWindowWillOpenEvent e) {}
   public void windowOpening(WebBrowserWindowOpeningEvent e) {}
   public void windowClosing(WebBrowserEvent e) {}
   

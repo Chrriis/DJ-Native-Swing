@@ -37,7 +37,7 @@ import chrriis.dj.nativeswing.CommandMessage;
 import chrriis.dj.nativeswing.ui.event.WebBrowserEvent;
 import chrriis.dj.nativeswing.ui.event.WebBrowserListener;
 import chrriis.dj.nativeswing.ui.event.WebBrowserNavigationEvent;
-import chrriis.dj.nativeswing.ui.event.WebBrowserWindowCreationEvent;
+import chrriis.dj.nativeswing.ui.event.WebBrowserWindowWillOpenEvent;
 import chrriis.dj.nativeswing.ui.event.WebBrowserWindowOpeningEvent;
 
 /**
@@ -65,9 +65,9 @@ class NativeWebBrowser extends NativeComponent {
           ((WebBrowserListener)listeners[i + 1]).windowClosing(e);
         }
       }
-      Window window = SwingUtilities.getWindowAncestor(webBrowser);
-      if(window instanceof JWebBrowserWindow) {
-        window.dispose();
+      JWebBrowserWindow browserWindow = webBrowser.getBrowserWindow();
+      if(browserWindow != null) {
+        browserWindow.dispose();
       }
       return null;
     }
@@ -83,13 +83,13 @@ class NativeWebBrowser extends NativeComponent {
       }
       JWebBrowser jWebBrowser = new JWebBrowser();
       Object[] listeners = nativeWebBrowser.listenerList.getListenerList();
-      WebBrowserWindowCreationEvent e = null;
+      WebBrowserWindowWillOpenEvent e = null;
       for(int i=listeners.length-2; i>=0 && jWebBrowser != null; i-=2) {
         if(listeners[i] == WebBrowserListener.class) {
           if(e == null) {
-            e = new WebBrowserWindowCreationEvent(webBrowser, jWebBrowser);
+            e = new WebBrowserWindowWillOpenEvent(webBrowser, jWebBrowser);
           }
-          ((WebBrowserListener)listeners[i + 1]).windowCreation(e);
+          ((WebBrowserListener)listeners[i + 1]).windowWillOpen(e);
           jWebBrowser = e.isConsumed()? null: e.getNewWebBrowser();
         }
       }
@@ -123,13 +123,13 @@ class NativeWebBrowser extends NativeComponent {
       newWebBrowser.setStatusBarVisible((Boolean)args[4]);
       Point location = (Point)args[5];
       Dimension size = (Dimension)args[6];
-      Window windowAncestor = SwingUtilities.getWindowAncestor(newWebBrowser);
-      if(windowAncestor instanceof JWebBrowserWindow) {
+      JWebBrowserWindow browserWindow = newWebBrowser.getBrowserWindow();;
+      if(browserWindow != null) {
         if(size != null) {
-          windowAncestor.setSize(size);
+          browserWindow.setSize(size);
         }
         if(location != null) {
-          windowAncestor.setLocation(location);
+          browserWindow.setLocation(location);
         }
       }
       Object[] listeners = nativeWebBrowser.listenerList.getListenerList();
@@ -144,9 +144,9 @@ class NativeWebBrowser extends NativeComponent {
       }
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-          Window windowAncestor = SwingUtilities.getWindowAncestor(newWebBrowser);
-          if(windowAncestor instanceof JWebBrowserWindow && !((NativeComponent)newWebBrowser.getDisplayComponent()).isDisposed()) {
-            windowAncestor.setVisible(true);
+          JWebBrowserWindow browserWindow = newWebBrowser.getBrowserWindow();
+          if(browserWindow != null && !((NativeComponent)newWebBrowser.getDisplayComponent()).isDisposed()) {
+            browserWindow.setVisible(true);
           }
         }
       });

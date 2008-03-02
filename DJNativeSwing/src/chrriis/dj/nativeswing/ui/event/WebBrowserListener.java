@@ -17,11 +17,10 @@ public interface WebBrowserListener extends EventListener {
   /**
    * This event is sent to the browser that originated the event, and can be consumed.
    */
-  public void windowCreation(WebBrowserWindowCreationEvent e);
+  public void windowWillOpen(WebBrowserWindowWillOpenEvent e);
   
   /**
-   * This event is sent to the browser that originated the event, and can be consumed.
-   * Note that the URL should be read from the event as it is not yet set on the newWebBrowser component. 
+   * This event is sent to the browser that originated the event.
    */
   public void windowOpening(WebBrowserWindowOpeningEvent e);
 

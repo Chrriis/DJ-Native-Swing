@@ -17,7 +17,7 @@ import chrriis.dj.nativeswing.ui.JWebBrowser;
 import chrriis.dj.nativeswing.ui.JWebBrowserWindow;
 import chrriis.dj.nativeswing.ui.event.WebBrowserAdapter;
 import chrriis.dj.nativeswing.ui.event.WebBrowserNavigationEvent;
-import chrriis.dj.nativeswing.ui.event.WebBrowserWindowCreationEvent;
+import chrriis.dj.nativeswing.ui.event.WebBrowserWindowWillOpenEvent;
 
 /**
  * @author Christopher Deckers
@@ -71,7 +71,7 @@ public class NavigationControl extends JPanel {
         }
       }
       @Override
-      public void windowCreation(WebBrowserWindowCreationEvent e) {
+      public void windowWillOpen(WebBrowserWindowWillOpenEvent e) {
         // We let the window to be created, but we will check the first URL that is set on it.
         e.getNewWebBrowser().addWebBrowserListener(new WebBrowserAdapter() {
           @Override

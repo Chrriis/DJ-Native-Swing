@@ -13,7 +13,7 @@ import java.awt.Point;
 import chrriis.dj.nativeswing.ui.JWebBrowser;
 
 /**
- * This event is sent after the window was created (creation event). The new web browser will have its appearance set (bars visibility, bounds of the containing window if any).
+ * This event is sent after the window was created, meaning after a WindowWillOpen event. The new web browser will have its appearance set (bars visibility, bounds of the containing window if any).
  * This new web browser may or may not have received navigation events.
  * @author Christopher Deckers
  */

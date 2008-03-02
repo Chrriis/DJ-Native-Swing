@@ -15,11 +15,11 @@ import chrriis.dj.nativeswing.ui.JWebBrowser;
  * Note that navigation events can happen after this event, but may be before or after the opening event.
  * @author Christopher Deckers
  */
-public class WebBrowserWindowCreationEvent extends WebBrowserEvent {
+public class WebBrowserWindowWillOpenEvent extends WebBrowserEvent {
 
   protected JWebBrowser newWebBrowser;
 
-  public WebBrowserWindowCreationEvent(JWebBrowser webBrowser, JWebBrowser newWebBrowser) {
+  public WebBrowserWindowWillOpenEvent(JWebBrowser webBrowser, JWebBrowser newWebBrowser) {
     super(webBrowser);
     this.newWebBrowser = newWebBrowser;
   }
