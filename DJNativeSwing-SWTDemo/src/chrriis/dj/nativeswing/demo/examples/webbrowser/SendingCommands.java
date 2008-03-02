@@ -8,20 +8,12 @@
 package chrriis.dj.nativeswing.demo.examples.webbrowser;
 
 import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.Dialog;
-import java.awt.FlowLayout;
-import java.awt.Frame;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import javax.swing.JTextField;
 
 import chrriis.dj.nativeswing.ui.JWebBrowser;
 import chrriis.dj.nativeswing.ui.event.WebBrowserAdapter;
@@ -40,8 +32,8 @@ public class SendingCommands extends JPanel {
     JPanel commandPanel = new JPanel(new BorderLayout(0, 0));
     commandPanel.add(new JLabel("Received command: "), BorderLayout.WEST);
     commandPanel.setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 5));
-    final JLabel commandLabel = new JLabel("-");
-    commandPanel.add(commandLabel, BorderLayout.CENTER);
+    final JTextField receivedCommandTextField = new JTextField();
+    commandPanel.add(receivedCommandTextField, BorderLayout.CENTER);
     contentPane.add(commandPanel, BorderLayout.SOUTH);
     JPanel webBrowserPanel = new JPanel(new BorderLayout(0, 0));
     webBrowserPanel.setBorder(BorderFactory.createTitledBorder("Native Web Browser component"));
@@ -51,44 +43,12 @@ public class SendingCommands extends JPanel {
     webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
       @Override
       public void commandReceived(WebBrowserEvent e, String command) {
-        commandLabel.setText("\"" + command + "\"");
+        receivedCommandTextField.setText(command);
         if(command.startsWith("store:")) {
-          Window w = SwingUtilities.getWindowAncestor(webBrowser);
-          final JDialog dialog;
-          String title = "Store message from Web Browser";
-          if(w instanceof Frame) {
-            dialog = new JDialog((Frame)w, title, true);
-          } else {
-            dialog = new JDialog((Dialog)w, title, true);
+          String data = command.substring("store:".length());
+          if(JOptionPane.showConfirmDialog(webBrowser, "Do you want to store \"" + data + "\" in a database?\n(Not for real of course!)", "Data received from the web browser", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            // Here the data should be used
           }
-          Container contentPane = dialog.getContentPane();
-          JPanel labelPanel = new JPanel(new BorderLayout(0, 0));
-          labelPanel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
-          JLabel label = new JLabel("Do you want to store \"" + command.substring("store:".length()) + "\" in a database?");
-          labelPanel.add(label, BorderLayout.CENTER);
-          contentPane.add(labelPanel, BorderLayout.CENTER);
-          JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 2));
-          ActionListener disposeListener = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              dialog.dispose();
-            }
-          };
-          JButton button = new JButton("Nope");
-          button.addActionListener(disposeListener);
-          buttonPanel.add(button);
-          button = new JButton("Don't want");
-          button.addActionListener(disposeListener);
-          buttonPanel.add(button);
-          button = new JButton("Not sure...");
-          button.addActionListener(disposeListener);
-          buttonPanel.add(button);
-          button = new JButton("Never!");
-          button.addActionListener(disposeListener);
-          buttonPanel.add(button);
-          contentPane.add(buttonPanel, BorderLayout.SOUTH);
-          dialog.pack();
-          dialog.setLocationRelativeTo(webBrowser);
-          dialog.setVisible(true);
         }
       }
     });
@@ -111,8 +71,8 @@ public class SendingCommands extends JPanel {
         "      <input type=\"button\" value=\"Send\" onclick=\"sendCommand(form.commandField.value)\"/>" + LS +
         "    </form>" + LS +
         "    <form name=\"form2\" onsubmit=\"sendCommand('store:' + form2.commandField.value); return false\">" + LS +
-        "      A more concrete example would be to ask the application to store some data in a database:<br/>" + LS +
-        "      <input name=\"commandField\" type=\"text\" value=\"some data\"/>" + LS +
+        "      A more concrete example: ask the application to store some data in a database:<br/>" + LS +
+        "      Client: <input name=\"commandField\" type=\"text\" value=\"John Smith\"/>" + LS +
         "      <input type=\"button\" value=\"Send\" onclick=\"sendCommand('store:' + form2.commandField.value)\"/>" + LS +
         "    </form>" + LS +
         "  </body>" + LS +
