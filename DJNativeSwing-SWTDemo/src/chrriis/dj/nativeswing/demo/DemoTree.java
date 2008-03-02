@@ -25,6 +25,7 @@ import chrriis.dj.nativeswing.demo.examples.componentoptions.VisibilityConstrain
 import chrriis.dj.nativeswing.demo.examples.evolutions.WorkInProgress;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.Interactions;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
+import chrriis.dj.nativeswing.demo.examples.htmleditor.SimpleHTMLEditorExample;
 import chrriis.dj.nativeswing.demo.examples.introduction.Codewise;
 import chrriis.dj.nativeswing.demo.examples.introduction.NativeIntegration;
 import chrriis.dj.nativeswing.demo.examples.introduction.TheSolution;
@@ -65,6 +66,9 @@ public class DemoTree extends JTree {
     }));
     exampleGroupList.add(new ExampleGroup("JVLCPlayer", new Example[] {
         new Example("Simple Example", SimpleVLCPlayerExample.class, "Load a movie/sound file to an embedded VLC player.", true),
+    }));
+    exampleGroupList.add(new ExampleGroup("JHTMLEditor", new Example[] {
+        new Example("Simple Example", SimpleHTMLEditorExample.class, "Edit HTML, get and set the content of the editor.", true),
     }));
     exampleGroupList.add(new ExampleGroup("Component Options", new Example[] {
         new Example("Visibility Constraint", VisibilityConstraintOption.class, "Constrain the visibility to superimpose Swing and native components.", true),
