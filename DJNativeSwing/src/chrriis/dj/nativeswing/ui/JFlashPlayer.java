@@ -29,6 +29,7 @@ import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.Disposable;
 import chrriis.dj.nativeswing.NativeInterfaceHandler;
 import chrriis.dj.nativeswing.Message.EmptyMessage;
+import chrriis.dj.nativeswing.ui.event.InitializationListener;
 import chrriis.dj.nativeswing.ui.event.WebBrowserAdapter;
 import chrriis.dj.nativeswing.ui.event.WebBrowserEvent;
 
@@ -102,7 +103,7 @@ public class JFlashPlayer extends JPanel implements Disposable {
   private JButton pauseButton;
   private JButton stopButton;
 
-  private WebBrowserObject webBrowserObject = new WebBrowserObject(webBrowser) {
+  private WebBrowserObject webBrowserObject = new WebBrowserObject(this, webBrowser) {
     
     protected ObjectHTMLConfiguration getObjectHtmlConfiguration() {
       ObjectHTMLConfiguration objectHTMLConfiguration = new ObjectHTMLConfiguration();
@@ -298,4 +299,16 @@ public class JFlashPlayer extends JPanel implements Disposable {
     return webBrowserObject.isDisposed();
   }
   
+  public void addInitializationListener(InitializationListener listener) {
+    webBrowserObject.addInitializationListener(listener);
+  }
+  
+  public void removeInitializationListener(InitializationListener listener) {
+    webBrowserObject.removeInitializationListener(listener);
+  }
+  
+  public InitializationListener[] getInitializationListeners() {
+    return webBrowserObject.getInitializationListeners();
+  }
+
 }

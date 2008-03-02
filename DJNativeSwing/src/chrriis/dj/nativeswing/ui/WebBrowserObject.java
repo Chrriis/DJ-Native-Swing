@@ -9,9 +9,13 @@ package chrriis.dj.nativeswing.ui;
 
 import java.io.File;
 import java.io.InputStream;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.swing.event.EventListenerList;
 
 import chrriis.common.Registry;
 import chrriis.common.Utils;
@@ -19,6 +23,10 @@ import chrriis.common.WebServer;
 import chrriis.common.WebServer.HTTPRequest;
 import chrriis.common.WebServer.WebServerContent;
 import chrriis.dj.nativeswing.Disposable;
+import chrriis.dj.nativeswing.ui.event.InitializationEvent;
+import chrriis.dj.nativeswing.ui.event.InitializationListener;
+import chrriis.dj.nativeswing.ui.event.WebBrowserAdapter;
+import chrriis.dj.nativeswing.ui.event.WebBrowserEvent;
 
 /**
  * A helper class to simplify the development of native components that act as a plugin to the web browser component (like the JFlashPlayer).
@@ -26,12 +34,41 @@ import chrriis.dj.nativeswing.Disposable;
  */
 public abstract class WebBrowserObject implements Disposable {
 
+  private static class NWebBrowserListener extends WebBrowserAdapter {
+    protected Reference<WebBrowserObject> webBrowserObject;
+    protected NWebBrowserListener(WebBrowserObject webBrowserObject) {
+      this.webBrowserObject = new WeakReference<WebBrowserObject>(webBrowserObject);
+    }
+    @Override
+    public void commandReceived(WebBrowserEvent e, String command) {
+      WebBrowserObject webBrowserObject = this.webBrowserObject.get();
+      if(webBrowserObject == null) {
+        return;
+      }
+      if("WB_setLoaded".equals(command)) {
+        Object[] listeners = webBrowserObject.listenerList.getListenerList();
+        InitializationEvent ev = null;
+        for(int i=listeners.length-2; i>=0; i-=2) {
+          if(listeners[i] == InitializationListener.class) {
+            if(ev == null) {
+              ev = new InitializationEvent(webBrowserObject.source);
+            }
+            ((InitializationListener)listeners[i + 1]).objectInitialized(ev);
+          }
+        }
+      }
+    }
+  }
+  
+  private Object source;
   private JWebBrowser webBrowser;
   private int instanceID;
   
-  public WebBrowserObject(JWebBrowser webBrowser) {
+  public WebBrowserObject(Object source, JWebBrowser webBrowser) {
+    this.source = source;
     this.webBrowser = webBrowser;
     webBrowser.setBarsVisible(false);
+    webBrowser.addWebBrowserListener(new NWebBrowserListener(this));
   }
   
   private String url;
@@ -170,6 +207,7 @@ public abstract class WebBrowserObject implements Disposable {
             "var embeddedObject = getEmbeddedObject();" + LS +
             "embeddedObject.style.width = '100%';" + LS +
             "embeddedObject.style.height = '100%';" + LS +
+            "sendCommand('WB_setLoaded');" + LS +
             "//-->" + LS;
           return getInputStream(content);
         }
@@ -272,6 +310,20 @@ public abstract class WebBrowserObject implements Disposable {
   
   public boolean isDisposed() {
     return webBrowser.isDisposed();
+  }
+
+  private EventListenerList listenerList = new EventListenerList();
+  
+  public void addInitializationListener(InitializationListener listener) {
+    listenerList.add(InitializationListener.class, listener);
+  }
+  
+  public void removeInitializationListener(InitializationListener listener) {
+    listenerList.remove(InitializationListener.class, listener);
+  }
+  
+  public InitializationListener[] getInitializationListeners() {
+    return listenerList.getListeners(InitializationListener.class);
   }
 
 }
