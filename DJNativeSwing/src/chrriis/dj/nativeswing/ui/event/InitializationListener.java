@@ -14,6 +14,6 @@ import java.util.EventListener;
  */
 public interface InitializationListener extends EventListener {
 
-  public void componentInitialized(InitializationEvent e);
+  public void objectInitialized(InitializationEvent e);
   
 }

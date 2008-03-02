@@ -34,7 +34,7 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
     protected NInitializationListener(JMultiMediaPlayer multiMediaPlayer) {
       this.multiMediaPlayer = new WeakReference<JMultiMediaPlayer>(multiMediaPlayer);
     }
-    public void componentInitialized(InitializationEvent e) {
+    public void objectInitialized(InitializationEvent e) {
       JMultiMediaPlayer multiMediaPlayer = this.multiMediaPlayer.get();
       if(multiMediaPlayer == null) {
         return;
@@ -42,11 +42,11 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
       Object[] listeners = multiMediaPlayer.listenerList.getListenerList();
       e = null;
       for(int i=listeners.length-2; i>=0; i-=2) {
-        if(listeners[i] == InitializationEvent.class) {
+        if(listeners[i] == InitializationListener.class) {
           if(e == null) {
             e = new InitializationEvent(multiMediaPlayer);
           }
-          ((InitializationListener)listeners[i + 1]).componentInitialized(e);
+          ((InitializationListener)listeners[i + 1]).objectInitialized(e);
         }
       }
     }
@@ -72,7 +72,7 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
     listenerList.add(InitializationListener.class, listener);
   }
   
-  public void removeWebBrowserListener(InitializationListener listener) {
+  public void removeInitializationListener(InitializationListener listener) {
     listenerList.remove(InitializationListener.class, listener);
   }
   

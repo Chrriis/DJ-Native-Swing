@@ -150,6 +150,13 @@ public class JVLCPlayer extends JPanel implements Disposable {
     return value.length() == 0? null: new ImageIcon(JWebBrowser.class.getResource(value));
   }
   
+  /**
+   * Get the web browser that contains this component. The web browser should only be used to add listeners, for example to listen to window creation events.
+   */
+  public JWebBrowser getWebBrowser() {
+    return webBrowser;
+  }
+  
   public String getURL() {
     return webBrowserObject.getURL();
   }

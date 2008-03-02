@@ -486,11 +486,11 @@ public abstract class NativeComponent extends Canvas {
     Object[] listeners = listenerList.getListenerList();
     InitializationEvent e = null;
     for(int i=listeners.length-2; i>=0; i-=2) {
-      if(listeners[i] == InitializationEvent.class) {
+      if(listeners[i] == InitializationListener.class) {
         if(e == null) {
           e = new InitializationEvent(NativeComponent.this);
         }
-        ((InitializationListener)listeners[i + 1]).componentInitialized(e);
+        ((InitializationListener)listeners[i + 1]).objectInitialized(e);
       }
     }
   }

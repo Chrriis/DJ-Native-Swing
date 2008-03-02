@@ -275,7 +275,7 @@ public class JFlashPlayer extends JPanel implements Disposable {
   }
   
   /**
-   * Get the web browser that contains the flash player. This web browser should be used only to add listeners, for example to listen to window creation events.
+   * Get the web browser that contains this component. The web browser should only be used to add listeners, for example to listen to window creation events.
    */
   public JWebBrowser getWebBrowser() {
     return webBrowser;

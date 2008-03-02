@@ -7,7 +7,6 @@
  */
 package chrriis.dj.nativeswing.ui.event;
 
-import java.awt.Component;
 import java.util.EventObject;
 
 /**
@@ -15,14 +14,8 @@ import java.util.EventObject;
  */
 public class InitializationEvent extends EventObject {
 
-  protected Component component;
-  
-  public InitializationEvent(Component component) {
-    super(component);
-  }
-  
-  public Component getComponent() {
-    return component;
+  public InitializationEvent(Object source) {
+    super(source);
   }
   
 }

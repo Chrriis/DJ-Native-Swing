@@ -11,6 +11,8 @@ import java.awt.BorderLayout;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.InputStream;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.Map;
 
 import javax.swing.JPanel;
@@ -25,6 +27,10 @@ import chrriis.dj.nativeswing.NativeInterfaceHandler;
 import chrriis.dj.nativeswing.Message.EmptyMessage;
 import chrriis.dj.nativeswing.ui.event.HTMLEditorListener;
 import chrriis.dj.nativeswing.ui.event.HTMLEditorSaveEvent;
+import chrriis.dj.nativeswing.ui.event.InitializationEvent;
+import chrriis.dj.nativeswing.ui.event.InitializationListener;
+import chrriis.dj.nativeswing.ui.event.WebBrowserAdapter;
+import chrriis.dj.nativeswing.ui.event.WebBrowserEvent;
 
 /**
  * @author Christopher Deckers
@@ -38,16 +44,50 @@ public class JHTMLEditor extends JPanel implements Disposable {
 
   protected static final String LS = System.getProperty("line.separator");
 
+  private static class NWebBrowserListener extends WebBrowserAdapter {
+    protected Reference<JHTMLEditor> htmlEditor;
+    protected NWebBrowserListener(JHTMLEditor htmlEditor) {
+      this.htmlEditor = new WeakReference<JHTMLEditor>(htmlEditor);
+    }
+    @Override
+    public void commandReceived(WebBrowserEvent e, String command) {
+      JHTMLEditor htmlEditor = this.htmlEditor.get();
+      if(htmlEditor == null) {
+        return;
+      }
+      if("JH_setLoaded".equals(command)) {
+        Object[] listeners = htmlEditor.listenerList.getListenerList();
+        InitializationEvent ev = null;
+        for(int i=listeners.length-2; i>=0; i-=2) {
+          if(listeners[i] == InitializationListener.class) {
+            if(ev == null) {
+              ev = new InitializationEvent(htmlEditor);
+            }
+            ((InitializationListener)listeners[i + 1]).objectInitialized(ev);
+          }
+        }
+      }
+    }
+  }
+  
   public JHTMLEditor() {
     super(new BorderLayout(0, 0));
     if(getClass().getResource("/fckeditor/fckeditor.js") == null) {
       throw new IllegalStateException("The FCKEditor distribution is missing from the classpath!");
     }
     webBrowser = new JWebBrowser();
+    webBrowser.addWebBrowserListener(new NWebBrowserListener(this));
     webBrowser.setBarsVisible(false);
     add(webBrowser, BorderLayout.CENTER);
     instanceID = Registry.getInstance().add(this);
     webBrowser.setURL(WebServer.getDefaultWebServer().getDynamicContentURL(JHTMLEditor.class.getName(), String.valueOf(instanceID),  "index.html"));
+  }
+  
+  /**
+   * Get the web browser that contains this component. The web browser should only be used to add listeners, for example to listen to window creation events.
+   */
+  public JWebBrowser getWebBrowser() {
+    return webBrowser;
   }
   
   protected static WebServerContent getWebServerContent(HTTPRequest httpRequest) {
@@ -103,6 +143,7 @@ public class JHTMLEditor extends JPanel implements Disposable {
             "      }" + LS +
             "      function FCKeditor_OnComplete(editorInstance) {" + LS +
             "        editorInstance.LinkedField.form.onsubmit = JH_doSave;" + LS +
+            "        sendCommand('JH_setLoaded');" + LS +
             "      }" + LS +
             "    </script>" + LS +
             "  </head>" + LS +
@@ -298,4 +339,16 @@ public class JHTMLEditor extends JPanel implements Disposable {
     return webBrowser.isDisposed();
   }
   
+  public void addInitializationListener(InitializationListener listener) {
+    listenerList.add(InitializationListener.class, listener);
+  }
+  
+  public void removeInitializationListener(InitializationListener listener) {
+    listenerList.remove(InitializationListener.class, listener);
+  }
+  
+  public InitializationListener[] getInitializationListeners() {
+    return listenerList.getListeners(InitializationListener.class);
+  }
+
 }
