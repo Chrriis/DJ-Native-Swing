@@ -195,20 +195,18 @@ public class JHTMLEditor extends JPanel implements Disposable {
 //          sb.append("<CurrentFolder path=\"").append(currentDir).append("\" url=\"").append(new File(currentDir).toURI().toURL()).append("\" />");
 //        } catch (MalformedURLException e) {
 //        }
-        if(("GetFoldersAndFiles".equals(command) || "GetFolders".equals(command)) && currentDir.equals("/") && roots.length > 0) {
-          if(currentDir.equals("/") && roots.length > 0) {
-            sb.append("<Folders>");
-            for(File file: roots) {
-              sb.append("<Folder name=\"").append(Utils.escapeXML(file.getAbsolutePath())).append("\"/>");
-            }
-            sb.append("</Folders>");
+        if(("GetFoldersAndFiles".equals(command) || "GetFolders".equals(command)) && currentDir.equals("/") && roots.length > 1) {
+          sb.append("<Folders>");
+          for(File file: roots) {
+            sb.append("<Folder name=\"").append(Utils.escapeXML(file.getAbsolutePath())).append("\"/>");
           }
+          sb.append("</Folders>");
         } else {
           if("GetFoldersAndFiles".equals(command) || "GetFolders".equals(command)) {
             sb.append("<Folders>");
             for(File file: new File(currentDir).listFiles(new FileFilter() {
               public boolean accept(File pathname) {
-                return pathname.isDirectory();
+                return !pathname.isFile();
               }
             })) {
               sb.append("<Folder name=\"").append(Utils.escapeXML(file.getName())).append("\"/>");
