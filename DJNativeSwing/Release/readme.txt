@@ -35,6 +35,9 @@ public static void main(String[] args) {
 If you want to use the shaping mode for native components (cf the demo), you
 need "jna_WindowUtils.jar" in your classpath.
 
+If you want to use the HTML editor, you need the zip of the FCK editor in your
+classpath.
+
 3. Any tutorial or demo?
 
 The DJ NativeSwing Demo presents all the features of the NativeSwing library,
