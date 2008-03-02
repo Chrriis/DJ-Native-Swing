@@ -44,7 +44,6 @@ import chrriis.common.Utils;
 import chrriis.dj.nativeswing.ui.NativeComponent;
 
 import com.sun.jna.Native;
-import com.sun.jna.examples.WindowUtils;
 
 /**
  * @author Christopher Deckers
@@ -279,33 +278,27 @@ public class NativeInterfaceHandler {
         }
       }
     }
-    List<Class<?>> referenceList = new ArrayList<Class<?>>();
+    List<Object> referenceList = new ArrayList<Object>();
     referenceList.add(NativeInterfaceHandler.class);
     referenceList.add(Display.class);
     referenceList.add(Native.class);
-    referenceList.add(WindowUtils.class);
+    // These are not mandatory, so we have to use the class name to avoid exceptions being thrown.
+    referenceList.add("com/sun/jna/examples/WindowUtils.class");
+    referenceList.add("fckeditor/fckeditor.js");
     Class<?>[] nativeClassPathReferenceClasses = nativeInterfaceInitOptions.getNativeClassPathReferenceClasses();
     if(nativeClassPathReferenceClasses != null) {
       referenceList.addAll(Arrays.asList(nativeClassPathReferenceClasses));
     }
-    for(Class<?> clazz: referenceList) {
-      File clazzClassPath = Utils.getClassPathFile(clazz);
+    String[] nativeClassPathReferenceResources = nativeInterfaceInitOptions.getNativeClassPathReferenceResources();
+    if(nativeClassPathReferenceResources != null) {
+      referenceList.addAll(Arrays.asList(nativeClassPathReferenceResources));
+    }
+    for(Object o: referenceList) {
+      File clazzClassPath = o instanceof Class? Utils.getClassPathFile((Class<?>)o): Utils.getClassPathFile((String)o);
       if(clazzClassPath != null) {
         String path = clazzClassPath.getAbsolutePath();
         if(!classPathList.contains(path)) {
           classPathList.add(path);
-        }
-      }
-    }
-    String[] nativeClassPathReferenceResources = nativeInterfaceInitOptions.getNativeClassPathReferenceResources();
-    if(nativeClassPathReferenceResources != null) {
-      for(String resourcePath: nativeClassPathReferenceResources) {
-        File resourceClassPath = Utils.getClassPathFile(resourcePath);
-        if(resourceClassPath != null) { 
-          String path = resourceClassPath.getAbsolutePath();
-          if(!classPathList.contains(path)) {
-            classPathList.add(path);
-          }
         }
       }
     }

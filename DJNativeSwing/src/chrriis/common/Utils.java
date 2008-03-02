@@ -9,6 +9,7 @@ package chrriis.common;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
@@ -101,6 +102,9 @@ public class Utils {
   }
   
   public static File getJARFile(String resourcePath) {
+    if(!resourcePath.startsWith("/")) {
+      resourcePath = '/' + resourcePath;
+    }
     return getJARFile(Utils.class, resourcePath);
   }
   
@@ -109,7 +113,11 @@ public class Utils {
   }
   
   private static File getJARFile(Class<?> clazz, String resourcePath) {
-    String classResourceURL = clazz.getResource(resourcePath).toExternalForm();
+    URL resource = clazz.getResource(resourcePath);
+    if(resource == null) {
+      return null;
+    }
+    String classResourceURL = resource.toExternalForm();
     if(classResourceURL != null && classResourceURL.startsWith("jar:file:")) {
       classResourceURL = classResourceURL.substring("jar:file:".length());
       if(classResourceURL.endsWith("!" + resourcePath)) {
@@ -135,7 +143,11 @@ public class Utils {
     if(resourceName.startsWith("/")) {
       resourceName = resourceName.substring(1);
     }
-    String classResourceURL = clazz.getResource(resourcePath).toExternalForm();
+    URL resource = clazz.getResource(resourcePath);
+    if(resource == null) {
+      return null;
+    }
+    String classResourceURL = resource.toExternalForm();
     if(classResourceURL != null && classResourceURL.startsWith("file:")) {
       File dir = new File(decodeURL(classResourceURL.substring("file:".length()))).getParentFile();
       for(int i=0; i<resourceName.length(); i++) {
