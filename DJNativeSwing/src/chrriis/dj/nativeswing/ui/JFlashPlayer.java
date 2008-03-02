@@ -12,8 +12,6 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -31,11 +29,8 @@ import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.Disposable;
 import chrriis.dj.nativeswing.NativeInterfaceHandler;
 import chrriis.dj.nativeswing.Message.EmptyMessage;
-import chrriis.dj.nativeswing.ui.event.FlashPlayerListener;
-import chrriis.dj.nativeswing.ui.event.FlashPlayerWindowOpeningEvent;
 import chrriis.dj.nativeswing.ui.event.WebBrowserAdapter;
 import chrriis.dj.nativeswing.ui.event.WebBrowserEvent;
-import chrriis.dj.nativeswing.ui.event.WebBrowserWindowOpeningEvent;
 
 /**
  * @author Christopher Deckers
@@ -107,41 +102,6 @@ public class JFlashPlayer extends JPanel implements Disposable {
   private JButton pauseButton;
   private JButton stopButton;
 
-  private static class NWebBrowserListener extends WebBrowserAdapter {
-    protected Reference<JFlashPlayer> flashPlayer;
-    protected NWebBrowserListener(JFlashPlayer flashPlayer) {
-      this.flashPlayer = new WeakReference<JFlashPlayer>(flashPlayer);
-    }
-//    @Override
-//    public void urlChanging(WebBrowserNavigationEvent e) {
-//      if(url == null || !url.equals(e.getNewURL())) {
-//        e.consume();
-//      }
-//    }
-    @Override
-    public void windowOpening(WebBrowserWindowOpeningEvent ev) {
-      JFlashPlayer flashPlayer = this.flashPlayer.get();
-      if(flashPlayer == null) {
-        return;
-      }
-      Object[] listeners = flashPlayer.listenerList.getListenerList();
-      FlashPlayerWindowOpeningEvent e = null;
-      for(int i=listeners.length-2; i>=0 && !ev.isConsumed(); i-=2) {
-        if(listeners[i] == FlashPlayerListener.class) {
-          if(e == null) {
-            e = new FlashPlayerWindowOpeningEvent(flashPlayer, ev.getNewWebBrowser(), ev.getNewURL(), ev.getLocation(), ev.getSize());
-          }
-          ((FlashPlayerListener)listeners[i + 1]).windowOpening(e);
-          if(e.isConsumed()) {
-            ev.consume();
-          } else {
-            ev.setNewWebBrowser(e.getNewWebBrowser());
-          }
-        }
-      }
-    }
-  }
-  
   private WebBrowserObject webBrowserObject = new WebBrowserObject(webBrowser) {
     
     protected ObjectHTMLConfiguration getObjectHtmlConfiguration() {
@@ -198,7 +158,6 @@ public class JFlashPlayer extends JPanel implements Disposable {
   public JFlashPlayer() {
     super(new BorderLayout(0, 0));
     webBrowserPanel = new JPanel(new BorderLayout(0, 0));
-    webBrowser.addWebBrowserListener(new NWebBrowserListener(this));
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);
     controlBarPane = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 2));
@@ -315,6 +274,13 @@ public class JFlashPlayer extends JPanel implements Disposable {
     return result == TEMP_RESULT? null: result;
   }
   
+  /**
+   * Get the web browser that contains the flash player. This web browser should be used only to add listeners, for example to listen to window creation events.
+   */
+  public JWebBrowser getWebBrowser() {
+    return webBrowser;
+  }
+  
   public boolean isControlBarVisible() {
     return controlBarPane.isVisible();
   }
@@ -322,18 +288,6 @@ public class JFlashPlayer extends JPanel implements Disposable {
   public void setControlBarVisible(boolean isVisible) {
     controlBarPane.setVisible(isVisible);
     adjustBorder();
-  }
-  
-  public void addFlashPlayerListener(FlashPlayerListener listener) {
-    listenerList.add(FlashPlayerListener.class, listener);
-  }
-  
-  public void removeFlashPlayerListener(FlashPlayerListener listener) {
-    listenerList.remove(FlashPlayerListener.class, listener);
-  }
-  
-  public FlashPlayerListener[] getFlashPlayerListeners() {
-    return listenerList.getListeners(FlashPlayerListener.class);
   }
   
   public void dispose() {

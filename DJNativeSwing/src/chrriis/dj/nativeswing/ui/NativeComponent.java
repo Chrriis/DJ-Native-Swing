@@ -500,7 +500,9 @@ public abstract class NativeComponent extends Canvas {
     public Object run() throws Exception {
       Control control = getControl();
       NativeComponent.registry.remove(getComponentID());
-      control.getShell().dispose();
+      if(!control.isDisposed()) {
+        control.getShell().dispose();
+      }
       return null;
     }
   }
@@ -781,7 +783,7 @@ public abstract class NativeComponent extends Canvas {
   public boolean hasFocus() {
     boolean hasFocus = super.hasFocus();
     if(!hasFocus && isValidControl() && !isDisposed) {
-      return (Boolean)syncExec(new CMN_hasFocus());
+      return Boolean.TRUE.equals(syncExec(new CMN_hasFocus()));
     }
     return hasFocus;
   }

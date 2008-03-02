@@ -13,25 +13,25 @@ import java.awt.Point;
 import chrriis.dj.nativeswing.ui.JWebBrowser;
 
 /**
+ * This event is sent after the window was created (creation event). The new web browser will have its appearance set (bars visibility, bounds of the containing window if any).
+ * This new web browser may or may not have received navigation events.
  * @author Christopher Deckers
  */
 public class WebBrowserWindowOpeningEvent extends WebBrowserEvent {
 
   protected JWebBrowser newWebBrowser;
-  protected String newURL;
   protected Point location;
   protected Dimension size;
 
-  public WebBrowserWindowOpeningEvent(JWebBrowser webBrowser, JWebBrowser newWebBrowser, String newURL, Point location, Dimension size) {
+  public WebBrowserWindowOpeningEvent(JWebBrowser webBrowser, JWebBrowser newWebBrowser, Point location, Dimension size) {
     super(webBrowser);
     this.newWebBrowser = newWebBrowser;
-    this.newURL = newURL;
     this.location = location;
     this.size = size;
   }
   
-  public String getNewURL() {
-    return newURL;
+  public JWebBrowser getNewWebBrowser() {
+    return newWebBrowser;
   }
   
   /**
@@ -46,28 +46,6 @@ public class WebBrowserWindowOpeningEvent extends WebBrowserEvent {
    */
   public Dimension getSize() {
     return size;
-  }
-  
-  public JWebBrowser getNewWebBrowser() {
-    return newWebBrowser;
-  }
-  
-  /**
-   * Set a different web browser. Note that null is not allowed: to prevent the window from opening, use the consume() method.
-   */
-  public void setNewWebBrowser(JWebBrowser newWebBrowser) {
-    if(newWebBrowser == null) {
-      throw new IllegalArgumentException("The new web browser cannot be null. To prevent the window to open, use the consume() method.");
-    }
-    this.newWebBrowser = newWebBrowser;
-  }
-  
-  public void consume() {
-    this.newWebBrowser = null;
-  }
-  
-  public boolean isConsumed() {
-    return newWebBrowser == null;
   }
   
 }

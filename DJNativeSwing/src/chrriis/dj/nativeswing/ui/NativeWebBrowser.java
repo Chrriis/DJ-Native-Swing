@@ -10,7 +10,6 @@ package chrriis.dj.nativeswing.ui;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Window;
-import java.io.Serializable;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.net.URLDecoder;
@@ -20,7 +19,6 @@ import javax.swing.SwingUtilities;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.CloseWindowListener;
-import org.eclipse.swt.browser.LocationAdapter;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.browser.OpenWindowListener;
@@ -33,14 +31,13 @@ import org.eclipse.swt.browser.TitleListener;
 import org.eclipse.swt.browser.VisibilityWindowAdapter;
 import org.eclipse.swt.browser.WindowEvent;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import chrriis.dj.nativeswing.CommandMessage;
-import chrriis.dj.nativeswing.NativeInterfaceHandler;
 import chrriis.dj.nativeswing.ui.event.WebBrowserEvent;
 import chrriis.dj.nativeswing.ui.event.WebBrowserListener;
 import chrriis.dj.nativeswing.ui.event.WebBrowserNavigationEvent;
+import chrriis.dj.nativeswing.ui.event.WebBrowserWindowCreationEvent;
 import chrriis.dj.nativeswing.ui.event.WebBrowserWindowOpeningEvent;
 
 /**
@@ -76,7 +73,7 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
   
-  private static class CMJ_showWindow extends ControlCommandMessage {
+  private static class CMJ_createWindow extends ControlCommandMessage {
     @Override
     public Object run() {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getComponent();
@@ -84,42 +81,79 @@ class NativeWebBrowser extends NativeComponent {
       if(webBrowser == null) {
         return null;
       }
-      BrowserAttributes browserAttributes = (BrowserAttributes)args[0];
       JWebBrowser jWebBrowser = new JWebBrowser();
-      jWebBrowser.setAddressBarVisible(browserAttributes.hasAddressBar);
-      jWebBrowser.setMenuBarVisible(browserAttributes.hasMenuBar);
-      jWebBrowser.setStatusBarVisible(browserAttributes.hasStatusBar);
-      jWebBrowser.setButtonBarVisible(browserAttributes.hasToolBar);
       Object[] listeners = nativeWebBrowser.listenerList.getListenerList();
-      WebBrowserWindowOpeningEvent e = null;
+      WebBrowserWindowCreationEvent e = null;
       for(int i=listeners.length-2; i>=0 && jWebBrowser != null; i-=2) {
         if(listeners[i] == WebBrowserListener.class) {
           if(e == null) {
-            e = new WebBrowserWindowOpeningEvent(webBrowser, jWebBrowser, browserAttributes.url, browserAttributes.location, browserAttributes.size);
+            e = new WebBrowserWindowCreationEvent(webBrowser, jWebBrowser);
           }
-          ((WebBrowserListener)listeners[i + 1]).windowOpening(e);
+          ((WebBrowserListener)listeners[i + 1]).windowCreation(e);
           jWebBrowser = e.isConsumed()? null: e.getNewWebBrowser();
         }
       }
-      if(jWebBrowser != null) {
-        if(SwingUtilities.getWindowAncestor(jWebBrowser) == null) {
-          JWebBrowserWindow webBrowserWindow = new JWebBrowserWindow(jWebBrowser);
-          if(browserAttributes.size != null) {
-            webBrowserWindow.setSize(browserAttributes.size);
-          }
-          if(browserAttributes.location != null) {
-            webBrowserWindow.setLocation(browserAttributes.location);
-          }
-          webBrowserWindow.setVisible(true);
-        }
-        if(browserAttributes.url != null) {
-          jWebBrowser.setURL(browserAttributes.url);
-        }
+      if(jWebBrowser == null) {
+        return null;
       }
-      return null;
+      Window windowAncestor = SwingUtilities.getWindowAncestor(jWebBrowser);
+      if(windowAncestor == null) {
+        final JWebBrowserWindow webBrowserWindow = new JWebBrowserWindow(jWebBrowser);
+        webBrowserWindow.addNotify();
+      } else {
+        windowAncestor.addNotify();
+      }
+      return ((NativeComponent)jWebBrowser.getDisplayComponent()).getComponentID();
     }
   }
 
+  private static class CMJ_showWindow extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getComponent();
+      final JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
+      if(webBrowser == null) {
+        return null;
+      }
+      int componentID = (Integer)args[0];
+      final JWebBrowser newWebBrowser = ((NativeWebBrowser)getRegistry().get(componentID)).webBrowser.get();
+      newWebBrowser.setMenuBarVisible((Boolean)args[1]);
+      newWebBrowser.setButtonBarVisible((Boolean)args[2]);
+      newWebBrowser.setAddressBarVisible((Boolean)args[3]);
+      newWebBrowser.setStatusBarVisible((Boolean)args[4]);
+      Point location = (Point)args[5];
+      Dimension size = (Dimension)args[6];
+      Window windowAncestor = SwingUtilities.getWindowAncestor(newWebBrowser);
+      if(windowAncestor instanceof JWebBrowserWindow) {
+        if(size != null) {
+          windowAncestor.setSize(size);
+        }
+        if(location != null) {
+          windowAncestor.setLocation(location);
+        }
+      }
+      Object[] listeners = nativeWebBrowser.listenerList.getListenerList();
+      WebBrowserWindowOpeningEvent e = null;
+      for(int i=listeners.length-2; i>=0 && newWebBrowser != null; i-=2) {
+        if(listeners[i] == WebBrowserListener.class) {
+          if(e == null) {
+            e = new WebBrowserWindowOpeningEvent(webBrowser, newWebBrowser, location, size);
+          }
+          ((WebBrowserListener)listeners[i + 1]).windowOpening(e);
+        }
+      }
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          Window windowAncestor = SwingUtilities.getWindowAncestor(newWebBrowser);
+          if(windowAncestor instanceof JWebBrowserWindow && !((NativeComponent)newWebBrowser.getDisplayComponent()).isDisposed()) {
+            windowAncestor.setVisible(true);
+          }
+        }
+      });
+      return null;
+    }
+  }
+  
   private static class CMJ_urlChanged extends ControlCommandMessage {
     @Override
     public Object run() {
@@ -286,17 +320,6 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
   
-  private static class BrowserAttributes implements Serializable {
-    protected Point location;
-    protected Dimension size;
-    protected boolean hasMenuBar = true;
-    protected boolean hasToolBar = true;
-    protected boolean hasAddressBar = true;
-    protected boolean hasStatusBar = true;
-    protected String url;
-  }
-
-  
   protected static Control createControl(Shell shell) {
     int style = SWT.NONE;
     if("mozilla".equals(System.getProperty("dj.nativeswing.webbrowser"))) {
@@ -312,34 +335,33 @@ class NativeWebBrowser extends NativeComponent {
       public void open(WindowEvent e) {
         // This forces the user to open it himself
         e.required = true;
-        final Display display = NativeInterfaceHandler.getDisplay();
-        final Shell shell = new Shell(display);
-        final Browser browser_ = new Browser(shell, browser.getStyle());
-        e.browser = browser_;
-        final BrowserAttributes browserAttributes = new BrowserAttributes();
-        browser_.addVisibilityWindowListener(new VisibilityWindowAdapter() {
+        final Integer componentID = (Integer)syncExec(browser, new CMJ_createWindow());
+        final Browser newWebBrowser;
+        final boolean isDisposed;
+        if(componentID == null) {
+          isDisposed = true;
+          Shell shell = new Shell();
+          newWebBrowser = new Browser(shell, browser.getStyle());
+        } else {
+          isDisposed = false;
+          newWebBrowser = (Browser)NativeComponent.getRegistry().get(componentID);
+        }
+        e.browser = newWebBrowser;
+        newWebBrowser.addVisibilityWindowListener(new VisibilityWindowAdapter() {
           @Override
           public void show(WindowEvent e) {
-            ((Browser)e.widget).removeVisibilityWindowListener(this);
-            browserAttributes.location = e.location == null? null: new Point(e.location.x, e.location.y);
-            browserAttributes.size = e.size == null? null: new Dimension(e.size.x, e.size.y);
-            browserAttributes.hasMenuBar = e.menuBar;
-            browserAttributes.hasToolBar = e.toolBar;
-            browserAttributes.hasAddressBar = e.addressBar;
-            browserAttributes.hasStatusBar = e.statusBar;
-            display.asyncExec(new Runnable() {
-              public void run() {
-                asyncExec(browser, new CMJ_showWindow(), browserAttributes);
-                shell.dispose();
-              }
-            });
-          }
-        });
-        browser_.addLocationListener(new LocationAdapter() {
-          public void changing(LocationEvent e) {
-            ((Browser)e.widget).removeLocationListener(this);
-            browserAttributes.url = e.location;
-            e.doit = false;
+            Browser browser = (Browser)e.widget;
+            if(isDisposed) {
+              final Shell shell = browser.getShell();
+              e.display.asyncExec(new Runnable() {
+                public void run() {
+                  shell.close();
+                }
+              });
+            } else {
+              (browser).removeVisibilityWindowListener(this);
+              asyncExec(newWebBrowser, new CMJ_showWindow(), componentID, e.menuBar, e.toolBar, e.addressBar, e.statusBar, e.location == null? null: new Point(e.location.x, e.location.y), e.size == null? null: new Dimension(e.size.x, e.size.y));
+            }
           }
         });
       }
@@ -433,8 +455,26 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
   
+  private boolean isLastActionSetText;
+  
+  boolean isLastActionSetText() {
+    return isLastActionSetText;
+  }
+  
   public boolean setURL(String url) {
+    isLastActionSetText = false;
     return Boolean.TRUE.equals(run(new CMN_setURL(), url));
+  }
+  
+  private static class CMN_getText extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      return ((Browser)getControl()).getText();
+    }
+  }
+  
+  public String getText() {
+    return (String)run(new CMN_getText());
   }
   
   private static class CMN_setText extends ControlCommandMessage {
@@ -445,6 +485,7 @@ class NativeWebBrowser extends NativeComponent {
   }
   
   public boolean setText(String html) {
+    isLastActionSetText = true;
     return Boolean.TRUE.equals(run(new CMN_setText(), html));
   }
   

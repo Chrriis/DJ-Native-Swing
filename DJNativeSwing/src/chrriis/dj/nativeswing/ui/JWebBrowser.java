@@ -9,6 +9,8 @@ package chrriis.dj.nativeswing.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -30,8 +32,10 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 
 import chrriis.dj.nativeswing.Disposable;
@@ -68,6 +72,7 @@ public class JWebBrowser extends JPanel implements Disposable {
   
   private JTextField addressField;
   private JLabel statusLabel;
+  private JProgressBar progressBar;
   private JButton backButton;
   private JMenuItem backMenuItem;
   private JButton forwardButton;
@@ -132,6 +137,29 @@ public class JWebBrowser extends JPanel implements Disposable {
       }
       String status = webBrowser.nativeComponent.getStatus();
       webBrowser.statusLabel.setText(status.length() == 0? " ": status);
+    }
+    @Override
+    public void loadingProgressChanged(WebBrowserEvent e) {
+      JWebBrowser webBrowser = this.webBrowser.get();
+      if(webBrowser == null) {
+        return;
+      }
+      int loadingProgress = webBrowser.getPageLoadingProgressValue();
+      webBrowser.progressBar.setValue(loadingProgress);
+      webBrowser.progressBar.setVisible(loadingProgress < 100);
+    }
+  }
+
+  public JWebBrowser(JWebBrowser webBrowser) {
+    this();
+    setAddressBarVisible(webBrowser.isAddressBarVisible());
+    setButtonBarVisible(webBrowser.isButtonBarVisible());
+    setMenuBarVisible(webBrowser.isMenuBarVisible());
+    setStatusBarVisible(webBrowser.isStatusBarVisible());
+    if(webBrowser.nativeComponent.isLastActionSetText()) {
+      setText(webBrowser.getText());
+    } else {
+      setURL(webBrowser.getURL());
     }
   }
   
@@ -220,6 +248,14 @@ public class JWebBrowser extends JPanel implements Disposable {
     statusBarPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, statusBarPanel.getBackground().darker()), BorderFactory.createEmptyBorder(2, 2, 2, 2)));
     statusLabel = new JLabel(" ");
     statusBarPanel.add(statusLabel, BorderLayout.CENTER);
+    progressBar = new JProgressBar() {
+      @Override
+      public Dimension getPreferredSize() {
+        return new Dimension(getParent().getWidth() / 10, 0);
+      }
+    };
+    progressBar.setVisible(false);
+    statusBarPanel.add(progressBar, BorderLayout.EAST);
     add(statusBarPanel, BorderLayout.SOUTH);
     nativeComponent.addWebBrowserListener(new NWebBrowserListener(this));
     adjustBorder();
@@ -227,10 +263,8 @@ public class JWebBrowser extends JPanel implements Disposable {
     JMenuItem fileNewWindowMenuItem = new JMenuItem(RESOURCES.getString("FileNewWindowMenu"));
     fileNewWindowMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        // TODO: implement
-//        JWebBrowserWindow webBrowserWindow = new JWebBrowserWindow();
-//        webBrowserWindow.getWebBrowser().setURL(getURL());
-//        webBrowserWindow.setVisible(true);
+        JWebBrowserWindow webBrowserWindow = new JWebBrowserWindow(new JWebBrowser(JWebBrowser.this));
+        webBrowserWindow.setVisible(true);
       }
     });
     fileMenu.add(fileNewWindowMenuItem);
@@ -353,12 +387,16 @@ public class JWebBrowser extends JPanel implements Disposable {
     return nativeComponent.getStatus();
   }
 
-  public String getURL() {
-    return nativeComponent.getURL();
+  public String getText() {
+    return nativeComponent.getText();
   }
   
   public boolean setText(String html) {
     return nativeComponent.setText(html);
+  }
+  
+  public String getURL() {
+    return nativeComponent.getURL();
   }
   
   public boolean setURL(String url) {
@@ -482,6 +520,17 @@ public class JWebBrowser extends JPanel implements Disposable {
   
   public boolean isDisposed() {
     return nativeComponent.isDisposed();
+  }
+  
+  /**
+   * @return the Browser Window if it is contained in one, or null.
+   */
+  public JWebBrowserWindow getBrowserWindow() {
+    Window window = SwingUtilities.getWindowAncestor(this);
+    if(window instanceof JWebBrowserWindow) {
+      return (JWebBrowserWindow)window;
+    }
+    return null;
   }
   
 }

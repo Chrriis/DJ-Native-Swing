@@ -87,6 +87,19 @@ abstract class MessagingInterface {
             }
             isEndOfStream = true;
             e.printStackTrace();
+            // Unlock all locked sync calls
+            synchronized(RECEIVER_LOCK) {
+              receivedMessageList.clear();
+              RECEIVER_LOCK.notify();
+            }
+            for(int instanceID: syncThreadRegistry.getInstanceIDs()) {
+              Thread thread = (Thread)syncThreadRegistry.get(instanceID);
+              if(thread != null) {
+                synchronized(thread) {
+                  thread.notify();
+                }
+              }
+            }
             if(!NativeInterfaceHandler.isNativeSide()) {
               SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
@@ -226,11 +239,20 @@ abstract class MessagingInterface {
           thread.wait();
         } catch(Exception e) {
         }
+        if(!isAlive()) {
+          syncThreadRegistry.remove(instanceID);
+          printFailedInvocation(message);
+          return null;
+        }
       }
       CommandResultMessage commandResultMessage = (CommandResultMessage)syncThreadRegistry.get(instanceID);
       syncThreadRegistry.remove(instanceID);
       return processCommandResult(commandResultMessage);
     }
+  }
+  
+  private void printFailedInvocation(Message message) {
+    System.err.println("Failed messaging: " + message);
   }
   
   public Object syncExec(Message message) {
@@ -239,6 +261,9 @@ abstract class MessagingInterface {
     }
     message.setUI(true);
     message.setSyncExec(true);
+    if(!isAlive()) {
+      printFailedInvocation(message);
+    }
     CommandResultMessage commandResultMessage = null;
     try {
       writeMessage(message);
@@ -258,6 +283,10 @@ abstract class MessagingInterface {
             RECEIVER_LOCK.wait();
             isWaitingResponse = false;
           }
+        }
+        if(!isAlive()) {
+          printFailedInvocation(message);
+          return null;
         }
       }
       synchronized(RECEIVER_LOCK) {
@@ -301,6 +330,9 @@ abstract class MessagingInterface {
   }
   
   private void writeMessage(Message message) throws IOException {
+    if(!isAlive()) {
+      printFailedInvocation(message);
+    }
     synchronized(oos) {
 //      System.err.println("SEND: " + message.getID() + ", " + message.getClass().getName());
       oos.writeObject(message);

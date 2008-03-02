@@ -37,6 +37,7 @@ public class JWebBrowserWindow extends JFrame {
   }
   
   public JWebBrowserWindow(JWebBrowser webBrowser) {
+    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     this.webBrowser = webBrowser;
     JMenu fileMenu = webBrowser.getFileMenu();
     fileMenu.addSeparator();

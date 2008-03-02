@@ -7,46 +7,21 @@
  */
 package chrriis.dj.nativeswing.ui.event;
 
-import java.awt.Dimension;
-import java.awt.Point;
-
-import chrriis.dj.nativeswing.ui.JFlashPlayer;
 import chrriis.dj.nativeswing.ui.JWebBrowser;
 
 /**
+ * This event is sent when a new window needs to be created. It allows to consume the event to prevent the opening, or to give a different web browser object to open the content elsewhere (for example in a tab).
+ * If this event is not consumed, then it will be followed by a window opening event, where the appearance will be defined.
+ * Note that navigation events can happen after this event, but may be before or after the opening event.
  * @author Christopher Deckers
  */
-public class FlashPlayerWindowOpeningEvent extends FlashPlayerEvent {
+public class WebBrowserWindowCreationEvent extends WebBrowserEvent {
 
   protected JWebBrowser newWebBrowser;
-  protected String newURL;
-  protected Point location;
-  protected Dimension size;
 
-  public FlashPlayerWindowOpeningEvent(JFlashPlayer flashPlayer, JWebBrowser newWebBrowser, String newURL, Point location, Dimension size) {
-    super(flashPlayer);
+  public WebBrowserWindowCreationEvent(JWebBrowser webBrowser, JWebBrowser newWebBrowser) {
+    super(webBrowser);
     this.newWebBrowser = newWebBrowser;
-    this.newURL = newURL;
-    this.location = location;
-    this.size = size;
-  }
-  
-  public String getNewURL() {
-    return newURL;
-  }
-  
-  /**
-   * @return the location, or null for default behavior.
-   */
-  public Point getLocation() {
-    return location;
-  }
-  
-  /**
-   * @return the size, or null for default behavior.
-   */
-  public Dimension getSize() {
-    return size;
   }
   
   public JWebBrowser getNewWebBrowser() {

@@ -7,6 +7,9 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.4 (xxxxxxxxxxxxxxxx):
 
+- Closing a browser window now disposes it.
+- Web browser events API is modified to fix window referencing in JS.
+- Web browser "new window" menu is implemented.
 - JVLCPlayer component is added.
 - Complete change of the internal native communication: dual process.
 - The L&F is not set anymore (use the corresponding method to apply it).

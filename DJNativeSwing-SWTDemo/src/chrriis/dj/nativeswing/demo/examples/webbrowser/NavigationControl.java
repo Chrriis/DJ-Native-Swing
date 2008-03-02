@@ -17,7 +17,7 @@ import chrriis.dj.nativeswing.ui.JWebBrowser;
 import chrriis.dj.nativeswing.ui.JWebBrowserWindow;
 import chrriis.dj.nativeswing.ui.event.WebBrowserAdapter;
 import chrriis.dj.nativeswing.ui.event.WebBrowserNavigationEvent;
-import chrriis.dj.nativeswing.ui.event.WebBrowserWindowOpeningEvent;
+import chrriis.dj.nativeswing.ui.event.WebBrowserWindowCreationEvent;
 
 /**
  * @author Christopher Deckers
@@ -71,13 +71,34 @@ public class NavigationControl extends JPanel {
         }
       }
       @Override
-      public void windowOpening(WebBrowserWindowOpeningEvent e) {
-        String newURL = e.getNewURL();
-        if(newURL.startsWith("http://www.microsoft.com/")) {
-          e.consume();
-        } else if(newURL.startsWith("http://www.eclipse.org/")) {
-          tabbedPane.addTab("www.eclipse.org", e.getNewWebBrowser());
-        }
+      public void windowCreation(WebBrowserWindowCreationEvent e) {
+        // We let the window to be created, but we will check the first URL that is set on it.
+        e.getNewWebBrowser().addWebBrowserListener(new WebBrowserAdapter() {
+          @Override
+          public void urlChanging(WebBrowserNavigationEvent e) {
+            final JWebBrowser webBrowser = e.getWebBrowser();
+            webBrowser.removeWebBrowserListener(this);
+            String newURL = e.getNewURL();
+            boolean isBlocked = false;
+            if(newURL.startsWith("http://www.microsoft.com/")) {
+              isBlocked = true;
+            } else if(newURL.startsWith("http://www.eclipse.org/")) {
+              isBlocked = true;
+              JWebBrowser newWebBrowser = new JWebBrowser(webBrowser);
+              newWebBrowser.setURL(newURL);
+              tabbedPane.addTab("www.eclipse.org", newWebBrowser);
+            }
+            if(isBlocked) {
+              e.consume();
+              // The URL Changing event is special: it is synchronous so disposal must be deferred.
+              SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                  webBrowser.getBrowserWindow().dispose();
+                }
+              });
+            }
+          }
+        });
       }
     });
     tabbedPane.addTab("Controled Browser", webBrowser);
