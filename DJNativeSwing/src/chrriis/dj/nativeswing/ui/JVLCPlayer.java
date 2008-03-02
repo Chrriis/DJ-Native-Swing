@@ -22,7 +22,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
-import chrriis.dj.nativeswing.Disposable;
+import chrriis.common.Disposable;
 import chrriis.dj.nativeswing.ui.event.InitializationListener;
 
 /**

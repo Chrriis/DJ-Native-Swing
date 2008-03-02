@@ -30,7 +30,7 @@ import javax.swing.JLayeredPane;
 import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
 
-import chrriis.dj.nativeswing.Disposable;
+import chrriis.common.Disposable;
 import chrriis.dj.nativeswing.NativeInterfaceHandler;
 import chrriis.dj.nativeswing.ui.NativeComponent.Options;
 import chrriis.dj.nativeswing.ui.NativeComponent.Options.DestructionTime;

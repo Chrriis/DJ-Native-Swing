@@ -17,12 +17,12 @@ import java.util.Map;
 
 import javax.swing.JPanel;
 
+import chrriis.common.Disposable;
 import chrriis.common.Registry;
 import chrriis.common.Utils;
 import chrriis.common.WebServer;
 import chrriis.common.WebServer.HTTPRequest;
 import chrriis.common.WebServer.WebServerContent;
-import chrriis.dj.nativeswing.Disposable;
 import chrriis.dj.nativeswing.NativeInterfaceHandler;
 import chrriis.dj.nativeswing.Message.EmptyMessage;
 import chrriis.dj.nativeswing.ui.event.HTMLEditorListener;

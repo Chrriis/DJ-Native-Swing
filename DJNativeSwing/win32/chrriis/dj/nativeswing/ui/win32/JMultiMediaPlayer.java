@@ -14,7 +14,7 @@ import java.lang.ref.WeakReference;
 
 import javax.swing.JPanel;
 
-import chrriis.dj.nativeswing.Disposable;
+import chrriis.common.Disposable;
 import chrriis.dj.nativeswing.ui.event.InitializationEvent;
 import chrriis.dj.nativeswing.ui.event.InitializationListener;
 

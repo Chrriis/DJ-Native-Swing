@@ -15,8 +15,8 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import chrriis.common.Disposable;
 import chrriis.common.WebServer;
-import chrriis.dj.nativeswing.Disposable;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
 import chrriis.dj.nativeswing.ui.JFlashPlayer;
 import chrriis.dj.nativeswing.ui.NativeComponent;

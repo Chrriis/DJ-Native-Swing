@@ -42,8 +42,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import chrriis.common.Disposable;
 import chrriis.common.ui.source.SourcePane;
-import chrriis.dj.nativeswing.Disposable;
 import chrriis.dj.nativeswing.NativeInterfaceHandler;
 import chrriis.dj.nativeswing.NativeInterfaceHandler.NativeInterfaceInitOptions;
 
