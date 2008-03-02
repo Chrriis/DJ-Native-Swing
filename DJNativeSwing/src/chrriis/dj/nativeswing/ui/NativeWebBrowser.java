@@ -455,14 +455,7 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
   
-  private boolean isLastActionSetText;
-  
-  boolean isLastActionSetText() {
-    return isLastActionSetText;
-  }
-  
   public boolean setURL(String url) {
-    isLastActionSetText = false;
     return Boolean.TRUE.equals(run(new CMN_setURL(), url));
   }
   
@@ -485,7 +478,6 @@ class NativeWebBrowser extends NativeComponent {
   }
   
   public boolean setText(String html) {
-    isLastActionSetText = true;
     return Boolean.TRUE.equals(run(new CMN_setText(), html));
   }
   

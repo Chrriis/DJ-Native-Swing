@@ -156,10 +156,11 @@ public class JWebBrowser extends JPanel implements Disposable {
     setButtonBarVisible(webBrowser.isButtonBarVisible());
     setMenuBarVisible(webBrowser.isMenuBarVisible());
     setStatusBarVisible(webBrowser.isStatusBarVisible());
-    if(webBrowser.nativeComponent.isLastActionSetText()) {
+    String url = webBrowser.getURL();
+    if("about:blank".equals(url)) {
       setText(webBrowser.getText());
     } else {
-      setURL(webBrowser.getURL());
+      setURL(url);
     }
   }
   
