@@ -679,7 +679,7 @@ public class WebServer {
     return port;
   }
   
-  protected String getURLPrefix() {
+  public String getURLPrefix() {
     return "http://" + HOST_ADDRESS + ":" + port;
   }
   
@@ -829,7 +829,7 @@ public class WebServer {
           } catch(Exception e) {
           }
           try {
-            return new FileInputStream(url);
+            return new FileInputStream("/" + url);
           } catch(Exception e) {
             e.printStackTrace();
           }

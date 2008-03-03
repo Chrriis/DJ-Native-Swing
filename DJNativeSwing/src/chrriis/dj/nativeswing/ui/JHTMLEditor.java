@@ -13,9 +13,13 @@ import java.io.FileFilter;
 import java.io.InputStream;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.net.MalformedURLException;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import chrriis.common.Disposable;
 import chrriis.common.Registry;
@@ -161,17 +165,22 @@ public class JHTMLEditor extends JPanel implements Disposable {
       };
     }
     if("jhtml_save".equals(resourcePath_)) {
-      String data = httpRequest.getHTTPPostDataArray()[0].getHeaderMap().get(FCK_INSTANCE);
-      Object[] listeners = htmlEditor.listenerList.getListenerList();
-      HTMLEditorSaveEvent e = null;
-      for(int i=listeners.length-2; i>=0; i-=2) {
-        if(listeners[i] == HTMLEditorListener.class) {
-          if(e == null) {
-            e = new HTMLEditorSaveEvent(htmlEditor, data);
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+//          String data = httpRequest.getHTTPPostDataArray()[0].getHeaderMap().get(FCK_INSTANCE);
+          String data = htmlEditor.getHTML();
+          Object[] listeners = htmlEditor.listenerList.getListenerList();
+          HTMLEditorSaveEvent e = null;
+          for(int i=listeners.length-2; i>=0; i-=2) {
+            if(listeners[i] == HTMLEditorListener.class) {
+              if(e == null) {
+                e = new HTMLEditorSaveEvent(htmlEditor, data);
+              }
+              ((HTMLEditorListener)listeners[i + 1]).saveHTML(e);
+            }
           }
-          ((HTMLEditorListener)listeners[i + 1]).saveHTML(e);
         }
-      }
+      });
       return new WebServerContent() {
         @Override
         public InputStream getInputStream() {
@@ -304,19 +313,41 @@ public class JHTMLEditor extends JPanel implements Disposable {
   public String getHTML() {
     tempResult = this;
     webBrowser.execute("JH_sendData()");
-    String data = null;
+    String html = null;
     for(int i=0; i<20; i++) {
       if(tempResult != this) {
-        data = (String)tempResult;
+        html = (String)tempResult;
         break;
       }
       NativeInterfaceHandler.syncExec(new EmptyMessage());
     }
-    return data;
+    if(html != null) {
+      // Transform proxied URLs to "file:///".
+      Pattern p = Pattern.compile("= *\"(" + WebServer.getDefaultWebServer().getURLPrefix() + "/resource/)([^/]+)/([^\"]+)\" ");
+      for(Matcher m; (m = p.matcher(html)).find(); ) {
+        String codeBase = html.substring(m.start(2), m.end(2));
+        String resource = html.substring(m.start(3), m.end(3));
+        try {
+          resource = new File(Utils.decodeURL(Utils.decodeURL(codeBase)), resource).toURI().toURL().toExternalForm();
+        } catch (MalformedURLException e) {
+        }
+        html = html.substring(0, m.start(1)) + resource + html.substring(m.end(3));
+      }
+    }
+    return html;
   }
   
   public void setHTML(String html) {
-    webBrowser.execute("JH_setData('" + Utils.encodeURL(html.replaceAll("[\r\n]", "")) + "')");
+    html = html.replaceAll("[\r\n]", "");
+    // Transform "file:///" to proxied URLs.
+    Pattern p = Pattern.compile("= *\"(file:/{1,3})([^\"]+)\" ");
+    for(Matcher m; (m = p.matcher(html)).find(); ) {
+      String resource = html.substring(m.start(2), m.end(2));
+      File resourceFile = new File(resource);
+      resource = WebServer.getDefaultWebServer().getResourcePathURL(Utils.encodeURL(resourceFile.getParent()), resourceFile.getName());
+      html = html.substring(0, m.start(1)) + resource + html.substring(m.end(2));
+    }
+    webBrowser.execute("JH_setData('" + Utils.encodeURL(html) + "')");
   }
   
   public void addHTMLEditorListener(HTMLEditorListener listener) {
