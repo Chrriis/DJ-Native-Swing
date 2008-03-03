@@ -323,7 +323,7 @@ public class JHTMLEditor extends JPanel implements Disposable {
     }
     if(html != null) {
       // Transform proxied URLs to "file:///".
-      Pattern p = Pattern.compile("= *\"(" + WebServer.getDefaultWebServer().getURLPrefix() + "/resource/)([^/]+)/([^\"]+)\" ");
+      Pattern p = Pattern.compile("=\\s*\"(" + WebServer.getDefaultWebServer().getURLPrefix() + "/resource/)([^/]+)/([^\"]+)\"\\s");
       for(Matcher m; (m = p.matcher(html)).find(); ) {
         String codeBase = html.substring(m.start(2), m.end(2));
         String resource = html.substring(m.start(3), m.end(3));
@@ -340,7 +340,7 @@ public class JHTMLEditor extends JPanel implements Disposable {
   public void setHTML(String html) {
     html = html.replaceAll("[\r\n]", "");
     // Transform "file:///" to proxied URLs.
-    Pattern p = Pattern.compile("= *\"(file:/{1,3})([^\"]+)\" ");
+    Pattern p = Pattern.compile("=\\s*\"(file:/{1,3})([^\"]+)\"\\s");
     for(Matcher m; (m = p.matcher(html)).find(); ) {
       String resource = html.substring(m.start(2), m.end(2));
       File resourceFile = new File(resource);
