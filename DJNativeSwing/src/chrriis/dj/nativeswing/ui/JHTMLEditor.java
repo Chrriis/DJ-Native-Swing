@@ -94,7 +94,7 @@ public class JHTMLEditor extends JPanel implements Disposable {
     return webBrowser;
   }
   
-  protected static WebServerContent getWebServerContent(HTTPRequest httpRequest) {
+  protected static WebServerContent getWebServerContent(final HTTPRequest httpRequest) {
     String resourcePath = httpRequest.getResourcePath();
     int index = resourcePath.indexOf('/');
     final int instanceID = Integer.parseInt(resourcePath.substring(0, index));
@@ -167,14 +167,13 @@ public class JHTMLEditor extends JPanel implements Disposable {
     if("jhtml_save".equals(resourcePath_)) {
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-//          String data = httpRequest.getHTTPPostDataArray()[0].getHeaderMap().get(FCK_INSTANCE);
-          String data = htmlEditor.getHTML();
+          String html = convertLinksToLocal(httpRequest.getHTTPPostDataArray()[0].getHeaderMap().get(FCK_INSTANCE));
           Object[] listeners = htmlEditor.listenerList.getListenerList();
           HTMLEditorSaveEvent e = null;
           for(int i=listeners.length-2; i>=0; i-=2) {
             if(listeners[i] == HTMLEditorListener.class) {
               if(e == null) {
-                e = new HTMLEditorSaveEvent(htmlEditor, data);
+                e = new HTMLEditorSaveEvent(htmlEditor, html);
               }
               ((HTMLEditorListener)listeners[i + 1]).saveHTML(e);
             }
@@ -321,24 +320,31 @@ public class JHTMLEditor extends JPanel implements Disposable {
       }
       NativeInterfaceHandler.syncExec(new EmptyMessage());
     }
-    if(html != null) {
-      // Transform proxied URLs to "file:///".
-      Pattern p = Pattern.compile("=\\s*\"(" + WebServer.getDefaultWebServer().getURLPrefix() + "/resource/)([^/]+)/([^\"]+)\"\\s");
-      for(Matcher m; (m = p.matcher(html)).find(); ) {
-        String codeBase = html.substring(m.start(2), m.end(2));
-        String resource = html.substring(m.start(3), m.end(3));
-        try {
-          resource = new File(Utils.decodeURL(Utils.decodeURL(codeBase)), resource).toURI().toURL().toExternalForm();
-        } catch (MalformedURLException e) {
-        }
-        html = html.substring(0, m.start(1)) + resource + html.substring(m.end(3));
+    return convertLinksToLocal(html);
+  }
+  
+  private static String convertLinksToLocal(String html) {
+    if(html == null) {
+      return html;
+    }
+    // Transform proxied URLs to "file:///".
+    Pattern p = Pattern.compile("=\\s*\"(" + WebServer.getDefaultWebServer().getURLPrefix() + "/resource/)([^/]+)/([^\"]+)\"\\s");
+    for(Matcher m; (m = p.matcher(html)).find(); ) {
+      String codeBase = html.substring(m.start(2), m.end(2));
+      String resource = html.substring(m.start(3), m.end(3));
+      try {
+        resource = new File(Utils.decodeURL(Utils.decodeURL(codeBase)), resource).toURI().toURL().toExternalForm();
+      } catch (MalformedURLException e) {
       }
+      html = html.substring(0, m.start(1)) + resource + html.substring(m.end(3));
     }
     return html;
   }
-  
-  public void setHTML(String html) {
-    html = html.replaceAll("[\r\n]", "");
+
+  private static String convertLinksFromLocal(String html) {
+    if(html == null) {
+      return html;
+    }
     // Transform "file:///" to proxied URLs.
     Pattern p = Pattern.compile("=\\s*\"(file:/{1,3})([^\"]+)\"\\s");
     for(Matcher m; (m = p.matcher(html)).find(); ) {
@@ -347,6 +353,11 @@ public class JHTMLEditor extends JPanel implements Disposable {
       resource = WebServer.getDefaultWebServer().getResourcePathURL(Utils.encodeURL(resourceFile.getParent()), resourceFile.getName());
       html = html.substring(0, m.start(1)) + resource + html.substring(m.end(2));
     }
+    return html;
+  }
+  
+  public void setHTML(String html) {
+    html = convertLinksFromLocal(html.replaceAll("[\r\n]", ""));
     webBrowser.execute("JH_setData('" + Utils.encodeURL(html) + "')");
   }
   
