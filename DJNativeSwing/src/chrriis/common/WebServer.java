@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 /**
  * @author Christopher Deckers
@@ -353,6 +354,7 @@ public class WebServer {
   protected static class WebServerConnectionThread extends Thread {
     
     private static int threadInitNumber;
+    private static Semaphore semaphore = new Semaphore(10);
     
     private static synchronized int nextThreadNumber() {
       return threadInitNumber++;
@@ -423,6 +425,9 @@ public class WebServer {
           ByteArrayOutputStream baos = new ByteArrayOutputStream();
           while(true) {
             int b = read();
+            if(b == -1) {
+              return null;
+            }
             if(b == '\n') {
               lineSeparator = LineSeparator.LF;
               return new String(baos.toByteArray(), "UTF-8");
@@ -433,7 +438,9 @@ public class WebServer {
                 lineSeparator = LineSeparator.CRLF;
               } else {
                 lineSeparator = LineSeparator.CR;
-                lastByte = b2;
+                if(b2 != -1) {
+                  lastByte = b2;
+                }
               }
               return new String(baos.toByteArray(), "UTF-8");
             }
@@ -447,19 +454,13 @@ public class WebServer {
         }
         switch(lineSeparator) {
           case CR:
-            for(int b; (b=read()) != '\r'; ) {
-              baos.write(b);
-            }
+            for(int b; (b=read()) != '\r' && b != -1; baos.write(b));
             break;
           case LF:
-            for(int b; (b=read()) != '\n'; ) {
-              baos.write(b);
-            }
+            for(int b; (b=read()) != '\n' && b != -1; baos.write(b));
             break;
           case CRLF:
-            for(int b; (b=read()) != '\r'; ) {
-              baos.write(b);
-            }
+            for(int b; (b=read()) != '\r' && b != -1; baos.write(b));
             read();
             break;
         }
@@ -615,6 +616,8 @@ public class WebServer {
         }
       } catch(Exception e) {
 //        e.printStackTrace();
+      } finally {
+        semaphore.release();
       }
     }
     
@@ -663,6 +666,10 @@ public class WebServer {
 //              throw new IllegalStateException("Illegal connection from host " + hostAddress);
 //            }
             socket.setSoTimeout(10000);
+            try {
+              WebServerConnectionThread.semaphore.acquire();
+            } catch(InterruptedException e) {
+            }
             WebServerConnectionThread webServerConnectionThread = new WebServerConnectionThread(socket);
             webServerConnectionThread.start();
           } catch(IOException e) {
