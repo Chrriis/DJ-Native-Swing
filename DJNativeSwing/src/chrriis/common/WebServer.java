@@ -849,7 +849,7 @@ public class WebServer {
 
   protected static WebServer webServer;
   protected static Object LOCK = new Object();
-  protected static final String HOST_ADDRESS = "localhost";
+  protected static final String HOST_ADDRESS = "127.0.0.1";
   
   public static WebServer getDefaultWebServer() {
     synchronized(LOCK) {
