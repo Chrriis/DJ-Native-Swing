@@ -276,6 +276,7 @@ public class FileTypeLauncher {
       if(program == null) {
         return null;
       }
+      initNative();
       FileTypeLauncherInfo fileTypeLauncher = programToFileTypeLauncherInfoMap.get(program);
       if(fileTypeLauncher == null && isProgramValid(program)) {
         fileTypeLauncher = new FileTypeLauncherInfo(program);
@@ -315,6 +316,7 @@ public class FileTypeLauncher {
   private static class CMN_getLauncherIDs extends CommandMessage {
     @Override
     public Object run() {
+      initNative();
       FileTypeLauncherInfo[] fileTypeLaunchers = programToFileTypeLauncherInfoMap.values().toArray(new FileTypeLauncherInfo[0]);
       Arrays.sort(fileTypeLaunchers, new Comparator<FileTypeLauncherInfo>() {
         public int compare(FileTypeLauncherInfo o1, FileTypeLauncherInfo o2) {
