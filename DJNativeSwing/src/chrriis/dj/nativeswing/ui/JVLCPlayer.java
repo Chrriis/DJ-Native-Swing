@@ -10,6 +10,8 @@ package chrriis.dj.nativeswing.ui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,7 +21,6 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -189,7 +190,6 @@ public class JVLCPlayer extends JPanel implements Disposable {
       }
     });
     controlBarPane.add(seekBarSlider, BorderLayout.NORTH);
-    JPanel buttonBarPanel = new JPanel(new BorderLayout(0, 0));
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 2));
     playButton = new JButton(createIcon("PlayIcon"));
     playButton.setEnabled(false);
@@ -218,7 +218,6 @@ public class JVLCPlayer extends JPanel implements Disposable {
       }
     });
     buttonPanel.add(stopButton);
-    buttonBarPanel.add(buttonPanel, BorderLayout.CENTER);
     JPanel volumePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 2));
     volumeButton = new JButton();
     Insets margin = volumeButton.getMargin();
@@ -245,8 +244,27 @@ public class JVLCPlayer extends JPanel implements Disposable {
     adjustVolumePanel();
     volumeButton.setEnabled(false);
     volumeSlider.setEnabled(false);
-    buttonBarPanel.add(volumePanel, BorderLayout.EAST);
-    buttonBarPanel.add(Box.createHorizontalStrut(volumePanel.getPreferredSize().width), BorderLayout.WEST);
+    GridBagLayout gridBag = new GridBagLayout();
+    GridBagConstraints cons = new GridBagConstraints();
+    JPanel buttonBarPanel = new JPanel(gridBag);
+    cons.gridx = 0;
+    cons.gridy = 0;
+    JPanel glue = new JPanel();
+    glue.setPreferredSize(new Dimension(volumePanel.getPreferredSize().width, 0));
+    gridBag.setConstraints(glue, cons);
+    buttonBarPanel.add(glue);
+    cons.gridx++;
+    cons.fill = GridBagConstraints.HORIZONTAL;
+    cons.weightx = 1.0;
+    gridBag.setConstraints(buttonPanel, cons);
+    buttonBarPanel.add(buttonPanel);
+    cons.gridx++;
+    cons.weightx = 0.0;
+    cons.fill = GridBagConstraints.NONE;
+    volumePanel.setMaximumSize(volumePanel.getPreferredSize());
+    volumePanel.setMinimumSize(volumePanel.getPreferredSize());
+    gridBag.setConstraints(volumePanel, cons);
+    buttonBarPanel.add(volumePanel);
     controlBarPane.add(buttonBarPanel, BorderLayout.CENTER);
     add(controlBarPane, BorderLayout.SOUTH);
     adjustBorder();
@@ -288,12 +306,21 @@ public class JVLCPlayer extends JPanel implements Disposable {
     setURL(url, new VLCLoadingOptions());
   }
   
+  /**
+   * The player is actually initialized after a call to setURL(). If the player's playlist is to be manipulated instead, then attach an initializationListener to perform playlist actions and call this method.
+   */
+  public void initialize() {
+    setURL("");
+  }
+  
   private VLCLoadingOptions loadingOptions;
   
   public void setURL(String url, VLCLoadingOptions loadingOptions) {
     this.loadingOptions = loadingOptions;
     webBrowserObject.setURL(url);
-    startUpdateThread();
+    if(webBrowserObject.hasContent()) {
+      startUpdateThread();
+    }
   }
 
   public boolean isControlBarVisible() {
