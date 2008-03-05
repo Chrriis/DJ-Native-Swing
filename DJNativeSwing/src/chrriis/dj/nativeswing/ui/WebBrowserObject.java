@@ -76,7 +76,7 @@ public abstract class WebBrowserObject implements Disposable {
   private String url;
 
   public String getURL() {
-    return url;
+    return "".equals(url)? null: url;
   }
   
   public boolean hasContent() {

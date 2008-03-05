@@ -573,6 +573,9 @@ public class JVLCPlayer extends JPanel implements Disposable {
       return "true".equals(webBrowser.executeAndWaitForCommandResult(commnand, "sendCommand('" + commnand + ":' + getEmbeddedObject().playlist.isPlaying);"));
     }
     public void add(String url) {
+      if(!webBrowserObject.hasContent()) {
+        initialize();
+      }
       File file = Utils.getLocalFile(url);
       if(file != null) {
         url = webBrowserObject.getLocalFileURL(file);
