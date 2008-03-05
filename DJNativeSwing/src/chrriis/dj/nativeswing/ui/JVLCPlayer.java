@@ -123,8 +123,8 @@ public class JVLCPlayer extends JPanel implements Disposable {
   
   @Override
   public void removeNotify() {
-    super.removeNotify();
     stopUpdateThread();
+    super.removeNotify();
   }
   
   @Override
