@@ -33,7 +33,7 @@ import javax.swing.event.ChangeListener;
 
 import chrriis.common.Disposable;
 import chrriis.common.Utils;
-import chrriis.dj.nativeswing.ui.event.InitializationEvent;
+import chrriis.dj.nativeswing.ui.JVLCPlayer.VLCInput.VLCState;
 import chrriis.dj.nativeswing.ui.event.InitializationListener;
 
 /**
@@ -152,18 +152,27 @@ public class JVLCPlayer extends JPanel implements Disposable {
           } catch(Exception e) {}
           SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-              float position = getVLCInput().getPosition();
-              boolean isValid = !Float.isNaN(position);
-              if(position == 0 && getVLCInput().getLength() == 0) {
-                isValid = false;
-              }
-              if(seekBarSlider.isVisible() != isValid) {
-                seekBarSlider.setVisible(isValid);
-              }
+              VLCInput vlcInput = getVLCInput();
+              VLCState state = vlcInput.getState();
+              boolean isValid = state == VLCState.OPENING || state == VLCState.BUFFERING || state == VLCState.PLAYING || state == VLCState.PAUSED || state == VLCState.STOPPING;
               if(isValid) {
-                isAdjustingSeekBar = true;
-                seekBarSlider.setValue(Math.round(position * 10000));
-                isAdjustingSeekBar = false;
+                float position = vlcInput.getPosition();
+                isValid = !Float.isNaN(position);
+                if(position == 0 && vlcInput.getLength() == 0) {
+                  isValid = false;
+                }
+                if(seekBarSlider.isVisible() != isValid) {
+                  seekBarSlider.setVisible(isValid);
+                }
+                if(isValid) {
+                  isAdjustingSeekBar = true;
+                  seekBarSlider.setValue(Math.round(position * 10000));
+                  isAdjustingSeekBar = false;
+                }
+              } else {
+                if(seekBarSlider.isVisible() != isValid) {
+                  seekBarSlider.setVisible(isValid);
+                }
               }
             }
           });
@@ -268,14 +277,6 @@ public class JVLCPlayer extends JPanel implements Disposable {
     controlBarPane.add(buttonBarPanel, BorderLayout.CENTER);
     add(controlBarPane, BorderLayout.SOUTH);
     adjustBorder();
-    addInitializationListener(new InitializationListener() {
-      public void objectInitialized(InitializationEvent e) {
-        playButton.setEnabled(true);
-        pauseButton.setEnabled(true);
-        stopButton.setEnabled(true);
-        adjustVolumePanel();
-      }
-    });
   }
   
   private void adjustBorder() {
@@ -302,12 +303,15 @@ public class JVLCPlayer extends JPanel implements Disposable {
     return webBrowserObject.getURL();
   }
   
+  /**
+   * The player is initialized after a call to setURL() or to initialize().
+   */
   public void setURL(String url) {
     setURL(url, null);
   }
   
   /**
-   * The player is actually initialized after a call to setURL(). If the player's playlist is to be manipulated instead, then attach an initializationListener to perform playlist actions and call this method.
+   * The player is initialized after a call to setURL() or to initialize().
    */
   public void initialize() {
     setURL_("", null);
@@ -315,6 +319,9 @@ public class JVLCPlayer extends JPanel implements Disposable {
   
   private VLCLoadingOptions loadingOptions;
   
+  /**
+   * The player is initialized after a call to setURL() or to initialize().
+   */
   public void setURL(String url, VLCLoadingOptions loadingOptions) {
     if("".equals(url)) {
       url = null;
@@ -328,7 +335,12 @@ public class JVLCPlayer extends JPanel implements Disposable {
     }
     this.loadingOptions = loadingOptions;
     webBrowserObject.setURL(url);
-    if(webBrowserObject.hasContent()) {
+    boolean hasContent = webBrowserObject.hasContent();
+    playButton.setEnabled(hasContent);
+    pauseButton.setEnabled(hasContent);
+    stopButton.setEnabled(hasContent);
+    if(hasContent) {
+      adjustVolumePanel();
       startUpdateThread();
     }
   }
@@ -350,18 +362,6 @@ public class JVLCPlayer extends JPanel implements Disposable {
     return webBrowserObject.isDisposed();
   }
   
-  public void addInitializationListener(InitializationListener listener) {
-    webBrowserObject.addInitializationListener(listener);
-  }
-  
-  public void removeInitializationListener(InitializationListener listener) {
-    webBrowserObject.removeInitializationListener(listener);
-  }
-  
-  public InitializationListener[] getInitializationListeners() {
-    return webBrowserObject.getInitializationListeners();
-  }
-
   /* ------------------------- VLC API exposed ------------------------- */
   
   public static class VLCAudio {
@@ -674,4 +674,16 @@ public class JVLCPlayer extends JPanel implements Disposable {
     return vlcVideo;
   }
   
+  public void addInitializationListener(InitializationListener listener) {
+    webBrowserObject.addInitializationListener(listener);
+  }
+  
+  public void removeInitializationListener(InitializationListener listener) {
+    webBrowserObject.removeInitializationListener(listener);
+  }
+  
+  public InitializationListener[] getInitializationListeners() {
+    return webBrowserObject.getInitializationListeners();
+  }
+
 }

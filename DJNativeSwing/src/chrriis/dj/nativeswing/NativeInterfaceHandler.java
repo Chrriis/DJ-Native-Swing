@@ -452,11 +452,19 @@ public class NativeInterfaceHandler {
   
   public static Object syncExec(final Message message) {
     checkInitialized();
+    if(message instanceof LocalMessage) {
+      ((LocalMessage)message).run();
+      return null;
+    }
     return messagingInterface.syncExec(message);
   }
   
   public static void asyncExec(final Message message) {
     checkInitialized();
+    if(message instanceof LocalMessage) {
+      ((LocalMessage)message).run();
+      return;
+    }
     messagingInterface.asyncExec(message);
   }
   

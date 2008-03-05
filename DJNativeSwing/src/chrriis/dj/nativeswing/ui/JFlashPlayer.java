@@ -27,7 +27,6 @@ import javax.swing.border.BevelBorder;
 import chrriis.common.Disposable;
 import chrriis.common.Utils;
 import chrriis.common.WebServer;
-import chrriis.dj.nativeswing.ui.event.InitializationEvent;
 import chrriis.dj.nativeswing.ui.event.InitializationListener;
 
 /**
@@ -188,14 +187,6 @@ public class JFlashPlayer extends JPanel implements Disposable {
     controlBarPane.add(stopButton);
     add(controlBarPane, BorderLayout.SOUTH);
     adjustBorder();
-    addInitializationListener(new InitializationListener() {
-      public void objectInitialized(InitializationEvent e) {
-        removeInitializationListener(this);
-        playButton.setEnabled(true);
-        pauseButton.setEnabled(true);
-        stopButton.setEnabled(true);
-      }
-    });
   }
   
   private void adjustBorder() {
@@ -227,6 +218,9 @@ public class JFlashPlayer extends JPanel implements Disposable {
     }
     this.loadingOptions = loadingOptions;
     webBrowserObject.setURL(url);
+    playButton.setEnabled(true);
+    pauseButton.setEnabled(true);
+    stopButton.setEnabled(true);
   }
 
   public void play() {

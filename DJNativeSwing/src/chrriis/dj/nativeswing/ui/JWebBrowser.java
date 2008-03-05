@@ -442,6 +442,9 @@ public class JWebBrowser extends JPanel implements Disposable {
   }
   
   public String executeAndWaitForCommandResult(final String commandName, String script) {
+    if(!nativeComponent.isInitialized()) {
+      return null;
+    }
     final String TEMP_RESULT = new String();
     final String[] resultArray = new String[] {TEMP_RESULT};
     WebBrowserAdapter webBrowserListener = new WebBrowserAdapter() {

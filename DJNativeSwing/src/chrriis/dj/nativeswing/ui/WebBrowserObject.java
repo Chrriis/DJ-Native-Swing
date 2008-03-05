@@ -23,6 +23,8 @@ import chrriis.common.Utils;
 import chrriis.common.WebServer;
 import chrriis.common.WebServer.HTTPRequest;
 import chrriis.common.WebServer.WebServerContent;
+import chrriis.dj.nativeswing.LocalMessage;
+import chrriis.dj.nativeswing.NativeInterfaceHandler;
 import chrriis.dj.nativeswing.ui.event.InitializationEvent;
 import chrriis.dj.nativeswing.ui.event.InitializationListener;
 import chrriis.dj.nativeswing.ui.event.WebBrowserAdapter;
@@ -81,6 +83,29 @@ public abstract class WebBrowserObject implements Disposable {
     return url != null;
   }
   
+  private class CMLocal_waitForCommand extends LocalMessage {
+    private Boolean[] resultArray;
+    public CMLocal_waitForCommand(Boolean[] resultArray) {
+      this.resultArray = resultArray;
+    }
+    @Override
+    public Object run() {
+      for(int i=0; i<20; i++) {
+        if(resultArray[0].booleanValue()) {
+          break;
+        }
+        NativeInterfaceHandler.syncExec(new EmptyMessage());
+        if(resultArray[0].booleanValue()) {
+          break;
+        }
+        try {
+          Thread.sleep(200);
+        } catch(Exception e) {}
+      }
+      return null;
+    }
+  }
+  
   @SuppressWarnings("deprecation")
   public void setURL(String url) {
     this.url = url;
@@ -92,7 +117,15 @@ public abstract class WebBrowserObject implements Disposable {
     Registry.getInstance().remove(instanceID);
     instanceID = Registry.getInstance().add(this);
     url = WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "html/" + instanceID);
+    final Boolean[] resultArray = new Boolean[] {Boolean.FALSE};
+    addInitializationListener(new InitializationListener() {
+      public void objectInitialized(InitializationEvent e) {
+        removeInitializationListener(this);
+        resultArray[0] = Boolean.TRUE;
+      }
+    });
     webBrowser.setURL(url);
+    ((NativeComponent)webBrowser.getDisplayComponent()).runSync(new CMLocal_waitForCommand(resultArray));
   }
   
   protected String getLocalFileURL(File localFile) {

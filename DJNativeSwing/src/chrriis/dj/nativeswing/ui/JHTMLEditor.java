@@ -27,6 +27,7 @@ import chrriis.common.Utils;
 import chrriis.common.WebServer;
 import chrriis.common.WebServer.HTTPRequest;
 import chrriis.common.WebServer.WebServerContent;
+import chrriis.dj.nativeswing.LocalMessage;
 import chrriis.dj.nativeswing.NativeInterfaceHandler;
 import chrriis.dj.nativeswing.Message.EmptyMessage;
 import chrriis.dj.nativeswing.ui.event.HTMLEditorListener;
@@ -74,6 +75,29 @@ public class JHTMLEditor extends JPanel implements Disposable {
     }
   }
   
+  private class CMLocal_waitForCommand extends LocalMessage {
+    private Boolean[] resultArray;
+    public CMLocal_waitForCommand(Boolean[] resultArray) {
+      this.resultArray = resultArray;
+    }
+    @Override
+    public Object run() {
+      for(int i=0; i<20; i++) {
+        if(resultArray[0].booleanValue()) {
+          break;
+        }
+        NativeInterfaceHandler.syncExec(new EmptyMessage());
+        if(resultArray[0].booleanValue()) {
+          break;
+        }
+        try {
+          Thread.sleep(200);
+        } catch(Exception e) {}
+      }
+      return null;
+    }
+  }
+  
   public JHTMLEditor() {
     super(new BorderLayout(0, 0));
     if(getClass().getResource("/fckeditor/fckeditor.js") == null) {
@@ -85,6 +109,14 @@ public class JHTMLEditor extends JPanel implements Disposable {
     add(webBrowser, BorderLayout.CENTER);
     instanceID = Registry.getInstance().add(this);
     webBrowser.setURL(WebServer.getDefaultWebServer().getDynamicContentURL(JHTMLEditor.class.getName(), String.valueOf(instanceID),  "index.html"));
+    final Boolean[] resultArray = new Boolean[] {Boolean.FALSE};
+    addInitializationListener(new InitializationListener() {
+      public void objectInitialized(InitializationEvent e) {
+        removeInitializationListener(this);
+        resultArray[0] = Boolean.TRUE;
+      }
+    });
+    ((NativeComponent)webBrowser.getDisplayComponent()).runSync(new CMLocal_waitForCommand(resultArray));
   }
   
   /**
@@ -310,6 +342,9 @@ public class JHTMLEditor extends JPanel implements Disposable {
   private Object tempResult;
   
   public String getHTML() {
+    if(!webBrowser.isInitialized()) {
+      return "";
+    }
     tempResult = this;
     webBrowser.execute("JH_sendData()");
     String html = null;
