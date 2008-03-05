@@ -190,6 +190,7 @@ public class JFlashPlayer extends JPanel implements Disposable {
     adjustBorder();
     addInitializationListener(new InitializationListener() {
       public void objectInitialized(InitializationEvent e) {
+        removeInitializationListener(this);
         playButton.setEnabled(true);
         pauseButton.setEnabled(true);
         stopButton.setEnabled(true);
