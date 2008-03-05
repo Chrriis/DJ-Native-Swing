@@ -27,11 +27,7 @@ import javax.swing.border.BevelBorder;
 import chrriis.common.Disposable;
 import chrriis.common.Utils;
 import chrriis.common.WebServer;
-import chrriis.dj.nativeswing.NativeInterfaceHandler;
-import chrriis.dj.nativeswing.Message.EmptyMessage;
 import chrriis.dj.nativeswing.ui.event.InitializationListener;
-import chrriis.dj.nativeswing.ui.event.WebBrowserAdapter;
-import chrriis.dj.nativeswing.ui.event.WebBrowserEvent;
 
 /**
  * @author Christopher Deckers
@@ -253,26 +249,7 @@ public class JFlashPlayer extends JPanel implements Disposable {
     if(!webBrowserObject.hasContent()) {
       return null;
     }
-    final String TEMP_RESULT = new String();
-    final String[] getVariableResult = new String[] {TEMP_RESULT};
-    webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
-      @Override
-      public void commandReceived(WebBrowserEvent e, String command) {
-        if(command.startsWith("getVariableEO:")) {
-          getVariableResult[0] = command.substring("getVariableEO:".length());
-          webBrowser.removeWebBrowserListener(this);
-        }
-      }
-    });
-    webBrowser.execute("getVariableEO('" + Utils.encodeURL(name) + "');");
-    for(int i=0; i<20; i++) {
-      if(getVariableResult[0] != TEMP_RESULT) {
-        break;
-      }
-      NativeInterfaceHandler.syncExec(new EmptyMessage());
-    }
-    String result = getVariableResult[0];
-    return result == TEMP_RESULT? null: result;
+    return webBrowser.executeAndWaitForCommandResult("getVariableEO", "getVariableEO('" + Utils.encodeURL(name) + "');");
   }
   
   /**

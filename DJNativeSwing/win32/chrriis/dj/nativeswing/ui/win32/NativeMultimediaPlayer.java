@@ -84,7 +84,7 @@ class NativeMultimediaPlayer extends NativeComponent {
   }
   
   public boolean setErrorDialogsEnabled(boolean isErrorDialogEnabled) {
-    return Boolean.TRUE.equals(run(new CMN_setErrorDialogsEnabled(), isErrorDialogEnabled));
+    return Boolean.TRUE.equals(runSync(new CMN_setErrorDialogsEnabled(), isErrorDialogEnabled));
   }
   
   private static class CMN_getURL extends ControlCommandMessage {
@@ -115,7 +115,7 @@ class NativeMultimediaPlayer extends NativeComponent {
   }
 
   public String getURL() {
-    return (String)run(new CMN_getURL());
+    return (String)runSync(new CMN_getURL());
   }
   
   private static class CMN_setURL extends ControlCommandMessage {
@@ -147,7 +147,7 @@ class NativeMultimediaPlayer extends NativeComponent {
   }
 
   public boolean setURL(final String url) {
-    return Boolean.TRUE.equals(run(new CMN_setURL(), url));
+    return Boolean.TRUE.equals(runSync(new CMN_setURL(), url));
   }
   
   private static class CMN_setControlBarVisible extends ControlCommandMessage {
@@ -181,7 +181,7 @@ class NativeMultimediaPlayer extends NativeComponent {
   }
   
   public boolean setControlBarVisible(final boolean isControlBarVisible) {
-    return Boolean.TRUE.equals(run(new CMN_setControlBarVisible(), isControlBarVisible));
+    return Boolean.TRUE.equals(runSync(new CMN_setControlBarVisible(), isControlBarVisible));
   }
 
   private static class CMN_isControlBarVisible extends ControlCommandMessage {
@@ -212,7 +212,7 @@ class NativeMultimediaPlayer extends NativeComponent {
   }
   
   public boolean isControlBarVisible() {
-    return Boolean.TRUE.equals(run(new CMN_isControlBarVisible()));
+    return Boolean.TRUE.equals(runSync(new CMN_isControlBarVisible()));
   }
   
   private static class CMN_setVolume extends ControlCommandMessage {
@@ -252,7 +252,7 @@ class NativeMultimediaPlayer extends NativeComponent {
     if(volume < 0 || volume > 100) {
       throw new IllegalArgumentException("The volume must be between 0 and 100");
     }
-    return Boolean.TRUE.equals(run(new CMN_setVolume()));
+    return Boolean.TRUE.equals(runSync(new CMN_setVolume()));
   }
   
   private static class CMN_getVolume extends ControlCommandMessage {
@@ -289,7 +289,7 @@ class NativeMultimediaPlayer extends NativeComponent {
   }
 
   public int getVolume() {
-    Object result = run(new CMN_getVolume());
+    Object result = runSync(new CMN_getVolume());
     return result == null? -1: (Integer)result;
   }
   
@@ -329,7 +329,7 @@ class NativeMultimediaPlayer extends NativeComponent {
     if(stereoBalance < 100 || stereoBalance > 100) {
       throw new IllegalArgumentException("The stereo balance must be between -100 and 100");
     }
-    return Boolean.TRUE.equals(run(new CMN_setStereoBalance()));
+    return Boolean.TRUE.equals(runSync(new CMN_setStereoBalance()));
   }
   
   private static class CMN_getStereoBalance extends ControlCommandMessage {
@@ -364,7 +364,7 @@ class NativeMultimediaPlayer extends NativeComponent {
   }
 
   public int getStereoBalance() {
-    Object result = run(new CMN_getStereoBalance());
+    Object result = runSync(new CMN_getStereoBalance());
     return result == null? -1: (Integer)result;
   }
   
@@ -401,7 +401,7 @@ class NativeMultimediaPlayer extends NativeComponent {
   }
   
   public boolean setAutoStart(final boolean isAutoStart) {
-    return Boolean.TRUE.equals(run(new CMN_setAutoStart(), isAutoStart));
+    return Boolean.TRUE.equals(runSync(new CMN_setAutoStart(), isAutoStart));
   }
   
   private static class CMN_isAutoStart extends ControlCommandMessage {
@@ -436,7 +436,7 @@ class NativeMultimediaPlayer extends NativeComponent {
   }
   
   public boolean isAutoStart() {
-    return Boolean.TRUE.equals(run(new CMN_isAutoStart()));
+    return Boolean.TRUE.equals(runSync(new CMN_isAutoStart()));
   }
   
   private static class CMN_setMute extends ControlCommandMessage {
@@ -472,7 +472,7 @@ class NativeMultimediaPlayer extends NativeComponent {
   }
   
   public boolean setMute(final boolean isMute) {
-    return Boolean.TRUE.equals(run(new CMN_setMute(), isMute));
+    return Boolean.TRUE.equals(runSync(new CMN_setMute(), isMute));
   }
   
   private static class CMN_isMute extends ControlCommandMessage {
@@ -507,7 +507,7 @@ class NativeMultimediaPlayer extends NativeComponent {
   }
   
   public boolean isMute() {
-    return Boolean.TRUE.equals(run(new CMN_isMute()));
+    return Boolean.TRUE.equals(runSync(new CMN_isMute()));
   }
   
   private static class CMN_isPlayEnabled extends ControlCommandMessage {
@@ -546,7 +546,7 @@ class NativeMultimediaPlayer extends NativeComponent {
   }
   
   public boolean isPlayEnabled() {
-    return Boolean.TRUE.equals(run(new CMN_isPlayEnabled()));
+    return Boolean.TRUE.equals(runSync(new CMN_isPlayEnabled()));
   }
   
   private static class CMN_play extends ControlCommandMessage {
@@ -583,7 +583,7 @@ class NativeMultimediaPlayer extends NativeComponent {
   }
   
   public boolean play() {
-    return Boolean.TRUE.equals(run(new CMN_play()));
+    return Boolean.TRUE.equals(runSync(new CMN_play()));
   }
   
   private static class CMN_isStopEnabled extends ControlCommandMessage {
@@ -622,7 +622,7 @@ class NativeMultimediaPlayer extends NativeComponent {
   }
   
   public boolean isStopEnabled() {
-    return Boolean.TRUE.equals(run(new CMN_isStopEnabled()));
+    return Boolean.TRUE.equals(runSync(new CMN_isStopEnabled()));
   }
   
   private static class CMN_stop extends ControlCommandMessage {
@@ -659,7 +659,7 @@ class NativeMultimediaPlayer extends NativeComponent {
   }
   
   public boolean stop() {
-    return Boolean.TRUE.equals(run(new CMN_stop()));
+    return Boolean.TRUE.equals(runSync(new CMN_stop()));
   }
   
   private static class CMN_isPauseEnabled extends ControlCommandMessage {
@@ -697,7 +697,7 @@ class NativeMultimediaPlayer extends NativeComponent {
   }
   
   public boolean isPauseEnabled() {
-    return Boolean.TRUE.equals(run(new CMN_isPauseEnabled()));
+    return Boolean.TRUE.equals(runSync(new CMN_isPauseEnabled()));
   }
   
   private static class CMN_pause extends ControlCommandMessage {
@@ -734,7 +734,7 @@ class NativeMultimediaPlayer extends NativeComponent {
   }
   
   public boolean pause() {
-    return Boolean.TRUE.equals(run(new CMN_pause()));
+    return Boolean.TRUE.equals(runSync(new CMN_pause()));
   }
   
   protected Component createEmbeddableComponent() {

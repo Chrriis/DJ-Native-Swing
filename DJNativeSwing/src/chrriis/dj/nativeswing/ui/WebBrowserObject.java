@@ -165,7 +165,7 @@ public abstract class WebBrowserObject implements Disposable {
         return null;
       }
       String url = webBrowserObject.url;
-      // local files may have some security restrictions, so let's use our proxy.
+      // local files may have some security restrictions depending on the plugin, so let's ask the plugin for a valid URL.
       File file = Utils.getLocalFile(url);
       if(file != null) {
         url = webBrowserObject.getLocalFileURL(file);
@@ -193,12 +193,14 @@ public abstract class WebBrowserObject implements Disposable {
             embedParameters.append(' ').append(name).append("=\"").append(value).append("\"");
             objectParameters.append("window.document.write('  <param name=\"").append(name).append("\" value=\"").append(value).append("\"/>');" + LS);
           }
+          String version = objectHtmlConfiguration.getVersion();
+          String versionParameter = version != null? " version=\"" + version + "\"": "";
           String content =
             "<!--" + LS +
             "window.document.write('<object classid=\"clsid:" + objectHtmlConfiguration.getWindowsClassID() + "\" id=\"myEmbeddedObject\" codebase=\"" + objectHtmlConfiguration.getWindowsInstallationURL() + "\" events=\"true\">');" + LS +
             "window.document.write('  <param name=\"" + objectHtmlConfiguration.getWindowsParamName() + "\" value=\"' + decodeURIComponent('" + escapedURL + "') + '\";\"/>');" + LS +
             objectParameters +
-            "window.document.write('  <embed" + embedParameters + " name=\"myEmbeddedObject\" " + objectHtmlConfiguration.getParamName() + "=\"" + escapedURL + "\" type=\"" + objectHtmlConfiguration.getMimeType() + "\" pluginspage=\"" + objectHtmlConfiguration.getInstallationURL() + "\">');" + LS +
+            "window.document.write('  <embed" + embedParameters + " name=\"myEmbeddedObject\" " + objectHtmlConfiguration.getParamName() + "=\"" + escapedURL + "\" type=\"" + objectHtmlConfiguration.getMimeType() + "\" pluginspage=\"" + objectHtmlConfiguration.getInstallationURL() + "\"" + versionParameter+ ">');" + LS +
             "window.document.write('  </embed>');" + LS +
             "window.document.write('</object>');" + LS +
             "window.document.write('<div></div>');" + LS +
@@ -256,6 +258,16 @@ public abstract class WebBrowserObject implements Disposable {
     
     public void setInstallationURL(String installationURL) {
       this.installationURL = installationURL;
+    }
+    
+    private String version;
+    
+    public String getVersion() {
+      return version;
+    }
+    
+    public void setVersion(String version) {
+      this.version = version;
     }
     
     private String windowsParamName;

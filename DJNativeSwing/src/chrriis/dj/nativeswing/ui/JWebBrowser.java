@@ -39,6 +39,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 
 import chrriis.common.Disposable;
+import chrriis.dj.nativeswing.NativeInterfaceHandler;
+import chrriis.dj.nativeswing.Message.EmptyMessage;
 import chrriis.dj.nativeswing.ui.event.InitializationListener;
 import chrriis.dj.nativeswing.ui.event.WebBrowserAdapter;
 import chrriis.dj.nativeswing.ui.event.WebBrowserEvent;
@@ -430,6 +432,31 @@ public class JWebBrowser extends JPanel implements Disposable {
   
   public boolean execute(String script) {
     return nativeComponent.execute(script);
+  }
+  
+  public String executeAndWaitForCommandResult(final String commandName, String script) {
+    final String TEMP_RESULT = new String();
+    final String[] resultArray = new String[] {TEMP_RESULT};
+    WebBrowserAdapter webBrowserListener = new WebBrowserAdapter() {
+      @Override
+      public void commandReceived(WebBrowserEvent e, String command) {
+        if(command.startsWith(commandName + ":")) {
+          resultArray[0] = command.substring((commandName + ":").length());
+          nativeComponent.removeWebBrowserListener(this);
+        }
+      }
+    };
+    nativeComponent.addWebBrowserListener(webBrowserListener);
+    nativeComponent.execute(script);
+    for(int i=0; i<20; i++) {
+      if(resultArray[0] != TEMP_RESULT) {
+        break;
+      }
+      NativeInterfaceHandler.syncExec(new EmptyMessage());
+    }
+    nativeComponent.removeWebBrowserListener(webBrowserListener);
+    String result = resultArray[0];
+    return result == TEMP_RESULT? null: result;
   }
   
   public int getPageLoadingProgressValue() {

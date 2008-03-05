@@ -445,7 +445,7 @@ class NativeWebBrowser extends NativeComponent {
   }
   
   public String getURL() {
-    return (String)run(new CMN_getURL());
+    return (String)runSync(new CMN_getURL());
   }
   
   private static class CMN_setURL extends ControlCommandMessage {
@@ -456,7 +456,7 @@ class NativeWebBrowser extends NativeComponent {
   }
   
   public boolean setURL(String url) {
-    return Boolean.TRUE.equals(run(new CMN_setURL(), url));
+    return Boolean.TRUE.equals(runSync(new CMN_setURL(), url));
   }
   
   private static class CMN_getText extends ControlCommandMessage {
@@ -467,7 +467,7 @@ class NativeWebBrowser extends NativeComponent {
   }
   
   public String getText() {
-    return (String)run(new CMN_getText());
+    return (String)runSync(new CMN_getText());
   }
   
   private static class CMN_setText extends ControlCommandMessage {
@@ -478,7 +478,7 @@ class NativeWebBrowser extends NativeComponent {
   }
   
   public boolean setText(String html) {
-    return Boolean.TRUE.equals(run(new CMN_setText(), html));
+    return Boolean.TRUE.equals(runSync(new CMN_setText(), html));
   }
   
   private static class CMN_execute extends ControlCommandMessage {
@@ -489,7 +489,7 @@ class NativeWebBrowser extends NativeComponent {
   }
   
   public boolean execute(String js) {
-    return Boolean.TRUE.equals(run(new CMN_execute(), js));
+    return Boolean.TRUE.equals(runSync(new CMN_execute(), js));
   }
   
   private static class CMN_stop extends ControlCommandMessage {
@@ -501,7 +501,7 @@ class NativeWebBrowser extends NativeComponent {
   }
   
   public void stop() {
-    run(new CMN_stop());
+    runSync(new CMN_stop());
   }
   
   private static class CMN_refresh extends ControlCommandMessage {
@@ -513,7 +513,7 @@ class NativeWebBrowser extends NativeComponent {
   }
   
   public void refresh() {
-    run(new CMN_refresh());
+    runSync(new CMN_refresh());
   }
   
   private static class CMN_isBackEnabled extends ControlCommandMessage {
@@ -524,7 +524,7 @@ class NativeWebBrowser extends NativeComponent {
   }
   
   public boolean isBackEnabled() {
-    return Boolean.TRUE.equals(run(new CMN_isBackEnabled()));
+    return Boolean.TRUE.equals(runSync(new CMN_isBackEnabled()));
   }
   
   private static class CMN_back extends ControlCommandMessage {
@@ -535,7 +535,7 @@ class NativeWebBrowser extends NativeComponent {
   }
   
   public boolean back() {
-    return Boolean.TRUE.equals(run(new CMN_back()));
+    return Boolean.TRUE.equals(runSync(new CMN_back()));
   }
   
   private static class CMN_forward extends ControlCommandMessage {
@@ -553,11 +553,11 @@ class NativeWebBrowser extends NativeComponent {
   }
   
   public boolean isForwardEnabled() {
-    return Boolean.TRUE.equals(run(new CMN_isForwardEnabled()));
+    return Boolean.TRUE.equals(runSync(new CMN_isForwardEnabled()));
   }
   
   public boolean forward() {
-    return Boolean.TRUE.equals(run(new CMN_forward()));
+    return Boolean.TRUE.equals(runSync(new CMN_forward()));
   }
   
   private String status;

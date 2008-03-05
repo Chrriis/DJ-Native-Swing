@@ -56,7 +56,6 @@ public class SimpleVLCPlayerExample extends JPanel {
     final Runnable loadPlayerFileRunnable = new Runnable() {
       public void run() {
         player.setURL(playerFileTextField.getText());
-        player.play();
       }
     };
     playerFileTextField.addActionListener(new ActionListener() {

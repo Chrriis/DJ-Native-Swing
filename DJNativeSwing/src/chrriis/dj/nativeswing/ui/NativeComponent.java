@@ -100,7 +100,7 @@ public abstract class NativeComponent extends Canvas {
    * Run the given command if the control is created, or store it to play it when the creation occurs.
    * If the component is disposed before the command has a chance to run, it is ignored silently.
    */
-  protected Object run(CommandMessage commandMessage, Object... args) {
+  protected Object runSync(CommandMessage commandMessage, Object... args) {
     NativeInterfaceHandler.checkUIThread();
     if(initializationCommandMessageList != null) {
       commandMessage.setArgs(args);
@@ -116,6 +116,26 @@ public abstract class NativeComponent extends Canvas {
       return null;
     }
     return syncExec(commandMessage, args);
+  }
+  
+  /**
+   * Run the given command if the control is created, or store it to play it when the creation occurs.
+   * If the component is disposed before the command has a chance to run, it is ignored silently.
+   */
+  protected void runAsync(CommandMessage commandMessage, Object... args) {
+    NativeInterfaceHandler.checkUIThread();
+    if(initializationCommandMessageList != null) {
+      commandMessage.setArgs(args);
+      if(commandMessage instanceof ControlCommandMessage) {
+        ((ControlCommandMessage)commandMessage).setNativeComponent(this);
+      }
+      initializationCommandMessageList.add(commandMessage);
+    } else if(!isValidControl()) {
+      commandMessage.setArgs(args);
+      printFailedInvocation(commandMessage);
+    } else {
+      asyncExec(commandMessage, args);
+    }
   }
   
   private void printFailedInvocation(Message message) {
@@ -182,7 +202,7 @@ public abstract class NativeComponent extends Canvas {
       @Override
       public void focusGained(FocusEvent e) {
         if(isValidControl() && !isDisposed()) {
-          run(new CMN_transferFocus());
+          runSync(new CMN_transferFocus());
         }
       }
     });
@@ -466,7 +486,7 @@ public abstract class NativeComponent extends Canvas {
     isInitialized = true;
     isValidControl = true;
     try {
-      run(new CMN_createControl(), componentID, NativeComponent.this.getClass().getName(), Native.getComponentID(this));
+      runSync(new CMN_createControl(), componentID, NativeComponent.this.getClass().getName(), Native.getComponentID(this));
     } catch(Exception e) {
       isValidControl = false;
       StringBuilder sb = new StringBuilder();
@@ -480,7 +500,7 @@ public abstract class NativeComponent extends Canvas {
       if(!isValidControl()) {
         printFailedInvocation(initCommandMessage);
       } else {
-        initCommandMessage.syncExec();
+        initCommandMessage.asyncExec();
       }
     }
     Object[] listeners = listenerList.getListenerList();
@@ -522,7 +542,7 @@ public abstract class NativeComponent extends Canvas {
     if(!isDisposed) {
       isDisposed = true;
       NativeInterfaceHandler._Internal_.removeCanvas(this);
-      run(new CMN_destroyControl());
+      runSync(new CMN_destroyControl());
       NativeComponent.registry.remove(componentID);
     }
   }
@@ -769,7 +789,7 @@ public abstract class NativeComponent extends Canvas {
       return;
     }
     isShellEnabled = isEnabled;
-    run(new CMN_setShellEnabled(), isEnabled);
+    runSync(new CMN_setShellEnabled(), isEnabled);
   }
 
   private static class CMN_hasFocus extends ControlCommandMessage {
