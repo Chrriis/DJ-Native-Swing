@@ -83,8 +83,8 @@ class NativeMultimediaPlayer extends NativeComponent {
     }
   }
   
-  public boolean setErrorDialogsEnabled(boolean isErrorDialogEnabled) {
-    return Boolean.TRUE.equals(runSync(new CMN_setErrorDialogsEnabled(), isErrorDialogEnabled));
+  public void setErrorDialogsEnabled(boolean isErrorDialogEnabled) {
+    runAsync(new CMN_setErrorDialogsEnabled(), isErrorDialogEnabled);
   }
   
   private static class CMN_getURL extends ControlCommandMessage {
@@ -146,8 +146,8 @@ class NativeMultimediaPlayer extends NativeComponent {
     }
   }
 
-  public boolean setURL(final String url) {
-    return Boolean.TRUE.equals(runSync(new CMN_setURL(), url));
+  public void setURL(final String url) {
+    runAsync(new CMN_setURL(), url);
   }
   
   private static class CMN_setControlBarVisible extends ControlCommandMessage {
@@ -180,8 +180,8 @@ class NativeMultimediaPlayer extends NativeComponent {
     }
   }
   
-  public boolean setControlBarVisible(final boolean isControlBarVisible) {
-    return Boolean.TRUE.equals(runSync(new CMN_setControlBarVisible(), isControlBarVisible));
+  public void setControlBarVisible(final boolean isControlBarVisible) {
+    runAsync(new CMN_setControlBarVisible(), isControlBarVisible);
   }
 
   private static class CMN_isControlBarVisible extends ControlCommandMessage {
@@ -248,11 +248,11 @@ class NativeMultimediaPlayer extends NativeComponent {
     }
   }
 
-  public boolean setVolume(final int volume) {
+  public void setVolume(final int volume) {
     if(volume < 0 || volume > 100) {
       throw new IllegalArgumentException("The volume must be between 0 and 100");
     }
-    return Boolean.TRUE.equals(runSync(new CMN_setVolume()));
+    runAsync(new CMN_setVolume());
   }
   
   private static class CMN_getVolume extends ControlCommandMessage {
@@ -325,11 +325,11 @@ class NativeMultimediaPlayer extends NativeComponent {
     }
   }
 
-  public boolean setStereoBalance(final int stereoBalance) {
+  public void setStereoBalance(final int stereoBalance) {
     if(stereoBalance < 100 || stereoBalance > 100) {
       throw new IllegalArgumentException("The stereo balance must be between -100 and 100");
     }
-    return Boolean.TRUE.equals(runSync(new CMN_setStereoBalance()));
+    runAsync(new CMN_setStereoBalance());
   }
   
   private static class CMN_getStereoBalance extends ControlCommandMessage {
@@ -400,8 +400,8 @@ class NativeMultimediaPlayer extends NativeComponent {
     }
   }
   
-  public boolean setAutoStart(final boolean isAutoStart) {
-    return Boolean.TRUE.equals(runSync(new CMN_setAutoStart(), isAutoStart));
+  public void setAutoStart(final boolean isAutoStart) {
+    runAsync(new CMN_setAutoStart(), isAutoStart);
   }
   
   private static class CMN_isAutoStart extends ControlCommandMessage {
@@ -471,8 +471,8 @@ class NativeMultimediaPlayer extends NativeComponent {
     }
   }
   
-  public boolean setMute(final boolean isMute) {
-    return Boolean.TRUE.equals(runSync(new CMN_setMute(), isMute));
+  public void setMute(final boolean isMute) {
+    runAsync(new CMN_setMute(), isMute);
   }
   
   private static class CMN_isMute extends ControlCommandMessage {
@@ -582,8 +582,8 @@ class NativeMultimediaPlayer extends NativeComponent {
     }
   }
   
-  public boolean play() {
-    return Boolean.TRUE.equals(runSync(new CMN_play()));
+  public void play() {
+    runAsync(new CMN_play());
   }
   
   private static class CMN_isStopEnabled extends ControlCommandMessage {
@@ -658,8 +658,8 @@ class NativeMultimediaPlayer extends NativeComponent {
     }
   }
   
-  public boolean stop() {
-    return Boolean.TRUE.equals(runSync(new CMN_stop()));
+  public void stop() {
+    runAsync(new CMN_stop());
   }
   
   private static class CMN_isPauseEnabled extends ControlCommandMessage {
@@ -733,8 +733,8 @@ class NativeMultimediaPlayer extends NativeComponent {
     }
   }
   
-  public boolean pause() {
-    return Boolean.TRUE.equals(runSync(new CMN_pause()));
+  public void pause() {
+    runAsync(new CMN_pause());
   }
   
   protected Component createEmbeddableComponent() {

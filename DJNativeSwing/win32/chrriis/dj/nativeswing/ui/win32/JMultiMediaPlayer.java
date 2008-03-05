@@ -80,24 +80,24 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
     return listenerList.getListeners(InitializationListener.class);
   }
 
-  public boolean setURL(String url) {
-    return nativeComponent.setURL(url);
+  public void setURL(String url) {
+    nativeComponent.setURL(url);
   }
   
   public String getURL() {
     return nativeComponent.getURL();
   }
   
-  public boolean setControlBarVisible(boolean isControlBarVisible) {
-    return nativeComponent.setControlBarVisible(isControlBarVisible);
+  public void setControlBarVisible(boolean isControlBarVisible) {
+    nativeComponent.setControlBarVisible(isControlBarVisible);
   }
   
   public boolean isControlBarVisible() {
     return nativeComponent.isControlBarVisible();
   }
   
-  public boolean setVolume(int volume) {
-    return nativeComponent.setVolume(volume);
+  public void setVolume(int volume) {
+    nativeComponent.setVolume(volume);
   }
 
   /**
@@ -110,8 +110,8 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
   /**
    * @param stereoBalance The stereo balance between -100 and 100, with 0 being the default.
    */
-  public boolean setStereoBalance(int stereoBalance) {
-    return nativeComponent.setStereoBalance(stereoBalance);
+  public void setStereoBalance(int stereoBalance) {
+    nativeComponent.setStereoBalance(stereoBalance);
   }
   
   /**
@@ -137,8 +137,8 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
 //    return nativeComponent.isFullScreen();
 //  }
   
-  public boolean setMute(boolean isMute) {
-    return nativeComponent.setMute(isMute);
+  public void setMute(boolean isMute) {
+    nativeComponent.setMute(isMute);
   }
   
   public boolean isMute() {
@@ -149,24 +149,24 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
     return nativeComponent.isPlayEnabled();
   }
   
-  public boolean play() {
-    return nativeComponent.play();
+  public void play() {
+    nativeComponent.play();
   }
   
   public boolean isStopEnabled() {
     return nativeComponent.isStopEnabled();
   }
   
-  public boolean stop() {
-    return nativeComponent.stop();
+  public void stop() {
+    nativeComponent.stop();
   }
   
   public boolean isPauseEnabled() {
     return nativeComponent.isPauseEnabled();
   }
   
-  public boolean pause() {
-    return nativeComponent.pause();
+  public void pause() {
+    nativeComponent.pause();
   }
   
   public void dispose() {

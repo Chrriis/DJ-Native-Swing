@@ -538,8 +538,8 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
   
-  public boolean back() {
-    return Boolean.TRUE.equals(runSync(new CMN_back()));
+  public void back() {
+    runAsync(new CMN_back());
   }
   
   private static class CMN_forward extends ControlCommandMessage {
@@ -560,8 +560,8 @@ class NativeWebBrowser extends NativeComponent {
     return Boolean.TRUE.equals(runSync(new CMN_isForwardEnabled()));
   }
   
-  public boolean forward() {
-    return Boolean.TRUE.equals(runSync(new CMN_forward()));
+  public void forward() {
+    runAsync(new CMN_forward());
   }
   
   private String status;

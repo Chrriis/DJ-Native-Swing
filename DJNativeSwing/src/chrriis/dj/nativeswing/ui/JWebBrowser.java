@@ -410,16 +410,16 @@ public class JWebBrowser extends JPanel implements Disposable {
     return nativeComponent.isBackEnabled();
   }
   
-  public boolean back() {
-    return nativeComponent.back();
+  public void back() {
+    nativeComponent.back();
   }
   
   public boolean isForwardEnabled() {
     return nativeComponent.isForwardEnabled();
   }
   
-  public boolean forward() {
-    return nativeComponent.forward();
+  public void forward() {
+    nativeComponent.forward();
   }
   
   public void refresh() {

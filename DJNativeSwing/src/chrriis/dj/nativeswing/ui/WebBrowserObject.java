@@ -207,7 +207,7 @@ public abstract class WebBrowserObject implements Disposable {
             "window.document.write('</object>');" + LS +
             "window.document.write('<div></div>');" + LS +
             "window.document.write('<div id=\"messageDiv\" style=\"display:none;\"><table><tr><td>" + objectHtmlConfiguration.getHTMLLoadingMessage() + "</td></tr></table></div>');" + LS +
-            "setTimeout('document.getElementById(\\'messageDiv\\').style.display = \\'inline\\'', 2000);" + LS +
+            "setTimeout('document.getElementById(\\'messageDiv\\').style.display = \\'inline\\'', 200);" + LS +
             "var embeddedObject = getEmbeddedObject();" + LS +
             "embeddedObject.style.width = '100%';" + LS +
             "embeddedObject.style.height = '100%';" + LS +
