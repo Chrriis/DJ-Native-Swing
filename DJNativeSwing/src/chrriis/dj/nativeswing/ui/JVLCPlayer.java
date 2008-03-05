@@ -303,19 +303,29 @@ public class JVLCPlayer extends JPanel implements Disposable {
   }
   
   public void setURL(String url) {
-    setURL(url, new VLCLoadingOptions());
+    setURL(url, null);
   }
   
   /**
    * The player is actually initialized after a call to setURL(). If the player's playlist is to be manipulated instead, then attach an initializationListener to perform playlist actions and call this method.
    */
   public void initialize() {
-    setURL("");
+    setURL_("", null);
   }
   
   private VLCLoadingOptions loadingOptions;
   
   public void setURL(String url, VLCLoadingOptions loadingOptions) {
+    if("".equals(url)) {
+      url = null;
+    }
+    setURL_(url, loadingOptions);
+  }
+  
+  private void setURL_(String url, VLCLoadingOptions loadingOptions) {
+    if(loadingOptions == null) {
+      loadingOptions = new VLCLoadingOptions();
+    }
     this.loadingOptions = loadingOptions;
     webBrowserObject.setURL(url);
     if(webBrowserObject.hasContent()) {

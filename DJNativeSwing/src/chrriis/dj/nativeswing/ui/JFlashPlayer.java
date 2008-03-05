@@ -222,6 +222,9 @@ public class JFlashPlayer extends JPanel implements Disposable {
   private FlashLoadingOptions loadingOptions;
   
   public void setURL(String url, FlashLoadingOptions loadingOptions) {
+    if("".equals(url)) {
+      url = null;
+    }
     this.loadingOptions = loadingOptions;
     webBrowserObject.setURL(url);
   }

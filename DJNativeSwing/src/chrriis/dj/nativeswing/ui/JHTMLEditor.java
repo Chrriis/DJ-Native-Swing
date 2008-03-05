@@ -319,6 +319,13 @@ public class JHTMLEditor extends JPanel implements Disposable {
         break;
       }
       NativeInterfaceHandler.syncExec(new EmptyMessage());
+      if(tempResult != this) {
+        html = (String)tempResult;
+        break;
+      }
+      try {
+        Thread.sleep(50);
+      } catch(Exception e) {}
     }
     return convertLinksToLocal(html);
   }

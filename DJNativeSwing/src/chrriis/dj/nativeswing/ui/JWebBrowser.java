@@ -430,8 +430,15 @@ public class JWebBrowser extends JPanel implements Disposable {
     nativeComponent.stop();
   }
   
-  public boolean execute(String script) {
-    return nativeComponent.execute(script);
+  /**
+   * Execute a script and wait for the indication of success.
+   */
+  public boolean executeAndWait(String script) {
+    return nativeComponent.executeAndWait(script);
+  }
+  
+  public void execute(String script) {
+    nativeComponent.execute(script);
   }
   
   public String executeAndWaitForCommandResult(final String commandName, String script) {
@@ -447,12 +454,18 @@ public class JWebBrowser extends JPanel implements Disposable {
       }
     };
     nativeComponent.addWebBrowserListener(webBrowserListener);
-    nativeComponent.execute(script);
+    nativeComponent.executeAndWait(script);
     for(int i=0; i<20; i++) {
       if(resultArray[0] != TEMP_RESULT) {
         break;
       }
       NativeInterfaceHandler.syncExec(new EmptyMessage());
+      if(resultArray[0] != TEMP_RESULT) {
+        break;
+      }
+      try {
+        Thread.sleep(50);
+      } catch(Exception e) {}
     }
     nativeComponent.removeWebBrowserListener(webBrowserListener);
     String result = resultArray[0];

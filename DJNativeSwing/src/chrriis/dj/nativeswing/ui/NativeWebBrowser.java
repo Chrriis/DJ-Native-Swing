@@ -488,8 +488,12 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
   
-  public boolean execute(String js) {
+  public boolean executeAndWait(String js) {
     return Boolean.TRUE.equals(runSync(new CMN_execute(), js));
+  }
+  
+  public void execute(String js) {
+    runAsync(new CMN_execute(), js);
   }
   
   private static class CMN_stop extends ControlCommandMessage {
@@ -501,7 +505,7 @@ class NativeWebBrowser extends NativeComponent {
   }
   
   public void stop() {
-    runSync(new CMN_stop());
+    runAsync(new CMN_stop());
   }
   
   private static class CMN_refresh extends ControlCommandMessage {
@@ -513,7 +517,7 @@ class NativeWebBrowser extends NativeComponent {
   }
   
   public void refresh() {
-    runSync(new CMN_refresh());
+    runAsync(new CMN_refresh());
   }
   
   private static class CMN_isBackEnabled extends ControlCommandMessage {
