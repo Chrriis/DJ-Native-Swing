@@ -146,12 +146,16 @@ public class JVLCPlayer extends JPanel implements Disposable {
     updateThread = new Thread("NativeSwing - VLC Player seek bar update") {
       @Override
       public void run() {
-        while(this == updateThread) {
+        final Thread currentThread = this;
+        while(currentThread == updateThread) {
           try {
             sleep(1000);
           } catch(Exception e) {}
           SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+              if(currentThread != updateThread) {
+                return;
+              }
               VLCInput vlcInput = getVLCInput();
               VLCState state = vlcInput.getState();
               boolean isValid = state == VLCState.OPENING || state == VLCState.BUFFERING || state == VLCState.PLAYING || state == VLCState.PAUSED || state == VLCState.STOPPING;

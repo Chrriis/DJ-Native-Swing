@@ -263,6 +263,7 @@ abstract class MessagingInterface {
     message.setSyncExec(true);
     if(!isAlive()) {
       printFailedInvocation(message);
+      return null;
     }
     CommandResultMessage commandResultMessage = null;
     try {
@@ -332,6 +333,7 @@ abstract class MessagingInterface {
   private void writeMessage(Message message) throws IOException {
     if(!isAlive()) {
       printFailedInvocation(message);
+      return;
     }
     synchronized(oos) {
 //      System.err.println("SEND: " + message.getID() + ", " + message.getClass().getName());
