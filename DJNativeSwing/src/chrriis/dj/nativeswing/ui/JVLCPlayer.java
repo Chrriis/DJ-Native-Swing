@@ -21,7 +21,11 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import chrriis.common.Disposable;
 import chrriis.common.Utils;
@@ -84,35 +88,82 @@ public class JVLCPlayer extends JPanel implements Disposable {
       return objectHTMLConfiguration;
     }
     
-    @Override
-    protected String getJavascriptDefinitions() {
-      return
-      "      function fullscreenEO() {" + LS +
-      "        var flashMovie = getEmbeddedObject();" + LS +
-      "        flashMovie.video.toggleFullscreen();" + LS +
-      "      }" + LS +
-      "      function playEO() {" + LS +
-      "        var flashMovie = getEmbeddedObject();" + LS +
-      "        flashMovie.play();" + LS +
-      "      }" + LS +
-      "      function stopEO() {" + LS +
-      "        var flashMovie = getEmbeddedObject();" + LS +
-      "        flashMovie.stop();" + LS +
-      "      }" + LS +
-      "      function pauseEO() {" + LS +
-      "        var flashMovie = getEmbeddedObject();" + LS +
-      "        flashMovie.pause();" + LS +
-      "      }" + LS;
-    }
-    
   };
+  
+  private JSlider slider;
+  private volatile boolean isAdjusting;
+  private volatile Thread updateThread;
 
+  @Override
+  public void removeNotify() {
+    super.removeNotify();
+    stopUpdateThread();
+  }
+  
+  @Override
+  public void addNotify() {
+    super.addNotify();
+    if(webBrowserObject.hasContent()) {
+      startUpdateThread();
+    }
+  }
+  
+  private void stopUpdateThread() {
+    updateThread = null;
+  }
+  
+  private void startUpdateThread() {
+    if(updateThread != null) {
+      return;
+    }
+    updateThread = new Thread("NativeSwing - VLC Player seek bar update") {
+      @Override
+      public void run() {
+        while(this == updateThread) {
+          try {
+            sleep(1000);
+          } catch(Exception e) {}
+          SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+              float position = getVLCInput().getPosition();
+              boolean isValid = !Float.isNaN(position);
+              if(position == 0 && getVLCInput().getLength() == 0) {
+                isValid = false;
+              }
+              if(slider.isVisible() != isValid) {
+                slider.setVisible(isValid);
+              }
+              if(isValid) {
+                isAdjusting = true;
+                slider.setValue(Math.round(position * 10000));
+                isAdjusting = false;
+              }
+            }
+          });
+        }
+      }
+    };
+    updateThread.setDaemon(true);
+    updateThread.start();
+  }
+  
   public JVLCPlayer() {
     super(new BorderLayout(0, 0));
     webBrowserPanel = new JPanel(new BorderLayout(0, 0));
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);
-    controlBarPane = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 2));
+    controlBarPane = new JPanel(new BorderLayout(0, 0));
+    slider = new JSlider(0, 10000, 0);
+    slider.setVisible(false);
+    slider.addChangeListener(new ChangeListener() {
+      public void stateChanged(ChangeEvent e) {
+        if(!isAdjusting) {
+          getVLCInput().setPosition(((float)slider.getValue()) / 10000);
+        }
+      }
+    });
+    controlBarPane.add(slider, BorderLayout.NORTH);
+    JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 2));
     playButton = new JButton(createIcon("PlayIcon"));
     playButton.setToolTipText(RESOURCES.getString("PlayText"));
     playButton.addActionListener(new ActionListener() {
@@ -120,7 +171,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
         getVLCPlaylist().play();
       }
     });
-    controlBarPane.add(playButton);
+    buttonPanel.add(playButton);
     pauseButton = new JButton(createIcon("PauseIcon"));
     pauseButton.setToolTipText(RESOURCES.getString("PauseText"));
     pauseButton.addActionListener(new ActionListener() {
@@ -128,7 +179,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
         getVLCPlaylist().togglePause();
       }
     });
-    controlBarPane.add(pauseButton);
+    buttonPanel.add(pauseButton);
     stopButton = new JButton(createIcon("StopIcon"));
     stopButton.setToolTipText(RESOURCES.getString("StopText"));
     stopButton.addActionListener(new ActionListener() {
@@ -136,7 +187,8 @@ public class JVLCPlayer extends JPanel implements Disposable {
         getVLCPlaylist().stop();
       }
     });
-    controlBarPane.add(stopButton);
+    buttonPanel.add(stopButton);
+    controlBarPane.add(buttonPanel, BorderLayout.CENTER);
     add(controlBarPane, BorderLayout.SOUTH);
     adjustBorder();
   }
@@ -174,6 +226,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
   public void setURL(String url, VLCLoadingOptions loadingOptions) {
     this.loadingOptions = loadingOptions;
     webBrowserObject.setURL(url);
+    startUpdateThread();
   }
 
   public boolean isControlBarVisible() {

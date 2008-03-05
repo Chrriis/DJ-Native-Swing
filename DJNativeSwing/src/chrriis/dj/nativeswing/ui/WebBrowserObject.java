@@ -119,6 +119,8 @@ public abstract class WebBrowserObject implements Disposable {
       return new WebServerContent() {
         @Override
         public InputStream getInputStream() {
+          String javascriptDefinitions = component.getJavascriptDefinitions();
+          javascriptDefinitions = javascriptDefinitions == null? "": javascriptDefinitions + LS;
           String content =
             "<html>" + LS +
             "  <head>" + LS +
@@ -141,7 +143,7 @@ public abstract class WebBrowserObject implements Disposable {
             "          return document.getElementById(movieName);" + LS +
             "        }" + LS +
             "      }" + LS +
-            component.getJavascriptDefinitions() + LS +
+            javascriptDefinitions +
             "      //-->" + LS +
             "    </script>" + LS +
             "    <style type=\"text/css\">" + LS +
@@ -314,7 +316,9 @@ public abstract class WebBrowserObject implements Disposable {
   
   protected abstract ObjectHTMLConfiguration getObjectHtmlConfiguration();
  
-  protected abstract String getJavascriptDefinitions();
+  protected String getJavascriptDefinitions() {
+    return null;
+  }
   
   public void dispose() {
     webBrowser.dispose();
