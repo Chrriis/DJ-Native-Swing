@@ -84,12 +84,9 @@ public abstract class WebBrowserObject implements Disposable {
   }
   
   private class CMLocal_waitForCommand extends LocalMessage {
-    private Boolean[] resultArray;
-    public CMLocal_waitForCommand(Boolean[] resultArray) {
-      this.resultArray = resultArray;
-    }
     @Override
     public Object run() {
+      Boolean[] resultArray = (Boolean[])args[0];
       for(int i=0; i<20; i++) {
         if(resultArray[0].booleanValue()) {
           break;
@@ -125,7 +122,7 @@ public abstract class WebBrowserObject implements Disposable {
       }
     });
     webBrowser.setURL(url);
-    ((NativeComponent)webBrowser.getDisplayComponent()).runSync(new CMLocal_waitForCommand(resultArray));
+    ((NativeComponent)webBrowser.getDisplayComponent()).runSync(new CMLocal_waitForCommand(), (Object)resultArray);
   }
   
   protected String getLocalFileURL(File localFile) {

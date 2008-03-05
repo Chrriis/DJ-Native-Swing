@@ -285,6 +285,10 @@ public class JFlashPlayer extends JPanel implements Disposable {
     return webBrowserObject.isDisposed();
   }
   
+  public void asyncExec(Runnable runnable) {
+    webBrowser.asyncExec(runnable);
+  }
+  
   public void addInitializationListener(InitializationListener listener) {
     webBrowserObject.addInitializationListener(listener);
   }

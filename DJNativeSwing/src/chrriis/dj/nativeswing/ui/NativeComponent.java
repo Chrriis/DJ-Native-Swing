@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.Shell;
 import chrriis.common.Registry;
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.CommandMessage;
+import chrriis.dj.nativeswing.LocalMessage;
 import chrriis.dj.nativeswing.Message;
 import chrriis.dj.nativeswing.NativeInterfaceHandler;
 import chrriis.dj.nativeswing.ui.NativeComponent.Options.DestructionTime;
@@ -78,7 +79,7 @@ public abstract class NativeComponent extends Canvas {
     commandMessage.asyncExecArgs(args);
   }
   
-  Object syncExec(CommandMessage commandMessage, Object... args) {
+  public Object syncExec(CommandMessage commandMessage, Object... args) {
     NativeInterfaceHandler.checkUIThread();
     if(commandMessage instanceof ControlCommandMessage) {
       ((ControlCommandMessage)commandMessage).setNativeComponent(this);
@@ -86,12 +87,24 @@ public abstract class NativeComponent extends Canvas {
     return commandMessage.syncExecArgs(args);
   }
   
-  void asyncExec(CommandMessage commandMessage, Object... args) {
+  public void asyncExec(CommandMessage commandMessage, Object... args) {
     NativeInterfaceHandler.checkUIThread();
     if(commandMessage instanceof ControlCommandMessage) {
       ((ControlCommandMessage)commandMessage).setNativeComponent(this);
     }
     commandMessage.asyncExecArgs(args);
+  }
+  
+  private class CMLocal_execRunnable extends LocalMessage {
+    @Override
+    public Object run() {
+      ((Runnable)args[0]).run();
+      return null;
+    }
+  }
+
+  public void asyncExec(Runnable runnable) {
+    runAsync(new CMLocal_execRunnable(), runnable);
   }
   
   private volatile List<CommandMessage> initializationCommandMessageList = new ArrayList<CommandMessage>();

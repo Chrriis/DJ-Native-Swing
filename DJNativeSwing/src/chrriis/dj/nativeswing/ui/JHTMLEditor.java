@@ -76,12 +76,9 @@ public class JHTMLEditor extends JPanel implements Disposable {
   }
   
   private class CMLocal_waitForCommand extends LocalMessage {
-    private Boolean[] resultArray;
-    public CMLocal_waitForCommand(Boolean[] resultArray) {
-      this.resultArray = resultArray;
-    }
     @Override
     public Object run() {
+      Boolean[] resultArray = (Boolean[])args[0];
       for(int i=0; i<20; i++) {
         if(resultArray[0].booleanValue()) {
           break;
@@ -116,7 +113,7 @@ public class JHTMLEditor extends JPanel implements Disposable {
         resultArray[0] = Boolean.TRUE;
       }
     });
-    ((NativeComponent)webBrowser.getDisplayComponent()).runSync(new CMLocal_waitForCommand(resultArray));
+    ((NativeComponent)webBrowser.getDisplayComponent()).runSync(new CMLocal_waitForCommand(), (Object)resultArray);
   }
   
   /**
@@ -421,6 +418,10 @@ public class JHTMLEditor extends JPanel implements Disposable {
   
   public boolean isDisposed() {
     return webBrowser.isDisposed();
+  }
+  
+  public void asyncExec(Runnable runnable) {
+    webBrowser.asyncExec(runnable);
   }
   
   public void addInitializationListener(InitializationListener listener) {

@@ -566,6 +566,10 @@ public class JWebBrowser extends JPanel implements Disposable {
     return nativeComponent.isDisposed();
   }
   
+  public void asyncExec(Runnable runnable) {
+    nativeComponent.asyncExec(runnable);
+  }
+  
   /**
    * @return the Browser Window if it is contained in one, or null.
    */

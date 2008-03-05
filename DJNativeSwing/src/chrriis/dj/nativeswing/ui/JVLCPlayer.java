@@ -681,6 +681,10 @@ public class JVLCPlayer extends JPanel implements Disposable {
     return vlcVideo;
   }
   
+  public void asyncExec(Runnable runnable) {
+    webBrowser.asyncExec(runnable);
+  }
+  
   public void addInitializationListener(InitializationListener listener) {
     webBrowserObject.addInitializationListener(listener);
   }
