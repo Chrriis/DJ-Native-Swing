@@ -27,6 +27,7 @@ import javax.swing.border.BevelBorder;
 import chrriis.common.Disposable;
 import chrriis.common.Utils;
 import chrriis.common.WebServer;
+import chrriis.dj.nativeswing.ui.event.InitializationEvent;
 import chrriis.dj.nativeswing.ui.event.InitializationListener;
 
 /**
@@ -159,6 +160,7 @@ public class JFlashPlayer extends JPanel implements Disposable {
     add(webBrowserPanel, BorderLayout.CENTER);
     controlBarPane = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 2));
     playButton = new JButton(createIcon("PlayIcon"));
+    playButton.setEnabled(false);
     playButton.setToolTipText(RESOURCES.getString("PlayText"));
     playButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -167,6 +169,7 @@ public class JFlashPlayer extends JPanel implements Disposable {
     });
     controlBarPane.add(playButton);
     pauseButton = new JButton(createIcon("PauseIcon"));
+    pauseButton.setEnabled(false);
     pauseButton.setToolTipText(RESOURCES.getString("PauseText"));
     pauseButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -175,6 +178,7 @@ public class JFlashPlayer extends JPanel implements Disposable {
     });
     controlBarPane.add(pauseButton);
     stopButton = new JButton(createIcon("StopIcon"));
+    stopButton.setEnabled(false);
     stopButton.setToolTipText(RESOURCES.getString("StopText"));
     stopButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -184,6 +188,13 @@ public class JFlashPlayer extends JPanel implements Disposable {
     controlBarPane.add(stopButton);
     add(controlBarPane, BorderLayout.SOUTH);
     adjustBorder();
+    addInitializationListener(new InitializationListener() {
+      public void objectInitialized(InitializationEvent e) {
+        playButton.setEnabled(true);
+        pauseButton.setEnabled(true);
+        stopButton.setEnabled(true);
+      }
+    });
   }
   
   private void adjustBorder() {

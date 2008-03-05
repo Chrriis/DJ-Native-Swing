@@ -8,7 +8,9 @@
 package chrriis.dj.nativeswing.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -17,6 +19,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -29,6 +32,7 @@ import javax.swing.event.ChangeListener;
 
 import chrriis.common.Disposable;
 import chrriis.common.Utils;
+import chrriis.dj.nativeswing.ui.event.InitializationEvent;
 import chrriis.dj.nativeswing.ui.event.InitializationListener;
 
 /**
@@ -90,10 +94,32 @@ public class JVLCPlayer extends JPanel implements Disposable {
     
   };
   
-  private JSlider slider;
-  private volatile boolean isAdjusting;
+  private JSlider seekBarSlider;
+  private volatile boolean isAdjustingSeekBar;
   private volatile Thread updateThread;
+  private JButton volumeButton;
+  private JSlider volumeSlider;
+  private boolean isAdjustingVolume;
 
+  private void adjustVolumePanel() {
+    volumeButton.setEnabled(true);
+    VLCAudio vlcAudio = getVLCAudio();
+    boolean isMute = vlcAudio.isMute();
+    if(isMute) {
+      volumeButton.setIcon(createIcon("VolumeOffIcon"));
+      volumeButton.setToolTipText(RESOURCES.getString("VolumeOffText"));
+    } else {
+      volumeButton.setIcon(createIcon("VolumeOnIcon"));
+      volumeButton.setToolTipText(RESOURCES.getString("VolumeOnText"));
+    }
+    volumeSlider.setEnabled(!isMute);
+    if(!isMute) {
+      isAdjustingVolume = true;
+      volumeSlider.setValue(vlcAudio.getVolume());
+      isAdjustingVolume = false;
+    }
+  }
+  
   @Override
   public void removeNotify() {
     super.removeNotify();
@@ -130,13 +156,13 @@ public class JVLCPlayer extends JPanel implements Disposable {
               if(position == 0 && getVLCInput().getLength() == 0) {
                 isValid = false;
               }
-              if(slider.isVisible() != isValid) {
-                slider.setVisible(isValid);
+              if(seekBarSlider.isVisible() != isValid) {
+                seekBarSlider.setVisible(isValid);
               }
               if(isValid) {
-                isAdjusting = true;
-                slider.setValue(Math.round(position * 10000));
-                isAdjusting = false;
+                isAdjustingSeekBar = true;
+                seekBarSlider.setValue(Math.round(position * 10000));
+                isAdjustingSeekBar = false;
               }
             }
           });
@@ -153,18 +179,20 @@ public class JVLCPlayer extends JPanel implements Disposable {
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);
     controlBarPane = new JPanel(new BorderLayout(0, 0));
-    slider = new JSlider(0, 10000, 0);
-    slider.setVisible(false);
-    slider.addChangeListener(new ChangeListener() {
+    seekBarSlider = new JSlider(0, 10000, 0);
+    seekBarSlider.setVisible(false);
+    seekBarSlider.addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
-        if(!isAdjusting) {
-          getVLCInput().setPosition(((float)slider.getValue()) / 10000);
+        if(!isAdjustingSeekBar) {
+          getVLCInput().setPosition(((float)seekBarSlider.getValue()) / 10000);
         }
       }
     });
-    controlBarPane.add(slider, BorderLayout.NORTH);
+    controlBarPane.add(seekBarSlider, BorderLayout.NORTH);
+    JPanel buttonBarPanel = new JPanel(new BorderLayout(0, 0));
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 2));
     playButton = new JButton(createIcon("PlayIcon"));
+    playButton.setEnabled(false);
     playButton.setToolTipText(RESOURCES.getString("PlayText"));
     playButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -173,6 +201,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
     });
     buttonPanel.add(playButton);
     pauseButton = new JButton(createIcon("PauseIcon"));
+    pauseButton.setEnabled(false);
     pauseButton.setToolTipText(RESOURCES.getString("PauseText"));
     pauseButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -181,6 +210,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
     });
     buttonPanel.add(pauseButton);
     stopButton = new JButton(createIcon("StopIcon"));
+    stopButton.setEnabled(false);
     stopButton.setToolTipText(RESOURCES.getString("StopText"));
     stopButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -188,9 +218,46 @@ public class JVLCPlayer extends JPanel implements Disposable {
       }
     });
     buttonPanel.add(stopButton);
-    controlBarPane.add(buttonPanel, BorderLayout.CENTER);
+    buttonBarPanel.add(buttonPanel, BorderLayout.CENTER);
+    JPanel volumePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 2));
+    volumeButton = new JButton();
+    Insets margin = volumeButton.getMargin();
+    margin.left = Math.min(2, margin.left);
+    margin.right = Math.min(2, margin.left);
+    volumeButton.setMargin(margin);
+    volumeButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        getVLCAudio().setMute(!getVLCAudio().isMute());
+        adjustVolumePanel();
+      }
+    });
+    volumePanel.add(volumeButton);
+    volumeSlider = new JSlider();
+    volumeSlider.addChangeListener(new ChangeListener() {
+      public void stateChanged(ChangeEvent e) {
+        if(!isAdjustingVolume) {
+          getVLCAudio().setVolume(volumeSlider.getValue());
+        }
+      }
+    });
+    volumeSlider.setPreferredSize(new Dimension(60, volumeSlider.getPreferredSize().height));
+    volumePanel.add(volumeSlider);
+    adjustVolumePanel();
+    volumeButton.setEnabled(false);
+    volumeSlider.setEnabled(false);
+    buttonBarPanel.add(volumePanel, BorderLayout.EAST);
+    buttonBarPanel.add(Box.createHorizontalStrut(volumePanel.getPreferredSize().width), BorderLayout.WEST);
+    controlBarPane.add(buttonBarPanel, BorderLayout.CENTER);
     add(controlBarPane, BorderLayout.SOUTH);
     adjustBorder();
+    addInitializationListener(new InitializationListener() {
+      public void objectInitialized(InitializationEvent e) {
+        playButton.setEnabled(true);
+        pauseButton.setEnabled(true);
+        stopButton.setEnabled(true);
+        adjustVolumePanel();
+      }
+    });
   }
   
   private void adjustBorder() {
@@ -261,10 +328,15 @@ public class JVLCPlayer extends JPanel implements Disposable {
   /* ------------------------- VLC API exposed ------------------------- */
   
   public static class VLCAudio {
+    private JVLCPlayer vlcPlayer;
     private JWebBrowser webBrowser;
-    private VLCAudio(JWebBrowser webBrowser) {}
+    private VLCAudio(JVLCPlayer vlcPlayer) {
+      this.vlcPlayer = vlcPlayer;
+      this.webBrowser = vlcPlayer.webBrowser;
+    }
     public void setMute(boolean isMute) {
       webBrowser.execute("getEmbeddedObject().audio.mute = " + isMute + ";");
+      vlcPlayer.adjustVolumePanel();
     }
     public boolean isMute() {
       String commnand = "isMute";
@@ -274,12 +346,13 @@ public class JVLCPlayer extends JPanel implements Disposable {
       if(volume < 0 || volume > 100) {
         throw new IllegalArgumentException("The volume must be between 0 and 100");
       }
-      webBrowser.execute("getEmbeddedObject().audio.volume = " + (volume * 2) + ";");
+      webBrowser.execute("getEmbeddedObject().audio.volume = " + Math.round((volume * 1.99 + 1)) + ";");
+      vlcPlayer.adjustVolumePanel();
     }
     public int getVolume() {
       String commnand = "getVolume";
       try {
-        return Integer.parseInt(webBrowser.executeAndWaitForCommandResult(commnand, "sendCommand('" + commnand + ":' + getEmbeddedObject().audio.volume);")) / 2;
+        return Math.max(0, (int)Math.round((Integer.parseInt(webBrowser.executeAndWaitForCommandResult(commnand, "sendCommand('" + commnand + ":' + getEmbeddedObject().audio.volume);")) - 1) / 1.99));
       } catch(Exception e) {
       }
       return -1;
@@ -327,7 +400,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
     }
   }
   
-  private VLCAudio vlcAudio = new VLCAudio(webBrowser);
+  private VLCAudio vlcAudio = new VLCAudio(this);
   
   public VLCAudio getVLCAudio() {
     return vlcAudio;
