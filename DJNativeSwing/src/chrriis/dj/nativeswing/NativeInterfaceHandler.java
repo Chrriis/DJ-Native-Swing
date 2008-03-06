@@ -28,6 +28,7 @@ import java.net.Socket;
 import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EventListener;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -37,6 +38,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
+import javax.swing.event.EventListenerList;
 
 import org.eclipse.swt.widgets.Display;
 
@@ -607,4 +609,22 @@ public class NativeInterfaceHandler {
     }
   }
   
+  public static interface NativeInterfaceListener extends EventListener {
+    public void nativeInterfaceRestarted();
+  }
+
+  private static EventListenerList listenerList = new EventListenerList();
+  
+  public static void addNativeInterfaceListener(NativeInterfaceListener listener) {
+    listenerList.add(NativeInterfaceListener.class, listener);
+  }
+  
+  public static void removeNativeInterfaceListener(NativeInterfaceListener listener) {
+    listenerList.remove(NativeInterfaceListener.class, listener);
+  }
+  
+  public static NativeInterfaceListener[] getNativeInterfaceListeners() {
+    return listenerList.getListeners(NativeInterfaceListener.class);
+  }
+
 }

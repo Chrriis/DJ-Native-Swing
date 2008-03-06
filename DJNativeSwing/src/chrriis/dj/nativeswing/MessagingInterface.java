@@ -21,6 +21,7 @@ import java.util.List;
 import javax.swing.SwingUtilities;
 
 import chrriis.common.Registry;
+import chrriis.dj.nativeswing.NativeInterfaceHandler.NativeInterfaceListener;
 import chrriis.dj.nativeswing.ui.NativeComponent;
 
 /**
@@ -76,8 +77,7 @@ abstract class MessagingInterface {
     Thread receiverThread = new Thread("NativeSwing Receiver") {
       @Override
       public void run() {
-        boolean isEndOfStream = false;
-        while(!isEndOfStream) {
+        while(isAlive) {
           Message message = null;
           try {
             message = readMessage();
@@ -86,7 +86,6 @@ abstract class MessagingInterface {
             if(exitOnEndOfStream) {
               System.exit(0);
             }
-            isEndOfStream = true;
             e.printStackTrace();
             try {
               NativeInterfaceHandler.createCommunicationChannel();
@@ -114,6 +113,9 @@ abstract class MessagingInterface {
                       ((NativeComponent)c).invalidateControl("The native peer died unexpectantly.");
                     }
                     c.repaint();
+                  }
+                  for(NativeInterfaceListener listener: NativeInterfaceHandler.getNativeInterfaceListeners()) {
+                    listener.nativeInterfaceRestarted();
                   }
                 }
               });
