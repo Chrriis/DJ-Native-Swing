@@ -457,18 +457,19 @@ public class JWebBrowser extends JPanel implements Disposable {
       }
     };
     nativeComponent.addWebBrowserListener(webBrowserListener);
-    nativeComponent.executeAndWait(script);
-    for(int i=0; i<20; i++) {
-      if(resultArray[0] != TEMP_RESULT) {
-        break;
+    if(nativeComponent.executeAndWait(script)) {
+      for(int i=0; i<20; i++) {
+        if(resultArray[0] != TEMP_RESULT) {
+          break;
+        }
+        NativeInterfaceHandler.syncExec(new EmptyMessage());
+        if(resultArray[0] != TEMP_RESULT) {
+          break;
+        }
+        try {
+          Thread.sleep(50);
+        } catch(Exception e) {}
       }
-      NativeInterfaceHandler.syncExec(new EmptyMessage());
-      if(resultArray[0] != TEMP_RESULT) {
-        break;
-      }
-      try {
-        Thread.sleep(50);
-      } catch(Exception e) {}
     }
     nativeComponent.removeWebBrowserListener(webBrowserListener);
     String result = resultArray[0];
