@@ -285,8 +285,11 @@ public class JFlashPlayer extends JPanel implements Disposable {
     return webBrowserObject.isDisposed();
   }
   
-  public void asyncExec(Runnable runnable) {
-    webBrowser.asyncExec(runnable);
+  /**
+   * Run a command in sequence with other calls from this class. Calls are performed only when the component is initialized, and this method adds to the queue of calls in case it is not.
+   */
+  public void run(Runnable runnable) {
+    webBrowser.run(runnable);
   }
   
   public void addInitializationListener(InitializationListener listener) {

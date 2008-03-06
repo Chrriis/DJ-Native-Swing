@@ -567,8 +567,11 @@ public class JWebBrowser extends JPanel implements Disposable {
     return nativeComponent.isDisposed();
   }
   
-  public void asyncExec(Runnable runnable) {
-    nativeComponent.asyncExec(runnable);
+  /**
+   * Run a command in sequence with other calls from this class. Calls are performed only when the component is initialized, and this method adds to the queue of calls in case it is not.
+   */
+  public void run(Runnable runnable) {
+    nativeComponent.run(runnable);
   }
   
   /**
