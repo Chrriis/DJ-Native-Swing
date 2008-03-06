@@ -164,7 +164,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
               if(isValid) {
                 int time = vlcInput.getTime();
                 int length = vlcInput.getLength();
-                isValid = time > 0 && length > 0;
+                isValid = time >= 0 && length > 0;
                 if(isValid) {
                   isAdjustingSeekBar = true;
                   seekBarSlider.setValue(Math.round(time * 10000f / length));
