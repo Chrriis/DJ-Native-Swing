@@ -52,10 +52,19 @@ public class NativeInterfaceHandler {
 
   public static class NativeInterfaceInitOptions {
     
+    private boolean isNativeSideRespawnedOnError = true;
     private boolean isPreferredLookAndFeelApplied;
     private Class<?>[] nativeClassPathReferenceClasses;
     private String[] nativeClassPathReferenceResources;
     private String[] peerVMParams;
+    
+    public void setNativeSideRespawnedOnError(boolean isNativeSideRespawnedOnError) {
+      this.isNativeSideRespawnedOnError = isNativeSideRespawnedOnError;
+    }
+    
+    public boolean isNativeSideRespawnedOnError() {
+      return isNativeSideRespawnedOnError;
+    }
     
     public void setPreferredLookAndFeelApplied(boolean isPreferredLookAndFeelApplied) {
       this.isPreferredLookAndFeelApplied = isPreferredLookAndFeelApplied;
@@ -159,10 +168,13 @@ public class NativeInterfaceHandler {
     }
   }
 
+  private static NativeInterfaceInitOptions nativeInterfaceInitOptions;
+  
   public static void init(NativeInterfaceInitOptions nativeInterfaceInitOptions) {
     if(isInitialized()) {
       return;
     }
+    NativeInterfaceHandler.nativeInterfaceInitOptions = nativeInterfaceInitOptions;
     isInitialized = true;
     if(nativeInterfaceInitOptions.isPreferredLookAndFeelApplied()) {
       setPreferredLookAndFeel();
@@ -178,10 +190,7 @@ public class NativeInterfaceHandler {
     System.setProperty("JPopupMenu.defaultLWPopupEnabledKey", "false");
     // We use our own HW forcing, so we disable the one from JNA
     System.setProperty("jna.force_hw_popups", "false");
-    // Create the interface to communicate with the process handling the native side
-    messagingInterface = createMessagingInterface(nativeInterfaceInitOptions);
-    // Set the system properties
-    new CMN_setProperties().syncExecArgs(System.getProperties());
+    createCommunicationChannel();
     // Create window monitor
     Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
       protected Set<Dialog> dialogSet = new HashSet<Dialog>();
@@ -263,6 +272,16 @@ public class NativeInterfaceHandler {
         }
       }
     }, WindowEvent.WINDOW_EVENT_MASK | ComponentEvent.COMPONENT_EVENT_MASK);
+  }
+  
+  static void createCommunicationChannel() {
+    if(messagingInterface != null && !nativeInterfaceInitOptions.isNativeSideRespawnedOnError()) {
+      return;
+    }
+    // Create the interface to communicate with the process handling the native side
+    messagingInterface = createMessagingInterface(nativeInterfaceInitOptions);
+    // Set the system properties
+    new CMN_setProperties().syncExecArgs(System.getProperties());
   }
   
   private static Process createProcess(NativeInterfaceInitOptions nativeInterfaceInitOptions, int port) {
@@ -387,7 +406,7 @@ public class NativeInterfaceHandler {
       if(p != null) {
         p.destroy();
       }
-      throw new IllegalStateException("Failed to connect to spawn VM!");
+      throw new IllegalStateException("Failed to connect to spawned VM!");
     }
     return new MessagingInterface(socket, false) {
       @Override

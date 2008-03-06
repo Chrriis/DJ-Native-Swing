@@ -88,6 +88,11 @@ abstract class MessagingInterface {
             }
             isEndOfStream = true;
             e.printStackTrace();
+            try {
+              NativeInterfaceHandler.createCommunicationChannel();
+            } catch(Exception ex) {
+              ex.printStackTrace();
+            }
             // Unlock all locked sync calls
             synchronized(RECEIVER_LOCK) {
               receivedMessageList.clear();
