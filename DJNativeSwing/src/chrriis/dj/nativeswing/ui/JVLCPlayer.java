@@ -24,6 +24,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
@@ -98,6 +99,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
   private JSlider seekBarSlider;
   private volatile boolean isAdjustingSeekBar;
   private volatile Thread updateThread;
+  private JLabel timeLabel;
   private JButton volumeButton;
   private JSlider volumeSlider;
   private boolean isAdjustingVolume;
@@ -143,7 +145,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
     if(updateThread != null) {
       return;
     }
-    updateThread = new Thread("NativeSwing - VLC Player seek bar update") {
+    updateThread = new Thread("NativeSwing - VLC Player control bar update") {
       @Override
       public void run() {
         final Thread currentThread = this;
@@ -160,24 +162,20 @@ public class JVLCPlayer extends JPanel implements Disposable {
               VLCState state = vlcInput.getState();
               boolean isValid = state == VLCState.OPENING || state == VLCState.BUFFERING || state == VLCState.PLAYING || state == VLCState.PAUSED || state == VLCState.STOPPING;
               if(isValid) {
-                float position = vlcInput.getPosition();
-                isValid = !Float.isNaN(position);
-                if(position == 0 && vlcInput.getLength() == 0) {
-                  isValid = false;
-                }
-                if(seekBarSlider.isVisible() != isValid) {
-                  seekBarSlider.setVisible(isValid);
-                }
+                int time = vlcInput.getTime();
+                int length = vlcInput.getLength();
+                isValid = time > 0 && length > 0;
                 if(isValid) {
                   isAdjustingSeekBar = true;
-                  seekBarSlider.setValue(Math.round(position * 10000));
+                  seekBarSlider.setValue(Math.round(time * 10000f / length));
                   isAdjustingSeekBar = false;
-                }
-              } else {
-                if(seekBarSlider.isVisible() != isValid) {
-                  seekBarSlider.setVisible(isValid);
+                  timeLabel.setText(formatTime(time, length >= 3600000) + " / " + formatTime(length, false));
                 }
               }
+              if(!isValid) {
+                timeLabel.setText("");
+              }
+              seekBarSlider.setVisible(isValid);
             }
           });
         }
@@ -185,6 +183,20 @@ public class JVLCPlayer extends JPanel implements Disposable {
     };
     updateThread.setDaemon(true);
     updateThread.start();
+  }
+  
+  private static String formatTime(int milliseconds, boolean showHours) {
+    int seconds = milliseconds / 1000;
+    int hours = seconds / 3600;
+    int minutes = (seconds % 3600) / 60;
+    seconds = seconds % 60;
+    StringBuilder sb = new StringBuilder();
+    if(hours != 0 || showHours) {
+      sb.append(hours).append(':');
+    }
+    sb.append(minutes < 10? "0": "").append(minutes).append(':');
+    sb.append(seconds < 10? "0": "").append(seconds);
+    return sb.toString();
   }
   
   public JVLCPlayer() {
@@ -231,7 +243,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
       }
     });
     buttonPanel.add(stopButton);
-    JPanel volumePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 2));
+    JPanel volumePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 2));
     volumeButton = new JButton();
     Insets margin = volumeButton.getMargin();
     margin.left = Math.min(2, margin.left);
@@ -239,8 +251,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
     volumeButton.setMargin(margin);
     volumeButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        getVLCAudio().setMute(!getVLCAudio().isMute());
-        adjustVolumePanel();
+        getVLCAudio().toggleMute();
       }
     });
     volumePanel.add(volumeButton);
@@ -262,20 +273,25 @@ public class JVLCPlayer extends JPanel implements Disposable {
     JPanel buttonBarPanel = new JPanel(gridBag);
     cons.gridx = 0;
     cons.gridy = 0;
-    JPanel glue = new JPanel();
-    glue.setPreferredSize(new Dimension(volumePanel.getPreferredSize().width, 0));
-    gridBag.setConstraints(glue, cons);
-    buttonBarPanel.add(glue);
-    cons.gridx++;
-    cons.fill = GridBagConstraints.HORIZONTAL;
     cons.weightx = 1.0;
-    gridBag.setConstraints(buttonPanel, cons);
-    buttonBarPanel.add(buttonPanel);
+    cons.anchor = GridBagConstraints.WEST;
+    cons.fill = GridBagConstraints.HORIZONTAL;
+    timeLabel = new JLabel(" ");
+    timeLabel.setPreferredSize(new Dimension(0, timeLabel.getPreferredSize().height));
+    gridBag.setConstraints(timeLabel, cons);
+    buttonBarPanel.add(timeLabel);
     cons.gridx++;
     cons.weightx = 0.0;
+    cons.anchor = GridBagConstraints.CENTER;
     cons.fill = GridBagConstraints.NONE;
-    volumePanel.setMaximumSize(volumePanel.getPreferredSize());
-    volumePanel.setMinimumSize(volumePanel.getPreferredSize());
+    gridBag.setConstraints(buttonPanel, cons);
+    buttonBarPanel.add(buttonPanel);
+    buttonBarPanel.setMinimumSize(buttonBarPanel.getPreferredSize());
+    cons.gridx++;
+    cons.weightx = 1.0;
+    cons.anchor = GridBagConstraints.EAST;
+    cons.fill = GridBagConstraints.HORIZONTAL;
+    volumePanel.setPreferredSize(new Dimension(0, volumePanel.getPreferredSize().height));
     gridBag.setConstraints(volumePanel, cons);
     buttonBarPanel.add(volumePanel);
     controlBarPane.add(buttonBarPanel, BorderLayout.CENTER);
@@ -318,7 +334,14 @@ public class JVLCPlayer extends JPanel implements Disposable {
    * The player is initialized after a call to setURL() or to initialize().
    */
   public void initialize() {
-    setURL_("", null);
+    initialize(null);
+  }
+  
+  /**
+   * The player is initialized after a call to setURL() or to initialize().
+   */
+  public void initialize(VLCLoadingOptions loadingOptions) {
+    setURL_("", loadingOptions);
   }
   
   private VLCLoadingOptions loadingOptions;
@@ -438,6 +461,10 @@ public class JVLCPlayer extends JPanel implements Disposable {
       } catch(Exception e) {
       }
       return null;
+    }
+    public void toggleMute() {
+      webBrowser.execute("getEmbeddedObject().audio.toggleMute();");
+      vlcPlayer.adjustVolumePanel();
     }
   }
   
@@ -562,12 +589,17 @@ public class JVLCPlayer extends JPanel implements Disposable {
     return vlcInput;
   }
   
-  public class VLCPlaylist {
-    private VLCPlaylist() {}
+  public static class VLCPlaylist {
+    private JVLCPlayer vlcPlayer;
+    private JWebBrowser webBrowser;
+    private VLCPlaylist(JVLCPlayer vlcPlayer) {
+      this.vlcPlayer = vlcPlayer;
+      this.webBrowser = vlcPlayer.webBrowser;
+    }
     public int getItemCount() {
       String commnand = "getItemCount";
       try {
-        return Integer.parseInt(webBrowser.executeAndWaitForCommandResult(commnand, "sendCommand('" + commnand + ":' + getEmbeddedObject().playlist.itemCount);"));
+        return Integer.parseInt(webBrowser.executeAndWaitForCommandResult(commnand, "sendCommand('" + commnand + ":' + getEmbeddedObject().playlist.items.count);"));
       } catch(Exception e) {
       }
       return -1;
@@ -576,18 +608,30 @@ public class JVLCPlayer extends JPanel implements Disposable {
       String commnand = "isPlaying";
       return "true".equals(webBrowser.executeAndWaitForCommandResult(commnand, "sendCommand('" + commnand + ":' + getEmbeddedObject().playlist.isPlaying);"));
     }
-    public void add(String url) {
-      if(!webBrowserObject.hasContent()) {
-        initialize();
+    /**
+     * @return the item ID, which can be used to add play or remove an item from the playlist.
+     */
+    public int add(String url) {
+      if(!vlcPlayer.webBrowserObject.hasContent()) {
+        vlcPlayer.initialize();
+        clear();
       }
       File file = Utils.getLocalFile(url);
       if(file != null) {
-        url = webBrowserObject.getLocalFileURL(file);
+        url = vlcPlayer.webBrowserObject.getLocalFileURL(file);
       }
-      webBrowser.execute("getEmbeddedObject().playlist.add(decodeURIComponent('" + Utils.encodeURL(url) + "'));");
+      String commnand = "add";
+      try {
+        return Integer.parseInt(webBrowser.executeAndWaitForCommandResult(commnand, "sendCommand('" + commnand + ":' + getEmbeddedObject().playlist.add(decodeURIComponent('" + Utils.encodeURL(url) + "')));"));
+      } catch(Exception e) {
+      }
+      return -1;
     }
     public void play() {
       webBrowser.execute("getEmbeddedObject().playlist.play();");
+    }
+    public void playItem(int itemID) {
+      webBrowser.execute("getEmbeddedObject().playlist.playItem(" + itemID + ");");
     }
     public void togglePause() {
       webBrowser.execute("getEmbeddedObject().playlist.togglePause();");
@@ -602,14 +646,14 @@ public class JVLCPlayer extends JPanel implements Disposable {
       webBrowser.execute("getEmbeddedObject().playlist.prev();");
     }
     public void clear() {
-      webBrowser.execute("getEmbeddedObject().playlist.clear();");
+      webBrowser.execute("getEmbeddedObject().playlist.items.clear();");
     }
-    public void removeItem(int item) {
-      webBrowser.execute("getEmbeddedObject().playlist.removeItem(" + item + ");");
+    public void removeItem(int itemID) {
+      webBrowser.execute("getEmbeddedObject().playlist.items.removeItem(" + itemID + ");");
     }
   }
   
-  private VLCPlaylist vlcPlaylist = new VLCPlaylist();
+  private VLCPlaylist vlcPlaylist = new VLCPlaylist(this);
   
   public VLCPlaylist getVLCPlaylist() {
     return vlcPlaylist;
@@ -669,6 +713,23 @@ public class JVLCPlayer extends JPanel implements Disposable {
       if("221:100".equals(value)) return VLCAspectRatio._221x100;
       if("5:4".equals(value)) return VLCAspectRatio._5x4;
       return null;
+    }
+    /**
+     * @param subtitleTrack The track of the subtitles, or 0 to disable it.
+     */
+    public void setSubtitleTrack(int subtitleTrack) {
+      webBrowser.execute("getEmbeddedObject().video.subtitle = " + subtitleTrack + ";");
+    }
+    /**
+     * @return the track of the subtitles, or 0 if disabled.
+     */
+    public int getSubtitleTrack() {
+      String commnand = "getSubtitleTrack";
+      try {
+        return Integer.parseInt(webBrowser.executeAndWaitForCommandResult(commnand, "sendCommand('" + commnand + ":' + getEmbeddedObject().video.subtitle);"));
+      } catch(Exception e) {
+      }
+      return -1;
     }
     public void toggleFullScreen() {
       webBrowser.execute("getEmbeddedObject().video.toggleFullscreen();");

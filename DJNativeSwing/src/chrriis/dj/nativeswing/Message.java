@@ -19,9 +19,17 @@ public abstract class Message implements Serializable {
   
   private static int nextID = 1;
   
-  private int id = nextID++;
+  private int id;
   private boolean isSyncExec;
   private boolean isUI = true;
+  
+  public Message() {
+    if(NativeInterfaceHandler.isNativeSide()) {
+      id = -nextID++;
+    } else {
+      id = nextID++;
+    }
+  }
   
   void setUI(boolean isUI) {
     this.isUI = isUI;
@@ -60,7 +68,11 @@ public abstract class Message implements Serializable {
   
   @Override
   public String toString() {
-    return getClass().getName();
+    String name = getClass().getName();
+    if(name.startsWith("chrriis.dj.nativeswing.")) {
+      name = name.substring("chrriis.dj.nativeswing.".length());
+    }
+    return name;
   }
   
 }

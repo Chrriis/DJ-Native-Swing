@@ -53,6 +53,11 @@ abstract class MessagingInterface {
       return exception;
     }
     
+    @Override
+    public String toString() {
+      return super.toString() + "(" + originalID + ")";
+    }
+
   }
 
   private Object RECEIVER_LOCK = new Object();
@@ -291,9 +296,11 @@ abstract class MessagingInterface {
           }
         } else {
           synchronized(RECEIVER_LOCK) {
-            isWaitingResponse = true;
-            RECEIVER_LOCK.wait();
-            isWaitingResponse = false;
+            if(receivedMessageList.isEmpty()) {
+              isWaitingResponse = true;
+              RECEIVER_LOCK.wait();
+              isWaitingResponse = false;
+            }
           }
         }
         if(!isAlive()) {
@@ -347,7 +354,7 @@ abstract class MessagingInterface {
       return;
     }
     synchronized(oos) {
-//      System.err.println("SEND: " + message.getID() + ", " + message.getClass().getName());
+//      System.err.println("SEND: " + message.getID() + ", " + message);
       oos.writeObject(message);
       oos.flush();
     }
@@ -357,7 +364,7 @@ abstract class MessagingInterface {
     Object o = MessagingInterface.this.ois.readObject();
     if(o instanceof Message) {
       Message message = (Message)o;
-//      System.err.println("RECV: " + message.getID() + ", " + message.getClass().getName());
+//      System.err.println("RECV: " + message.getID() + ", " + message);
       return message;
     }
     System.err.println("Unknown message: " + o);

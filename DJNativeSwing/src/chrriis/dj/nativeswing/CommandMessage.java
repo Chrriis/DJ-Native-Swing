@@ -36,11 +36,12 @@ public abstract class CommandMessage extends Message {
   
   @Override
   public String toString() {
+    String s = super.toString();
     if(args == null || args.length == 0) {
-      return getClass().getName() + "()";
+      return s + "()";
     }
     StringBuilder sb = new StringBuilder();
-    sb.append(getClass().getName()).append('(');
+    sb.append(s).append('(');
     for(int i=0; i<args.length; i++) {
       Object arg = args[i];
       if(i > 0) {
