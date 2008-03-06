@@ -572,6 +572,14 @@ public abstract class NativeComponent extends Canvas {
     return isValidControl && NativeInterfaceHandler._Internal_.isInterfaceAlive();
   }
   
+  public void invalidateControl(String invalidControlText) {
+    if(isValidControl) {
+      isValidControl = false;
+      this.invalidControlText = "Invalid " + getClass().getName() + "[" + hashCode() + "]\n\n" + invalidControlText;
+      repaint();
+    }
+  }
+  
   private Options options;
   
   private void setOptions(Options options) {
