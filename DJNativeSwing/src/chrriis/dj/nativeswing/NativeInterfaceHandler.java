@@ -347,7 +347,7 @@ public class NativeInterfaceHandler {
           argList.add(param);
         }
       }
-      argList.add("-Ddj.nativeswing.debug.messages=" + Boolean.parseBoolean(System.getProperty("dj.nativeswing.debug.messages")));
+      argList.add("-Ddj.nativeswing.messaging.debug=" + Boolean.parseBoolean(System.getProperty("dj.nativeswing.messaging.debug")));
       argList.add("-classpath");
       argList.add(sb.toString());
       argList.add(NativeInterfaceHandler.class.getName());
@@ -368,7 +368,7 @@ public class NativeInterfaceHandler {
   }
   
   private static MessagingInterface createMessagingInterface(NativeInterfaceInitOptions nativeInterfaceInitOptions) {
-    int port = Integer.parseInt(System.getProperty("dj.nativeswing.port", "-1"));
+    int port = Integer.parseInt(System.getProperty("dj.nativeswing.messaging.port", "-1"));
     if(port <= 0) {
       ServerSocket serverSocket;
       try {
@@ -385,7 +385,7 @@ public class NativeInterfaceHandler {
       }
     }
     Process p;
-    if(Boolean.valueOf(System.getProperty("dj.nativeswing.connect"))) {
+    if(Boolean.parseBoolean(System.getProperty("dj.nativeswing.messaging.createprocess"))) {
       p = null;
     } else {
       p = createProcess(nativeInterfaceInitOptions, port);
@@ -540,7 +540,7 @@ public class NativeInterfaceHandler {
       }
     }
     final ServerSocket serverSocket_ = serverSocket;
-    if(!Boolean.valueOf(System.getProperty("dj.nativeswing.native.keepalive"))) {
+    if(!Boolean.parseBoolean(System.getProperty("dj.nativeswing.native.keepalive"))) {
       Thread shutdownThread = new Thread("NativeSwing Shutdown") {
         @Override
         public void run() {

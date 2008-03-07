@@ -322,7 +322,7 @@ class NativeWebBrowser extends NativeComponent {
   
   protected static Control createControl(Shell shell) {
     int style = SWT.NONE;
-    if("mozilla".equals(System.getProperty("dj.nativeswing.webbrowser"))) {
+    if("mozilla".equals(System.getProperty("dj.nativeswing.ui.webbrowser"))) {
       style |= SWT.MOZILLA;
     }
     final Browser browser = new Browser(shell, style);

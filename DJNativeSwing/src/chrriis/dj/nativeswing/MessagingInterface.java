@@ -29,7 +29,7 @@ import chrriis.dj.nativeswing.ui.NativeComponent;
  */
 abstract class MessagingInterface {
 
-  private boolean isDebuggingMessages = Boolean.parseBoolean(System.getProperty("dj.nativeswing.debug.messages"));
+  private boolean isDebuggingMessages = Boolean.parseBoolean(System.getProperty("dj.nativeswing.messaging.debug"));
   
   private static class CommandResultMessage extends Message {
 
