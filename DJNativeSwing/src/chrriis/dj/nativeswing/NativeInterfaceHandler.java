@@ -385,7 +385,7 @@ public class NativeInterfaceHandler {
       }
     }
     Process p;
-    if(Boolean.parseBoolean(System.getProperty("dj.nativeswing.messaging.createprocess"))) {
+    if(Boolean.parseBoolean(System.getProperty("dj.nativeswing.messaging.nocreateprocess"))) {
       p = null;
     } else {
       p = createProcess(nativeInterfaceInitOptions, port);
