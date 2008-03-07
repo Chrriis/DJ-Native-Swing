@@ -93,7 +93,7 @@ public class NativeInterfaceHandler {
       return nativeClassPathReferenceResources;
     }
     
-    public void setPeerVMParams(String[] peerVMParams) {
+    public void setPeerVMParams(String... peerVMParams) {
       this.peerVMParams = peerVMParams;
     }
     
@@ -101,7 +101,7 @@ public class NativeInterfaceHandler {
       return peerVMParams;
     }
     
-    public void setPeerVMClasspath(String[] peerVMClasspath) {
+    public void setPeerVMClasspath(String... peerVMClasspath) {
       this.peerVMClasspath = peerVMClasspath;
     }
     
@@ -368,6 +368,9 @@ public class NativeInterfaceHandler {
       argList.add(sb.toString());
       argList.add(NativeInterfaceHandler.class.getName());
       argList.add(String.valueOf(port));
+      if(Boolean.parseBoolean(System.getProperty("dj.nativeswing.native.commandline"))) {
+        System.err.println("Native Command: " + Arrays.toString(argList.toArray()));
+      }
       builder.command(argList);
       try {
         p = builder.start();
