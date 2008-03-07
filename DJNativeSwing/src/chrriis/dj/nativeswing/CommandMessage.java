@@ -15,11 +15,14 @@ public abstract class CommandMessage extends Message {
   protected Object[] args;
   
   public void setArgs(Object... args) {
+    if(args.length == 0) {
+      args = null;
+    }
     this.args = args;
   }
   
   public CommandMessage(Object... args) {
-    this.args = args;
+    setArgs(args);
   }
   
   public void asyncExecArgs(Object... args) {

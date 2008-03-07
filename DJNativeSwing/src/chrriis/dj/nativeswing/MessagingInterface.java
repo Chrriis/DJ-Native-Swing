@@ -29,6 +29,8 @@ import chrriis.dj.nativeswing.ui.NativeComponent;
  */
 abstract class MessagingInterface {
 
+  private boolean isDebuggingMessages = Boolean.parseBoolean(System.getProperty("dj.nativeswing.debug.messages"));
+  
   private static class CommandResultMessage extends Message {
 
     private int originalID;
@@ -174,6 +176,12 @@ abstract class MessagingInterface {
   }
   
   private CommandResultMessage runMessage(Message message) {
+    if(isDebuggingMessages) {
+      synchronized(System.err) {
+        System.err.println(">RUN: " + message.getID() + ", " + message);
+      }
+    }
+    CommandResultMessage commandResultMessage;
     if(message instanceof CommandMessage) {
       CommandMessage commandMessage = (CommandMessage)message;
       Object result = null;
@@ -186,18 +194,24 @@ abstract class MessagingInterface {
         }
       }
       if(commandMessage.isSyncExec()) {
-        CommandResultMessage commandResultMessage = new CommandResultMessage(commandMessage.getID(), result, throwable);
+        commandResultMessage = new CommandResultMessage(commandMessage.getID(), result, throwable);
         asyncExec(commandResultMessage);
-        return commandResultMessage;
+      } else {
+        if(throwable != null) {
+          throwable.printStackTrace();
+        }
+        commandResultMessage = new CommandResultMessage(message.getID(), result, throwable);
       }
-      if(throwable != null) {
-        throwable.printStackTrace();
+    } else {
+      commandResultMessage = new CommandResultMessage(message.getID(), null, null);
+      if(message.isSyncExec()) {
+        asyncExec(commandResultMessage);
       }
-      return new CommandResultMessage(message.getID(), result, throwable);
     }
-    CommandResultMessage commandResultMessage = new CommandResultMessage(message.getID(), null, null);
-    if(message.isSyncExec()) {
-      asyncExec(commandResultMessage);
+    if(isDebuggingMessages) {
+      synchronized(System.err) {
+        System.err.println("<RUN: " + message.getID());
+      }
     }
     return commandResultMessage;
   }
@@ -328,6 +342,11 @@ abstract class MessagingInterface {
   }
   
   private Object processCommandResult(CommandResultMessage commandResultMessage) {
+    if(isDebuggingMessages) {
+      synchronized(System.err) {
+        System.err.println("<USE: " + commandResultMessage.getID());
+      }
+    }
     Throwable exception = commandResultMessage.getException();
     if(exception != null) {
       if(exception instanceof RuntimeException) {
@@ -353,8 +372,12 @@ abstract class MessagingInterface {
       printFailedInvocation(message);
       return;
     }
+    if(isDebuggingMessages) {
+      synchronized(System.err) {
+        System.err.println("SEND: " + message.getID() + ", " + message);
+      }
+    }
     synchronized(oos) {
-//      System.err.println("SEND: " + message.getID() + ", " + message);
       oos.writeObject(message);
       oos.flush();
     }
@@ -364,7 +387,11 @@ abstract class MessagingInterface {
     Object o = MessagingInterface.this.ois.readObject();
     if(o instanceof Message) {
       Message message = (Message)o;
-//      System.err.println("RECV: " + message.getID() + ", " + message);
+      if(isDebuggingMessages) {
+        synchronized(System.err) {
+          System.err.println("RECV: " + message.getID() + ", " + message);
+        }
+      }
       return message;
     }
     System.err.println("Unknown message: " + o);

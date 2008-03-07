@@ -265,12 +265,6 @@ public abstract class NativeComponent extends Canvas {
   
   private static class CMJ_dispatchMouseEvent extends ControlCommandMessage {
     private static int buttonPressedCount;
-    private static Point lastLocation = new Point(-1, -1);
-    @Override
-    public void setArgs(Object... args) {
-      org.eclipse.swt.events.MouseEvent e = (org.eclipse.swt.events.MouseEvent)args[0];
-      super.setArgs(args[1], e.x, e.y, e.button, e.count, e.stateMask, e.display.getCursorLocation());
-    }
     @Override
     public Object run() {
       NativeComponent nativeComponent = getComponent();
@@ -293,11 +287,6 @@ public abstract class NativeComponent extends Canvas {
           break;
         case MouseEvent.MOUSE_DRAGGED:
         case MouseEvent.MOUSE_MOVED:
-          Point newLocation = new Point(e_x, e_y);
-          if(newLocation.equals(lastLocation)) {
-            return null;
-          }
-          lastLocation = newLocation;
           break;
       }
       int button = UIUtils.translateMouseButton(e_button);
@@ -332,12 +321,11 @@ public abstract class NativeComponent extends Canvas {
     }
   }
   
+  private static Object[] getKeyEventArgs(org.eclipse.swt.events.KeyEvent keyEvent, int keyEventType) {
+    return new Object[] {keyEventType, keyEvent.stateMask, keyEvent.character, keyEvent.keyCode};
+  }
+  
   private static class CMJ_dispatchKeyEvent extends ControlCommandMessage {
-    @Override
-    public void setArgs(Object... args) {
-      org.eclipse.swt.events.KeyEvent e = (org.eclipse.swt.events.KeyEvent)args[0];
-      super.setArgs(args[1], e.stateMask, e.character, e.keyCode);
-    }
     @Override
     public Object run() {
       NativeComponent nativeComponent = getComponent();
@@ -430,26 +418,58 @@ public abstract class NativeComponent extends Canvas {
     }
   }
 
+  private static Object[] getMouseEventArgs(Control control, org.eclipse.swt.events.MouseEvent e, int mouseEventType) {
+    org.eclipse.swt.events.MouseEvent lastEvent = (org.eclipse.swt.events.MouseEvent)control.getData("NS_LastMouseEvent");
+    if(lastEvent != null) {
+      Integer lastEventType = (Integer)control.getData("NS_LastMouseEventType");
+      if(lastEventType.intValue() == mouseEventType &&
+          lastEvent.x == e.x &&
+          lastEvent.y == e.y &&
+          lastEvent.button == e.button &&
+          lastEvent.count == e.count &&
+          lastEvent.stateMask == e.stateMask
+          ) {
+        return null;
+      }
+    }
+    control.setData("NS_LastMouseEvent", e);
+    control.setData("NS_LastMouseEventType", mouseEventType);
+    lastEvent = e;
+    return new Object[] {mouseEventType, e.x, e.y, e.button, e.count, e.stateMask, e.display.getCursorLocation()};
+  }
+  
   protected static void configureControl(final Control control, int componentID) {
     control.setData("NS_ID", componentID);
     control.addMouseListener(new MouseAdapter() {
       @Override
       public void mouseDown(org.eclipse.swt.events.MouseEvent e) {
-        NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), e, MouseEvent.MOUSE_PRESSED);
+        Object[] mouseEventArgs = getMouseEventArgs(control, e, MouseEvent.MOUSE_PRESSED);
+        if(mouseEventArgs != null) {
+          NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), mouseEventArgs);
+        }
       }
       @Override
       public void mouseUp(org.eclipse.swt.events.MouseEvent e) {
-        NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), e, MouseEvent.MOUSE_RELEASED);
+        Object[] mouseEventArgs = getMouseEventArgs(control, e, MouseEvent.MOUSE_RELEASED);
+        if(mouseEventArgs != null) {
+          NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), mouseEventArgs);
+        }
       }
     });
     control.addMouseMoveListener(new MouseMoveListener() {
       public void mouseMove(org.eclipse.swt.events.MouseEvent e) {
-        NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), e, MouseEvent.MOUSE_MOVED);
+        Object[] mouseEventArgs = getMouseEventArgs(control, e, MouseEvent.MOUSE_MOVED);
+        if(mouseEventArgs != null) {
+          NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), mouseEventArgs);
+        }
       }
     });
     control.addMouseWheelListener(new MouseWheelListener() {
       public void mouseScrolled(org.eclipse.swt.events.MouseEvent e) {
-        NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), e, MouseEvent.MOUSE_WHEEL);
+        Object[] mouseEventArgs = getMouseEventArgs(control, e, MouseEvent.MOUSE_WHEEL);
+        if(mouseEventArgs != null) {
+          NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), mouseEventArgs);
+        }
       }
     });
     control.addKeyListener(new KeyListener() {
@@ -457,12 +477,12 @@ public abstract class NativeComponent extends Canvas {
         if((e.stateMask & SWT.CONTROL) != 0 && e.keyCode == SWT.TAB) {
           e.doit = false;
         }
-        NativeComponent.asyncExec(control, new CMJ_dispatchKeyEvent(), e, KeyEvent.KEY_PRESSED);
+        NativeComponent.asyncExec(control, new CMJ_dispatchKeyEvent(), getKeyEventArgs(e, KeyEvent.KEY_PRESSED));
       }
       public void keyReleased(org.eclipse.swt.events.KeyEvent e) {
-        NativeComponent.asyncExec(control, new CMJ_dispatchKeyEvent(), e, KeyEvent.KEY_RELEASED);
+        NativeComponent.asyncExec(control, new CMJ_dispatchKeyEvent(), getKeyEventArgs(e, KeyEvent.KEY_RELEASED));
         // TODO: Maybe innacurate: swing may issue pressed events when a key is stuck. verify this behavior some day.
-        NativeComponent.asyncExec(control, new CMJ_dispatchKeyEvent(), e, KeyEvent.KEY_TYPED);
+        NativeComponent.asyncExec(control, new CMJ_dispatchKeyEvent(), getKeyEventArgs(e, KeyEvent.KEY_TYPED));
       }
     });
   }

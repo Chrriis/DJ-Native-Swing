@@ -347,6 +347,7 @@ public class NativeInterfaceHandler {
           argList.add(param);
         }
       }
+      argList.add("-Ddj.nativeswing.debug.messages=" + Boolean.parseBoolean(System.getProperty("dj.nativeswing.debug.messages")));
       argList.add("-classpath");
       argList.add(sb.toString());
       argList.add(NativeInterfaceHandler.class.getName());
@@ -447,10 +448,12 @@ public class NativeInterfaceHandler {
             // Flushing directly to the out stream freezes in Webstart.
             SwingUtilities.invokeLater(new Runnable() {
               public void run() {
-                try {
-                  out.write(byteArray);
-                } catch(Exception e) {
-                  e.printStackTrace();
+                synchronized (out) {
+                  try {
+                    out.write(byteArray);
+                  } catch(Exception e) {
+                    e.printStackTrace();
+                  }
                 }
               }
             });
