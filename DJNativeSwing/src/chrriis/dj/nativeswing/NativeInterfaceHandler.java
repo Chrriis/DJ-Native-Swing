@@ -59,6 +59,7 @@ public class NativeInterfaceHandler {
     private Class<?>[] nativeClassPathReferenceClasses;
     private String[] nativeClassPathReferenceResources;
     private String[] peerVMParams;
+    private String[] peerVMClasspath;
     
     public void setNativeSideRespawnedOnError(boolean isNativeSideRespawnedOnError) {
       this.isNativeSideRespawnedOnError = isNativeSideRespawnedOnError;
@@ -98,6 +99,14 @@ public class NativeInterfaceHandler {
     
     public String[] getPeerVMParams() {
       return peerVMParams;
+    }
+    
+    public void setPeerVMClasspath(String[] peerVMClasspath) {
+      this.peerVMClasspath = peerVMClasspath;
+    }
+    
+    public String[] getPeerVMClasspath() {
+      return peerVMClasspath;
     }
     
   }
@@ -290,6 +299,13 @@ public class NativeInterfaceHandler {
     String javaHome = System.getProperty("java.home");
     ProcessBuilder builder = new ProcessBuilder();
     List<String> classPathList = new ArrayList<String>();
+    if(nativeInterfaceInitOptions.peerVMClasspath != null) {
+      for(String path: nativeInterfaceInitOptions.peerVMClasspath) {
+        if(!classPathList.contains(path)) {
+          classPathList.add(path);
+        }
+      }
+    }
     String pathSeparator = System.getProperty("path.separator");
     String classPath = System.getProperty("java.class.path");
     if(classPath != null && classPath.length() != 0) {
