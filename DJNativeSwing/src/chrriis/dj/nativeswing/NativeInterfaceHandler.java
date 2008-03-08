@@ -45,8 +45,6 @@ import org.eclipse.swt.widgets.Display;
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.ui.NativeComponent;
 
-import com.sun.jna.Native;
-
 /**
  * @author Christopher Deckers
  */
@@ -307,21 +305,18 @@ public class NativeInterfaceHandler {
       }
     }
     String pathSeparator = System.getProperty("path.separator");
-    String classPath = System.getProperty("java.class.path");
-    if(classPath != null && classPath.length() != 0) {
-      for(String path: classPath.split(pathSeparator)) {
-        if(!classPathList.contains(path)) {
-          classPathList.add(path);
-        }
-      }
-    }
+    // classpath can be huge and useless (cf OSGi implementations like Felix), so better get the classpath of individual files
+//    String classPath = System.getProperty("java.class.path");
+//    if(classPath != null && classPath.length() != 0) {
+//      for(String path: classPath.split(pathSeparator)) {
+//        if(!classPathList.contains(path)) {
+//          classPathList.add(path);
+//        }
+//      }
+//    }
     List<Object> referenceList = new ArrayList<Object>();
     referenceList.add(NativeInterfaceHandler.class);
-    referenceList.add(Display.class);
-    referenceList.add(Native.class);
-    // These are not mandatory, so we have to use the class name to avoid exceptions being thrown.
-    referenceList.add("com/sun/jna/examples/WindowUtils.class");
-    referenceList.add("fckeditor/fckeditor.js");
+    referenceList.add("org/eclipse/swt/widgets/Display.class");
     Class<?>[] nativeClassPathReferenceClasses = nativeInterfaceInitOptions.getNativeClassPathReferenceClasses();
     if(nativeClassPathReferenceClasses != null) {
       referenceList.addAll(Arrays.asList(nativeClassPathReferenceClasses));
