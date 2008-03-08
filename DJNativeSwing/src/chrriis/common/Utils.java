@@ -160,4 +160,15 @@ public class Utils {
     return null;
   }
   
+  public static void deleteAll(File fileOrDir) {
+    if(!fileOrDir.delete()) {
+      if(fileOrDir.isDirectory()) {
+        for(File file: fileOrDir.listFiles()) {
+          deleteAll(file);
+        }
+        fileOrDir.delete();
+      }
+    }
+  }
+  
 }

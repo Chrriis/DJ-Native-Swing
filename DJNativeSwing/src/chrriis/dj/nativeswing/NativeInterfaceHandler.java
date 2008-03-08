@@ -17,8 +17,10 @@ import java.awt.event.AWTEventListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowEvent;
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -42,7 +44,9 @@ import javax.swing.event.EventListenerList;
 
 import org.eclipse.swt.widgets.Display;
 
+import chrriis.common.NetworkURLClassLoader;
 import chrriis.common.Utils;
+import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.ui.NativeComponent;
 
 /**
@@ -334,8 +338,31 @@ public class NativeInterfaceHandler {
         }
       }
     }
+    boolean isProxyUsed = false;
     if(classPathList.isEmpty()) {
-      throw new IllegalStateException("Cannot find a suitable classpath to spawn VM!");
+      File classPathFile = new File(System.getProperty("java.io.tmpdir"), ".djnativeswing/classpath");
+      Utils.deleteAll(classPathFile);
+      String classPath = NetworkURLClassLoader.class.getName().replace('.', '/') + ".class";
+      File mainClassFile = new File(classPathFile, classPath);
+      mainClassFile.getParentFile().mkdirs();
+      if(!mainClassFile.exists()) {
+        try {
+          BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(mainClassFile));
+          BufferedInputStream in = new BufferedInputStream(NativeInterfaceHandler.class.getResourceAsStream("/" + classPath));
+          byte[] bytes = new byte[1024];
+          for(int n; (n=in.read(bytes)) != -1; ) {
+            out.write(bytes, 0, n);
+          }
+          in.close();
+          out.close();
+        } catch(Exception e) {
+          throw new IllegalStateException("Cannot find a suitable classpath to spawn VM!");
+        }
+        mainClassFile.deleteOnExit();
+      }
+      isProxyUsed = true;
+      classPathList.add(classPathFile.getAbsolutePath());
+//      throw new IllegalStateException("Cannot find a suitable classpath to spawn VM!");
     }
     StringBuilder sb = new StringBuilder();
     for(int i=0; i<classPathList.size(); i++) {
@@ -361,6 +388,10 @@ public class NativeInterfaceHandler {
       argList.add("-Ddj.nativeswing.messaging.debug=" + Boolean.parseBoolean(System.getProperty("dj.nativeswing.messaging.debug")));
       argList.add("-classpath");
       argList.add(sb.toString());
+      if(isProxyUsed) {
+        argList.add(NetworkURLClassLoader.class.getName());
+        argList.add(WebServer.getDefaultWebServer().getClassPathResourceURL("", ""));
+      }
       argList.add(NativeInterfaceHandler.class.getName());
       argList.add(String.valueOf(port));
       if(Boolean.parseBoolean(System.getProperty("dj.nativeswing.native.commandline"))) {
