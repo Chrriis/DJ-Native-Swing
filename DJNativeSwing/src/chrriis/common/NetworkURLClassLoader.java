@@ -57,7 +57,7 @@ public class NetworkURLClassLoader extends ClassLoader {
     if(clazz != null) {
       return clazz;
     }
-    throw new ClassNotFoundException();
+    return super.findClass(name);
   }
   
   public static void main(String[] args) throws Exception {
