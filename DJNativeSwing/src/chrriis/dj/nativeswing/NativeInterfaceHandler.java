@@ -61,7 +61,6 @@ public class NativeInterfaceHandler {
     private Class<?>[] nativeClassPathReferenceClasses;
     private String[] nativeClassPathReferenceResources;
     private String[] peerVMParams;
-    private String[] peerVMClasspath;
     
     public void setNativeSideRespawnedOnError(boolean isNativeSideRespawnedOnError) {
       this.isNativeSideRespawnedOnError = isNativeSideRespawnedOnError;
@@ -101,14 +100,6 @@ public class NativeInterfaceHandler {
     
     public String[] getPeerVMParams() {
       return peerVMParams;
-    }
-    
-    public void setPeerVMClasspath(String... peerVMClasspath) {
-      this.peerVMClasspath = peerVMClasspath;
-    }
-    
-    public String[] getPeerVMClasspath() {
-      return peerVMClasspath;
     }
     
   }
@@ -298,16 +289,7 @@ public class NativeInterfaceHandler {
   }
   
   private static Process createProcess(NativeInterfaceInitOptions nativeInterfaceInitOptions, int port) {
-    String javaHome = System.getProperty("java.home");
-    ProcessBuilder builder = new ProcessBuilder();
     List<String> classPathList = new ArrayList<String>();
-    if(nativeInterfaceInitOptions.peerVMClasspath != null) {
-      for(String path: nativeInterfaceInitOptions.peerVMClasspath) {
-        if(!classPathList.contains(path)) {
-          classPathList.add(path);
-        }
-      }
-    }
     String pathSeparator = System.getProperty("path.separator");
     // classpath can be huge and useless (cf OSGi implementations like Felix), so better get the classpath of individual files
 //    String classPath = System.getProperty("java.class.path");
@@ -318,28 +300,43 @@ public class NativeInterfaceHandler {
 //        }
 //      }
 //    }
-    List<Object> referenceList = new ArrayList<Object>();
-    referenceList.add(NativeInterfaceHandler.class);
-    referenceList.add("org/eclipse/swt/widgets/Display.class");
-    Class<?>[] nativeClassPathReferenceClasses = nativeInterfaceInitOptions.getNativeClassPathReferenceClasses();
-    if(nativeClassPathReferenceClasses != null) {
-      referenceList.addAll(Arrays.asList(nativeClassPathReferenceClasses));
-    }
-    String[] nativeClassPathReferenceResources = nativeInterfaceInitOptions.getNativeClassPathReferenceResources();
-    if(nativeClassPathReferenceResources != null) {
-      referenceList.addAll(Arrays.asList(nativeClassPathReferenceResources));
-    }
-    for(Object o: referenceList) {
+    boolean isMandatoryPathComplete = true;
+    Object[] mandatoryClassPathReferences = new Object[] {
+        NativeInterfaceHandler.class,
+        "org_/eclipse/swt/widgets/Display.class",
+    };
+    for(Object o: mandatoryClassPathReferences) {
       File clazzClassPath = o instanceof Class? Utils.getClassPathFile((Class<?>)o): Utils.getClassPathFile((String)o);
       if(clazzClassPath != null) {
-        String path = clazzClassPath.getAbsolutePath();
-        if(!classPathList.contains(path)) {
-          classPathList.add(path);
-        }
+        classPathList.add(clazzClassPath.getAbsolutePath());
+      } else {
+        isMandatoryPathComplete = false;
       }
     }
-    boolean isProxyUsed = false;
-    if(classPathList.isEmpty()) {
+    boolean isProxyClassLoaderUsed = false;
+    if(isMandatoryPathComplete) {
+      // We add more to the classpath
+      List<Object> referenceList = new ArrayList<Object>();
+      Class<?>[] nativeClassPathReferenceClasses = nativeInterfaceInitOptions.getNativeClassPathReferenceClasses();
+      if(nativeClassPathReferenceClasses != null) {
+        referenceList.addAll(Arrays.asList(nativeClassPathReferenceClasses));
+      }
+      String[] nativeClassPathReferenceResources = nativeInterfaceInitOptions.getNativeClassPathReferenceResources();
+      if(nativeClassPathReferenceResources != null) {
+        referenceList.addAll(Arrays.asList(nativeClassPathReferenceResources));
+      }
+      for(Object o: referenceList) {
+        File clazzClassPath = o instanceof Class? Utils.getClassPathFile((Class<?>)o): Utils.getClassPathFile((String)o);
+        if(clazzClassPath != null) {
+          String path = clazzClassPath.getAbsolutePath();
+          if(!classPathList.contains(path)) {
+            classPathList.add(path);
+          }
+        }
+      }
+    } else {
+      // We set only one item in the classpath: the path to the proxy class loader.
+      classPathList.clear();
       File classPathFile = new File(System.getProperty("java.io.tmpdir"), ".djnativeswing/classpath");
       Utils.deleteAll(classPathFile);
       String classPath = NetworkURLClassLoader.class.getName().replace('.', '/') + ".class";
@@ -356,13 +353,12 @@ public class NativeInterfaceHandler {
           in.close();
           out.close();
         } catch(Exception e) {
-          throw new IllegalStateException("Cannot find a suitable classpath to spawn VM!");
+//          throw new IllegalStateException("Cannot find a suitable classpath to spawn VM!");
         }
         mainClassFile.deleteOnExit();
       }
-      isProxyUsed = true;
+      isProxyClassLoaderUsed = true;
       classPathList.add(classPathFile.getAbsolutePath());
-//      throw new IllegalStateException("Cannot find a suitable classpath to spawn VM!");
     }
     StringBuilder sb = new StringBuilder();
     for(int i=0; i<classPathList.size(); i++) {
@@ -371,35 +367,38 @@ public class NativeInterfaceHandler {
       }
       sb.append(classPathList.get(i));
     }
+    String javaHome = System.getProperty("java.home");
     String[] candidateBinaries = new String[] {
         new File(javaHome, "bin/java").getAbsolutePath(),
         new File("/usr/lib/java").getAbsolutePath(),
         "java",
     };
     Process p = null;
+    // Create the argument list for the Java process that will be created
+    List<String> argList = new ArrayList<String>();
+    argList.add(null);
+    if(nativeInterfaceInitOptions.peerVMParams != null) {
+      for(String param: nativeInterfaceInitOptions.peerVMParams) {
+        argList.add(param);
+      }
+    }
+    argList.add("-Ddj.nativeswing.messaging.debug=" + Boolean.parseBoolean(System.getProperty("dj.nativeswing.messaging.debug")));
+    argList.add("-classpath");
+    argList.add(sb.toString());
+    if(isProxyClassLoaderUsed) {
+      argList.add(NetworkURLClassLoader.class.getName());
+      argList.add(WebServer.getDefaultWebServer().getClassPathResourceURL("", ""));
+    }
+    argList.add(NativeInterfaceHandler.class.getName());
+    argList.add(String.valueOf(port));
+    // Try these arguments with the various candidate binaries.
     for(String candidateBinary: candidateBinaries) {
-      List<String> argList = new ArrayList<String>();
-      argList.add(candidateBinary);
-      if(nativeInterfaceInitOptions.peerVMParams != null) {
-        for(String param: nativeInterfaceInitOptions.peerVMParams) {
-          argList.add(param);
-        }
-      }
-      argList.add("-Ddj.nativeswing.messaging.debug=" + Boolean.parseBoolean(System.getProperty("dj.nativeswing.messaging.debug")));
-      argList.add("-classpath");
-      argList.add(sb.toString());
-      if(isProxyUsed) {
-        argList.add(NetworkURLClassLoader.class.getName());
-        argList.add(WebServer.getDefaultWebServer().getClassPathResourceURL("", ""));
-      }
-      argList.add(NativeInterfaceHandler.class.getName());
-      argList.add(String.valueOf(port));
+      argList.set(0, candidateBinary);
       if(Boolean.parseBoolean(System.getProperty("dj.nativeswing.native.commandline"))) {
         System.err.println("Native Command: " + Arrays.toString(argList.toArray()));
       }
-      builder.command(argList);
       try {
-        p = builder.start();
+        p = new ProcessBuilder(argList).start();
         break;
       } catch(IOException e) {
       }
@@ -436,7 +435,7 @@ public class NativeInterfaceHandler {
       p = createProcess(nativeInterfaceInitOptions, port);
     }
     Socket socket = null;
-    for(int i=19; i>=0; i--) {
+    for(int i=24; i>=0; i--) {
       try {
         socket = new Socket("127.0.0.1", port);
         break;
@@ -446,7 +445,7 @@ public class NativeInterfaceHandler {
         }
       }
       try {
-        Thread.sleep(100);
+        Thread.sleep(200);
       } catch(Exception e) {
       }
     }
