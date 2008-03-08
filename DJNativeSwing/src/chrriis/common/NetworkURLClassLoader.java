@@ -20,7 +20,7 @@ public class NetworkURLClassLoader extends ClassLoader {
 
   private URL codeBaseURL;
   
-  NetworkURLClassLoader(String codeBase) throws MalformedURLException {
+  public NetworkURLClassLoader(String codeBase) throws MalformedURLException {
     this.codeBaseURL = new URL(codeBase);
   }
   
