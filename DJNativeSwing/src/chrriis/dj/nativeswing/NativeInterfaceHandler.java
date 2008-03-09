@@ -291,50 +291,39 @@ public class NativeInterfaceHandler {
   private static Process createProcess(NativeInterfaceInitOptions nativeInterfaceInitOptions, int port) {
     List<String> classPathList = new ArrayList<String>();
     String pathSeparator = System.getProperty("path.separator");
-    // classpath can be huge and useless (cf OSGi implementations like Felix), so better get the classpath of individual files
-//    String classPath = System.getProperty("java.class.path");
-//    if(classPath != null && classPath.length() != 0) {
-//      for(String path: classPath.split(pathSeparator)) {
-//        if(!classPathList.contains(path)) {
-//          classPathList.add(path);
-//        }
-//      }
-//    }
-    boolean isMandatoryPathComplete = true;
-    Object[] mandatoryClassPathReferences = new Object[] {
-        NativeInterfaceHandler.class,
-        "org/eclipse/swt/widgets/Display.class",
-    };
-    for(Object o: mandatoryClassPathReferences) {
-      File clazzClassPath = o instanceof Class? Utils.getClassPathFile((Class<?>)o): Utils.getClassPathFile((String)o);
-      if(clazzClassPath != null) {
-        classPathList.add(clazzClassPath.getAbsolutePath());
-      } else {
-        isMandatoryPathComplete = false;
-      }
+    List<Object> referenceList = new ArrayList<Object>();
+    referenceList.add(NativeInterfaceHandler.class);
+    referenceList.add("org/eclipse/swt/widgets/Display.class");
+    Class<?>[] nativeClassPathReferenceClasses = nativeInterfaceInitOptions.getNativeClassPathReferenceClasses();
+    if(nativeClassPathReferenceClasses != null) {
+      referenceList.addAll(Arrays.asList(nativeClassPathReferenceClasses));
+    }
+    String[] nativeClassPathReferenceResources = nativeInterfaceInitOptions.getNativeClassPathReferenceResources();
+    if(nativeClassPathReferenceResources != null) {
+      referenceList.addAll(Arrays.asList(nativeClassPathReferenceResources));
     }
     boolean isProxyClassLoaderUsed = false;
-    if(isMandatoryPathComplete) {
-      // We add more to the classpath
-      List<Object> referenceList = new ArrayList<Object>();
-      Class<?>[] nativeClassPathReferenceClasses = nativeInterfaceInitOptions.getNativeClassPathReferenceClasses();
-      if(nativeClassPathReferenceClasses != null) {
-        referenceList.addAll(Arrays.asList(nativeClassPathReferenceClasses));
-      }
-      String[] nativeClassPathReferenceResources = nativeInterfaceInitOptions.getNativeClassPathReferenceResources();
-      if(nativeClassPathReferenceResources != null) {
-        referenceList.addAll(Arrays.asList(nativeClassPathReferenceResources));
-      }
-      for(Object o: referenceList) {
-        File clazzClassPath = o instanceof Class? Utils.getClassPathFile((Class<?>)o): Utils.getClassPathFile((String)o);
-        if(clazzClassPath != null) {
-          String path = clazzClassPath.getAbsolutePath();
-          if(!classPathList.contains(path)) {
-            classPathList.add(path);
-          }
+    for(Object o: referenceList) {
+      File clazzClassPath;
+      if(o instanceof Class) {
+        clazzClassPath = Utils.getClassPathFile((Class<?>)o);
+      } else {
+        clazzClassPath = Utils.getClassPathFile((String)o);
+        if(NativeInterfaceHandler.class.getResource("/" + o) == null) {
+          throw new IllegalStateException("A resource that is needed in the classpath is missing: " + o);
         }
       }
-    } else {
+      clazzClassPath = o instanceof Class? Utils.getClassPathFile((Class<?>)o): Utils.getClassPathFile((String)o);
+      if(clazzClassPath != null) {
+        String path = clazzClassPath.getAbsolutePath();
+        if(!classPathList.contains(path)) {
+          classPathList.add(path);
+        }
+      } else {
+        isProxyClassLoaderUsed = true;
+      }
+    }
+    if(isProxyClassLoaderUsed) {
       // We set only one item in the classpath: the path to the proxy class loader.
       classPathList.clear();
       File classPathFile = new File(System.getProperty("java.io.tmpdir"), ".djnativeswing/classpath");
@@ -357,7 +346,6 @@ public class NativeInterfaceHandler {
         }
         mainClassFile.deleteOnExit();
       }
-      isProxyClassLoaderUsed = true;
       classPathList.add(classPathFile.getAbsolutePath());
     }
     StringBuilder sb = new StringBuilder();
