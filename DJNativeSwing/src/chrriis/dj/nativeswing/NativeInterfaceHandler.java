@@ -336,9 +336,7 @@ public class NativeInterfaceHandler {
           BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(mainClassFile));
           BufferedInputStream in = new BufferedInputStream(NativeInterfaceHandler.class.getResourceAsStream("/" + classPath));
           byte[] bytes = new byte[1024];
-          for(int n; (n=in.read(bytes)) != -1; ) {
-            out.write(bytes, 0, n);
-          }
+          for(int n; (n=in.read(bytes)) != -1; out.write(bytes, 0, n));
           in.close();
           out.close();
         } catch(Exception e) {

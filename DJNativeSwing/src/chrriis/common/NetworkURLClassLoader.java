@@ -42,9 +42,7 @@ public class NetworkURLClassLoader extends ClassLoader {
     try {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       byte[] bytes = new byte[1024];
-      for(int n; (n=in.read(bytes)) != -1; ) {
-        baos.write(bytes, 0, n);
-      }
+      for(int n; (n=in.read(bytes)) != -1; baos.write(bytes, 0, n));
       bytes = baos.toByteArray();
       clazz = defineClass(name, bytes, 0, bytes.length);
     } catch(Exception e) {

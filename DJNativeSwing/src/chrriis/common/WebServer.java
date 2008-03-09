@@ -524,9 +524,7 @@ public class WebServer {
               } else {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 byte[] bytes = new byte[1024];
-                for(int i; (i=in.read(bytes)) != -1; ) {
-                  baos.write(bytes, 0, i);
-                }
+                for(int i; (i=in.read(bytes)) != -1; baos.write(bytes, 0, i));
                 dataBytes = baos.toByteArray();
               }
               String boundary = "--" + contentType.substring(contentType.indexOf("boundary=") + "boundary=".length());
@@ -560,9 +558,7 @@ public class WebServer {
                   headerMap.put(key, value);
                 }
                 ByteArrayOutputStream aos = new ByteArrayOutputStream();
-                for(int n; (n=din.read()) != -1; ) {
-                  aos.write(n);
-                }
+                for(int n; (n=din.read()) != -1; aos.write(n));
                 httpData.setBytes(aos.toByteArray());
               }
             } else {
@@ -575,9 +571,7 @@ public class WebServer {
               } else {
                 StringBuilder sb = new StringBuilder();
                 char[] chars = new char[1024];
-                for(int i; (i=reader.read(chars)) != -1; ) {
-                  sb.append(chars, 0, i);
-                }
+                for(int i; (i=reader.read(chars)) != -1; sb.append(chars, 0, i));
                 dataContent = sb.toString();
               }
               HTTPData httpData = new HTTPData();
@@ -600,9 +594,7 @@ public class WebServer {
           BufferedInputStream resourceStream = new BufferedInputStream(resourceStream_);
           writeHTTPHeaders(out, 200, webServerContent.getContentType(), webServerContent.getContentLength(), webServerContent.getLastModified());
           byte[] bytes = new byte[4096];
-          for(int i; (i=resourceStream.read(bytes)) != -1; ) {
-            out.write(bytes, 0, i);
-          }
+          for(int i; (i=resourceStream.read(bytes)) != -1; out.write(bytes, 0, i));
           try {
             resourceStream.close();
           } catch(Exception e) {
