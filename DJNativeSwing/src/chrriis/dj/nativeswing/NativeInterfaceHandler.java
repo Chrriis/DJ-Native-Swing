@@ -303,7 +303,7 @@ public class NativeInterfaceHandler {
     boolean isMandatoryPathComplete = true;
     Object[] mandatoryClassPathReferences = new Object[] {
         NativeInterfaceHandler.class,
-        "org_/eclipse/swt/widgets/Display.class",
+        "org/eclipse/swt/widgets/Display.class",
     };
     for(Object o: mandatoryClassPathReferences) {
       File clazzClassPath = o instanceof Class? Utils.getClassPathFile((Class<?>)o): Utils.getClassPathFile((String)o);
