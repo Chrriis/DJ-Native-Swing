@@ -455,38 +455,26 @@ public class NativeInterfaceHandler {
   
   private static void connectStream(final PrintStream out, InputStream in) {
     final BufferedInputStream bin = new BufferedInputStream(in);
-    Thread streamThread = new Thread("NativeSwing Stream Connector") {
+    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    final Thread streamThread = new Thread("NativeSwing Stream Connector") {
       @Override
       public void run() {
         try {
-          ByteArrayOutputStream baos = new ByteArrayOutputStream();
           String lineSeparator = System.getProperty("line.separator");
           byte lastByte = (byte)lineSeparator.charAt(lineSeparator.length() - 1);
           boolean addMessage = true;
           byte[] bytes = new byte[1024];
           for(int i; (i=bin.read(bytes)) != -1; ) {
-            baos.reset();
-            for(int j=0; j<i; j++) {
-              byte b = bytes[j];
-              if(addMessage) {
-                baos.write("NativeSwing: ".getBytes());
-              }
-              addMessage = b == lastByte;
-              baos.write(b);
-            }
-            final byte[] byteArray = baos.toByteArray();
-            // Flushing directly to the out stream freezes in Webstart.
-            SwingUtilities.invokeLater(new Runnable() {
-              public void run() {
-                synchronized (out) {
-                  try {
-                    out.write(byteArray);
-                  } catch(Exception e) {
-                    e.printStackTrace();
-                  }
+            synchronized(baos) {
+              for(int j=0; j<i; j++) {
+                byte b = bytes[j];
+                if(addMessage) {
+                  baos.write("NativeSwing: ".getBytes());
                 }
+                addMessage = b == lastByte;
+                baos.write(b);
               }
-            });
+            }
           }
         } catch(Exception e) {
         }
@@ -494,6 +482,32 @@ public class NativeInterfaceHandler {
     };
     streamThread.setDaemon(true);
     streamThread.start();
+    // Flushing directly to the out stream freezes in Webstart.
+    Thread flushThread = new Thread("NativeSwing Stream Connector Flush") {
+      @Override
+      public void run() {
+        while(streamThread.isAlive()) {
+          byte[] bytes;
+          synchronized (baos) {
+            bytes = baos.toByteArray();
+            baos.reset();
+          }
+          synchronized(out) {
+            try {
+              out.write(bytes);
+            } catch(Exception e) {
+              e.printStackTrace();
+            }
+          }
+          try {
+            sleep(50);
+          } catch(Exception e) {
+          }
+        }
+      }
+    };
+    flushThread.setDaemon(true);
+    flushThread.start();
   }
   
   private NativeInterfaceHandler() {}
@@ -636,8 +650,12 @@ public class NativeInterfaceHandler {
       }
     };
     while(display != null && !display.isDisposed()) {
-      if(!display.readAndDispatch()) {
-        display.sleep();
+      try {
+        if(!display.readAndDispatch()) {
+          display.sleep();
+        }
+      } catch(Exception e) {
+        e.printStackTrace();
       }
     }
   }

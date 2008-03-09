@@ -84,7 +84,8 @@ public class NavigationControl extends JPanel {
               isBlocked = true;
             } else if(newURL.startsWith("http://www.eclipse.org/")) {
               isBlocked = true;
-              JWebBrowser newWebBrowser = new JWebBrowser(webBrowser);
+              JWebBrowser newWebBrowser = new JWebBrowser();
+              newWebBrowser.copyAppearance(webBrowser);
               newWebBrowser.setURL(newURL);
               tabbedPane.addTab("www.eclipse.org", newWebBrowser);
             }

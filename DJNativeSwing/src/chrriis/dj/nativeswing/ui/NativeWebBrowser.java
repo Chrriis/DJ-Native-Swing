@@ -13,6 +13,7 @@ import java.awt.Window;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.net.URLDecoder;
+import java.util.regex.Pattern;
 
 import javax.swing.SwingUtilities;
 
@@ -37,8 +38,8 @@ import chrriis.dj.nativeswing.CommandMessage;
 import chrriis.dj.nativeswing.ui.event.WebBrowserEvent;
 import chrriis.dj.nativeswing.ui.event.WebBrowserListener;
 import chrriis.dj.nativeswing.ui.event.WebBrowserNavigationEvent;
-import chrriis.dj.nativeswing.ui.event.WebBrowserWindowWillOpenEvent;
 import chrriis.dj.nativeswing.ui.event.WebBrowserWindowOpeningEvent;
+import chrriis.dj.nativeswing.ui.event.WebBrowserWindowWillOpenEvent;
 
 /**
  * @author Christopher Deckers
@@ -96,12 +97,17 @@ class NativeWebBrowser extends NativeComponent {
       if(jWebBrowser == null) {
         return null;
       }
-      Window windowAncestor = SwingUtilities.getWindowAncestor(jWebBrowser);
-      if(windowAncestor == null) {
-        final JWebBrowserWindow webBrowserWindow = new JWebBrowserWindow(jWebBrowser);
-        webBrowserWindow.addNotify();
-      } else {
-        windowAncestor.addNotify();
+      if(!jWebBrowser.isInitialized()) {
+        Window windowAncestor = SwingUtilities.getWindowAncestor(jWebBrowser);
+        if(windowAncestor == null) {
+          final JWebBrowserWindow webBrowserWindow = new JWebBrowserWindow(jWebBrowser);
+          webBrowserWindow.addNotify();
+        } else {
+          windowAncestor.addNotify();
+        }
+        if(!jWebBrowser.isInitialized()) {
+          ((NativeWebBrowser)jWebBrowser.getDisplayComponent()).createResources();
+        }
       }
       return ((NativeComponent)jWebBrowser.getDisplayComponent()).getComponentID();
     }
@@ -482,18 +488,23 @@ class NativeWebBrowser extends NativeComponent {
   }
   
   private static class CMN_execute extends ControlCommandMessage {
+    private static Pattern JAVASCRIPT_LINE_COMMENT_PATTERN = Pattern.compile("^\\s*//.*$", Pattern.MULTILINE);
     @Override
     public Object run() {
-      return ((Browser)getControl()).execute((String)args[0]);
+      String script = (String)args[0];
+      // Remove line comments, because it does not work properly on Mozilla.
+      script = JAVASCRIPT_LINE_COMMENT_PATTERN.matcher(script).replaceAll("");
+      return ((Browser)getControl()).execute(script);
     }
   }
   
-  public boolean executeAndWait(String js) {
-    return Boolean.TRUE.equals(runSync(new CMN_execute(), js));
+  
+  public boolean executeAndWait(String script) {
+    return Boolean.TRUE.equals(runSync(new CMN_execute(), script));
   }
   
-  public void execute(String js) {
-    runAsync(new CMN_execute(), js);
+  public void execute(String script) {
+    runAsync(new CMN_execute(), script);
   }
   
   private static class CMN_stop extends ControlCommandMessage {

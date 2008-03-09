@@ -152,12 +152,14 @@ public class JWebBrowser extends JPanel implements Disposable {
     }
   }
 
-  public JWebBrowser(JWebBrowser webBrowser) {
-    this();
+  public void copyAppearance(JWebBrowser webBrowser) {
     setAddressBarVisible(webBrowser.isAddressBarVisible());
     setButtonBarVisible(webBrowser.isButtonBarVisible());
     setMenuBarVisible(webBrowser.isMenuBarVisible());
     setStatusBarVisible(webBrowser.isStatusBarVisible());
+  }
+  
+  public void copyContent(JWebBrowser webBrowser) {
     String url = webBrowser.getURL();
     if("about:blank".equals(url)) {
       setText(webBrowser.getText());
@@ -266,7 +268,10 @@ public class JWebBrowser extends JPanel implements Disposable {
     JMenuItem fileNewWindowMenuItem = new JMenuItem(RESOURCES.getString("FileNewWindowMenu"));
     fileNewWindowMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        JWebBrowserWindow webBrowserWindow = new JWebBrowserWindow(new JWebBrowser(JWebBrowser.this));
+        JWebBrowser webBrowser = new JWebBrowser();
+        webBrowser.copyAppearance(JWebBrowser.this);
+        webBrowser.copyContent(JWebBrowser.this);
+        JWebBrowserWindow webBrowserWindow = new JWebBrowserWindow(webBrowser);
         webBrowserWindow.setVisible(true);
       }
     });

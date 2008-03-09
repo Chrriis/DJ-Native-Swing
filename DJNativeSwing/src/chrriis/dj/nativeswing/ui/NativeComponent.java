@@ -225,11 +225,16 @@ public abstract class NativeComponent extends Canvas {
     setFocusable(true);
     addHierarchyListener(new HierarchyListener() {
       public void hierarchyChanged(HierarchyEvent e) {
-        if((e.getChangeFlags() & HierarchyEvent.PARENT_CHANGED) != 0) {
+        long changeFlags = e.getChangeFlags();
+        if((changeFlags & HierarchyEvent.PARENT_CHANGED) != 0) {
           Container parent = getParent();
           if(parent != null && !(parent instanceof NativeComponentHolder)) {
             throw new IllegalStateException("The native component cannot be added directly! Use the createEmbeddableComponent() method to get a component that can be added.");
           }
+        }
+        if((changeFlags & HierarchyEvent.SHOWING_CHANGED) != 0 && isShowing() && (!isInitialized() || isDisposed())) {
+          // addNotify is called just too early, so we wait until the component is showing. If it was disposed and is shown again, we have to trigger normal creation potentially raising an error.
+          createResources();
         }
       }
     });
@@ -509,13 +514,13 @@ public abstract class NativeComponent extends Canvas {
     }
   }
   
-  @Override
-  public void addNotify() {
-    super.addNotify();
+  protected void createResources() {
     NativeInterfaceHandler.checkUIThread();
     NativeInterfaceHandler._Internal_.addCanvas(this);
     if(initializationCommandMessageList == null) {
-      throw new IllegalStateException("A native component cannot be re-created after having been disposed! To achieve re-parenting, set the options to use a proxied filiation and a finalization-time destruction.");
+      isValidControl = false;
+      invalidControlText = "Failed to create " + NativeComponent.this.getClass().getName() + "[" + NativeComponent.this.hashCode() + "]\n\nReason:\nA native component cannot be re-created after having been disposed.";
+      throw new IllegalStateException("A native component cannot be re-created after having been disposed! To achieve re-parenting, set the options to use a proxied filiation and a destruction on finalization.");
     }
     List<CommandMessage> initializationCommandMessageList_ = initializationCommandMessageList;
     initializationCommandMessageList = null;
