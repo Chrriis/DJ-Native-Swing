@@ -232,10 +232,6 @@ public abstract class NativeComponent extends Canvas {
             throw new IllegalStateException("The native component cannot be added directly! Use the createEmbeddableComponent() method to get a component that can be added.");
           }
         }
-        if((changeFlags & HierarchyEvent.SHOWING_CHANGED) != 0 && isShowing() && (!isInitialized() || isDisposed())) {
-          // addNotify is called just too early, so we wait until the component is showing. If it was disposed and is shown again, we have to trigger normal creation potentially raising an error.
-          createResources();
-        }
       }
     });
   }
@@ -514,6 +510,18 @@ public abstract class NativeComponent extends Canvas {
     }
   }
   
+  @Override
+  public void addNotify() {
+    super.addNotify();
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        if(!isInitialized && !isDisposed) {
+          createResources();
+        }
+      }
+    });
+  }
+  
   protected void createResources() {
     NativeInterfaceHandler.checkUIThread();
     NativeInterfaceHandler._Internal_.addCanvas(this);
@@ -537,6 +545,7 @@ public abstract class NativeComponent extends Canvas {
       invalidControlText = "Failed to create " + NativeComponent.this.getClass().getName() + "[" + NativeComponent.this.hashCode() + "]\n\nReason:\n" + sb.toString();
       e.printStackTrace();
     }
+    asyncExec(new CMN_reshape(), getWidth(), getHeight());
     for(CommandMessage initCommandMessage: initializationCommandMessageList_) {
       if(!isValidControl()) {
         printFailedInvocation(initCommandMessage);
@@ -582,8 +591,10 @@ public abstract class NativeComponent extends Canvas {
   protected void releaseResources() {
     if(!isDisposed) {
       isDisposed = true;
-      NativeInterfaceHandler._Internal_.removeCanvas(this);
-      runSync(new CMN_destroyControl());
+      if(isInitialized) {
+        NativeInterfaceHandler._Internal_.removeCanvas(this);
+        runSync(new CMN_destroyControl());
+      }
       NativeComponent.registry.remove(componentID);
     }
   }
