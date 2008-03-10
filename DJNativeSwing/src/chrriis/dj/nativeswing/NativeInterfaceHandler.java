@@ -78,7 +78,7 @@ public class NativeInterfaceHandler {
       return isPreferredLookAndFeelApplied;
     }
     
-    public void setNativeClassPathReferenceClasses(Class<?>[] nativeClassPathReferenceClasses) {
+    public void setNativeClassPathReferenceClasses(Class<?>... nativeClassPathReferenceClasses) {
       this.nativeClassPathReferenceClasses = nativeClassPathReferenceClasses;
     }
     
@@ -86,7 +86,7 @@ public class NativeInterfaceHandler {
       return nativeClassPathReferenceClasses;
     }
     
-    public void setNativeClassPathReferenceResources(String[] nativeClassPathReferenceResources) {
+    public void setNativeClassPathReferenceResources(String... nativeClassPathReferenceResources) {
       this.nativeClassPathReferenceResources = nativeClassPathReferenceResources;
     }
     

@@ -37,8 +37,8 @@ class NativeMultimediaPlayer extends NativeComponent {
 
   protected static Control createControl(Shell shell) {
     int type;
-    OleClientSite site;
     OleFrame frame = new OleFrame(shell, SWT.NONE);
+    OleClientSite site;
     try {
       try {
         site = new OleClientSite(frame, SWT.NONE, "WMPlayer.OCX");
@@ -146,7 +146,7 @@ class NativeMultimediaPlayer extends NativeComponent {
     }
   }
 
-  public void setURL(final String url) {
+  public void setURL(String url) {
     runAsync(new CMN_setURL(), url);
   }
   
@@ -180,7 +180,7 @@ class NativeMultimediaPlayer extends NativeComponent {
     }
   }
   
-  public void setControlBarVisible(final boolean isControlBarVisible) {
+  public void setControlBarVisible(boolean isControlBarVisible) {
     runAsync(new CMN_setControlBarVisible(), isControlBarVisible);
   }
 
@@ -248,7 +248,7 @@ class NativeMultimediaPlayer extends NativeComponent {
     }
   }
 
-  public void setVolume(final int volume) {
+  public void setVolume(int volume) {
     if(volume < 0 || volume > 100) {
       throw new IllegalArgumentException("The volume must be between 0 and 100");
     }
@@ -325,7 +325,7 @@ class NativeMultimediaPlayer extends NativeComponent {
     }
   }
 
-  public void setStereoBalance(final int stereoBalance) {
+  public void setStereoBalance(int stereoBalance) {
     if(stereoBalance < 100 || stereoBalance > 100) {
       throw new IllegalArgumentException("The stereo balance must be between -100 and 100");
     }
@@ -400,7 +400,7 @@ class NativeMultimediaPlayer extends NativeComponent {
     }
   }
   
-  public void setAutoStart(final boolean isAutoStart) {
+  public void setAutoStart(boolean isAutoStart) {
     runAsync(new CMN_setAutoStart(), isAutoStart);
   }
   
@@ -471,7 +471,7 @@ class NativeMultimediaPlayer extends NativeComponent {
     }
   }
   
-  public void setMute(final boolean isMute) {
+  public void setMute(boolean isMute) {
     runAsync(new CMN_setMute(), isMute);
   }
   
