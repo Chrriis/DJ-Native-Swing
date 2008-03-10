@@ -37,7 +37,7 @@ public class FiliationTypeOption extends JPanel implements Disposable {
     JDesktopPane desktopPane = new JDesktopPane();
     // Web Browser 1 internal frame
     JInternalFrame webBrowser1InternalFrame = new JInternalFrame("Web Browser 1");
-    webBrowser1InternalFrame.setBounds(10, 10, 400, 300);
+    webBrowser1InternalFrame.setBounds(10, 10, 400, 280);
     webBrowser1InternalFrame.setResizable(true);
     webBrowser1InternalFrame.setVisible(true);
     NativeComponent.getNextInstanceOptions().setFiliationType(FiliationType.COMPONENT_PROXYING);
@@ -47,7 +47,7 @@ public class FiliationTypeOption extends JPanel implements Disposable {
     desktopPane.add(webBrowser1InternalFrame);
     // Flash Player internal frame
     JInternalFrame flashPlayerInternalFrame = new JInternalFrame("Flash Player");
-    flashPlayerInternalFrame.setBounds(110, 110, 400, 300);
+    flashPlayerInternalFrame.setBounds(100, 100, 400, 280);
     flashPlayerInternalFrame.setResizable(true);
     flashPlayerInternalFrame.setVisible(true);
     NativeComponent.getNextInstanceOptions().setFiliationType(FiliationType.COMPONENT_PROXYING);
@@ -59,7 +59,7 @@ public class FiliationTypeOption extends JPanel implements Disposable {
     desktopPane.add(flashPlayerInternalFrame);
     // Web Browser 2 internal frame, with a button on top
     JInternalFrame webBrowser2InternalFrame = new JInternalFrame("Web Browser 2 with a JButton on top");
-    webBrowser2InternalFrame.setBounds(210, 210, 400, 300);
+    webBrowser2InternalFrame.setBounds(190, 190, 400, 280);
     webBrowser2InternalFrame.setResizable(true);
     webBrowser2InternalFrame.setVisible(true);
     GridBagLayout gridBag = new GridBagLayout();
