@@ -14,6 +14,7 @@ import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.AWTEventListener;
@@ -235,19 +236,20 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
     }
     if(!lastArea.equals(area)) {
       lastArea = area;
+      Shape s;
+      Dimension size;
       if(area.isEmpty()) {
-        if(window.getWidth() != 1 || window.getHeight() != 1) {
-          window.setSize(1, 1);
-        }
-        WindowUtils.setWindowMask(window, new Rectangle(1, 1, 1, 1));
+        size = new Dimension(1, 1);
+        s = new Rectangle(1, 1, 1, 1);
       } else {
-        Dimension size = getSize();
-        if(!window.getSize().equals(size)) {
-          window.setSize(size);
-        }
-        WindowUtils.setWindowMask(window, area);
-//        nativeComponent.repaintNativeControl();
+        size = getSize();
+        s = area;
       }
+      if(!window.getSize().equals(size)) {
+        window.setSize(size);
+      }
+      WindowUtils.setWindowMask(window, s);
+//      nativeComponent.repaintNativeControl();
     }
   }
   
