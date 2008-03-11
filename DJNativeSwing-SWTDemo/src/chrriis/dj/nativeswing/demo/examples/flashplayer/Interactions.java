@@ -36,6 +36,7 @@ public class Interactions extends JPanel {
     JPanel flashPlayerPanel = new JPanel(new BorderLayout(0, 0));
     flashPlayerPanel.setBorder(BorderFactory.createTitledBorder("Native Flash Player component"));
     final JFlashPlayer flashPlayer = new JFlashPlayer();
+    flashPlayer.setControlBarVisible(true);
     String resourceURL = WebServer.getDefaultWebServer().getClassPathResourceURL(Interactions.class.getName(), "resource/dyn_text_moving.swf");
     FlashLoadingOptions flashLoadingOptions = new FlashLoadingOptions();
     flashLoadingOptions.setVariables(new HashMap<String, String>() {{put("mytext", "My Text");}});

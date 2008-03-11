@@ -187,6 +187,7 @@ public class JFlashPlayer extends JPanel implements Disposable {
     controlBarPane.add(stopButton);
     add(controlBarPane, BorderLayout.SOUTH);
     adjustBorder();
+    setControlBarVisible(false);
   }
   
   private void adjustBorder() {
