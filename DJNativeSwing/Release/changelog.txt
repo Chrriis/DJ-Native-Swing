@@ -5,17 +5,16 @@ Licence terms: LGPL (see licence.txt)
 
 ---------------------------------- Change log ----------------------------------
 
-* Version 0.9.4 (xxxxxxxxxxxxxxxx):
+* Version 0.9.4 (March 11, 2008):
 
 - JHTMLEditor is added.
-- Closing a browser window now disposes it.
-- Web browser events API is modified to fix window referencing in JS.
-- Web browser "new window" menu is implemented.
 - JVLCPlayer component is added.
+- Web browser events API is modified to fix window referencing in JS.
+- Closing a browser window now disposes it.
+- Web browser "new window" menu is implemented.
 - Complete change of the internal native communication: dual process.
 - The L&F is not set anymore (use the corresponding method to apply it).
 - Browser components display messages on failure.
-- Browser components are easier to create.
 - Flash player uses a proxy for local files to bypass security restrictions.
 - Flash player allows to set parameters and variables.
 
