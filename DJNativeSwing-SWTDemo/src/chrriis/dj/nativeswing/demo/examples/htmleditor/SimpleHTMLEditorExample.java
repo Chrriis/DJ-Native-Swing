@@ -23,8 +23,6 @@ import javax.swing.JTextArea;
 import chrriis.dj.nativeswing.ui.JHTMLEditor;
 import chrriis.dj.nativeswing.ui.event.HTMLEditorListener;
 import chrriis.dj.nativeswing.ui.event.HTMLEditorSaveEvent;
-import chrriis.dj.nativeswing.ui.event.InitializationEvent;
-import chrriis.dj.nativeswing.ui.event.InitializationListener;
 
 /**
  * @author Christopher Deckers
@@ -72,11 +70,7 @@ public class SimpleHTMLEditorExample extends JPanel {
         htmlEditor.setHTML(htmlTextArea.getText());
       }
     });
-    htmlEditor.addInitializationListener(new InitializationListener() {
-      public void objectInitialized(InitializationEvent e) {
-        htmlEditor.setHTML(htmlTextArea.getText());
-      }
-    });
+    htmlEditor.setHTML(htmlTextArea.getText());
   }
   
 }
