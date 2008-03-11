@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -748,24 +747,9 @@ public class WebServer {
     }
     if("classpath".equals(type)) {
       final String resourcePath = parameter;
-      URLConnection connection = null;
-      try {
-        connection = WebServer.class.getResource('/' + resourcePath).openConnection();
-      } catch(Exception e) {
-      }
-      final Long contentLength = connection == null? null: (long)connection.getContentLength();
-      final String contentType = connection == null? null: connection.getContentType();
-
       return new WebServerContent() {
         @Override
-        public long getContentLength() {
-          return contentLength != null? contentLength: super.getContentLength();
-        }
-        @Override
         public String getContentType() {
-          if(contentType != null && !"content/unknown".equals(contentType)) {
-            return contentType;
-          }
           int index = resourcePath.lastIndexOf('.');
           return getDefaultMimeType(index == -1? null: resourcePath.substring(index));
         }
