@@ -421,7 +421,7 @@ public class NativeInterfaceHandler {
       p = createProcess(nativeInterfaceInitOptions, port);
     }
     Socket socket = null;
-    for(int i=24; i>=0; i--) {
+    for(int i=99; i>=0; i--) {
       try {
         socket = new Socket("127.0.0.1", port);
         break;
@@ -550,6 +550,7 @@ public class NativeInterfaceHandler {
   }
   
   public static void main(String[] args) throws Exception {
+    System.out.println("Starting spawned VM");
     isInitialized = true;
     int port = Integer.parseInt(args[0]);
     ServerSocket serverSocket = null;
@@ -575,7 +576,7 @@ public class NativeInterfaceHandler {
         @Override
         public void run() {
           try {
-            sleep(5000);
+            sleep(10000);
           } catch(Exception e) {
           }
           if(messagingInterface == null) {
