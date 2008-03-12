@@ -212,7 +212,8 @@ public abstract class WebBrowserObject implements Disposable {
           ObjectHTMLConfiguration objectHtmlConfiguration = webBrowserObject.getObjectHtmlConfiguration();
           StringBuffer objectParameters = new StringBuffer();
           StringBuffer embedParameters = new StringBuffer();
-          HashMap<String, String> htmlParameters = new HashMap<String, String>(objectHtmlConfiguration.getHTMLParameters());
+          Map<String, String> parameters = objectHtmlConfiguration.getHTMLParameters();
+          HashMap<String, String> htmlParameters = parameters == null? new HashMap<String, String>(): new HashMap<String, String>(parameters);
           htmlParameters.remove("width");
           htmlParameters.remove("height");
           htmlParameters.remove("type");
