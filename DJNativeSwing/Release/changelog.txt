@@ -5,6 +5,9 @@ Licence terms: LGPL (see licence.txt)
 
 ---------------------------------- Change log ----------------------------------
 
+* Version 0.9.5 (xxxxxxxxxxxxxx):
+
+
 * Version 0.9.4 (March 11, 2008):
 
 - JHTMLEditor is added.
