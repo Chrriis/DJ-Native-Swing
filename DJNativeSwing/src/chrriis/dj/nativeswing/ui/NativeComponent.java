@@ -118,7 +118,9 @@ public abstract class NativeComponent extends Canvas {
    * If the component is disposed before the command has a chance to run, it is ignored silently.
    */
   protected Object runSync(CommandMessage commandMessage, Object... args) {
-    NativeInterfaceHandler.checkUIThread();
+    if(NativeInterfaceHandler._Internal_.isInterfaceAlive()) {
+      NativeInterfaceHandler.checkUIThread();
+    }
     if(initializationCommandMessageList != null) {
       commandMessage.setArgs(args);
       if(commandMessage instanceof ControlCommandMessage) {
@@ -140,7 +142,9 @@ public abstract class NativeComponent extends Canvas {
    * If the component is disposed before the command has a chance to run, it is ignored silently.
    */
   protected void runAsync(CommandMessage commandMessage, Object... args) {
-    NativeInterfaceHandler.checkUIThread();
+    if(NativeInterfaceHandler._Internal_.isInterfaceAlive()) {
+      NativeInterfaceHandler.checkUIThread();
+    }
     if(initializationCommandMessageList != null) {
       commandMessage.setArgs(args);
       if(commandMessage instanceof ControlCommandMessage) {
@@ -524,7 +528,9 @@ public abstract class NativeComponent extends Canvas {
   }
   
   public void initialize() {
-    NativeInterfaceHandler.checkUIThread();
+    if(NativeInterfaceHandler._Internal_.isInterfaceAlive()) {
+      NativeInterfaceHandler.checkUIThread();
+    }
     Window windowAncestor = SwingUtilities.getWindowAncestor(this);
     if(windowAncestor == null) {
       throw new IllegalStateException("This method can only be called when the component has a Window ancestor!");
