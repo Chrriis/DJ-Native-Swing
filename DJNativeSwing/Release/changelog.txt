@@ -6,6 +6,8 @@ Licence terms: LGPL (see licence.txt)
 ---------------------------------- Change log ----------------------------------
 
 * Version 0.9.5 (xxxxxxxxxxxxxx):
+
+- Destroying and re-init the native interface is supported.
 - NativeComponent allows to initialize().
 - getDisplayComponent() returns a NativeComponent.
 

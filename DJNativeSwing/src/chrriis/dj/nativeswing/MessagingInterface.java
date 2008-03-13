@@ -73,6 +73,14 @@ abstract class MessagingInterface {
     return isAlive;
   }
   
+  public void destroy() {
+    isAlive = false;
+    try {
+      ois.close();
+    } catch(Exception e) {
+    }
+  }
+  
   public MessagingInterface(final Socket socket, final boolean exitOnEndOfStream) {
     try {
       oos = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
@@ -89,15 +97,17 @@ abstract class MessagingInterface {
           try {
             message = readMessage();
           } catch(Exception e) {
-            isAlive = false;
-            if(exitOnEndOfStream) {
-              System.exit(0);
-            }
-            e.printStackTrace();
-            try {
-              NativeInterfaceHandler.createCommunicationChannel();
-            } catch(Exception ex) {
-              ex.printStackTrace();
+            if(isAlive) {
+              isAlive = false;
+              if(exitOnEndOfStream) {
+                System.exit(0);
+              }
+              e.printStackTrace();
+              try {
+                NativeInterfaceHandler.createCommunicationChannel();
+              } catch(Exception ex) {
+                ex.printStackTrace();
+              }
             }
             // Unlock all locked sync calls
             synchronized(RECEIVER_LOCK) {
@@ -152,6 +162,18 @@ abstract class MessagingInterface {
               }
             }
           }
+        }
+        try {
+          oos.close();
+        } catch(Exception e) {
+        }
+        try {
+          ois.close();
+        } catch(Exception e) {
+        }
+        try {
+          socket.close();
+        } catch(Exception e) {
         }
       }
     };

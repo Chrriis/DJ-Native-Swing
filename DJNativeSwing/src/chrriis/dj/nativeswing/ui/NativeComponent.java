@@ -536,7 +536,10 @@ public abstract class NativeComponent extends Canvas {
   }
   
   protected void createResources() {
-    NativeInterfaceHandler.checkUIThread();
+    boolean isInterfaceAlive = NativeInterfaceHandler._Internal_.isInterfaceAlive();
+    if(isInterfaceAlive) {
+      NativeInterfaceHandler.checkUIThread();
+    }
     NativeInterfaceHandler._Internal_.addCanvas(this);
     if(initializationCommandMessageList == null) {
       isValidControl = false;
@@ -547,18 +550,23 @@ public abstract class NativeComponent extends Canvas {
     initializationCommandMessageList = null;
     isInitialized = true;
     isValidControl = true;
-    try {
-      runSync(new CMN_createControl(), componentID, NativeComponent.this.getClass().getName(), Native.getComponentID(this));
-    } catch(Exception e) {
-      isValidControl = false;
-      StringBuilder sb = new StringBuilder();
-      for(Throwable t = e; t != null; t = t.getCause()) {
-        sb.append("    " + t.toString() + "\n");
+    if(isInterfaceAlive) {
+      try {
+        runSync(new CMN_createControl(), componentID, NativeComponent.this.getClass().getName(), Native.getComponentID(this));
+      } catch(Exception e) {
+        isValidControl = false;
+        StringBuilder sb = new StringBuilder();
+        for(Throwable t = e; t != null; t = t.getCause()) {
+          sb.append("    " + t.toString() + "\n");
+        }
+        invalidControlText = "Failed to create " + NativeComponent.this.getClass().getName() + "[" + NativeComponent.this.hashCode() + "]\n\nReason:\n" + sb.toString();
+        e.printStackTrace();
       }
-      invalidControlText = "Failed to create " + NativeComponent.this.getClass().getName() + "[" + NativeComponent.this.hashCode() + "]\n\nReason:\n" + sb.toString();
-      e.printStackTrace();
+      asyncExec(new CMN_reshape(), getWidth(), getHeight());
+    } else {
+      isValidControl = false;
+      invalidControlText = "Failed to create " + NativeComponent.this.getClass().getName() + "[" + NativeComponent.this.hashCode() + "]\n\nReason:\nThe interface is not alive!";
     }
-    asyncExec(new CMN_reshape(), getWidth(), getHeight());
     for(CommandMessage initCommandMessage: initializationCommandMessageList_) {
       if(!isValidControl()) {
         printFailedInvocation(initCommandMessage);
@@ -606,7 +614,9 @@ public abstract class NativeComponent extends Canvas {
       isDisposed = true;
       if(isInitialized) {
         NativeInterfaceHandler._Internal_.removeCanvas(this);
-        runSync(new CMN_destroyControl());
+        if(isValidControl()) {
+          runSync(new CMN_destroyControl());
+        }
       }
       NativeComponent.registry.remove(componentID);
     }
