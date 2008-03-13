@@ -6,6 +6,8 @@ Licence terms: LGPL (see licence.txt)
 ---------------------------------- Change log ----------------------------------
 
 * Version 0.9.5 (xxxxxxxxxxxxxx):
+- NativeComponent allows to initialize().
+- getDisplayComponent() returns a NativeComponent.
 
 
 * Version 0.9.4 (March 11, 2008):

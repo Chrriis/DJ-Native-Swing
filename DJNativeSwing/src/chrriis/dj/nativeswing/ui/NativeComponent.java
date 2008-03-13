@@ -14,6 +14,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Window;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.HierarchyEvent;
@@ -520,6 +521,18 @@ public abstract class NativeComponent extends Canvas {
         }
       }
     });
+  }
+  
+  public void initialize() {
+    NativeInterfaceHandler.checkUIThread();
+    Window windowAncestor = SwingUtilities.getWindowAncestor(this);
+    if(windowAncestor == null) {
+      throw new IllegalStateException("This method can only be called when the component has a Window ancestor!");
+    }
+    if(!isInitialized && !isDisposed) {
+      windowAncestor.addNotify();
+      createResources();
+    }
   }
   
   protected void createResources() {

@@ -122,7 +122,7 @@ public abstract class WebBrowserObject implements Disposable {
       }
     });
     webBrowser.setURL(url);
-    ((NativeComponent)webBrowser.getDisplayComponent()).runSync(new CMLocal_waitForCommand(), (Object)resultArray);
+    webBrowser.getDisplayComponent().runSync(new CMLocal_waitForCommand(), (Object)resultArray);
   }
   
   protected String getLocalFileURL(File localFile) {

@@ -113,7 +113,7 @@ public class JHTMLEditor extends JPanel implements Disposable {
         resultArray[0] = Boolean.TRUE;
       }
     });
-    ((NativeComponent)webBrowser.getDisplayComponent()).runSync(new CMLocal_waitForCommand(), (Object)resultArray);
+    webBrowser.getDisplayComponent().runSync(new CMLocal_waitForCommand(), (Object)resultArray);
   }
   
   /**

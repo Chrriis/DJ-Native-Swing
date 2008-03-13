@@ -15,6 +15,7 @@ import java.lang.ref.WeakReference;
 import javax.swing.JPanel;
 
 import chrriis.common.Disposable;
+import chrriis.dj.nativeswing.ui.NativeComponent;
 import chrriis.dj.nativeswing.ui.event.InitializationEvent;
 import chrriis.dj.nativeswing.ui.event.InitializationListener;
 
@@ -64,7 +65,7 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
    * The display component is the component that actually shows the web browser content.
    * This access is useful to attach listeners (key, mouse) to trap events happening in that area.
    */
-  public Component getDisplayComponent() {
+  public NativeComponent getDisplayComponent() {
     return nativeComponent;
   }
   

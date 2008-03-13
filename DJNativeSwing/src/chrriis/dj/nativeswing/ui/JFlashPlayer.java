@@ -118,18 +118,6 @@ public class JFlashPlayer extends JPanel implements Disposable {
     @Override
     protected String getJavascriptDefinitions() {
       return
-      "      function playEO() {" + LS +
-      "        var flashMovie = getEmbeddedObject();" + LS +
-      "        flashMovie.Play();" + LS +
-      "      }" + LS +
-      "      function pauseEO() {" + LS +
-      "        var flashMovie = getEmbeddedObject();" + LS +
-      "        flashMovie.StopPlay();" + LS +
-      "      }" + LS +
-      "      function stopEO() {" + LS +
-      "        var flashMovie = getEmbeddedObject();" + LS +
-      "        flashMovie.Rewind();" + LS +
-      "      }" + LS +
       "      function setVariableEO(variableName, variableValue) {" + LS +
       "        var flashMovie = getEmbeddedObject();" + LS +
       "        flashMovie.SetVariable(decodeURIComponent(variableName), decodeURIComponent(variableValue));" + LS +
@@ -228,21 +216,21 @@ public class JFlashPlayer extends JPanel implements Disposable {
     if(!webBrowserObject.hasContent()) {
       return;
     }
-    webBrowser.execute("playEO();");
+    webBrowser.execute("getEmbeddedObject().Play();");
   }
   
   public void pause() {
     if(!webBrowserObject.hasContent()) {
       return;
     }
-    webBrowser.execute("pauseEO();");
+    webBrowser.execute("getEmbeddedObject().StopPlay();");
   }
   
   public void stop() {
     if(!webBrowserObject.hasContent()) {
       return;
     }
-    webBrowser.execute("stopEO();");
+    webBrowser.execute("getEmbeddedObject().Rewind();");
   }
   
   public void setVariable(String name, String value) {
