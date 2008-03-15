@@ -83,22 +83,18 @@ public abstract class WebBrowserObject implements Disposable {
     return url != null;
   }
   
-  private class CMLocal_waitForCommand extends LocalMessage {
+  private class CMLocal_waitForInitialization extends LocalMessage {
     @Override
     public Object run() {
-      Boolean[] resultArray = (Boolean[])args[0];
-      for(int i=0; i<20; i++) {
-        if(resultArray[0].booleanValue()) {
-          break;
-        }
+      InitializationListener initializationListener = (InitializationListener)args[0];
+      Boolean[] resultArray = (Boolean[])args[1];
+      for(long time = System.currentTimeMillis(); !resultArray[0].booleanValue() && System.currentTimeMillis() - time < 4000; ) {
         NativeInterfaceHandler.syncExec(new EmptyMessage());
-        if(resultArray[0].booleanValue()) {
-          break;
-        }
         try {
-          Thread.sleep(200);
+          Thread.sleep(50);
         } catch(Exception e) {}
       }
+      removeInitializationListener(initializationListener);
       return null;
     }
   }
@@ -115,14 +111,15 @@ public abstract class WebBrowserObject implements Disposable {
     instanceID = Registry.getInstance().add(this);
     url = WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "html/" + instanceID);
     final Boolean[] resultArray = new Boolean[] {Boolean.FALSE};
-    addInitializationListener(new InitializationListener() {
+    InitializationListener initializationListener = new InitializationListener() {
       public void objectInitialized(InitializationEvent e) {
         removeInitializationListener(this);
         resultArray[0] = Boolean.TRUE;
       }
-    });
+    };
+    addInitializationListener(initializationListener);
     webBrowser.setURL(url);
-    webBrowser.getDisplayComponent().runSync(new CMLocal_waitForCommand(), (Object)resultArray);
+    webBrowser.getDisplayComponent().runSync(new CMLocal_waitForInitialization(), initializationListener, resultArray);
   }
   
   protected String getLocalFileURL(File localFile) {

@@ -108,7 +108,7 @@ public abstract class NativeComponent extends Canvas {
    * Run a command in sequence with other calls from this class. Calls are performed only when the component is initialized, and this method adds to the queue of calls in case it is not.
    */
   public void run(Runnable runnable) {
-    runAsync(new CMLocal_execRunnable(), runnable);
+    runSync(new CMLocal_execRunnable(), runnable);
   }
   
   private volatile List<CommandMessage> initializationCommandMessageList = new ArrayList<CommandMessage>();

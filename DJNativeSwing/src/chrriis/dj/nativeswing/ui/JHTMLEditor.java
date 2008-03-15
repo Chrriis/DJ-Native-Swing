@@ -75,22 +75,18 @@ public class JHTMLEditor extends JPanel implements Disposable {
     }
   }
   
-  private class CMLocal_waitForCommand extends LocalMessage {
+  private class CMLocal_waitForInitialization extends LocalMessage {
     @Override
     public Object run() {
-      Boolean[] resultArray = (Boolean[])args[0];
-      for(int i=0; i<20; i++) {
-        if(resultArray[0].booleanValue()) {
-          break;
-        }
+      InitializationListener initializationListener = (InitializationListener)args[0];
+      Boolean[] resultArray = (Boolean[])args[1];
+      for(long time = System.currentTimeMillis(); !resultArray[0].booleanValue() && System.currentTimeMillis() - time < 4000; ) {
         NativeInterfaceHandler.syncExec(new EmptyMessage());
-        if(resultArray[0].booleanValue()) {
-          break;
-        }
         try {
-          Thread.sleep(200);
+          Thread.sleep(50);
         } catch(Exception e) {}
       }
+      removeInitializationListener(initializationListener);
       return null;
     }
   }
@@ -105,15 +101,16 @@ public class JHTMLEditor extends JPanel implements Disposable {
     webBrowser.setBarsVisible(false);
     add(webBrowser, BorderLayout.CENTER);
     instanceID = Registry.getInstance().add(this);
-    webBrowser.setURL(WebServer.getDefaultWebServer().getDynamicContentURL(JHTMLEditor.class.getName(), String.valueOf(instanceID),  "index.html"));
     final Boolean[] resultArray = new Boolean[] {Boolean.FALSE};
-    addInitializationListener(new InitializationListener() {
+    InitializationListener initializationListener = new InitializationListener() {
       public void objectInitialized(InitializationEvent e) {
         removeInitializationListener(this);
         resultArray[0] = Boolean.TRUE;
       }
-    });
-    webBrowser.getDisplayComponent().runSync(new CMLocal_waitForCommand(), (Object)resultArray);
+    };
+    addInitializationListener(initializationListener);
+    webBrowser.setURL(WebServer.getDefaultWebServer().getDynamicContentURL(JHTMLEditor.class.getName(), String.valueOf(instanceID),  "index.html"));
+    webBrowser.getDisplayComponent().runSync(new CMLocal_waitForInitialization(), initializationListener, resultArray);
   }
   
   /**
