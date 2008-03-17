@@ -58,7 +58,7 @@ public class DemoTree extends JTree {
         new Example("Setting Content", SettingContent.class, "Any HTML content can be set to the web browser.", true),
         new Example("Javascript Execution", JavascriptExecution.class, "Javscript can be executed in the web browser component.", true),
         new Example("Navigation Control", NavigationControl.class, "The Java application can control the navigation happening in the web browser.\nThis feature allows to block certain links and/or the creation of new windows, or to open links and/or new windows elsewhere.", true),
-        new Example("Sending Commands", SendingCommands.class, "Use static links and/or simple Javascript to send commands to the application:\n    function sendCommand(command) {\n      var s = 'command://' + encodeURIComponent(command);\n      for(var i=1; i<arguments.length; s+='&'+encodeURIComponent(arguments[i++]));\n      window.location = s;\n    }", true),
+        new Example("Sending Commands", SendingCommands.class, "Use static links or simple Javascript to send commands with arguments to the application:\n    function sendCommand(command) {\n      var s = 'command://' + encodeURIComponent(command);\n      for(var i=1; i<arguments.length; s+='&'+encodeURIComponent(arguments[i++]));\n      window.location = s;\n    }", true),
     }));
     exampleGroupList.add(new ExampleGroup("JFlashPlayer", new Example[] {
         new Example("Simple Example", SimpleFlashExample.class, "Display a flash application.", true),

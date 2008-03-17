@@ -78,7 +78,7 @@ public class SendingCommands extends JPanel {
         "      <input type=\"button\" value=\"Send\" onclick=\"sendCommand(form.commandField.value)\"/>" + LS +
         "    </form>" + LS +
         "    <form name=\"form2\" onsubmit=\"sendCommand('store', form2.commandField.value); return false\">" + LS +
-        "      A more concrete example: ask the application to store some data in a database:<br/>" + LS +
+        "      A more concrete example: ask the application to store some data in a database, by sending a command with some arguments:<br/>" + LS +
         "      Client: <input name=\"commandField\" type=\"text\" value=\"John Smith\"/>" + LS +
         "      <input type=\"button\" value=\"Send\" onclick=\"sendCommand('store', form2.commandField.value)\"/>" + LS +
         "    </form>" + LS +
