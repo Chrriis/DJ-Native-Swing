@@ -8,6 +8,7 @@
 package chrriis.dj.nativeswing.demo.examples.webbrowser;
 
 import java.awt.BorderLayout;
+import java.util.Arrays;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -42,12 +43,16 @@ public class SendingCommands extends JPanel {
     webBrowser.setStatusBarVisible(true);
     webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
       @Override
-      public void commandReceived(WebBrowserEvent e, String command) {
-        receivedCommandTextField.setText(command);
-        if(command.startsWith("store:")) {
-          String data = command.substring("store:".length());
+      public void commandReceived(WebBrowserEvent e, String command, String... args) {
+        String commandText = command;
+        if(args.length > 0) {
+          commandText += " " + Arrays.toString(args);
+        }
+        receivedCommandTextField.setText(commandText);
+        if("store".equals(command)) {
+          String data = args[0];
           if(JOptionPane.showConfirmDialog(webBrowser, "Do you want to store \"" + data + "\" in a database?\n(Not for real of course!)", "Data received from the web browser", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-            // Here the data should be used
+            // Data should be used here
           }
         }
       }
@@ -58,7 +63,9 @@ public class SendingCommands extends JPanel {
         "    <script language=\"JavaScript\" type=\"text/javascript\">" + LS +
         "      <!--" + LS +
         "      function sendCommand(command) {" + LS +
-        "        window.location = 'command://' + encodeURIComponent(command);" + LS +
+        "        var s = 'command://' + encodeURIComponent(command);" + LS +
+        "        for(var i=1; i<arguments.length; s+='&'+encodeURIComponent(arguments[i++]));" + LS +
+        "        window.location = s;" + LS +
         "      }" + LS +
         "      //-->" + LS +
         "    </script>" + LS +
@@ -70,10 +77,10 @@ public class SendingCommands extends JPanel {
         "      <input name=\"commandField\" type=\"text\" value=\"some command\"/>" + LS +
         "      <input type=\"button\" value=\"Send\" onclick=\"sendCommand(form.commandField.value)\"/>" + LS +
         "    </form>" + LS +
-        "    <form name=\"form2\" onsubmit=\"sendCommand('store:' + form2.commandField.value); return false\">" + LS +
+        "    <form name=\"form2\" onsubmit=\"sendCommand('store', form2.commandField.value); return false\">" + LS +
         "      A more concrete example: ask the application to store some data in a database:<br/>" + LS +
         "      Client: <input name=\"commandField\" type=\"text\" value=\"John Smith\"/>" + LS +
-        "      <input type=\"button\" value=\"Send\" onclick=\"sendCommand('store:' + form2.commandField.value)\"/>" + LS +
+        "      <input type=\"button\" value=\"Send\" onclick=\"sendCommand('store', form2.commandField.value)\"/>" + LS +
         "    </form>" + LS +
         "  </body>" + LS +
         "</html>");

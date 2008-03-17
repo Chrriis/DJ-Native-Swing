@@ -12,7 +12,9 @@ import java.awt.Point;
 import java.awt.Window;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
-import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
 import javax.swing.SwingUtilities;
@@ -34,6 +36,7 @@ import org.eclipse.swt.browser.WindowEvent;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import chrriis.common.Utils;
 import chrriis.dj.nativeswing.CommandMessage;
 import chrriis.dj.nativeswing.ui.event.WebBrowserEvent;
 import chrriis.dj.nativeswing.ui.event.WebBrowserListener;
@@ -192,12 +195,13 @@ class NativeWebBrowser extends NativeComponent {
       Object[] listeners = nativeWebBrowser.listenerList.getListenerList();
       WebBrowserEvent e = null;
       String command = (String)args[0];
+      String[] arguments = (String[])args[1];
       for(int i=listeners.length-2; i>=0; i-=2) {
         if(listeners[i] == WebBrowserListener.class) {
           if(e == null) {
             e = new WebBrowserEvent(webBrowser);
           }
-          ((WebBrowserListener)listeners[i + 1]).commandReceived(e, command);
+          ((WebBrowserListener)listeners[i + 1]).commandReceived(e, command, arguments);
         }
       }
       return null;
@@ -373,22 +377,35 @@ class NativeWebBrowser extends NativeComponent {
       public void changed(LocationEvent e) {
         asyncExec(browser, new CMJ_urlChanged(), e.location, e.top);
       }
-      @SuppressWarnings("deprecation")
       public void changing(LocationEvent e) {
         final String location = e.location;
         if(location.startsWith(COMMAND_PREFIX)) {
           e.doit = false;
-          String command = location.substring(COMMAND_PREFIX.length());
-          if(command.endsWith("/")) {
-            command = command.substring(0, command.length() - 1);
+          String query = location.substring(COMMAND_PREFIX.length());
+          if(query.endsWith("/")) {
+            query = query.substring(0, query.length() - 1);
           }
-          try {
-            command = URLDecoder.decode(command, "UTF-8");
-          } catch(Exception ex) {
-            command = URLDecoder.decode(command);
-            ex.printStackTrace();
+          List<String> queryElementList = new ArrayList<String>();
+          StringTokenizer st = new StringTokenizer(query, "&", true);
+          String lastToken = null;
+          while(st.hasMoreTokens()) {
+            String token = st.nextToken();
+            if("&".equals(token)) {
+              if(lastToken == null) {
+                queryElementList.add("");
+              }
+              lastToken = null;
+            } else {
+              lastToken = token;
+              queryElementList.add(Utils.decodeURL(token));
+            }
           }
-          asyncExec(browser, new CMJ_commandReceived(), command);
+          if(lastToken == null) {
+            queryElementList.add("");
+          }
+          String command = queryElementList.isEmpty()? "": queryElementList.remove(0);
+          String[] args = queryElementList.toArray(new String[0]);
+          asyncExec(browser, new CMJ_commandReceived(), command, args);
           return;
         }
         if(location.startsWith("javascript:")) {

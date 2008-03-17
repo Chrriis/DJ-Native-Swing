@@ -15,12 +15,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
 
 import chrriis.common.Disposable;
 import chrriis.common.Registry;
 import chrriis.common.Utils;
 import chrriis.common.WebServer;
+import chrriis.common.WebServer.HTTPData;
 import chrriis.common.WebServer.HTTPRequest;
 import chrriis.common.WebServer.WebServerContent;
 import chrriis.dj.nativeswing.LocalMessage;
@@ -29,6 +31,7 @@ import chrriis.dj.nativeswing.ui.event.InitializationEvent;
 import chrriis.dj.nativeswing.ui.event.InitializationListener;
 import chrriis.dj.nativeswing.ui.event.WebBrowserAdapter;
 import chrriis.dj.nativeswing.ui.event.WebBrowserEvent;
+import chrriis.dj.nativeswing.ui.event.WebBrowserListener;
 
 /**
  * A helper class to simplify the development of native components that act as a plugin to the web browser component (like the JFlashPlayer).
@@ -42,7 +45,7 @@ public abstract class WebBrowserObject implements Disposable {
       this.webBrowserObject = new WeakReference<WebBrowserObject>(webBrowserObject);
     }
     @Override
-    public void commandReceived(WebBrowserEvent e, String command) {
+    public void commandReceived(WebBrowserEvent e, String command, String... args) {
       WebBrowserObject webBrowserObject = this.webBrowserObject.get();
       if(webBrowserObject == null) {
         return;
@@ -154,8 +157,26 @@ public abstract class WebBrowserObject implements Disposable {
             "    <script language=\"JavaScript\" type=\"text/javascript\">" + LS +
             "      <!--" + LS +
             "      function sendCommand(command) {" + LS +
-            "        command = command == null? '': encodeURIComponent(command);" + LS +
-            "        window.location = 'command://' + command;" + LS +
+            "        var s = 'command://' + encodeURIComponent(command);" + LS +
+            "        for(var i=1; i<arguments.length; s+='&'+encodeURIComponent(arguments[i++]));" + LS +
+            "        window.location = s;" + LS +
+            "      }" + LS +
+            "      function postCommand(command) {" + LS +
+            "        var elements = new Array();" + LS +
+            "        for(var i=1; i<arguments.length; i++) {" + LS +
+            "          var element = document.createElement('input');" + LS +
+            "          element.type='text';" + LS +
+            "          element.name='j_arg' + (i-1);" + LS +
+            "          element.value=arguments[i];" + LS +
+            "          document.createElement('j_arg' + (i-1));" + LS +
+            "          elements[i-1] = element;" + LS +
+            "          document.j_form.appendChild(element);" + LS +
+            "        }" + LS +
+            "        document.j_form.j_command.value = command;" + LS +
+            "        document.j_form.submit();" + LS +
+            "        for(var i=0; i<elements.length; i++) {" + LS +
+            "          document.j_form.removeChild(elements[i]);" + LS +
+            "        }" + LS +
             "      }" + LS +
             "      function getEmbeddedObject() {" + LS +
             "        var movieName = \"myEmbeddedObject\";" + LS +
@@ -180,6 +201,10 @@ public abstract class WebBrowserObject implements Disposable {
             "    </style>" + LS +
             "  </head>" + LS +
             "  <body height=\"*\">" + LS +
+            "    <iframe style=\"display:none;\" name=\"j_iframe\"></iframe>" + LS +
+            "    <form style=\"display:none;\" name=\"j_form\" action=\"" + WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "postCommand/" + instanceID) + "\" method=\"POST\" target=\"j_iframe\">" + LS +
+            "      <input name=\"j_command\" type=\"text\"></input>" + LS +
+            "    </form>" + LS +
             "    <script src=\"" + WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "js/" + instanceID) + "\"></script>" + LS +
             "  </body>" + LS +
             "</html>" + LS;
@@ -241,6 +266,46 @@ public abstract class WebBrowserObject implements Disposable {
             "embeddedObject.style.height = '100%';" + LS +
             "sendCommand('WB_setLoaded');" + LS +
             "//-->" + LS;
+          return getInputStream(content);
+        }
+      };
+    }
+    if("postCommand".equals(type)) {
+      final int instanceID = Integer.parseInt(resourcePath);
+      final WebBrowserObject webBrowserObject = (WebBrowserObject)Registry.getInstance().get(instanceID);
+      if(webBrowserObject == null) {
+        return null;
+      }
+      HTTPData postData = httpRequest.getHTTPPostDataArray()[0];
+      Map<String, String> headerMap = postData.getHeaderMap();
+      int size = headerMap.size();
+      final String command = headerMap.get("j_command");
+      final String[] arguments = new String[size - 1];
+      for(int i=0; i<arguments.length; i++) {
+        arguments[i] = headerMap.get("j_arg" + i);
+        System.err.println(arguments[i]);
+      }
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          WebBrowserListener[] webBrowserListeners = webBrowserObject.webBrowser.getWebBrowserListeners();
+          WebBrowserEvent e = null;
+          for(int i=webBrowserListeners.length-1; i>= 0; i--) {
+            if(e == null) {
+              e = new WebBrowserEvent(webBrowserObject.webBrowser);
+            }
+            webBrowserListeners[i].commandReceived(e, command, arguments);
+          }
+        }
+      });
+      return new WebServerContent() {
+        @Override
+        public InputStream getInputStream() {
+          String content =
+            "<html>" + LS +
+            "  <body>" + LS +
+            "    Command sent successfully." + LS +
+            "  </body>" + LS +
+            "</html>" + LS;
           return getInputStream(content);
         }
       };

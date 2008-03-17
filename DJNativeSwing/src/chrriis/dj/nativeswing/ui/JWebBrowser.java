@@ -454,7 +454,7 @@ public class JWebBrowser extends JPanel implements Disposable {
     final String[] resultArray = new String[] {TEMP_RESULT};
     WebBrowserAdapter webBrowserListener = new WebBrowserAdapter() {
       @Override
-      public void commandReceived(WebBrowserEvent e, String command) {
+      public void commandReceived(WebBrowserEvent e, String command, String... args) {
         if(command.startsWith(commandName + ":")) {
           resultArray[0] = command.substring((commandName + ":").length());
           nativeComponent.removeWebBrowserListener(this);
@@ -495,7 +495,7 @@ public class JWebBrowser extends JPanel implements Disposable {
     nativeComponent.removeWebBrowserListener(listener);
   }
   
-  public WebBrowserListener[] getListSelectionListeners() {
+  public WebBrowserListener[] getWebBrowserListeners() {
     return listenerList.getListeners(WebBrowserListener.class);
   }
   

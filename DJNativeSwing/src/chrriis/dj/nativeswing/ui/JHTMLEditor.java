@@ -55,7 +55,7 @@ public class JHTMLEditor extends JPanel implements Disposable {
       this.htmlEditor = new WeakReference<JHTMLEditor>(htmlEditor);
     }
     @Override
-    public void commandReceived(WebBrowserEvent e, String command) {
+    public void commandReceived(WebBrowserEvent e, String command, String... args) {
       JHTMLEditor htmlEditor = this.htmlEditor.get();
       if(htmlEditor == null) {
         return;
@@ -147,8 +147,9 @@ public class JHTMLEditor extends JPanel implements Disposable {
             "    <script type=\"text/javascript\" src=\"fckeditor.js\"></script>" + LS +
             "    <script type=\"text/javascript\">" + LS +
             "      function sendCommand(command) {" + LS +
-            "        command = command == null? '': encodeURIComponent(command);" + LS +
-            "        window.location = 'command://' + command;" + LS +
+            "        var s = 'command://' + encodeURIComponent(command);" + LS +
+            "        for(var i=1; i<arguments.length; s+='&'+encodeURIComponent(arguments[i++]));" + LS +
+            "        window.location = s;" + LS +
             "      }" + LS +
             "      function JH_setData(html) {" + LS +
             "        var inst = FCKeditorAPI.GetInstance('" + FCK_INSTANCE + "');" + LS +
