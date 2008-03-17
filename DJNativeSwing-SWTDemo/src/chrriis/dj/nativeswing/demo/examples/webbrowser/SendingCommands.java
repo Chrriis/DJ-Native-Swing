@@ -43,7 +43,7 @@ public class SendingCommands extends JPanel {
     webBrowser.setStatusBarVisible(true);
     webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
       @Override
-      public void commandReceived(WebBrowserEvent e, String command, String... args) {
+      public void commandReceived(WebBrowserEvent e, String command, String[] args) {
         String commandText = command;
         if(args.length > 0) {
           commandText += " " + Arrays.toString(args);

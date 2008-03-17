@@ -25,6 +25,6 @@ public abstract class WebBrowserAdapter implements WebBrowserListener {
   public void titleChanged(WebBrowserEvent e) {}
   public void statusChanged(WebBrowserEvent e) {}
 
-  public void commandReceived(WebBrowserEvent e, String command, String... args) {}
+  public void commandReceived(WebBrowserEvent e, String command, String[] args) {}
   
 }

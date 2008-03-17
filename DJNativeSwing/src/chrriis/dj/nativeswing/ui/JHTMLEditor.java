@@ -55,7 +55,7 @@ public class JHTMLEditor extends JPanel implements Disposable {
       this.htmlEditor = new WeakReference<JHTMLEditor>(htmlEditor);
     }
     @Override
-    public void commandReceived(WebBrowserEvent e, String command, String... args) {
+    public void commandReceived(WebBrowserEvent e, String command, String[] args) {
       JHTMLEditor htmlEditor = this.htmlEditor.get();
       if(htmlEditor == null) {
         return;

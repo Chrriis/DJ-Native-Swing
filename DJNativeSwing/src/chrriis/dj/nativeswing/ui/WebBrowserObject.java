@@ -45,7 +45,7 @@ public abstract class WebBrowserObject implements Disposable {
       this.webBrowserObject = new WeakReference<WebBrowserObject>(webBrowserObject);
     }
     @Override
-    public void commandReceived(WebBrowserEvent e, String command, String... args) {
+    public void commandReceived(WebBrowserEvent e, String command, String[] args) {
       WebBrowserObject webBrowserObject = this.webBrowserObject.get();
       if(webBrowserObject == null) {
         return;
