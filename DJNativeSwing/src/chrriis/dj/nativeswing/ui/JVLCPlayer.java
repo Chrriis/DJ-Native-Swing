@@ -404,7 +404,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
     }
     public boolean isMute() {
       String command = "isMute";
-      return "true".equals(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + ":' + getEmbeddedObject().audio.mute);"));
+      return "true".equals(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + "', getEmbeddedObject().audio.mute);"));
     }
     public void setVolume(int volume) {
       if(volume < 0 || volume > 100) {
@@ -416,7 +416,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
     public int getVolume() {
       String command = "getVolume";
       try {
-        return Math.max(0, (int)Math.round((Integer.parseInt(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + ":' + getEmbeddedObject().audio.volume);")) - 1) / 1.99));
+        return Math.max(0, (int)Math.round((Integer.parseInt(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + "', getEmbeddedObject().audio.volume);")) - 1) / 1.99));
       } catch(Exception e) {
       }
       return -1;
@@ -427,7 +427,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
     public int getTrack() {
       String command = "getTrack";
       try {
-        return Integer.parseInt(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + ":' + getEmbeddedObject().audio.track);"));
+        return Integer.parseInt(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + "', getEmbeddedObject().audio.track);"));
       } catch(Exception e) {
       }
       return -1;
@@ -450,7 +450,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
     public VLCChannel getChannel() {
       String command = "getChannel";
       try {
-        int value = Integer.parseInt(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + ":' + getEmbeddedObject().audio.channel);"));
+        int value = Integer.parseInt(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + "', getEmbeddedObject().audio.channel);"));
         switch(value) {
           case 1: return VLCChannel.STEREO;
           case 2: return VLCChannel.REVERSE_STEREO;
@@ -485,7 +485,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
     public int getLength() {
       String command = "getLength";
       try {
-        return Integer.parseInt(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + ":' + getEmbeddedObject().input.length);"));
+        return Integer.parseInt(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + "', getEmbeddedObject().input.length);"));
       } catch(Exception e) {
       }
       return -1;
@@ -493,14 +493,14 @@ public class JVLCPlayer extends JPanel implements Disposable {
     public float getFPS() {
       String command = "getFPS";
       try {
-        return Float.parseFloat(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + ":' + getEmbeddedObject().input.fps);"));
+        return Float.parseFloat(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + "', getEmbeddedObject().input.fps);"));
       } catch(Exception e) {
       }
       return Float.NaN;
     }
     public boolean isVideoDisplayed() {
       String command = "isVideoDisplayed";
-      return "true".equals(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + ":' + getEmbeddedObject().input.isVout);"));
+      return "true".equals(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + "', getEmbeddedObject().input.isVout);"));
     }
     /**
      * @param position A value between 0.0 and 1.0.
@@ -514,7 +514,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
     public float getPosition() {
       String command = "getPosition";
       try {
-        return Float.parseFloat(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + ":' + getEmbeddedObject().input.position);"));
+        return Float.parseFloat(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + "', getEmbeddedObject().input.position);"));
       } catch(Exception e) {
       }
       return Float.NaN;
@@ -531,7 +531,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
     public int getTime() {
       String command = "getTime";
       try {
-        return Integer.parseInt(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + ":' + getEmbeddedObject().input.time);"));
+        return Integer.parseInt(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + "', getEmbeddedObject().input.time);"));
       } catch(Exception e) {
       }
       return -1;
@@ -556,7 +556,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
     public VLCState getState() {
       String command = "getState";
       try {
-        int value = Integer.parseInt(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + ":' + getEmbeddedObject().input.state);"));
+        int value = Integer.parseInt(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + "', getEmbeddedObject().input.state);"));
         switch(value) {
           case 0: return VLCState.IDLE_CLOSE;
           case 1: return VLCState.OPENING;
@@ -576,7 +576,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
     public float getRate() {
       String command = "getRate";
       try {
-        return Float.parseFloat(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + ":' + getEmbeddedObject().input.rate);"));
+        return Float.parseFloat(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + "', getEmbeddedObject().input.rate);"));
       } catch(Exception e) {
       }
       return Float.NaN;
@@ -599,14 +599,14 @@ public class JVLCPlayer extends JPanel implements Disposable {
     public int getItemCount() {
       String command = "getItemCount";
       try {
-        return Integer.parseInt(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + ":' + getEmbeddedObject().playlist.items.count);"));
+        return Integer.parseInt(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + "', getEmbeddedObject().playlist.items.count);"));
       } catch(Exception e) {
       }
       return -1;
     }
     public boolean isPlaying() {
       String command = "isPlaying";
-      return "true".equals(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + ":' + getEmbeddedObject().playlist.isPlaying);"));
+      return "true".equals(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + "', getEmbeddedObject().playlist.isPlaying);"));
     }
     /**
      * @return the item ID, which can be used to add play or remove an item from the playlist.
@@ -622,7 +622,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
       }
       String command = "add";
       try {
-        return Integer.parseInt(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + ":' + getEmbeddedObject().playlist.add(decodeURIComponent('" + Utils.encodeURL(url) + "')));"));
+        return Integer.parseInt(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + "', getEmbeddedObject().playlist.add(decodeURIComponent('" + Utils.encodeURL(url) + "')));"));
       } catch(Exception e) {
       }
       return -1;
@@ -667,7 +667,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
     public int getWidth() {
       String command = "getWidth";
       try {
-        return Integer.parseInt(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + ":' + getEmbeddedObject().video.width);"));
+        return Integer.parseInt(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + "', getEmbeddedObject().video.width);"));
       } catch(Exception e) {
       }
       return -1;
@@ -675,7 +675,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
     public int getHeight() {
       String command = "getHeight";
       try {
-        return Integer.parseInt(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + ":' + getEmbeddedObject().video.height);"));
+        return Integer.parseInt(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + "', getEmbeddedObject().video.height);"));
       } catch(Exception e) {
       }
       return -1;
@@ -685,7 +685,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
     }
     public boolean isFullScreen() {
       String command = "isFullScreen";
-      return "true".equals(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + ":' + getEmbeddedObject().video.fullscreen);"));
+      return "true".equals(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + "', getEmbeddedObject().video.fullscreen);"));
     }
     public enum VLCAspectRatio {
       _1x1, _4x3, _16x9, _16x10, _221x100, _5x4,
@@ -705,7 +705,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
     }
     public VLCAspectRatio getAspectRatio() {
       String command = "getAspectRatio";
-      String value = webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + ":' + getEmbeddedObject().video.aspectRatio);");
+      String value = webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + "', getEmbeddedObject().video.aspectRatio);");
       if("1:1".equals(value)) return VLCAspectRatio._1x1;
       if("4:3".equals(value)) return VLCAspectRatio._4x3;
       if("16:9".equals(value)) return VLCAspectRatio._16x9;
@@ -726,7 +726,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
     public int getSubtitleTrack() {
       String command = "getSubtitleTrack";
       try {
-        return Integer.parseInt(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + ":' + getEmbeddedObject().video.subtitle);"));
+        return Integer.parseInt(webBrowser.executeAndWaitForCommandResult(command, "sendCommand('" + command + "', getEmbeddedObject().video.subtitle);"));
       } catch(Exception e) {
       }
       return -1;

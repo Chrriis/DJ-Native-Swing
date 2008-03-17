@@ -125,9 +125,9 @@ public class JFlashPlayer extends JPanel implements Disposable {
       "      function getVariableEO(variableName) {" + LS +
       "        var flashMovie = getEmbeddedObject();" + LS +
       "        try {" + LS +
-      "          sendCommand('getVariableEO:' + flashMovie.GetVariable(decodeURIComponent(variableName)));" + LS +
+      "          sendCommand('getVariableEO', flashMovie.GetVariable(decodeURIComponent(variableName)));" + LS +
       "        } catch(e) {" + LS +
-      "          sendCommand('getVariableEO:');" + LS +
+      "          sendCommand('getVariableEO', '');" + LS +
       "        }" + LS +
       "      }" + LS;
     }
