@@ -9,6 +9,7 @@ Licence terms: LGPL (see licence.txt)
 
 - JFlashPlayer allows call Flash functions on the object.
 - JFlashPlayer allows to add custom JS.
+- Lightweight popups are handled differently.
 - sendCommand supports parameters.
 - Browser-based components have a postCommand() call.
 - Destroying and re-init the native interface is supported.
