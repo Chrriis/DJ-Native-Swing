@@ -36,15 +36,6 @@ public class JFlashPlayer extends JPanel implements Disposable {
 
   public static class FlashLoadingOptions {
     
-    public FlashLoadingOptions() {
-      this(null, null);
-    }
-    
-    public FlashLoadingOptions(Map<String, String> parameters, Map<String, String> variables) {
-      setParameters(parameters);
-      setVariables(variables);
-    }
-    
     protected Map<String, String> keyToValueVariableMap = new HashMap<String, String>();
     
     public Map<String, String> getVariables() {
@@ -69,6 +60,16 @@ public class JFlashPlayer extends JPanel implements Disposable {
         keyToValueParameterMap = new HashMap<String, String>();
       }
       this.keyToValueParameterMap = keyToValueParameterMap;
+    }
+    
+    public String customJavascriptDefinitions;
+    
+    public void setCustomJavascriptDefinitions(String customJavascriptDefinitions) {
+      this.customJavascriptDefinitions = customJavascriptDefinitions;
+    }
+    
+    public String getCustomJavascriptDefinitions() {
+      return customJavascriptDefinitions;
     }
     
     Map<String, String> getHTMLParameters() {
@@ -117,7 +118,14 @@ public class JFlashPlayer extends JPanel implements Disposable {
     
     @Override
     protected String getJavascriptDefinitions() {
+      String customJavascript = loadingOptions.getCustomJavascriptDefinitions();
+      if(customJavascript != null) {
+        customJavascript = customJavascript + LS;
+      } else {
+        customJavascript = "";
+      }
       return
+      customJavascript +
       "      function setVariableEO(variableName, variableValue) {" + LS +
       "        var flashMovie = getEmbeddedObject();" + LS +
       "        flashMovie.SetVariable(decodeURIComponent(variableName), decodeURIComponent(variableValue));" + LS +

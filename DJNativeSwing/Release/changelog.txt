@@ -7,6 +7,7 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.5 (xxxxxxxxxxxxxx):
 
+- JFlashPlayer allows to add custom JS.
 - sendCommand supports parameters.
 - Browser-based components have a postCommand() call.
 - Destroying and re-init the native interface is supported.
