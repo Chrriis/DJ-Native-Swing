@@ -11,10 +11,13 @@ import java.awt.AWTEvent;
 import java.awt.Canvas;
 import java.awt.Component;
 import java.awt.Dialog;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.AWTEventListener;
 import java.awt.event.ComponentEvent;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 import java.awt.event.WindowEvent;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -36,9 +39,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
-import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.event.EventListenerList;
 
@@ -104,6 +105,96 @@ public class NativeInterfaceHandler {
     
   }
   
+  private static class HeavyweightForcerWindow extends Window {
+    
+    private boolean isPacked;
+    
+    public HeavyweightForcerWindow(Window parent) {
+      super(parent);
+      pack();
+      isPacked = true;
+    }
+    
+    public boolean isVisible() {
+      return isPacked;
+    }
+    
+    public Rectangle getBounds() {
+      return getOwner().getBounds();
+    }
+    
+    private int count;
+    
+    public void setCount(int count) {
+      this.count = count;
+    }
+    
+    public int getCount() {
+      return count;
+    }
+    
+  }
+  
+  private static class HeavyweightForcer implements HierarchyListener {
+    
+    private Canvas canvas;
+    private HeavyweightForcerWindow forcer;
+    
+    private HeavyweightForcer(Canvas canvas) {
+      this.canvas = canvas;
+      if(canvas.isShowing()) {
+        createForcer();
+      }
+    }
+    
+    public static void activate(Canvas canvas) {
+      canvas.addHierarchyListener(new HeavyweightForcer(canvas));
+    }
+    
+    private void destroyForcer() {
+      if(forcer == null) {
+        return;
+      }
+      int count = forcer.getCount() - 1;
+      forcer.setCount(count);
+      if(count == 0) {
+        forcer.dispose();
+      }
+      forcer = null;
+    }
+    
+    private void createForcer() {
+      Window windowAncestor = SwingUtilities.getWindowAncestor(canvas);
+      for(Window window: windowAncestor.getOwnedWindows()) {
+        if(window instanceof HeavyweightForcerWindow) {
+          forcer = (HeavyweightForcerWindow)window;
+          break;
+        }
+      }
+      if(forcer == null) {
+        forcer = new HeavyweightForcerWindow(windowAncestor);
+      }
+      forcer.setCount(forcer.getCount() + 1);
+    }
+    
+    public void hierarchyChanged(HierarchyEvent e) {
+      long changeFlags = e.getChangeFlags();
+      if((changeFlags & HierarchyEvent.DISPLAYABILITY_CHANGED) != 0) {
+        if(!canvas.isDisplayable()) {
+          canvas.removeHierarchyListener(this);
+          destroyForcer();
+        }
+      } else if((changeFlags & HierarchyEvent.SHOWING_CHANGED) != 0) {
+        if(canvas.isShowing()) {
+          createForcer();
+        } else {
+          destroyForcer();
+        }
+      }
+    }
+    
+  }
+  
   /**
    * This class is not part of the public API.
    * @author Christopher Deckers
@@ -118,6 +209,7 @@ public class NativeInterfaceHandler {
     
     public static void addCanvas(Canvas canvas) {
       canvasList.add(canvas);
+      HeavyweightForcer.activate(canvas);
     }
     
     public static void removeCanvas(Canvas canvas) {
@@ -128,7 +220,13 @@ public class NativeInterfaceHandler {
     
     public static Window[] getWindows() {
       if(Utils.IS_JAVA_6_OR_GREATER) {
-        return Window.getWindows();
+        List<Window> windowList = new ArrayList<Window>();
+        for(Window window: Window.getWindows()) {
+          if(!(window instanceof HeavyweightForcerWindow)) {
+            windowList.add(window);
+          }
+        }
+        return windowList.toArray(new Window[0]);
       }
       return windowSet == null? new Window[0]: windowSet.toArray(new Window[0]);
     }
@@ -199,10 +297,6 @@ public class NativeInterfaceHandler {
       System.setProperty("sun.awt.noerasebackground", "true");
       // It seems on Linux this is required to get the component visible.
       System.setProperty("sun.awt.xembedserver", "true");
-      // Remove all lightweight windows, to avoid wrong overlaps
-      ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
-      JPopupMenu.setDefaultLightWeightPopupEnabled(false);
-      System.setProperty("JPopupMenu.defaultLWPopupEnabledKey", "false");
       // We use our own HW forcing, so we disable the one from JNA
       System.setProperty("jna.force_hw_popups", "false");
       // Create window monitor

@@ -84,6 +84,7 @@ public class JFlashPlayer extends JPanel implements Disposable {
       if(variablesSB.length() > 0) {
         htmlParameters.put("flashvars", variablesSB.toString());
       }
+      htmlParameters.put("allowScriptAccess", "always");
       htmlParameters.put("swliveconnect", "true");
       return htmlParameters;
     }
@@ -256,6 +257,46 @@ public class JFlashPlayer extends JPanel implements Disposable {
       return null;
     }
     return webBrowser.executeAndWaitForCommandResult("getVariableEO", "getVariableEO('" + Utils.encodeURL(name) + "');");
+  }
+  
+  /**
+   * Call a function on the Flash object, with optional arguments (Strings, numbers, booleans).
+   */
+  public void callFlashFunction(String functionName, Object... args) {
+    webBrowser.execute(getObjectFunctionCall(functionName, args) + ";");
+  }
+  
+  /**
+   * Call a function on the Flash object and waits for a result, with optional arguments (Strings, numbers, booleans).
+   */
+  public String callFlashFunctionWithResult(String functionName, Object... args) {
+    return webBrowser.executeAndWaitForCommandResult("getFlashResult", "sendCommand('getFlashResult', " + getObjectFunctionCall(functionName, args) + ");");
+  }
+  
+  private String getObjectFunctionCall(String functionName, Object... args) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("getEmbeddedObject().").append(functionName).append('(');
+    for(int i=0; i<args.length; i++) {
+      if(i > 0) {
+        sb.append(", ");
+      }
+      Object arg = args[i];
+      if(arg == null) {
+        sb.append("null");
+      } else if(arg instanceof Boolean || arg instanceof Number) {
+        sb.append(arg);
+      } else {
+        arg = arg.toString();
+        String encodedArg = Utils.encodeURL((String)arg);
+        if(arg.equals(encodedArg)) {
+          sb.append('\'').append(arg).append('\'');
+        } else {
+          sb.append("decodeURIComponent('").append(encodedArg).append("')");
+        }
+      }
+    }
+    sb.append(")");
+    return sb.toString();
   }
   
   /**
