@@ -541,7 +541,7 @@ public abstract class NativeComponent extends Canvas {
     }
   }
   
-  protected void createResources() {
+  private void createResources() {
     boolean isInterfaceAlive = NativeInterfaceHandler._Internal_.isInterfaceAlive();
     if(isInterfaceAlive) {
       NativeInterfaceHandler.checkUIThread();
