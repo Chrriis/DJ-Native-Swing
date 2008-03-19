@@ -580,6 +580,14 @@ public class JWebBrowser extends JPanel implements Disposable {
   }
   
   /**
+   * Forces the component to initialize. All method calls will then be synchronous instead of being queued waiting for the componant to be initialized.
+   * This call fails if the component is not in a component hierarchy with a Window ancestor.
+   */
+  public void initialize() {
+    nativeComponent.initialize();
+  }
+  
+  /**
    * @return the Browser Window if it is contained in one, or null.
    */
   public JWebBrowserWindow getBrowserWindow() {

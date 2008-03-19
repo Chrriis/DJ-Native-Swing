@@ -435,4 +435,60 @@ public abstract class WebBrowserObject implements Disposable {
     return listenerList.getListeners(InitializationListener.class);
   }
 
+  /**
+   * Set the value of a property of the object (a String, number, boolean).
+   */
+  public void setObjectProperty(String property, Object value) {
+    webBrowser.execute("try {getEmbeddedObject()." + property + " = " + getObjectArgument(value) + ";} catch(exxxxx) {}");
+  }
+  
+  /**
+   * Call a function on the object and waits for a result, with optional arguments (Strings, numbers, booleans).
+   */
+  public String getObjectProperty(String property) {
+    return webBrowser.executeAndWaitForCommandResult("[getFlashResult]", "try {sendCommand('[getFlashResult]', getEmbeddedObject()." + property + ");} catch(exxxxx) {sendCommand('[getFlashResult]', null);}");
+  }
+  
+  /**
+   * Call a function on the object, with optional arguments (Strings, numbers, booleans).
+   */
+  public void callObjectFunction(String functionName, Object... args) {
+    webBrowser.execute("try {" + getObjectFunctionCall(functionName, args) + ";} catch(exxxxx) {}");
+  }
+  
+  /**
+   * Call a function on the object and waits for a result, with optional arguments (Strings, numbers, booleans).
+   */
+  public String callObjectFunctionWithResult(String functionName, Object... args) {
+    return webBrowser.executeAndWaitForCommandResult("[getFlashResult]", "try {sendCommand('[getFlashResult]', " + getObjectFunctionCall(functionName, args) + ");} catch(exxxxx) {sendCommand('[getFlashResult]', null);}");
+  }
+  
+  private String getObjectFunctionCall(String functionName, Object... args) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("getEmbeddedObject().").append(functionName).append('(');
+    for(int i=0; i<args.length; i++) {
+      if(i > 0) {
+        sb.append(", ");
+      }
+      sb.append(getObjectArgument(args[i]));
+    }
+    sb.append(")");
+    return sb.toString();
+  }
+  
+  private String getObjectArgument(Object arg) {
+    if(arg == null) {
+      return "null";
+    }
+    if(arg instanceof Boolean || arg instanceof Number) {
+      return arg.toString();
+    }
+    arg = arg.toString();
+    String encodedArg = Utils.encodeURL((String)arg);
+    if(arg.equals(encodedArg)) {
+      return '\'' + (String)arg + '\'';
+    }
+    return "decodeURIComponent('" + encodedArg + "')";
+  }
+  
 }

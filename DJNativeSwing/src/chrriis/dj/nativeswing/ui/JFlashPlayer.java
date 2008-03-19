@@ -119,26 +119,7 @@ public class JFlashPlayer extends JPanel implements Disposable {
     
     @Override
     protected String getJavascriptDefinitions() {
-      String customJavascript = loadingOptions.getCustomJavascriptDefinitions();
-      if(customJavascript != null) {
-        customJavascript = customJavascript + LS;
-      } else {
-        customJavascript = "";
-      }
-      return
-      customJavascript +
-      "      function setVariableEO(variableName, variableValue) {" + LS +
-      "        var flashMovie = getEmbeddedObject();" + LS +
-      "        flashMovie.SetVariable(decodeURIComponent(variableName), decodeURIComponent(variableValue));" + LS +
-      "      }" + LS +
-      "      function getVariableEO(variableName) {" + LS +
-      "        var flashMovie = getEmbeddedObject();" + LS +
-      "        try {" + LS +
-      "          sendCommand('getVariableEO', flashMovie.GetVariable(decodeURIComponent(variableName)));" + LS +
-      "        } catch(e) {" + LS +
-      "          sendCommand('getVariableEO', '');" + LS +
-      "        }" + LS +
-      "      }" + LS;
+      return loadingOptions.getCustomJavascriptDefinitions();
     }
     
     @Override
@@ -225,28 +206,28 @@ public class JFlashPlayer extends JPanel implements Disposable {
     if(!webBrowserObject.hasContent()) {
       return;
     }
-    webBrowser.execute("getEmbeddedObject().Play();");
+    webBrowserObject.callObjectFunction("Play");
   }
   
   public void pause() {
     if(!webBrowserObject.hasContent()) {
       return;
     }
-    webBrowser.execute("getEmbeddedObject().StopPlay();");
+    webBrowserObject.callObjectFunction("StopPlay");
   }
   
   public void stop() {
     if(!webBrowserObject.hasContent()) {
       return;
     }
-    webBrowser.execute("getEmbeddedObject().Rewind();");
+    webBrowserObject.callObjectFunction("Rewind");
   }
   
   public void setVariable(String name, String value) {
     if(!webBrowserObject.hasContent()) {
       return;
     }
-    webBrowser.execute("setVariableEO('" + Utils.encodeURL(name) + "', '" + Utils.encodeURL(value) + "')");
+    webBrowserObject.callObjectFunction("SetVariable", name, value);
   }
   
   /**
@@ -256,47 +237,21 @@ public class JFlashPlayer extends JPanel implements Disposable {
     if(!webBrowserObject.hasContent()) {
       return null;
     }
-    return webBrowser.executeAndWaitForCommandResult("getVariableEO", "getVariableEO('" + Utils.encodeURL(name) + "');");
+    return webBrowserObject.callObjectFunctionWithResult("GetVariable", name);
   }
   
   /**
    * Call a function on the Flash object, with optional arguments (Strings, numbers, booleans).
    */
   public void callFlashFunction(String functionName, Object... args) {
-    webBrowser.execute(getObjectFunctionCall(functionName, args) + ";");
+    webBrowserObject.callObjectFunction(functionName, args);
   }
   
   /**
    * Call a function on the Flash object and waits for a result, with optional arguments (Strings, numbers, booleans).
    */
   public String callFlashFunctionWithResult(String functionName, Object... args) {
-    return webBrowser.executeAndWaitForCommandResult("getFlashResult", "sendCommand('getFlashResult', " + getObjectFunctionCall(functionName, args) + ");");
-  }
-  
-  private String getObjectFunctionCall(String functionName, Object... args) {
-    StringBuilder sb = new StringBuilder();
-    sb.append("getEmbeddedObject().").append(functionName).append('(');
-    for(int i=0; i<args.length; i++) {
-      if(i > 0) {
-        sb.append(", ");
-      }
-      Object arg = args[i];
-      if(arg == null) {
-        sb.append("null");
-      } else if(arg instanceof Boolean || arg instanceof Number) {
-        sb.append(arg);
-      } else {
-        arg = arg.toString();
-        String encodedArg = Utils.encodeURL((String)arg);
-        if(arg.equals(encodedArg)) {
-          sb.append('\'').append(arg).append('\'');
-        } else {
-          sb.append("decodeURIComponent('").append(encodedArg).append("')");
-        }
-      }
-    }
-    sb.append(")");
-    return sb.toString();
+    return webBrowserObject.callObjectFunctionWithResult(functionName, args);
   }
   
   /**
@@ -328,6 +283,14 @@ public class JFlashPlayer extends JPanel implements Disposable {
    */
   public void run(Runnable runnable) {
     webBrowser.run(runnable);
+  }
+  
+  /**
+   * Forces the component to initialize. All method calls will then be synchronous instead of being queued waiting for the componant to be initialized.
+   * This call fails if the component is not in a component hierarchy with a Window ancestor.
+   */
+  public void initialize() {
+    webBrowser.initialize();
   }
   
   public void addInitializationListener(InitializationListener listener) {

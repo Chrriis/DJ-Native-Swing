@@ -55,7 +55,7 @@ public class SimpleVLCPlayerExample extends JPanel {
     gridBag.setConstraints(playerFileTextField, cons);
     final Runnable loadPlayerFileRunnable = new Runnable() {
       public void run() {
-        player.setURL(playerFileTextField.getText());
+        player.load(playerFileTextField.getText());
       }
     };
     playerFileTextField.addActionListener(new ActionListener() {
