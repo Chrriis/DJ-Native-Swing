@@ -320,9 +320,9 @@ public class JVLCPlayer extends JPanel implements Disposable {
     return webBrowser;
   }
   
-  public String getLoadedResource() {
-    return webBrowserObject.getLoadedResource();
-  }
+//  public String getLoadedResource() {
+//    return webBrowserObject.getLoadedResource();
+//  }
   
   /**
    * Load the player, with no content.

@@ -175,9 +175,9 @@ public class JFlashPlayer extends JPanel implements Disposable {
     return null;
   }
   
-  public String getLoadedResource() {
-    return webBrowserObject.getLoadedResource();
-  }
+//  public String getLoadedResource() {
+//    return webBrowserObject.getLoadedResource();
+//  }
   
   /**
    * Load a file from the classpath.
