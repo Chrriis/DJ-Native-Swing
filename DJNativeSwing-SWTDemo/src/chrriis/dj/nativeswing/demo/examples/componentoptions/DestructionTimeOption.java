@@ -16,7 +16,6 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import chrriis.common.Disposable;
-import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
 import chrriis.dj.nativeswing.ui.JFlashPlayer;
 import chrriis.dj.nativeswing.ui.NativeComponent;
@@ -34,8 +33,7 @@ public class DestructionTimeOption extends JPanel implements Disposable {
     NativeComponent.getNextInstanceOptions().setDestructionTime(DestructionTime.ON_FINALIZATION);
     flashPlayer = new JFlashPlayer();
     flashPlayer.setControlBarVisible(false);
-    String resourceURL = WebServer.getDefaultWebServer().getClassPathResourceURL(SimpleFlashExample.class.getName(), "resource/Movement-pointer_or_click.swf");
-    flashPlayer.setURL(resourceURL);
+    flashPlayer.load(SimpleFlashExample.class, "resource/Movement-pointer_or_click.swf");
     add(flashPlayer, BorderLayout.CENTER);
     JButton addRemoveButton = new JButton("Add/Remove component");
     addRemoveButton.addActionListener(new ActionListener() {

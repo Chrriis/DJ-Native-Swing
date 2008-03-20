@@ -76,14 +76,14 @@ public abstract class WebBrowserObject implements Disposable {
     webBrowser.addWebBrowserListener(new NWebBrowserListener(this));
   }
   
-  private String url;
+  private String resourcePath;
 
-  public String getURL() {
-    return "".equals(url)? null: url;
+  public String getLoadedResource() {
+    return "".equals(resourcePath)? null: resourcePath;
   }
   
   public boolean hasContent() {
-    return url != null;
+    return resourcePath != null;
   }
   
   private class CMLocal_waitForInitialization extends LocalMessage {
@@ -103,16 +103,16 @@ public abstract class WebBrowserObject implements Disposable {
   }
   
   @SuppressWarnings("deprecation")
-  public void setURL(String url) {
-    this.url = url;
+  public void load(String resourcePath) {
+    this.resourcePath = resourcePath;
     Registry.getInstance().remove(instanceID);
-    if(url == null) {
+    if(resourcePath == null) {
       webBrowser.setText("");
       return;
     }
     Registry.getInstance().remove(instanceID);
     instanceID = Registry.getInstance().add(this);
-    url = WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "html/" + instanceID);
+    resourcePath = WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "html/" + instanceID);
     final Boolean[] resultArray = new Boolean[] {Boolean.FALSE};
     InitializationListener initializationListener = new InitializationListener() {
       public void objectInitialized(InitializationEvent e) {
@@ -121,7 +121,7 @@ public abstract class WebBrowserObject implements Disposable {
       }
     };
     addInitializationListener(initializationListener);
-    webBrowser.setURL(url);
+    webBrowser.setURL(resourcePath);
     webBrowser.getDisplayComponent().runSync(new CMLocal_waitForInitialization(), initializationListener, resultArray);
   }
   
@@ -218,7 +218,7 @@ public abstract class WebBrowserObject implements Disposable {
       if(webBrowserObject == null) {
         return null;
       }
-      String url = webBrowserObject.url;
+      String url = webBrowserObject.resourcePath;
       // local files may have some security restrictions depending on the plugin, so let's ask the plugin for a valid URL.
       File file = Utils.getLocalFile(url);
       if(file != null) {

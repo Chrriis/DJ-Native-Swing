@@ -175,23 +175,40 @@ public class JFlashPlayer extends JPanel implements Disposable {
     return null;
   }
   
-  public String getURL() {
-    return webBrowserObject.getURL();
+  public String getLoadedResource() {
+    return webBrowserObject.getLoadedResource();
   }
   
-  public void setURL(String url) {
-    setURL(url, new FlashLoadingOptions());
+  /**
+   * Load a file from the classpath.
+   */
+  public void load(Class<?> clazz, String resourcePath) {
+    load(clazz, resourcePath, null);
+  }
+  
+  /**
+   * Load a file from the classpath.
+   */
+  public void load(Class<?> clazz, String resourcePath, FlashLoadingOptions loadingOptions) {
+    load(WebServer.getDefaultWebServer().getClassPathResourceURL(clazz.getName(), resourcePath), loadingOptions);
+  }
+  
+  public void load(String resourcePath) {
+    load(resourcePath, null);
   }
   
   private FlashLoadingOptions loadingOptions;
   
-  public void setURL(String url, FlashLoadingOptions loadingOptions) {
-    if("".equals(url)) {
-      url = null;
+  public void load(String resourcePath, FlashLoadingOptions loadingOptions) {
+    if("".equals(resourcePath)) {
+      resourcePath = null;
+    }
+    if(loadingOptions == null) {
+      loadingOptions = new FlashLoadingOptions();
     }
     this.loadingOptions = loadingOptions;
-    webBrowserObject.setURL(url);
-    boolean isEnabled = url != null;
+    webBrowserObject.load(resourcePath);
+    boolean isEnabled = resourcePath != null;
     playButton.setEnabled(isEnabled);
     pauseButton.setEnabled(isEnabled);
     stopButton.setEnabled(isEnabled);

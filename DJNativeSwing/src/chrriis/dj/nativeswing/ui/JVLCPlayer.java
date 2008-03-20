@@ -34,6 +34,7 @@ import javax.swing.event.ChangeListener;
 
 import chrriis.common.Disposable;
 import chrriis.common.Utils;
+import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.ui.JVLCPlayer.VLCInput.VLCState;
 import chrriis.dj.nativeswing.ui.event.InitializationListener;
 
@@ -319,8 +320,8 @@ public class JVLCPlayer extends JPanel implements Disposable {
     return webBrowser;
   }
   
-  public String getURL() {
-    return webBrowserObject.getURL();
+  public String getLoadedResource() {
+    return webBrowserObject.getLoadedResource();
   }
   
   /**
@@ -330,8 +331,8 @@ public class JVLCPlayer extends JPanel implements Disposable {
     load((VLCLoadingOptions)null);
   }
   
-  public void load(String url) {
-    load(url, null);
+  public void load(String resourcePath) {
+    load(resourcePath, null);
   }
   
   /**
@@ -341,21 +342,35 @@ public class JVLCPlayer extends JPanel implements Disposable {
     load("", loadingOptions);
   }
   
-  private VLCLoadingOptions loadingOptions;
-  
-  public void load(String url, VLCLoadingOptions loadingOptions) {
-    if("".equals(url)) {
-      url = null;
-    }
-    load_(url, loadingOptions);
+  /**
+   * Load a file from the classpath.
+   */
+  public void load(Class<?> clazz, String resourcePath) {
+    load(clazz, resourcePath, null);
   }
   
-  private void load_(String url, VLCLoadingOptions loadingOptions) {
+  /**
+   * Load a file from the classpath.
+   */
+  public void load(Class<?> clazz, String resourcePath, VLCLoadingOptions loadingOptions) {
+    load(WebServer.getDefaultWebServer().getClassPathResourceURL(clazz.getName(), resourcePath), loadingOptions);
+  }
+  
+  private VLCLoadingOptions loadingOptions;
+  
+  public void load(String resourcePath, VLCLoadingOptions loadingOptions) {
+    if("".equals(resourcePath)) {
+      resourcePath = null;
+    }
+    load_(resourcePath, loadingOptions);
+  }
+  
+  private void load_(String resourcePath, VLCLoadingOptions loadingOptions) {
     if(loadingOptions == null) {
       loadingOptions = new VLCLoadingOptions();
     }
     this.loadingOptions = loadingOptions;
-    webBrowserObject.setURL(url);
+    webBrowserObject.load(resourcePath);
     boolean hasContent = webBrowserObject.hasContent();
     playButton.setEnabled(hasContent);
     pauseButton.setEnabled(hasContent);

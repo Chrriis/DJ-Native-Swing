@@ -22,7 +22,6 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 
-import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.ui.JFlashPlayer;
 import chrriis.dj.nativeswing.ui.JFlashPlayer.FlashLoadingOptions;
 
@@ -37,10 +36,9 @@ public class Interactions extends JPanel {
     flashPlayerPanel.setBorder(BorderFactory.createTitledBorder("Native Flash Player component"));
     final JFlashPlayer flashPlayer = new JFlashPlayer();
     flashPlayer.setControlBarVisible(true);
-    String resourceURL = WebServer.getDefaultWebServer().getClassPathResourceURL(Interactions.class.getName(), "resource/dyn_text_moving.swf");
     FlashLoadingOptions flashLoadingOptions = new FlashLoadingOptions();
     flashLoadingOptions.setVariables(new HashMap<String, String>() {{put("mytext", "My Text");}});
-    flashPlayer.setURL(resourceURL, flashLoadingOptions);
+    flashPlayer.load(getClass(), "resource/dyn_text_moving.swf", flashLoadingOptions);
     flashPlayerPanel.add(flashPlayer, BorderLayout.CENTER);
     add(flashPlayerPanel, BorderLayout.CENTER);
     JPanel variablePanel = new JPanel(new BorderLayout(0, 0));

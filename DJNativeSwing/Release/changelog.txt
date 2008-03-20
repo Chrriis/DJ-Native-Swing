@@ -7,7 +7,8 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.5 (xxxxxxxxxxxxxx):
 
-- JVLCPlayer.setURL() is changed to load().
+- JFlashPlayer and JVLCPlayer can load files from the classpath.
+- JFlashPlayer.setURL() and JVLCPlayer.setURL() are changed to load().
 - initialize() method is exposed.
 - JFlashPlayer allows call Flash functions on the object.
 - JFlashPlayer allows to add custom JS.

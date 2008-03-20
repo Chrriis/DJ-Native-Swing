@@ -17,7 +17,6 @@ import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 
 import chrriis.common.Disposable;
-import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
 import chrriis.dj.nativeswing.ui.JFlashPlayer;
 import chrriis.dj.nativeswing.ui.JWebBrowser;
@@ -53,8 +52,7 @@ public class FiliationTypeOption extends JPanel implements Disposable {
     NativeComponent.getNextInstanceOptions().setFiliationType(FiliationType.COMPONENT_PROXYING);
     JFlashPlayer flashPlayer = new JFlashPlayer();
     flashPlayer.setControlBarVisible(false);
-    String resourceURL = WebServer.getDefaultWebServer().getClassPathResourceURL(SimpleFlashExample.class.getName(), "resource/Movement-pointer_or_click.swf");
-    flashPlayer.setURL(resourceURL);
+    flashPlayer.load(SimpleFlashExample.class, "resource/Movement-pointer_or_click.swf");
     flashPlayerInternalFrame.add(flashPlayer, BorderLayout.CENTER);
     desktopPane.add(flashPlayerInternalFrame);
     // Web Browser 2 internal frame, with a button on top

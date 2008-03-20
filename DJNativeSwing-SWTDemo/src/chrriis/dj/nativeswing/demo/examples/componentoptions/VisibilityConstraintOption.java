@@ -17,7 +17,6 @@ import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
 import chrriis.dj.nativeswing.ui.JFlashPlayer;
 import chrriis.dj.nativeswing.ui.JWebBrowser;
@@ -45,8 +44,7 @@ public class VisibilityConstraintOption extends JPanel {
     NativeComponent.getNextInstanceOptions().setVisibilityConstraint(VisibilityConstraint.FULL_COMPONENT_TREE);
     JFlashPlayer flashPlayer = new JFlashPlayer();
     flashPlayer.setControlBarVisible(false);
-    String resourceURL = WebServer.getDefaultWebServer().getClassPathResourceURL(SimpleFlashExample.class.getName(), "resource/Movement-pointer_or_click.swf");
-    flashPlayer.setURL(resourceURL);
+    flashPlayer.load(SimpleFlashExample.class, "resource/Movement-pointer_or_click.swf");
     flashPlayer.setBounds(OFFSET_X * layerIndex, OFFSET_Y * layerIndex, WIDTH, HEIGHT);
     layeredPane.setLayer(flashPlayer, layerIndex++);
     layeredPane.add(flashPlayer);
