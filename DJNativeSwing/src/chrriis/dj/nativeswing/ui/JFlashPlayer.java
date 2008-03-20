@@ -109,7 +109,7 @@ public class JFlashPlayer extends JPanel implements Disposable {
     
     @Override
     protected String getJavascriptDefinitions() {
-      return JFlashPlayer.this.getCustomJavascriptDefinitions();
+      return JFlashPlayer.this.getJavascriptDefinitions();
     }
     
     @Override
@@ -171,7 +171,7 @@ public class JFlashPlayer extends JPanel implements Disposable {
     return value.length() == 0? null: new ImageIcon(JWebBrowser.class.getResource(value));
   }
   
-  protected String getCustomJavascriptDefinitions() {
+  protected String getJavascriptDefinitions() {
     return null;
   }
   
