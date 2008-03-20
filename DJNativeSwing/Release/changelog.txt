@@ -9,7 +9,7 @@ Licence terms: LGPL (see licence.txt)
 
 - JFlashPlayer and JVLCPlayer can load files from the classpath.
 - JFlashPlayer.setURL() and JVLCPlayer.setURL() are changed to load().
-- initialize() method is exposed.
+- initializeNativePeer() method is exposed.
 - JFlashPlayer allows call Flash functions on the object.
 - JFlashPlayer allows to add custom JS.
 - Lightweight popups are handled differently.

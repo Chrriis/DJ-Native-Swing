@@ -107,7 +107,7 @@ class NativeWebBrowser extends NativeComponent {
           windowAncestor = webBrowserWindow;
         } else {
         }
-        jWebBrowser.getDisplayComponent().initialize();
+        jWebBrowser.getDisplayComponent().initializeNativePeer();
       }
       return jWebBrowser.getDisplayComponent().getComponentID();
     }

@@ -531,7 +531,7 @@ public abstract class NativeComponent extends Canvas {
    * Forces the component to initialize. All method calls will then be synchronous instead of being queued waiting for the componant to be initialized.
    * This call fails if the component is not in a component hierarchy with a Window ancestor.
    */
-  public void initialize() {
+  public void initializeNativePeer() {
     if(NativeInterfaceHandler._Internal_.isInterfaceAlive()) {
       NativeInterfaceHandler.checkUIThread();
     }
