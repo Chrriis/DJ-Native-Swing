@@ -62,16 +62,6 @@ public class JFlashPlayer extends JPanel implements Disposable {
       this.keyToValueParameterMap = keyToValueParameterMap;
     }
     
-    public String customJavascriptDefinitions;
-    
-    public void setCustomJavascriptDefinitions(String customJavascriptDefinitions) {
-      this.customJavascriptDefinitions = customJavascriptDefinitions;
-    }
-    
-    public String getCustomJavascriptDefinitions() {
-      return customJavascriptDefinitions;
-    }
-    
     Map<String, String> getHTMLParameters() {
       HashMap<String, String> htmlParameters = new HashMap<String, String>(getParameters());
       StringBuffer variablesSB = new StringBuffer();
@@ -119,7 +109,7 @@ public class JFlashPlayer extends JPanel implements Disposable {
     
     @Override
     protected String getJavascriptDefinitions() {
-      return loadingOptions.getCustomJavascriptDefinitions();
+      return JFlashPlayer.this.getCustomJavascriptDefinitions();
     }
     
     @Override
@@ -179,6 +169,10 @@ public class JFlashPlayer extends JPanel implements Disposable {
   private Icon createIcon(String resourceKey) {
     String value = RESOURCES.getString(resourceKey);
     return value.length() == 0? null: new ImageIcon(JWebBrowser.class.getResource(value));
+  }
+  
+  protected String getCustomJavascriptDefinitions() {
+    return null;
   }
   
   public String getURL() {
