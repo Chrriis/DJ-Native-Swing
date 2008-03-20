@@ -197,9 +197,10 @@ public class JFlashPlayer extends JPanel implements Disposable {
     }
     this.loadingOptions = loadingOptions;
     webBrowserObject.setURL(url);
-    playButton.setEnabled(true);
-    pauseButton.setEnabled(true);
-    stopButton.setEnabled(true);
+    boolean isEnabled = url != null;
+    playButton.setEnabled(isEnabled);
+    pauseButton.setEnabled(isEnabled);
+    stopButton.setEnabled(isEnabled);
   }
 
   public void play() {
