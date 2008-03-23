@@ -75,20 +75,20 @@ public abstract class OleNativeComponent extends NativeComponent {
     }
   }
   
-  protected void invokeOleFunction(String property, Object... args) {
-    invokeOleFunction(new String[] {property}, args);
+  protected void invokeOleFunction(String functionName, Object... args) {
+    invokeOleFunction(new String[] {functionName}, args);
   }
   
-  protected void invokeOleFunction(String[] propertyPath, Object... args) {
-    runAsync(new CMN_invokeOleFunction(), false, propertyPath, args);
+  protected void invokeOleFunction(String[] functionPath, Object... args) {
+    runAsync(new CMN_invokeOleFunction(), false, functionPath, args);
   }
   
-  protected Object invokeOleFunctionWithResult(String property, Object... args) {
-    return invokeOleFunctionWithResult(new String[] {property}, args);
+  protected Object invokeOleFunctionWithResult(String functionName, Object... args) {
+    return invokeOleFunctionWithResult(new String[] {functionName}, args);
   }
   
-  protected Object invokeOleFunctionWithResult(String[] propertyPath, Object... args) {
-    return runSync(new CMN_invokeOleFunction(), true, propertyPath, args);
+  protected Object invokeOleFunctionWithResult(String[] functionPath, Object... args) {
+    return runSync(new CMN_invokeOleFunction(), true, functionPath, args);
   }
   
   private static class CMN_setOleProperty extends ControlCommandMessage {
