@@ -651,6 +651,13 @@ public class NativeInterfaceHandler {
     return display != null;
   }
   
+  public static boolean isUIThread() {
+    if(!_Internal_.isInterfaceAlive()) {
+      throw new IllegalStateException("The native interface is not alive!");
+    }
+    return messagingInterface.isUIThread();
+  }
+  
   public static void checkUIThread() {
     if(!_Internal_.isInterfaceAlive()) {
       throw new IllegalStateException("The native interface is not alive!");

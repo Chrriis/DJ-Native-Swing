@@ -22,7 +22,13 @@ import java.awt.event.HierarchyListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.StringReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -39,6 +45,10 @@ import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.MouseWheelListener;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Control;
@@ -786,13 +796,20 @@ public abstract class NativeComponent extends Canvas {
   
   static class SimpleNativeComponentHolder extends JPanel implements NativeComponentHolder {
     
+    private NativeComponent nativeComponent;
+    
     public SimpleNativeComponentHolder(NativeComponent nativeComponent) {
-      this();
+      super(new BorderLayout(0, 0));
+      this.nativeComponent = nativeComponent;
       add(nativeComponent);
     }
     
-    public SimpleNativeComponentHolder() {
-      super(new BorderLayout(0, 0));
+    @Override
+    public void print(Graphics g) {
+      BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
+      nativeComponent.paintComponent(image);
+      g.drawImage(image, 0, 0, null);
+      super.print(g);
     }
     
   }
@@ -920,6 +937,118 @@ public abstract class NativeComponent extends Canvas {
       result = super.getPreferredSize();
     }
     return result;
+  }
+  
+  private static class CMN_getGraphicsData extends ControlCommandMessage {
+    private ImageData getImageData(Control control) {
+      Point size = control.getSize();
+      if(size.x <= 0 || size.y <= 0) {
+        return null;
+      }
+      final Image image = new Image(NativeInterfaceHandler.getDisplay(), size.x, size.y);
+      GC gc = new GC(image);
+      control.print(gc);
+      gc.dispose();
+      return image.getImageData();
+    }
+    @Override
+    public Object run() throws Exception {
+      final Control control = getControl();
+      ImageData imageData;
+      if(!NativeInterfaceHandler.isUIThread()) {
+        final Exception[] eArray = new Exception[1];
+        final ImageData[] resultArray = new ImageData[1];
+        control.getDisplay().syncExec(new Runnable() {
+          public void run() {
+            try {
+              resultArray[0] = getImageData(control);
+            } catch (Exception e) {
+              eArray[0] = e;
+            }
+          }
+        });
+        if(eArray[0] != null) {
+          throw eArray[0];
+        }
+        imageData = resultArray[0];
+      } else {
+        imageData = getImageData(control);
+      }
+      if(imageData == null) {
+        return new Object[] {new int[] {0, 0}, new int[0][0]};
+      }
+      int cursor = 0;
+      // Has to be a multiple of 3
+      byte[] bytes = new byte[1024 * 3];
+      PaletteData palette = imageData.palette;
+      if (palette.isDirect) {
+        File outputFile = File.createTempFile(".ns", ".bin");
+        BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(outputFile));
+        for(int x=0; x<imageData.width; x++) {
+          for(int y=0; y<imageData.height; y++) {
+            int pixel = imageData.getPixel(x, y);
+            int red = pixel & palette.redMask;
+            bytes[cursor++] = (byte)(palette.redShift < 0? red >>> -palette.redShift: red << palette.redShift);
+            int green = pixel & palette.greenMask;
+            bytes[cursor++] = (byte)((palette.greenShift < 0)? green >>> -palette.greenShift: green << palette.greenShift);
+            int blue = pixel & palette.blueMask;
+            bytes[cursor++] = (byte)((palette.blueShift < 0)? blue >>> -palette.blueShift: blue << palette.blueShift);
+            if(cursor == bytes.length) {
+              out.write(bytes);
+              cursor = 0;
+            }
+          }
+        }
+        out.write(bytes, 0, cursor);
+        out.close();
+        return new Object[] {new int[] {imageData.width, imageData.height}, outputFile.getAbsolutePath()};
+      }
+      throw new IllegalStateException("Not implemented");
+    }
+  }
+  
+  public void paintComponent(BufferedImage image) {
+    if(!isValidControl() || isDisposed) {
+      return;
+    }
+    Dimension size = getSize();
+    if(size.width <= 0 || size.height <= 0) {
+      return;
+    }
+    CMN_getGraphicsData getGraphicsData = new CMN_getGraphicsData();
+    getGraphicsData.setNativeComponent(this);
+    Object[] result = (Object[])getGraphicsData.syncExec();
+    int imageWidth = image.getWidth();
+    int imageHeight = image.getHeight();
+    int width = Math.min(((int[])result[0])[0], imageWidth);
+    int height = Math.min(((int[])result[0])[1], imageHeight);
+    if(width <= 0 || height <= 0) {
+      return;
+    }
+    File inFile = new File((String)result[1]);
+    inFile.deleteOnExit();
+    // Has to be a multiple of 3
+    byte[] bytes = new byte[1024 * 3];
+    int count = 0;
+    try {
+      BufferedInputStream in = new BufferedInputStream(new FileInputStream(inFile));
+      for(int x=0; x<width; x++) {
+        for(int y=0; y<height; y++) {
+          if(count == 0) {
+            in.read(bytes);
+          }
+          image.setRGB(x, y, 0xFF000000 | (0xFF & bytes[count]) << 16 | (0xFF & bytes[count + 1]) << 8 | (0xFF & bytes[count + 2]));
+          count += 3;
+          if(count == bytes.length) {
+            count = 0;
+          }
+        }
+      }
+      in.close();
+    } catch(Exception e) {
+      e.printStackTrace();
+    }
+    inFile.delete();
   }
   
   @Override
