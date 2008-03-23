@@ -88,21 +88,21 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
 
   public static class WMPSettings {
     
-    private NativeMultiMediaPlayer player;
+    private NativeMultiMediaPlayer nativeComponent;
     
     WMPSettings(JMultiMediaPlayer multiMediaPlayer) {
-      this.player = multiMediaPlayer.nativeComponent;
+      this.nativeComponent = multiMediaPlayer.nativeComponent;
     }
     
     public void setErrorDialogsEnabled(boolean isErrorDialogEnabled) {
-      player.setProperty(new String[] {"settings", "enableErrorDialogs"}, isErrorDialogEnabled);
+      nativeComponent.setOleProperty(new String[] {"settings", "enableErrorDialogs"}, isErrorDialogEnabled);
     }
     
     public void setVolume(int volume) {
       if(volume < 0 || volume > 100) {
         throw new IllegalArgumentException("The volume must be between 0 and 100");
       }
-      player.setProperty(new String[] {"settings", "volume"}, volume);
+      nativeComponent.setOleProperty(new String[] {"settings", "volume"}, volume);
     }
     
     /**
@@ -110,7 +110,7 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
      */
     public int getVolume() {
       try {
-        return (Integer)player.getProperty(new String[] {"settings", "volume"});
+        return (Integer)nativeComponent.getOleProperty(new String[] {"settings", "volume"});
       } catch(Exception e) {
         return -1;
       }
@@ -123,7 +123,7 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
       if(stereoBalance < 100 || stereoBalance > 100) {
         throw new IllegalArgumentException("The stereo balance must be between -100 and 100");
       }
-      player.setProperty(new String[] {"settings", "balance"}, stereoBalance);
+      nativeComponent.setOleProperty(new String[] {"settings", "balance"}, stereoBalance);
     }
     
     /**
@@ -131,30 +131,30 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
      */
     public int getStereoBalance() {
       try {
-        return (Integer)player.getProperty(new String[] {"settings", "balance"});
+        return (Integer)nativeComponent.getOleProperty(new String[] {"settings", "balance"});
       } catch(Exception e) {
         return -1;
       }
     }
     
     public void setAutoStart(boolean isAutoStart) {
-      player.setProperty(new String[] {"settings", "autoStart"}, isAutoStart);
+      nativeComponent.setOleProperty(new String[] {"settings", "autoStart"}, isAutoStart);
     }
     
     public boolean isAutoStart() {
-      return Boolean.TRUE.equals(player.getProperty(new String[] {"settings", "autoStart"}));
+      return Boolean.TRUE.equals(nativeComponent.getOleProperty(new String[] {"settings", "autoStart"}));
     }
     
     public void setMute(boolean isMute) {
-      player.setProperty(new String[] {"settings", "mute"}, isMute);
+      nativeComponent.setOleProperty(new String[] {"settings", "mute"}, isMute);
     }
     
     public boolean isMute() {
-      return Boolean.TRUE.equals(player.getProperty(new String[] {"settings", "mute"}));
+      return Boolean.TRUE.equals(nativeComponent.getOleProperty(new String[] {"settings", "mute"}));
     }
     
     public boolean isPlayEnabled() {
-      return Boolean.TRUE.equals(player.getProperty(new String[] {"controls", "isAvailable"}, "Play"));
+      return Boolean.TRUE.equals(nativeComponent.getOleProperty(new String[] {"controls", "isAvailable"}, "Play"));
     }
     
   }
@@ -167,37 +167,37 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
 
   public static class WMPControls {
     
-    private NativeMultiMediaPlayer player;
+    private NativeMultiMediaPlayer nativeComponent;
     
     WMPControls(JMultiMediaPlayer multiMediaPlayer) {
-      this.player = multiMediaPlayer.nativeComponent;
+      this.nativeComponent = multiMediaPlayer.nativeComponent;
     }
     
     public void play() {
-      player.invokeOleFunction(new String[] {"controls", "Play"});
+      nativeComponent.invokeOleFunction(new String[] {"controls", "Play"});
     }
     
     public boolean isStopEnabled() {
-      return Boolean.TRUE.equals(player.getProperty(new String[] {"controls", "isAvailable"}, "Stop"));
+      return Boolean.TRUE.equals(nativeComponent.getOleProperty(new String[] {"controls", "isAvailable"}, "Stop"));
     }
     
     public void stop() {
-      player.invokeOleFunction(new String[] {"controls", "Stop"});
+      nativeComponent.invokeOleFunction(new String[] {"controls", "Stop"});
     }
     
     public boolean isPauseEnabled() {
-      return Boolean.TRUE.equals(player.getProperty(new String[] {"controls", "isAvailable"}, "Pause"));
+      return Boolean.TRUE.equals(nativeComponent.getOleProperty(new String[] {"controls", "isAvailable"}, "Pause"));
     }
     
     public void pause() {
-      player.invokeOleFunction(new String[] {"controls", "Pause"});
+      nativeComponent.invokeOleFunction(new String[] {"controls", "Pause"});
     }
     
     /**
      * @param time The time in milliseconds.
      */
     public void setTime(int time) {
-      player.setProperty(new String[] {"controls", "currentPosition"}, time / 1000d);
+      nativeComponent.setOleProperty(new String[] {"controls", "currentPosition"}, time / 1000d);
     }
     
     /**
@@ -205,7 +205,7 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
      */
     public int getTime() {
       try {
-        return (int)Math.round((Double)player.getProperty(new String[] {"controls", "currentPosition"}) * 1000);
+        return (int)Math.round((Double)nativeComponent.getOleProperty(new String[] {"controls", "currentPosition"}) * 1000);
       } catch(Exception e) {
         return -1;
       }
@@ -230,19 +230,19 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
   }
   
   public String getLoadedResource() {
-    return (String)nativeComponent.getProperty(new String[] {"url"});
+    return (String)nativeComponent.getOleProperty(new String[] {"url"});
   }
   
   public void load(String resourcePath) {
-    nativeComponent.setProperty("url", resourcePath == null? "": resourcePath);
+    nativeComponent.setOleProperty("url", resourcePath == null? "": resourcePath);
   }
   
   public void setControlBarVisible(boolean isControlBarVisible) {
-    nativeComponent.setProperty("uiMode", isControlBarVisible? "full": "none");
+    nativeComponent.setOleProperty("uiMode", isControlBarVisible? "full": "none");
   }
 
   public boolean isControlBarVisible() {
-    return Boolean.TRUE.equals("full".equals(nativeComponent.getProperty("uiMode")));
+    return Boolean.TRUE.equals("full".equals(nativeComponent.getOleProperty("uiMode")));
   }
   
   public static enum WMPState {
@@ -251,7 +251,7 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
   
   public WMPState getState() {
     try {
-      switch((Integer)nativeComponent.getProperty("playState")) {
+      switch((Integer)nativeComponent.getOleProperty("playState")) {
         case 1: return WMPState.STOPPED;
         case 2: return WMPState.PAUSED;
         case 3: return WMPState.PLAYING;
