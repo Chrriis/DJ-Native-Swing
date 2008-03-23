@@ -539,20 +539,6 @@ public class JVLCPlayer extends JPanel implements Disposable {
     enum VLCState {
       IDLE_CLOSE, OPENING, BUFFERING, PLAYING, PAUSED, STOPPING, ERROR,
     }
-    public void setState(VLCState state) {
-      int value;
-      switch(state) {
-        case IDLE_CLOSE: value = 0; break;
-        case OPENING: value = 1; break;
-        case BUFFERING: value = 2; break;
-        case PLAYING: value = 3; break;
-        case PAUSED: value = 4; break;
-        case STOPPING: value = 5; break;
-        case ERROR: value = 6; break;
-        default: throw new IllegalArgumentException("The state value is invalid!");
-      }
-      webBrowserObject.setObjectProperty("input.state", value);
-    }
     public VLCState getState() {
       try {
         int value = Integer.parseInt(webBrowserObject.getObjectProperty("input.state"));

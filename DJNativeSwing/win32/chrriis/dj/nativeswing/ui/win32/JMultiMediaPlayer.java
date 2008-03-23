@@ -28,7 +28,7 @@ import chrriis.dj.nativeswing.ui.event.InitializationListener;
 public class JMultiMediaPlayer extends JPanel implements Disposable {
 
   private Component embeddableComponent;
-  private NativeMultimediaPlayer nativeComponent;
+  private NativeMultiMediaPlayer nativeComponent;
   
   private static class NInitializationListener implements InitializationListener {
     protected Reference<JMultiMediaPlayer> multiMediaPlayer;
@@ -55,10 +55,15 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
   
   public JMultiMediaPlayer() {
     setLayout(new BorderLayout(0, 0));
-    nativeComponent = new NativeMultimediaPlayer();
+    nativeComponent = new NativeMultiMediaPlayer();
+    wmpSettings = new WMPSettings(this);
+    wmpControls = new WMPControls(this);
     nativeComponent.addInitializationListener(new NInitializationListener(this));
     embeddableComponent = nativeComponent.createEmbeddableComponent();
     add(embeddableComponent, BorderLayout.CENTER);
+    wmpSettings.setAutoStart(true);
+    wmpSettings.setErrorDialogsEnabled(false);
+    setControlBarVisible(true);
   }
   
   /**
@@ -81,95 +86,139 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
     return listenerList.getListeners(InitializationListener.class);
   }
 
-  public void load(String resourcePath) {
-    nativeComponent.load(resourcePath);
+  public static class WMPSettings {
+    
+    private NativeMultiMediaPlayer player;
+    
+    WMPSettings(JMultiMediaPlayer multiMediaPlayer) {
+      this.player = multiMediaPlayer.nativeComponent;
+    }
+    
+    public void setErrorDialogsEnabled(boolean isErrorDialogEnabled) {
+      player.setProperty(new String[] {"settings", "enableErrorDialogs"}, isErrorDialogEnabled);
+    }
+    
+    public void setVolume(int volume) {
+      if(volume < 0 || volume > 100) {
+        throw new IllegalArgumentException("The volume must be between 0 and 100");
+      }
+      player.setProperty(new String[] {"settings", "volume"}, volume);
+    }
+    
+    /**
+     * @return The volume, between 0 and 100. When mute, the volume is still returned. -1 indicate that it could not be accessed.
+     */
+    public int getVolume() {
+      try {
+        return (Integer)player.getProperty(new String[] {"settings", "volume"});
+      } catch(Exception e) {
+        return -1;
+      }
+    }
+    
+    /**
+     * @param stereoBalance The stereo balance between -100 and 100, with 0 being the default.
+     */
+    public void setStereoBalance(int stereoBalance) {
+      if(stereoBalance < 100 || stereoBalance > 100) {
+        throw new IllegalArgumentException("The stereo balance must be between -100 and 100");
+      }
+      player.setProperty(new String[] {"settings", "balance"}, stereoBalance);
+    }
+    
+    /**
+     * @return The stereo balance, between -100 and 100, with 0 being the default. When mute, the balance is still returned.
+     */
+    public int getStereoBalance() {
+      try {
+        return (Integer)player.getProperty(new String[] {"settings", "balance"});
+      } catch(Exception e) {
+        return -1;
+      }
+    }
+    
+    public void setAutoStart(boolean isAutoStart) {
+      player.setProperty(new String[] {"settings", "autoStart"}, isAutoStart);
+    }
+    
+    public boolean isAutoStart() {
+      return Boolean.TRUE.equals(player.getProperty(new String[] {"settings", "autoStart"}));
+    }
+    
+    public void setMute(boolean isMute) {
+      player.setProperty(new String[] {"settings", "mute"}, isMute);
+    }
+    
+    public boolean isMute() {
+      return Boolean.TRUE.equals(player.getProperty(new String[] {"settings", "mute"}));
+    }
+    
+    public boolean isPlayEnabled() {
+      return Boolean.TRUE.equals(player.getProperty(new String[] {"controls", "isAvailable"}, "Play"));
+    }
+    
   }
   
-//  public String getLoadedResource() {
-//    return nativeComponent.getLoadedResource();
-//  }
+  private WMPSettings wmpSettings;
   
-  public void setControlBarVisible(boolean isControlBarVisible) {
-    nativeComponent.setControlBarVisible(isControlBarVisible);
-  }
-  
-  public boolean isControlBarVisible() {
-    return nativeComponent.isControlBarVisible();
-  }
-  
-  public void setVolume(int volume) {
-    nativeComponent.setVolume(volume);
+  public WMPSettings getWMPSettings() {
+    return wmpSettings;
   }
 
-  /**
-   * @return The volume, between 0 and 100. When mute, the volume is still returned. -1 indicate that it could not be accessed.
-   */
-  public int getVolume() {
-    return nativeComponent.getVolume();
+  public static class WMPControls {
+    
+    private NativeMultiMediaPlayer player;
+    
+    WMPControls(JMultiMediaPlayer multiMediaPlayer) {
+      this.player = multiMediaPlayer.nativeComponent;
+    }
+    
+    public void play() {
+      player.invokeOleFunction(new String[] {"controls", "Play"});
+    }
+    
+    public boolean isStopEnabled() {
+      return Boolean.TRUE.equals(player.getProperty(new String[] {"controls", "isAvailable"}, "Stop"));
+    }
+    
+    public void stop() {
+      player.invokeOleFunction(new String[] {"controls", "Stop"});
+    }
+    
+    public boolean isPauseEnabled() {
+      return Boolean.TRUE.equals(player.getProperty(new String[] {"controls", "isAvailable"}, "Pause"));
+    }
+    
+    public void pause() {
+      player.invokeOleFunction(new String[] {"controls", "Pause"});
+    }
+    
+    /**
+     * @param time The time in milliseconds.
+     */
+    public void setTime(int time) {
+      player.setProperty(new String[] {"controls", "currentPosition"}, time / 1000d);
+    }
+    
+    /**
+     * @param time The time in milliseconds.
+     */
+    public int getTime() {
+      try {
+        return (int)Math.round((Double)player.getProperty(new String[] {"controls", "currentPosition"}) * 1000);
+      } catch(Exception e) {
+        return -1;
+      }
+    }
+    
   }
   
-  /**
-   * @param stereoBalance The stereo balance between -100 and 100, with 0 being the default.
-   */
-  public void setStereoBalance(int stereoBalance) {
-    nativeComponent.setStereoBalance(stereoBalance);
+  private WMPControls wmpControls;
+  
+  public WMPControls getWMPControls() {
+    return wmpControls;
   }
-  
-  /**
-   * @return The stereo balance, between -100 and 100, with 0 being the default. When mute, the balance is still returned.
-   */
-  public int getStereoBalance() {
-    return nativeComponent.getStereoBalance();
-  }
-  
-//  public boolean setAutoStart(boolean isAutoStart) {
-//    return nativeComponent.setAutoStart(isAutoStart);
-//  }
-//  
-//  public boolean isAutoStart() {
-//    return nativeComponent.isAutoStart();
-//  }
-  
-//  public boolean setFullScreen(boolean isFullScreen) {
-//    return nativeComponent.setFullScreen(isFullScreen);
-//  }
-//  
-//  public boolean isFullScreen() {
-//    return nativeComponent.isFullScreen();
-//  }
-  
-  public void setMute(boolean isMute) {
-    nativeComponent.setMute(isMute);
-  }
-  
-  public boolean isMute() {
-    return nativeComponent.isMute();
-  }
-  
-  public boolean isPlayEnabled() {
-    return nativeComponent.isPlayEnabled();
-  }
-  
-  public void play() {
-    nativeComponent.play();
-  }
-  
-  public boolean isStopEnabled() {
-    return nativeComponent.isStopEnabled();
-  }
-  
-  public void stop() {
-    nativeComponent.stop();
-  }
-  
-  public boolean isPauseEnabled() {
-    return nativeComponent.isPauseEnabled();
-  }
-  
-  public void pause() {
-    nativeComponent.pause();
-  }
-  
+
   public void dispose() {
     if(embeddableComponent instanceof Disposable) {
       ((Disposable)embeddableComponent).dispose();
@@ -180,4 +229,44 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
     return nativeComponent.isDisposed();
   }
   
+  public String getLoadedResource() {
+    return (String)nativeComponent.getProperty(new String[] {"url"});
+  }
+  
+  public void load(String resourcePath) {
+    nativeComponent.setProperty("url", resourcePath == null? "": resourcePath);
+  }
+  
+  public void setControlBarVisible(boolean isControlBarVisible) {
+    nativeComponent.setProperty("uiMode", isControlBarVisible? "full": "none");
+  }
+
+  public boolean isControlBarVisible() {
+    return Boolean.TRUE.equals("full".equals(nativeComponent.getProperty("uiMode")));
+  }
+  
+  public static enum WMPState {
+    UNDEFINED, STOPPED, PAUSED, PLAYING, SCAN_FORWARD, SCAN_REVERSE, BUFFERING, WAITING, MEDIA_ENDED, TRANSITIONING, READY, RECONNECTING
+  }
+  
+  public WMPState getState() {
+    try {
+      switch((Integer)nativeComponent.getProperty("playState")) {
+        case 1: return WMPState.STOPPED;
+        case 2: return WMPState.PAUSED;
+        case 3: return WMPState.PLAYING;
+        case 4: return WMPState.SCAN_FORWARD;
+        case 5: return WMPState.SCAN_REVERSE;
+        case 6: return WMPState.BUFFERING;
+        case 7: return WMPState.WAITING;
+        case 8: return WMPState.MEDIA_ENDED;
+        case 9: return WMPState.TRANSITIONING;
+        case 10: return WMPState.READY;
+        case 11: return WMPState.RECONNECTING;
+      }
+    } catch(Exception e) {
+    }
+    return WMPState.UNDEFINED;
+  }
+
 }

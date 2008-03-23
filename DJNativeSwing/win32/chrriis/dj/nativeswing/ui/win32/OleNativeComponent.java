@@ -156,7 +156,6 @@ public abstract class OleNativeComponent extends NativeComponent {
           automation.dispose();
           return result;
         }
-        System.err.println(propertyPath[i] + ", " + automation + ", " + ids.length);
         OleAutomation newAutomation = automation.getProperty(ids[0]).getAutomation();
         automation.dispose();
         automation = newAutomation;
