@@ -81,13 +81,13 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
     return listenerList.getListeners(InitializationListener.class);
   }
 
-  public void setURL(String url) {
-    nativeComponent.setURL(url);
+  public void load(String resourcePath) {
+    nativeComponent.load(resourcePath);
   }
   
-  public String getURL() {
-    return nativeComponent.getURL();
-  }
+//  public String getLoadedResource() {
+//    return nativeComponent.getLoadedResource();
+//  }
   
   public void setControlBarVisible(boolean isControlBarVisible) {
     nativeComponent.setControlBarVisible(isControlBarVisible);

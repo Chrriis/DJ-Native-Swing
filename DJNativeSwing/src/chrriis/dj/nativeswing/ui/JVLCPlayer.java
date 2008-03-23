@@ -468,7 +468,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
       return null;
     }
     public void toggleMute() {
-      webBrowserObject.callObjectFunction("audio.toggleMute");
+      webBrowserObject.invokeObjectFunction("audio.toggleMute");
       vlcPlayer.adjustVolumePanel();
     }
   }
@@ -617,34 +617,34 @@ public class JVLCPlayer extends JPanel implements Disposable {
         url = webBrowserObject.getLocalFileURL(file);
       }
       try {
-        return Integer.parseInt(webBrowserObject.callObjectFunctionWithResult("playlist.add", url));
+        return Integer.parseInt(webBrowserObject.invokeObjectFunctionWithResult("playlist.add", url));
       } catch(Exception e) {
       }
       return -1;
     }
     public void play() {
-      webBrowserObject.callObjectFunction("playlist.play");
+      webBrowserObject.invokeObjectFunction("playlist.play");
     }
     public void playItem(int itemID) {
-      webBrowserObject.callObjectFunction("playlist.playItem", itemID);
+      webBrowserObject.invokeObjectFunction("playlist.playItem", itemID);
     }
     public void togglePause() {
-      webBrowserObject.callObjectFunction("playlist.togglePause");
+      webBrowserObject.invokeObjectFunction("playlist.togglePause");
     }
     public void stop() {
-      webBrowserObject.callObjectFunction("playlist.stop");
+      webBrowserObject.invokeObjectFunction("playlist.stop");
     }
     public void next() {
-      webBrowserObject.callObjectFunction("playlist.next");
+      webBrowserObject.invokeObjectFunction("playlist.next");
     }
     public void prev() {
-      webBrowserObject.callObjectFunction("playlist.prev");
+      webBrowserObject.invokeObjectFunction("playlist.prev");
     }
     public void clear() {
-      webBrowserObject.callObjectFunction("playlist.items.clear");
+      webBrowserObject.invokeObjectFunction("playlist.items.clear");
     }
     public void removeItem(int itemID) {
-      webBrowserObject.callObjectFunction("playlist.items.removeItem", itemID);
+      webBrowserObject.invokeObjectFunction("playlist.items.removeItem", itemID);
     }
   }
   
@@ -722,7 +722,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
       return -1;
     }
     public void toggleFullScreen() {
-      webBrowserObject.callObjectFunction("video.toggleFullscreen");
+      webBrowserObject.invokeObjectFunction("video.toggleFullscreen");
     }
   }
   
