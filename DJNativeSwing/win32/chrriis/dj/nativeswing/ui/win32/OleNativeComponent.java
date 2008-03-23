@@ -79,19 +79,19 @@ public abstract class OleNativeComponent extends NativeComponent {
     }
   }
   
-  protected void invokeOleFunction(String functionName, Object... args) {
+  public void invokeOleFunction(String functionName, Object... args) {
     invokeOleFunction(new String[] {functionName}, args);
   }
   
-  protected void invokeOleFunction(String[] functionPath, Object... args) {
+  public void invokeOleFunction(String[] functionPath, Object... args) {
     runAsync(new CMN_invokeOleFunction(), false, functionPath, args);
   }
   
-  protected Object invokeOleFunctionWithResult(String functionName, Object... args) {
+  public Object invokeOleFunctionWithResult(String functionName, Object... args) {
     return invokeOleFunctionWithResult(new String[] {functionName}, args);
   }
   
-  protected Object invokeOleFunctionWithResult(String[] functionPath, Object... args) {
+  public Object invokeOleFunctionWithResult(String[] functionPath, Object... args) {
     return runSync(new CMN_invokeOleFunction(), true, functionPath, args);
   }
   
@@ -126,11 +126,11 @@ public abstract class OleNativeComponent extends NativeComponent {
     }
   }
   
-  protected void setProperty(String property, Object... args) {
-    setProperty(new String[] {property}, args);
+  public void setOleProperty(String property, Object... args) {
+    setOleProperty(new String[] {property}, args);
   }
   
-  protected void setProperty(String[] propertyPath, Object... args) {
+  public void setOleProperty(String[] propertyPath, Object... args) {
     runAsync(new CMN_setOleProperty(), propertyPath, args);
   }
   
@@ -165,11 +165,11 @@ public abstract class OleNativeComponent extends NativeComponent {
     }
   }
   
-  protected Object getProperty(String property, Object... args) {
-    return getProperty(new String[] {property}, args);
+  public Object getOleProperty(String property, Object... args) {
+    return getOleProperty(new String[] {property}, args);
   }
   
-  protected Object getProperty(String[] propertyPath, Object... args) {
+  public Object getOleProperty(String[] propertyPath, Object... args) {
     return runSync(new CMN_getOleProperty(), propertyPath, args);
   }
   
@@ -274,7 +274,7 @@ public abstract class OleNativeComponent extends NativeComponent {
     }
   }
       
-  protected void dumpProperties() {
+  public void dumpProperties() {
     runSync(new CMN_dumpOleProperties());
   }
   

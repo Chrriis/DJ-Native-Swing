@@ -31,8 +31,8 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
   private NativeMultiMediaPlayer nativeComponent;
   
   private static class NInitializationListener implements InitializationListener {
-    protected Reference<JMultiMediaPlayer> multiMediaPlayer;
-    protected NInitializationListener(JMultiMediaPlayer multiMediaPlayer) {
+    private Reference<JMultiMediaPlayer> multiMediaPlayer;
+    private NInitializationListener(JMultiMediaPlayer multiMediaPlayer) {
       this.multiMediaPlayer = new WeakReference<JMultiMediaPlayer>(multiMediaPlayer);
     }
     public void objectInitialized(InitializationEvent e) {
@@ -90,7 +90,7 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
     
     private NativeMultiMediaPlayer nativeComponent;
     
-    WMPSettings(JMultiMediaPlayer multiMediaPlayer) {
+    private WMPSettings(JMultiMediaPlayer multiMediaPlayer) {
       this.nativeComponent = multiMediaPlayer.nativeComponent;
     }
     
@@ -169,7 +169,7 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
     
     private NativeMultiMediaPlayer nativeComponent;
     
-    WMPControls(JMultiMediaPlayer multiMediaPlayer) {
+    private WMPControls(JMultiMediaPlayer multiMediaPlayer) {
       this.nativeComponent = multiMediaPlayer.nativeComponent;
     }
     
