@@ -35,7 +35,11 @@ public abstract class OleNativeComponent extends NativeComponent {
   }
   
   protected static OleClientSite getSite(OleFrame frame) {
-    return (OleClientSite)frame.getData("NS_site");
+    OleClientSite oleClientSite = (OleClientSite)frame.getData("NS_site");
+    if(oleClientSite == null) {
+      throw new IllegalStateException("The OleNativeComponent is not properly initialized! You need to call configureOleFrame() after the site creation.");
+    }
+    return oleClientSite;
   }
   
   private static class CMN_invokeOleFunction extends ControlCommandMessage {
