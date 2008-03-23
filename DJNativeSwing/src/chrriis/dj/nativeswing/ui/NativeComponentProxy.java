@@ -22,6 +22,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
 import java.awt.geom.Area;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -315,6 +316,13 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
       }
     }
     return area;
+  }
+
+  @Override
+  public void print(Graphics g) {
+    BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
+    nativeComponent.paintComponent(image);
+    g.drawImage(image, 0, 0, null);
   }
   
 }

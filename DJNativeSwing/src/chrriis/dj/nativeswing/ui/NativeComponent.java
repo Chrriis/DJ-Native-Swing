@@ -1007,6 +1007,9 @@ public abstract class NativeComponent extends Canvas {
     }
   }
   
+  /**
+   * Can be called from a non-UI thread.
+   */
   public void paintComponent(BufferedImage image) {
     if(!isValidControl() || isDisposed) {
       return;
