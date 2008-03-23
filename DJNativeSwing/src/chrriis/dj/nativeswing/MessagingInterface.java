@@ -371,9 +371,9 @@ abstract class MessagingInterface {
     }
     Throwable exception = commandResultMessage.getException();
     if(exception != null) {
-      if(exception instanceof RuntimeException) {
-        throw (RuntimeException)exception;
-      }
+//      if(exception instanceof RuntimeException) {
+//        throw (RuntimeException)exception;
+//      }
       throw new RuntimeException(exception);
     }
     return commandResultMessage.getResult();

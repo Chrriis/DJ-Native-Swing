@@ -218,28 +218,28 @@ public class JFlashPlayer extends JPanel implements Disposable {
     if(!webBrowserObject.hasContent()) {
       return;
     }
-    webBrowserObject.callObjectFunction("Play");
+    webBrowserObject.invokeObjectFunction("Play");
   }
   
   public void pause() {
     if(!webBrowserObject.hasContent()) {
       return;
     }
-    webBrowserObject.callObjectFunction("StopPlay");
+    webBrowserObject.invokeObjectFunction("StopPlay");
   }
   
   public void stop() {
     if(!webBrowserObject.hasContent()) {
       return;
     }
-    webBrowserObject.callObjectFunction("Rewind");
+    webBrowserObject.invokeObjectFunction("Rewind");
   }
   
   public void setVariable(String name, String value) {
     if(!webBrowserObject.hasContent()) {
       return;
     }
-    webBrowserObject.callObjectFunction("SetVariable", name, value);
+    webBrowserObject.invokeObjectFunction("SetVariable", name, value);
   }
   
   /**
@@ -251,21 +251,21 @@ public class JFlashPlayer extends JPanel implements Disposable {
     if(!webBrowserObject.hasContent()) {
       return null;
     }
-    return webBrowserObject.callObjectFunctionWithResult("GetVariable", name);
+    return webBrowserObject.invokeObjectFunctionWithResult("GetVariable", name);
   }
   
   /**
-   * Call a function on the Flash object, with optional arguments (Strings, numbers, booleans).
+   * Invoke a function on the Flash object, with optional arguments (Strings, numbers, booleans).
    */
-  public void callFlashFunction(String functionName, Object... args) {
-    webBrowserObject.callObjectFunction(functionName, args);
+  public void invokeFlashFunction(String functionName, Object... args) {
+    webBrowserObject.invokeObjectFunction(functionName, args);
   }
   
   /**
-   * Call a function on the Flash object and waits for a result, with optional arguments (Strings, numbers, booleans).
+   * Invoke a function on the Flash object and waits for a result, with optional arguments (Strings, numbers, booleans).
    */
-  public String callFlashFunctionWithResult(String functionName, Object... args) {
-    return webBrowserObject.callObjectFunctionWithResult(functionName, args);
+  public String invokeFlashFunctionWithResult(String functionName, Object... args) {
+    return webBrowserObject.invokeObjectFunctionWithResult(functionName, args);
   }
   
   /**

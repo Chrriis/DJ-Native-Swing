@@ -9,8 +9,6 @@ package chrriis.dj.nativeswing.ui.win32;
 
 import java.awt.Component;
 
-import javax.swing.SwingUtilities;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.ole.win32.OLE;
@@ -28,23 +26,6 @@ class NativeMultimediaPlayer extends OleNativeComponent {
     setAutoStart(true);
     setControlBarVisible(true);
     setErrorDialogsEnabled(false);
-    new Thread() {
-      @Override
-      public void run() {
-        try {
-          sleep(10000);
-        } catch(Exception e) {
-        }
-        SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
-//            dumpProperties();
-            System.err.println("in: Pause");
-            pause();
-            System.err.println("in2");
-          }
-        });
-      }
-    }.start();
   }
   
   protected static Control createControl(Shell shell) {

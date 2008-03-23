@@ -450,16 +450,16 @@ public abstract class WebBrowserObject implements Disposable {
   }
   
   /**
-   * Call a function on the object, with optional arguments (Strings, numbers, booleans).
+   * Invoke a function on the object, with optional arguments (Strings, numbers, booleans).
    */
-  public void callObjectFunction(String functionName, Object... args) {
+  public void invokeObjectFunction(String functionName, Object... args) {
     webBrowser.execute("try {" + getObjectFunctionCall(functionName, args) + ";} catch(exxxxx) {}");
   }
   
   /**
-   * Call a function on the object and waits for a result, with optional arguments (Strings, numbers, booleans).
+   * Invoke a function on the object and waits for a result, with optional arguments (Strings, numbers, booleans).
    */
-  public String callObjectFunctionWithResult(String functionName, Object... args) {
+  public String invokeObjectFunctionWithResult(String functionName, Object... args) {
     return webBrowser.executeAndWaitForCommandResult("[[getFlashResult]]", "try {sendCommand('[[getFlashResult]]', " + getObjectFunctionCall(functionName, args) + ");} catch(exxxxx) {sendCommand('[[getFlashResult]]', null);}");
   }
   

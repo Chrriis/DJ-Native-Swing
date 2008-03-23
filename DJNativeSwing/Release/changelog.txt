@@ -7,6 +7,7 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.5 (xxxxxxxxxxxxxx):
 
+- Ole integration is greatly simplified using the OleNativeComponent superclass.
 - Possibility to paint a native component to an image.
 - JFlashPlayer and JVLCPlayer can load files from the classpath.
 - JFlashPlayer.setURL() and JVLCPlayer.setURL() are changed to load().
