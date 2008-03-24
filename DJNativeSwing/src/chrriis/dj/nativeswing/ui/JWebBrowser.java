@@ -52,8 +52,8 @@ import chrriis.dj.nativeswing.ui.event.WebBrowserNavigationEvent;
  */
 public class JWebBrowser extends JPanel implements Disposable {
 
-  public static void clearSessions() {
-    NativeWebBrowser.clearSessions();
+  public static void clearSessionCookies() {
+    NativeWebBrowser.clearSessionCookies();
   }
   
   private final ResourceBundle RESOURCES = ResourceBundle.getBundle(JWebBrowser.class.getPackage().getName().replace('.', '/') + "/resource/WebBrowser");

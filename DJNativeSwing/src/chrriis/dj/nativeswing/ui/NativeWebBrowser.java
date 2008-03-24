@@ -445,7 +445,7 @@ class NativeWebBrowser extends NativeComponent {
     this.webBrowser = new WeakReference<JWebBrowser>(webBrowser);
   }
 
-  private static class CMN_clearSessions extends CommandMessage {
+  private static class CMN_clearSessionCookies extends CommandMessage {
     @Override
     public Object run() {
       Browser.clearSessions();
@@ -453,8 +453,8 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
 
-  public static void clearSessions() {
-    new CMN_clearSessions().asyncExec();
+  public static void clearSessionCookies() {
+    new CMN_clearSessionCookies().asyncExec();
   }
 
   private static class CMN_getURL extends ControlCommandMessage {
