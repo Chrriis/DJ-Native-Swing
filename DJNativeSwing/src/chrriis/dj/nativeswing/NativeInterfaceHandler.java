@@ -14,6 +14,8 @@ import java.awt.Dialog;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.event.AWTEventListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.HierarchyEvent;
@@ -21,12 +23,14 @@ import java.awt.event.HierarchyListener;
 import java.awt.event.WindowEvent;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.StringReader;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -36,6 +40,7 @@ import java.util.Arrays;
 import java.util.EventListener;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
 
@@ -280,10 +285,32 @@ public class NativeInterfaceHandler {
 
   private static NativeInterfaceInitOptions nativeInterfaceInitOptions;
   
+  private static void loadClipboardProperties() {
+    try {
+      Clipboard systemClipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+      if(!systemClipboard.isDataFlavorAvailable(DataFlavor.stringFlavor)) {
+        return;
+      }
+      BufferedReader reader = new BufferedReader(new StringReader((String)systemClipboard.getData(DataFlavor.stringFlavor)));
+      if("[nativeswing debugging]".equals(reader.readLine().toLowerCase(Locale.ENGLISH))) {
+        for(String line; ((line = reader.readLine()) != null); ) {
+          int index = line.indexOf('=');
+          if(index <= 0) {
+            break;
+          }
+          System.setProperty(line.substring(0, index), line.substring(index + 1));
+        }
+      }
+      reader.close();
+    } catch(Exception e) {
+    }
+  }
+  
   public static void init(NativeInterfaceInitOptions nativeInterfaceInitOptions) {
     if(isInitialized()) {
       return;
     }
+    loadClipboardProperties();
     NativeInterfaceHandler.nativeInterfaceInitOptions = nativeInterfaceInitOptions;
     isInitialized = true;
     boolean isFullInit = isFirstStart;
