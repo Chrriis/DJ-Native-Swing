@@ -19,10 +19,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 
-import chrriis.dj.nativeswing.demo.examples.componentoptions.AlphaBlendingSimulation;
-import chrriis.dj.nativeswing.demo.examples.componentoptions.DestructionTimeOption;
-import chrriis.dj.nativeswing.demo.examples.componentoptions.FiliationTypeOption;
-import chrriis.dj.nativeswing.demo.examples.componentoptions.VisibilityConstraintOption;
+import chrriis.dj.nativeswing.demo.examples.advancedcapabilities.AlphaBlendingSimulation;
+import chrriis.dj.nativeswing.demo.examples.advancedcapabilities.DestructionTimeOption;
+import chrriis.dj.nativeswing.demo.examples.advancedcapabilities.FiliationTypeOption;
+import chrriis.dj.nativeswing.demo.examples.advancedcapabilities.VisibilityConstraintOption;
 import chrriis.dj.nativeswing.demo.examples.evolutions.WorkInProgress;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.Interactions;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
