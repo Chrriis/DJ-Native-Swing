@@ -20,8 +20,8 @@ Licence terms: LGPL (see licence.txt)
 - sendCommand supports parameters.
 - Browser-based components have a postCommand() call.
 - Destroying and re-init the native interface is supported.
-- NativeComponent allows to initialize().
-- getDisplayComponent() returns a NativeComponent.
+- NativeComponent allows to initializeNativePeer().
+- getNativeComponent() returns a NativeComponent.
 
 
 * Version 0.9.4 (March 11, 2008):
