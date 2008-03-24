@@ -475,6 +475,7 @@ public class NativeInterfaceHandler {
       }
     }
     argList.add("-Ddj.nativeswing.messaging.debug=" + Boolean.parseBoolean(System.getProperty("dj.nativeswing.messaging.debug")));
+    argList.add("-Ddj.nativeswing.native.initmessage=" + Boolean.parseBoolean(System.getProperty("dj.nativeswing.native.initmessage")));
     argList.add("-classpath");
     argList.add(sb.toString());
     if(isProxyClassLoaderUsed) {
@@ -666,7 +667,9 @@ public class NativeInterfaceHandler {
   }
   
   public static void main(String[] args) throws Exception {
-    System.out.println("Starting spawned VM");
+    if(Boolean.parseBoolean(System.getProperty("dj.nativeswing.native.initmessage"))) {
+      System.err.println("Starting spawned VM");
+    }
     isInitialized = true;
     int port = Integer.parseInt(args[0]);
     ServerSocket serverSocket = null;
