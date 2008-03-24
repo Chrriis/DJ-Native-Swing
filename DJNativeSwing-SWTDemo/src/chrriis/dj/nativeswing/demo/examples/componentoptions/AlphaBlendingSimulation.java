@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.MouseInputAdapter;
 
+import chrriis.common.Disposable;
 import chrriis.dj.nativeswing.ui.JWebBrowser;
 import chrriis.dj.nativeswing.ui.NativeComponent;
 import chrriis.dj.nativeswing.ui.NativeComponent.Options.VisibilityConstraint;
@@ -24,7 +25,7 @@ import chrriis.dj.nativeswing.ui.NativeComponent.Options.VisibilityConstraint;
 /**
  * @author Christopher Deckers
  */
-public class AlphaBlendingSimulation extends JPanel {
+public class AlphaBlendingSimulation extends JPanel implements Disposable {
 
   private JWebBrowser webBrowser;
   
@@ -74,11 +75,13 @@ public class AlphaBlendingSimulation extends JPanel {
     updateBackgroundBuffer();
   }
   
+  private volatile boolean isDisposed;
+  
   private void updateBackgroundBuffer() {
     new Thread() {
       @Override
       public void run() {
-        while(true) {
+        while(!isDisposed) {
           // we refresh the background buffer outside the UI thread, to minimize the overhead.
           webBrowser.getNativeComponent().createBackBuffer();
           try {
@@ -89,6 +92,10 @@ public class AlphaBlendingSimulation extends JPanel {
         }
       }
     }.start();
+  }
+  
+  public void dispose() {
+    isDisposed = true;
   }
   
 }
