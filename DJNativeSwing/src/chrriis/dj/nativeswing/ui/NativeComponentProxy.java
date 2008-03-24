@@ -319,10 +319,45 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
   }
 
   @Override
-  public void print(Graphics g) {
+  public void printAll(Graphics g) {
     BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
     nativeComponent.paintComponent(image);
     g.drawImage(image, 0, 0, null);
   }
+  
+  private final Object backgroundBufferLock = new Object();
+  private BufferedImage backgroundBuffer;
+  
+  public void createBackgroundBuffer() {
+    Dimension size = getSize();
+    if(size.width <= 0 || size.height <= 0) {
+      backgroundBuffer = null;
+      return;
+    }
+    BufferedImage backgroundBuffer = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_ARGB);
+    nativeComponent.paintComponent(backgroundBuffer);
+    synchronized(backgroundBufferLock) {
+      this.backgroundBuffer = backgroundBuffer;
+      repaint();
+    }
+  }
+  
+  public void releaseBackgroundBuffer() {
+    backgroundBuffer = null;
+  }
+  
+  @Override
+  protected void paintComponent(Graphics g) {
+//    super.paintComponent(g);
+    synchronized(backgroundBufferLock) {
+      if(backgroundBuffer != null) {
+        g.drawImage(backgroundBuffer, 0, 0, this);
+      }
+    }
+  }
+  
+  abstract void startCapture();
+  
+  abstract void stopCapture();
   
 }

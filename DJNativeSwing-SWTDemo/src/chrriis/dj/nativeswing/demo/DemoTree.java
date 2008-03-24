@@ -19,6 +19,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 
+import chrriis.dj.nativeswing.demo.examples.componentoptions.AlphaBlendingSimulation;
 import chrriis.dj.nativeswing.demo.examples.componentoptions.DestructionTimeOption;
 import chrriis.dj.nativeswing.demo.examples.componentoptions.FiliationTypeOption;
 import chrriis.dj.nativeswing.demo.examples.componentoptions.VisibilityConstraintOption;
@@ -70,10 +71,11 @@ public class DemoTree extends JTree {
     exampleGroupList.add(new ExampleGroup("JHTMLEditor", new Example[] {
         new Example("Simple Example", SimpleHTMLEditorExample.class, "Edit HTML, get and set the content of the editor.", true),
     }));
-    exampleGroupList.add(new ExampleGroup("Component Options", new Example[] {
+    exampleGroupList.add(new ExampleGroup("Advanced Capabilities", new Example[] {
         new Example("Visibility Constraint", VisibilityConstraintOption.class, "Constrain the visibility to superimpose Swing and native components.", true),
         new Example("Destruction Time", DestructionTimeOption.class, "Defer destruction until finalization to add/remove the same component. It is not destroyed when removed but on explicit dispose() or during garbage collection.", true),
         new Example("Filiation Type", FiliationTypeOption.class, "Use a proxied filiation of native components to allow re-parenting and change of component Z-order. By default, the visibility gets automatically constrained.", true),
+        new Example("Alpha Blending Simulation", AlphaBlendingSimulation.class, "Simulate alpha blending of a Swing component over a native component.", true),
     }));
     exampleGroupList.add(new ExampleGroup("JMultiMediaPlayer (win32)", new Example[] {
         new Example("Simple Example", SimpleMultiMediaPlayerExample.class, "Load a movie/sound file to an embedded multimedia player.", true, System.getProperty("os.name").startsWith("Windows"), "This example is only available on a Windows operating system."),

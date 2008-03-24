@@ -514,11 +514,7 @@ public class JWebBrowser extends JPanel implements Disposable {
     }
   }
   
-  /**
-   * The display component is the component that actually shows the web browser content.
-   * This access is useful to attach listeners (key, mouse) to trap events happening in that area.
-   */
-  public NativeComponent getDisplayComponent() {
+  public NativeComponent getNativeComponent() {
     return nativeComponent;
   }
   

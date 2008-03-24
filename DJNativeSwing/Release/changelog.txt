@@ -7,6 +7,7 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.5 (xxxxxxxxxxxxxx):
 
+- NativeComponent.createBackBuffer() is added.
 - JMultiMediaPlayer API is completely reviewed.
 - Ole integration is greatly simplified using the OleNativeComponent superclass.
 - Possibility to paint a native component to an image.

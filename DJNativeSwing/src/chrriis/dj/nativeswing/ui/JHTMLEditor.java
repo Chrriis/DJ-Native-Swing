@@ -110,7 +110,7 @@ public class JHTMLEditor extends JPanel implements Disposable {
     };
     addInitializationListener(initializationListener);
     webBrowser.setURL(WebServer.getDefaultWebServer().getDynamicContentURL(JHTMLEditor.class.getName(), String.valueOf(instanceID),  "index.html"));
-    webBrowser.getDisplayComponent().runSync(new CMLocal_waitForInitialization(), initializationListener, resultArray);
+    webBrowser.getNativeComponent().runSync(new CMLocal_waitForInitialization(), initializationListener, resultArray);
   }
   
   /**

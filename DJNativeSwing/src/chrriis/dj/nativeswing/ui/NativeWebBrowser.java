@@ -107,9 +107,9 @@ class NativeWebBrowser extends NativeComponent {
           windowAncestor = webBrowserWindow;
         } else {
         }
-        jWebBrowser.getDisplayComponent().initializeNativePeer();
+        jWebBrowser.getNativeComponent().initializeNativePeer();
       }
-      return jWebBrowser.getDisplayComponent().getComponentID();
+      return jWebBrowser.getNativeComponent().getComponentID();
     }
   }
 
@@ -151,7 +151,7 @@ class NativeWebBrowser extends NativeComponent {
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
           JWebBrowserWindow browserWindow = newWebBrowser.getBrowserWindow();
-          if(browserWindow != null && !newWebBrowser.getDisplayComponent().isDisposed()) {
+          if(browserWindow != null && !newWebBrowser.getNativeComponent().isDisposed()) {
             browserWindow.setVisible(true);
           }
         }

@@ -941,6 +941,9 @@ public abstract class NativeComponent extends Canvas {
   
   private static class CMN_getGraphicsData extends ControlCommandMessage {
     private ImageData getImageData(Control control) {
+      if(control.isDisposed()) {
+        return null;
+      }
       Point size = control.getSize();
       if(size.x <= 0 || size.y <= 0) {
         return null;
@@ -1018,9 +1021,15 @@ public abstract class NativeComponent extends Canvas {
     if(size.width <= 0 || size.height <= 0) {
       return;
     }
+    if(componentProxy != null) {
+      componentProxy.startCapture();
+    }
     CMN_getGraphicsData getGraphicsData = new CMN_getGraphicsData();
     getGraphicsData.setNativeComponent(this);
     Object[] result = (Object[])getGraphicsData.syncExec();
+    if(componentProxy != null) {
+      componentProxy.stopCapture();
+    }
     int imageWidth = image.getWidth();
     int imageHeight = image.getHeight();
     int width = Math.min(((int[])result[0])[0], imageWidth);
@@ -1057,6 +1066,18 @@ public abstract class NativeComponent extends Canvas {
   @Override
   public Dimension getMinimumSize() {
     return new Dimension(0, 0);
+  }
+  
+  public void createBackBuffer() {
+    if(componentProxy != null) {
+      componentProxy.createBackgroundBuffer();
+    }
+  }
+  
+  public void releaseBackBuffer() {
+    if(componentProxy != null) {
+      componentProxy.releaseBackgroundBuffer();
+    }
   }
   
   protected EventListenerList listenerList = new EventListenerList();

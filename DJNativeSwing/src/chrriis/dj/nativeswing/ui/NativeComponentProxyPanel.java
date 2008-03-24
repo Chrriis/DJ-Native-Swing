@@ -8,10 +8,15 @@
 package chrriis.dj.nativeswing.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Canvas;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Graphics;
+import java.awt.MouseInfo;
 import java.awt.Panel;
 import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Robot;
 import java.awt.Window;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -20,6 +25,7 @@ import java.awt.event.HierarchyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
+import java.awt.image.BufferedImage;
 import java.beans.PropertyVetoException;
 
 import javax.swing.JInternalFrame;
@@ -190,14 +196,116 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     if(!lastArea.equals(area)) {
       lastArea = area;
       if(area.isEmpty()) {
-        panel.setVisible(false);
+        if(!isCapturing) {
+          panel.setVisible(false);
+        }
       } else {
         if(!panel.isVisible()) {
           panel.setVisible(true);
         }
-        WindowUtils.setComponentMask(panel, area);
+        if(!isCapturing) {
+          WindowUtils.setComponentMask(panel, area);
+        }
 //        nativeComponent.repaintNativeControl();
       }
+    }
+  }
+
+  private boolean isCapturing;
+  private Canvas capturingComponent;
+  
+  @Override
+  void startCapture() {
+    if(!SwingUtilities.isEventDispatchThread()) {
+      try {
+        SwingUtilities.invokeAndWait(new Runnable() {
+          public void run() {
+            startCapture();
+          }
+        });
+      } catch(Exception e) {
+        e.printStackTrace();
+      }
+      return;
+    }
+    if(!isVisibilityConstrained) {
+      return;
+    }
+    isCapturing = true;
+    Container parent = panel.getParent();
+    Window windowAncestor = SwingUtilities.getWindowAncestor(panel);
+    Point panelLocation = panel.getLocation();
+    SwingUtilities.convertPointToScreen(panelLocation, parent);
+    Rectangle r = new Rectangle(panelLocation, panel.getSize());
+    r = r.intersection(windowAncestor.getBounds());
+    try {
+      boolean isValidBounds = r.width > 0 && r.height > 0;
+      final BufferedImage image;
+      if(isValidBounds) {
+        image = new Robot().createScreenCapture(r);
+        Point location = r.getLocation();
+        SwingUtilities.convertPointFromScreen(location, parent);
+        r.setLocation(location);
+      } else {
+        image = null;
+      }
+      if(isValidBounds) {
+        capturingComponent = new Canvas() {
+          @Override
+          public void paint(Graphics g) {
+            g.drawImage(image, 0, 0, this);
+          }
+          @Override
+          public boolean contains(int x, int y) {
+            return false;
+          }
+        };
+        Point mouseLocation = MouseInfo.getPointerInfo().getLocation();
+        SwingUtilities.convertPointFromScreen(mouseLocation, windowAncestor);
+        Component hoveredComponent = windowAncestor.findComponentAt(mouseLocation);
+        if(hoveredComponent != null) {
+          capturingComponent.setCursor(hoveredComponent.getCursor());
+        }
+        capturingComponent.setBounds(r);
+        capturingComponent.setVisible(false);
+        parent.add(capturingComponent, 0);
+        capturingComponent.setVisible(true);
+      }
+      WindowUtils.setComponentMask(panel, null);
+      if(!panel.isVisible()) {
+        panel.setVisible(true);
+      }
+    } catch(Exception e) {
+      isCapturing = false;
+      e.printStackTrace();
+      return;
+    }
+  }
+  
+  @Override
+  void stopCapture() {
+    if(!SwingUtilities.isEventDispatchThread()) {
+      try {
+        SwingUtilities.invokeAndWait(new Runnable() {
+          public void run() {
+            stopCapture();
+          }
+        });
+      } catch(Exception e) {
+        e.printStackTrace();
+      }
+      return;
+    }
+    if(!isCapturing) {
+      return;
+    }
+    WindowUtils.setComponentMask(panel, lastArea);
+    panel.setVisible(!lastArea.isEmpty());
+    isCapturing = false;
+    if(capturingComponent != null) {
+      Container parent = capturingComponent.getParent();
+      parent.remove(capturingComponent);
+      capturingComponent = null;
     }
   }
   
