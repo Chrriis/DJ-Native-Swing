@@ -24,6 +24,7 @@ import java.awt.event.HierarchyBoundsListener;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyVetoException;
@@ -205,6 +206,8 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
         }
         if(!isCapturing) {
           WindowUtils.setComponentMask(panel, area);
+        } else {
+          updateCapturingComponentBounds();
         }
 //        nativeComponent.repaintNativeControl();
       }
@@ -269,7 +272,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
         capturingComponent.setBounds(r);
         capturingComponent.setVisible(false);
         parent.add(capturingComponent, 0);
-        capturingComponent.setVisible(true);
+        updateCapturingComponentBounds();
       }
       WindowUtils.setComponentMask(panel, null);
       if(!panel.isVisible()) {
@@ -279,6 +282,26 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
       isCapturing = false;
       e.printStackTrace();
       return;
+    }
+  }
+  
+  private void updateCapturingComponentBounds() {
+    if(capturingComponent == null) {
+      return;
+    }
+    Area subtractingArea = (Area)lastArea.clone();
+    Point l1 = capturingComponent.getLocation();
+    Point l2 = panel.getLocation();
+    subtractingArea.transform(AffineTransform.getTranslateInstance(l2.x - l1.x, l2.y - l1.y));
+    Area area = new Area(new Rectangle(capturingComponent.getSize()));
+    area.subtract(subtractingArea);
+    if(!area.isEmpty()) {
+      WindowUtils.setComponentMask(capturingComponent, area);
+      if(!capturingComponent.isVisible()) {
+        capturingComponent.setVisible(true);
+      }
+    } else {
+      capturingComponent.setVisible(false);
     }
   }
   
