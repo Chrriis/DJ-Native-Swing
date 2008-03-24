@@ -20,6 +20,8 @@ import java.util.List;
 
 import javax.swing.SwingUtilities;
 
+import org.eclipse.swt.SWT;
+
 import chrriis.common.Registry;
 import chrriis.dj.nativeswing.NativeInterfaceHandler.NativeInterfaceListener;
 import chrriis.dj.nativeswing.ui.NativeComponent;
@@ -244,7 +246,11 @@ abstract class MessagingInterface {
   
   public void checkUIThread() {
     if(!isUIThread()) {
-      throw new IllegalStateException("This call must happen in the UI thread!");
+      if(NativeInterfaceHandler.isNativeSide()) {
+        SWT.error(SWT.ERROR_THREAD_INVALID_ACCESS);
+        return;
+      }
+      throw new IllegalStateException("This call must happen in the AWT Event Dispatch Thread! Please refer to http://java.sun.com/docs/books/tutorial/uiswing/concurrency/index.html and http://java.sun.com/javase/6/docs/api/javax/swing/SwingUtilities.html#invokeLater(java.lang.Runnable)");
     }
   }
   
