@@ -956,6 +956,8 @@ public abstract class NativeComponent extends Canvas {
     }
     @Override
     public Object run() throws Exception {
+      File dataFile = new File((String)args[0]);
+      dataFile.deleteOnExit();
       final Control control = getControl();
       ImageData imageData;
       if(!NativeInterfaceHandler.isUIThread()) {
@@ -978,16 +980,14 @@ public abstract class NativeComponent extends Canvas {
         imageData = getImageData(control);
       }
       if(imageData == null) {
-        return new Object[] {new int[] {0, 0}, new int[0][0]};
+        return new Dimension(0, 0);
       }
       int cursor = 0;
       // Has to be a multiple of 3
       byte[] bytes = new byte[1024 * 3];
       PaletteData palette = imageData.palette;
       if (palette.isDirect) {
-        File outputFile = File.createTempFile(".ns", ".bin");
-        outputFile.deleteOnExit();
-        BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(outputFile));
+        BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(dataFile));
         for(int x=0; x<imageData.width; x++) {
           for(int y=0; y<imageData.height; y++) {
             int pixel = imageData.getPixel(x, y);
@@ -1005,7 +1005,7 @@ public abstract class NativeComponent extends Canvas {
         }
         out.write(bytes, 0, cursor);
         out.close();
-        return new Object[] {new int[] {imageData.width, imageData.height}, outputFile.getAbsolutePath()};
+        return new Dimension(imageData.width, imageData.height);
       }
       throw new IllegalStateException("Not implemented");
     }
@@ -1025,26 +1025,37 @@ public abstract class NativeComponent extends Canvas {
     if(componentProxy != null) {
       componentProxy.startCapture();
     }
-    CMN_getComponentImage getComponentImage = new CMN_getComponentImage();
-    getComponentImage.setNativeComponent(this);
-    Object[] result = (Object[])getComponentImage.syncExec();
+    Dimension resultSize;
+    File dataFile;
+    try {
+      dataFile = File.createTempFile("~DJNS", null);
+      dataFile.deleteOnExit();
+      CMN_getComponentImage getComponentImage = new CMN_getComponentImage();
+      getComponentImage.setNativeComponent(this);
+      resultSize = (Dimension)getComponentImage.syncExecArgs(dataFile.getAbsolutePath());
+    } catch(Exception e) {
+      e.printStackTrace();
+      resultSize = null;
+      dataFile = null;
+    }
     if(componentProxy != null) {
       componentProxy.stopCapture();
     }
+    if(resultSize == null) {
+      return;
+    }
     int imageWidth = image.getWidth();
     int imageHeight = image.getHeight();
-    int width = Math.min(((int[])result[0])[0], imageWidth);
-    int height = Math.min(((int[])result[0])[1], imageHeight);
+    int width = Math.min(resultSize.width, imageWidth);
+    int height = Math.min(resultSize.height, imageHeight);
     if(width <= 0 || height <= 0) {
       return;
     }
-    File inFile = new File((String)result[1]);
-    inFile.deleteOnExit();
     // Has to be a multiple of 3
     byte[] bytes = new byte[1024 * 3];
     int count = 0;
     try {
-      BufferedInputStream in = new BufferedInputStream(new FileInputStream(inFile));
+      BufferedInputStream in = new BufferedInputStream(new FileInputStream(dataFile));
       for(int x=0; x<width; x++) {
         for(int y=0; y<height; y++) {
           if(count == 0) {
@@ -1061,7 +1072,7 @@ public abstract class NativeComponent extends Canvas {
     } catch(Exception e) {
       e.printStackTrace();
     }
-    inFile.delete();
+    dataFile.delete();
   }
   
   @Override
