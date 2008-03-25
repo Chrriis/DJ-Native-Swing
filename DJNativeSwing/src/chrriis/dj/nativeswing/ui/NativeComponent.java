@@ -939,7 +939,7 @@ public abstract class NativeComponent extends Canvas {
     return result;
   }
   
-  private static class CMN_getGraphicsData extends ControlCommandMessage {
+  private static class CMN_getComponentImage extends ControlCommandMessage {
     private ImageData getImageData(Control control) {
       if(control.isDisposed()) {
         return null;
@@ -986,6 +986,7 @@ public abstract class NativeComponent extends Canvas {
       PaletteData palette = imageData.palette;
       if (palette.isDirect) {
         File outputFile = File.createTempFile(".ns", ".bin");
+        outputFile.deleteOnExit();
         BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(outputFile));
         for(int x=0; x<imageData.width; x++) {
           for(int y=0; y<imageData.height; y++) {
@@ -1024,9 +1025,9 @@ public abstract class NativeComponent extends Canvas {
     if(componentProxy != null) {
       componentProxy.startCapture();
     }
-    CMN_getGraphicsData getGraphicsData = new CMN_getGraphicsData();
-    getGraphicsData.setNativeComponent(this);
-    Object[] result = (Object[])getGraphicsData.syncExec();
+    CMN_getComponentImage getComponentImage = new CMN_getComponentImage();
+    getComponentImage.setNativeComponent(this);
+    Object[] result = (Object[])getComponentImage.syncExec();
     if(componentProxy != null) {
       componentProxy.stopCapture();
     }
