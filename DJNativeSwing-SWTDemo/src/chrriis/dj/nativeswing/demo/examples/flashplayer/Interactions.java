@@ -70,7 +70,7 @@ public class Interactions extends JPanel {
     final JLabel getLabel = new JLabel("-");
     getButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        String value = flashPlayer.getVariable("mytext");
+        String value = (String)flashPlayer.getVariable("mytext");
         getLabel.setText(value == null || value.length() == 0? " ": value);
       }
     });

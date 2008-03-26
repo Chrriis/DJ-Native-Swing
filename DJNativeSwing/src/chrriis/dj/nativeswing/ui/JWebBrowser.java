@@ -446,17 +446,62 @@ public class JWebBrowser extends JPanel implements Disposable {
     nativeComponent.execute(script);
   }
   
-  public String executeAndWaitForCommandResult(final String commandName, String script) {
+  private static final String LS = System.getProperty("line.separator");
+
+  /**
+   * @param script Some javascript containing explicit return statements. 
+   * @return The value, potentially a String, Number, Boolean.
+   */
+  public Object executeWithResult(String script) {
+    if(!script.endsWith(";")) {
+      script = script + ";";
+    }
+    String[] result = executeWithCommandResult("[[getScriptResult]]",
+        "try {" + LS +
+        "  var result = function() {" + script + "}();" + LS +
+        "  var type = result? typeof(result): '';" + LS +
+        "  sendCommand('[[getScriptResult]]', type, result);" + LS +
+        "} catch(exxxxx) {" + LS +
+        "  sendCommand('[[getScriptResult]]', '', null);" + LS +
+        "}");
+    if(result == null) {
+      return null;
+    }
+    return convertJSObject(result[0], result[1]);
+  }
+  
+  private Object convertJSObject(String type, String value) {
+    if(type.length() == 0) {
+      return null;
+    }
+    if("boolean".equals(type)) {
+      return Boolean.parseBoolean(value);
+    }
+    if("number".equals(type)) {
+      try {
+        return Integer.parseInt(value);
+      } catch(Exception e) {}
+      try {
+        return Float.parseFloat(value);
+      } catch(Exception e) {}
+      try {
+        return Long.parseLong(value);
+      } catch(Exception e) {}
+      throw new IllegalStateException("Could not convert number: " + value);
+    }
+    return value;
+  }
+  
+  public String[] executeWithCommandResult(final String commandName, String script) {
     if(!nativeComponent.isInitialized()) {
       return null;
     }
-    final String TEMP_RESULT = new String();
-    final String[] resultArray = new String[] {TEMP_RESULT};
+    final Object[] resultArray = new Object[] {null};
     WebBrowserAdapter webBrowserListener = new WebBrowserAdapter() {
       @Override
       public void commandReceived(WebBrowserEvent e, String command, String[] args) {
         if(command.equals(commandName)) {
-          resultArray[0] = args[0];
+          resultArray[0] = args;
           nativeComponent.removeWebBrowserListener(this);
         }
       }
@@ -464,11 +509,11 @@ public class JWebBrowser extends JPanel implements Disposable {
     nativeComponent.addWebBrowserListener(webBrowserListener);
     if(nativeComponent.executeAndWait(script)) {
       for(int i=0; i<20; i++) {
-        if(resultArray[0] != TEMP_RESULT) {
+        if(resultArray[0] != null) {
           break;
         }
         NativeInterfaceHandler.syncExec(new EmptyMessage());
-        if(resultArray[0] != TEMP_RESULT) {
+        if(resultArray[0] != null) {
           break;
         }
         try {
@@ -477,8 +522,7 @@ public class JWebBrowser extends JPanel implements Disposable {
       }
     }
     nativeComponent.removeWebBrowserListener(webBrowserListener);
-    String result = resultArray[0];
-    return result == TEMP_RESULT? null: result;
+    return (String[])resultArray[0];
   }
   
   public int getPageLoadingProgressValue() {

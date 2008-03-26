@@ -245,9 +245,9 @@ public class JFlashPlayer extends JPanel implements Disposable {
   /**
    * Get the value of a variable.
    * Note that on Mozilla, it is not possible to access object properties with that method, you should create your own accessor in the Flash application or use a global variable.
-   * @return The value, or null or an empty string when the variable is not defined.
+   * @return The value, potentially a String, Number, Boolean.
    */
-  public String getVariable(String name) {
+  public Object getVariable(String name) {
     if(!webBrowserObject.hasContent()) {
       return null;
     }
@@ -263,8 +263,9 @@ public class JFlashPlayer extends JPanel implements Disposable {
   
   /**
    * Invoke a function on the Flash object and waits for a result, with optional arguments (Strings, numbers, booleans).
+   * @return The value, potentially a String, Number, Boolean.
    */
-  public String invokeFlashFunctionWithResult(String functionName, Object... args) {
+  public Object invokeFlashFunctionWithResult(String functionName, Object... args) {
     return webBrowserObject.invokeObjectFunctionWithResult(functionName, args);
   }
   

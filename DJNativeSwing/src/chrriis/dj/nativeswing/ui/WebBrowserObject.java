@@ -443,10 +443,10 @@ public abstract class WebBrowserObject implements Disposable {
   }
   
   /**
-   * Call a function on the object and waits for a result, with optional arguments (Strings, numbers, booleans).
+   * @return The value, potentially a String, Number, boolean.
    */
-  public String getObjectProperty(String property) {
-    return webBrowser.executeAndWaitForCommandResult("[[getFlashResult]]", "try {sendCommand('[[getFlashResult]]', getEmbeddedObject()." + property + ");} catch(exxxxx) {sendCommand('[[getFlashResult]]', null);}");
+  public Object getObjectProperty(String property) {
+    return webBrowser.executeWithResult("return getEmbeddedObject()." + property);
   }
   
   /**
@@ -458,9 +458,10 @@ public abstract class WebBrowserObject implements Disposable {
   
   /**
    * Invoke a function on the object and waits for a result, with optional arguments (Strings, numbers, booleans).
+   * @return The value, potentially a String, Number, boolean.
    */
-  public String invokeObjectFunctionWithResult(String functionName, Object... args) {
-    return webBrowser.executeAndWaitForCommandResult("[[getFlashResult]]", "try {sendCommand('[[getFlashResult]]', " + getObjectFunctionCall(functionName, args) + ");} catch(exxxxx) {sendCommand('[[getFlashResult]]', null);}");
+  public Object invokeObjectFunctionWithResult(String functionName, Object... args) {
+    return webBrowser.executeWithResult("return " + getObjectFunctionCall(functionName, args));
   }
   
   private String getObjectFunctionCall(String functionName, Object... args) {

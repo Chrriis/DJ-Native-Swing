@@ -412,7 +412,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
       vlcPlayer.adjustVolumePanel();
     }
     public boolean isMute() {
-      return "true".equals(webBrowserObject.getObjectProperty("audio.mute"));
+      return Boolean.TRUE.equals(webBrowserObject.getObjectProperty("audio.mute"));
     }
     public void setVolume(int volume) {
       if(volume < 0 || volume > 100) {
@@ -422,21 +422,15 @@ public class JVLCPlayer extends JPanel implements Disposable {
       vlcPlayer.adjustVolumePanel();
     }
     public int getVolume() {
-      try {
-        return Math.max(0, (int)Math.round((Integer.parseInt(webBrowserObject.getObjectProperty("audio.volume")) - 1) / 1.99));
-      } catch(Exception e) {
-      }
-      return -1;
+      Object value = webBrowserObject.getObjectProperty("audio.volume");
+      return value == null? -1: Math.max(0, (int)Math.round((((Number)value).intValue() - 1) / 1.99));
     }
     public void setTrack(int track) {
       webBrowserObject.setObjectProperty("audio.track", track);
     }
     public int getTrack() {
-      try {
-        return Integer.parseInt(webBrowserObject.getObjectProperty("audio.track"));
-      } catch(Exception e) {
-      }
-      return -1;
+      Object value = webBrowserObject.getObjectProperty("audio.track");
+      return value == null? -1: ((Number)value).intValue();
     }
     public enum VLCChannel {
       STEREO, REVERSE_STEREO, LEFT, RIGHT, DOLBY
@@ -454,16 +448,16 @@ public class JVLCPlayer extends JPanel implements Disposable {
       webBrowserObject.setObjectProperty("audio.channel", value);
     }
     public VLCChannel getChannel() {
-      try {
-        int value = Integer.parseInt(webBrowserObject.getObjectProperty("audio.channel"));
-        switch(value) {
-          case 1: return VLCChannel.STEREO;
-          case 2: return VLCChannel.REVERSE_STEREO;
-          case 3: return VLCChannel.LEFT;
-          case 4: return VLCChannel.RIGHT;
-          case 5: return VLCChannel.DOLBY;
-        }
-      } catch(Exception e) {
+      Object value = webBrowserObject.getObjectProperty("audio.channel");
+      if(value == null) {
+        return null;
+      }
+      switch(((Number)value).intValue()) {
+        case 1: return VLCChannel.STEREO;
+        case 2: return VLCChannel.REVERSE_STEREO;
+        case 3: return VLCChannel.LEFT;
+        case 4: return VLCChannel.RIGHT;
+        case 5: return VLCChannel.DOLBY;
       }
       return null;
     }
@@ -488,21 +482,15 @@ public class JVLCPlayer extends JPanel implements Disposable {
      * @return the length in milliseconds.
      */
     public int getLength() {
-      try {
-        return Integer.parseInt(webBrowserObject.getObjectProperty("input.length"));
-      } catch(Exception e) {
-      }
-      return -1;
+      Object value = webBrowserObject.getObjectProperty("input.length");
+      return value == null? -1: ((Number)value).intValue();
     }
     public float getFPS() {
-      try {
-        return Float.parseFloat(webBrowserObject.getObjectProperty("input.fps"));
-      } catch(Exception e) {
-      }
-      return Float.NaN;
+      Object value = webBrowserObject.getObjectProperty("input.fps");
+      return value == null? Float.NaN: ((Number)value).floatValue();
     }
     public boolean isVideoDisplayed() {
-      return "true".equals(webBrowserObject.getObjectProperty("input.isVout"));
+      return Boolean.TRUE.equals(webBrowserObject.getObjectProperty("input.isVout"));
     }
     /**
      * @param position A value between 0.0 and 1.0.
@@ -514,11 +502,8 @@ public class JVLCPlayer extends JPanel implements Disposable {
       webBrowserObject.setObjectProperty("input.position", position);
     }
     public float getPosition() {
-      try {
-        return Float.parseFloat(webBrowserObject.getObjectProperty("input.position"));
-      } catch(Exception e) {
-      }
-      return Float.NaN;
+      Object value = webBrowserObject.getObjectProperty("input.position");
+      return value == null? Float.NaN: ((Number)value).floatValue();
     }
     /**
      * @param time The time in milliseconds.
@@ -530,28 +515,25 @@ public class JVLCPlayer extends JPanel implements Disposable {
      * @return the time in milliseconds.
      */
     public int getTime() {
-      try {
-        return Integer.parseInt(webBrowserObject.getObjectProperty("input.time"));
-      } catch(Exception e) {
-      }
-      return -1;
+      Object value = webBrowserObject.getObjectProperty("input.time");
+      return value == null? -1: ((Number)value).intValue();
     }
     enum VLCState {
       IDLE_CLOSE, OPENING, BUFFERING, PLAYING, PAUSED, STOPPING, ERROR,
     }
     public VLCState getState() {
-      try {
-        int value = Integer.parseInt(webBrowserObject.getObjectProperty("input.state"));
-        switch(value) {
-          case 0: return VLCState.IDLE_CLOSE;
-          case 1: return VLCState.OPENING;
-          case 2: return VLCState.BUFFERING;
-          case 3: return VLCState.PLAYING;
-          case 4: return VLCState.PAUSED;
-          case 5: return VLCState.STOPPING;
-          case 6: return VLCState.ERROR;
-        }
-      } catch(Exception e) {
+      Object value = webBrowserObject.getObjectProperty("input.state");
+      if(value == null) {
+        return null;
+      }
+      switch(((Number)value).intValue()) {
+        case 0: return VLCState.IDLE_CLOSE;
+        case 1: return VLCState.OPENING;
+        case 2: return VLCState.BUFFERING;
+        case 3: return VLCState.PLAYING;
+        case 4: return VLCState.PAUSED;
+        case 5: return VLCState.STOPPING;
+        case 6: return VLCState.ERROR;
       }
       return null;
     }
@@ -559,11 +541,8 @@ public class JVLCPlayer extends JPanel implements Disposable {
       webBrowserObject.setObjectProperty("input.rate", rate);
     }
     public float getRate() {
-      try {
-        return Float.parseFloat(webBrowserObject.getObjectProperty("input.rate"));
-      } catch(Exception e) {
-      }
-      return Float.NaN;
+      Object value = webBrowserObject.getObjectProperty("input.rate");
+      return value == null? Float.NaN: ((Number)value).floatValue();
     }
   }
   
@@ -581,14 +560,11 @@ public class JVLCPlayer extends JPanel implements Disposable {
       this.webBrowserObject = vlcPlayer.webBrowserObject;
     }
     public int getItemCount() {
-      try {
-        return Integer.parseInt(webBrowserObject.getObjectProperty("playlist.items.count"));
-      } catch(Exception e) {
-      }
-      return -1;
+      Object value = webBrowserObject.getObjectProperty("playlist.items.count");
+      return value == null? -1: ((Number)value).intValue();
     }
     public boolean isPlaying() {
-      return "true".equals(webBrowserObject.getObjectProperty("playlist.isPlaying"));
+      return Boolean.TRUE.equals(webBrowserObject.getObjectProperty("playlist.isPlaying"));
     }
     /**
      * @return the item ID, which can be used to add play or remove an item from the playlist.
@@ -602,11 +578,8 @@ public class JVLCPlayer extends JPanel implements Disposable {
       if(file != null) {
         url = webBrowserObject.getLocalFileURL(file);
       }
-      try {
-        return Integer.parseInt(webBrowserObject.invokeObjectFunctionWithResult("playlist.add", url));
-      } catch(Exception e) {
-      }
-      return -1;
+      Object value = webBrowserObject.invokeObjectFunctionWithResult("playlist.add", url);
+      return value == null? -1: ((Number)value).intValue();
     }
     public void play() {
       webBrowserObject.invokeObjectFunction("playlist.play");
@@ -646,24 +619,18 @@ public class JVLCPlayer extends JPanel implements Disposable {
       this.webBrowserObject = vlcPlayer.webBrowserObject;
     }
     public int getWidth() {
-      try {
-        return Integer.parseInt(webBrowserObject.getObjectProperty("video.width"));
-      } catch(Exception e) {
-      }
-      return -1;
+      Object value = webBrowserObject.getObjectProperty("video.width");
+      return value == null? -1: ((Number)value).intValue();
     }
     public int getHeight() {
-      try {
-        return Integer.parseInt(webBrowserObject.getObjectProperty("video.height"));
-      } catch(Exception e) {
-      }
-      return -1;
+      Object value = webBrowserObject.getObjectProperty("video.height");
+      return value == null? -1: ((Number)value).intValue();
     }
     public void setFullScreen(boolean isFullScreen) {
       webBrowserObject.setObjectProperty("video.fullscreen", isFullScreen);
     }
     public boolean isFullScreen() {
-      return "true".equals(webBrowserObject.getObjectProperty("video.fullscreen"));
+      return Boolean.TRUE.equals(webBrowserObject.getObjectProperty("video.fullscreen"));
     }
     public enum VLCAspectRatio {
       _1x1, _4x3, _16x9, _16x10, _221x100, _5x4,
@@ -682,7 +649,7 @@ public class JVLCPlayer extends JPanel implements Disposable {
       webBrowserObject.setObjectProperty("video.aspectRatio", value);
     }
     public VLCAspectRatio getAspectRatio() {
-      String value = webBrowserObject.getObjectProperty("video.aspectRatio");
+      String value = (String)webBrowserObject.getObjectProperty("video.aspectRatio");
       if("1:1".equals(value)) return VLCAspectRatio._1x1;
       if("4:3".equals(value)) return VLCAspectRatio._4x3;
       if("16:9".equals(value)) return VLCAspectRatio._16x9;
@@ -701,11 +668,8 @@ public class JVLCPlayer extends JPanel implements Disposable {
      * @return the track of the subtitles, or 0 if disabled.
      */
     public int getSubtitleTrack() {
-      try {
-        return Integer.parseInt(webBrowserObject.getObjectProperty("video.subtitle"));
-      } catch(Exception e) {
-      }
-      return -1;
+      Object value = webBrowserObject.getObjectProperty("video.subtitle");
+      return value == null? -1: ((Number)value).intValue();
     }
     public void toggleFullScreen() {
       webBrowserObject.invokeObjectFunction("video.toggleFullscreen");

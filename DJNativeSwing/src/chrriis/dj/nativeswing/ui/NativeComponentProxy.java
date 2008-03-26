@@ -19,6 +19,7 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.AWTEventListener;
 import java.awt.event.ComponentEvent;
+import java.awt.event.ContainerEvent;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
 import java.awt.geom.Area;
@@ -69,6 +70,8 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
         public void eventDispatched(AWTEvent e) {
           boolean isAdjustingShape = false;
           switch(e.getID()) {
+            case ContainerEvent.COMPONENT_ADDED:
+            case ContainerEvent.COMPONENT_REMOVED:
             case ComponentEvent.COMPONENT_RESIZED:
             case ComponentEvent.COMPONENT_MOVED:
               isAdjustingShape = true;
@@ -100,7 +103,7 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
       addHierarchyListener(hierarchyListener);
     }
     if(shapeAdjustmentEventListener != null) {
-      Toolkit.getDefaultToolkit().addAWTEventListener(shapeAdjustmentEventListener, AWTEvent.COMPONENT_EVENT_MASK);
+      Toolkit.getDefaultToolkit().addAWTEventListener(shapeAdjustmentEventListener, AWTEvent.COMPONENT_EVENT_MASK | AWTEvent.CONTAINER_EVENT_MASK);
     }
     if(peer != null) {
       adjustPeerBounds();
@@ -318,13 +321,6 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
     return area;
   }
 
-  @Override
-  public void printAll(Graphics g) {
-    BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
-    nativeComponent.paintComponent(image);
-    g.drawImage(image, 0, 0, null);
-  }
-  
   private final Object backgroundBufferLock = new Object();
   private BufferedImage backgroundBuffer;
   
@@ -347,8 +343,14 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
   }
   
   @Override
+  protected void printComponent(Graphics g) {
+    BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
+    nativeComponent.paintComponent(image);
+    g.drawImage(image, 0, 0, null);
+  }
+  
+  @Override
   protected void paintComponent(Graphics g) {
-//    super.paintComponent(g);
     synchronized(backgroundBufferLock) {
       if(backgroundBuffer != null) {
         g.drawImage(backgroundBuffer, 0, 0, this);
