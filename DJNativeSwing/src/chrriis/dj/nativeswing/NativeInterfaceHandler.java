@@ -209,10 +209,16 @@ public class NativeInterfaceHandler {
     private static volatile List<Canvas> canvasList;
 
     public static Canvas[] getCanvas() {
+      if(canvasList == null) {
+        return new Canvas[0];
+      }
       return canvasList.toArray(new Canvas[0]);
     }
     
     public static void addCanvas(Canvas canvas) {
+      if(canvasList == null) {
+        canvasList = new ArrayList<Canvas>();
+      }
       canvasList.add(canvas);
       HeavyweightForcer.activate(canvas);
     }
@@ -319,7 +325,6 @@ public class NativeInterfaceHandler {
       if(nativeInterfaceInitOptions.isPreferredLookAndFeelApplied()) {
         setPreferredLookAndFeel();
       }
-      _Internal_.canvasList = new ArrayList<Canvas>();
       // Specific Sun property to prevent heavyweight components from erasing their background.
       System.setProperty("sun.awt.noerasebackground", "true");
       // It seems on Linux this is required to get the component visible.
@@ -331,6 +336,9 @@ public class NativeInterfaceHandler {
         protected Set<Dialog> dialogSet = new HashSet<Dialog>();
         protected volatile Set<Window> blockedWindowSet = new HashSet<Window>();
         protected void adjustNativeComponents() {
+          if(_Internal_.canvasList == null) {
+            return;
+          }
           for(int i=_Internal_.canvasList.size()-1; i>=0; i--) {
             final Canvas canvas = _Internal_.canvasList.get(i);
             Component c = canvas;

@@ -585,7 +585,7 @@ public abstract class NativeComponent extends Canvas {
       asyncExec(new CMN_reshape(), getWidth(), getHeight());
     } else {
       isValidControl = false;
-      invalidControlText = "Failed to create " + NativeComponent.this.getClass().getName() + "[" + NativeComponent.this.hashCode() + "]\n\nReason:\nThe interface is not alive!";
+      invalidControlText = "Failed to create " + NativeComponent.this.getClass().getName() + "[" + NativeComponent.this.hashCode() + "]\n\nReason:\nThe native interface is not alive! It may not have been initialized.";
     }
     for(CommandMessage initCommandMessage: initializationCommandMessageList_) {
       if(!isValidControl()) {
