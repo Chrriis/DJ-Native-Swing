@@ -107,7 +107,7 @@ public abstract class WebBrowserObject implements Disposable {
     this.resourcePath = resourcePath;
     Registry.getInstance().remove(instanceID);
     if(resourcePath == null) {
-      webBrowser.setText("");
+      webBrowser.setHTMLContent("");
       return;
     }
     Registry.getInstance().remove(instanceID);
@@ -439,21 +439,21 @@ public abstract class WebBrowserObject implements Disposable {
    * Set the value of a property of the object (a String, number, boolean).
    */
   public void setObjectProperty(String property, Object value) {
-    webBrowser.execute("try {getEmbeddedObject()." + property + " = " + getObjectArgument(value) + ";} catch(exxxxx) {}");
+    webBrowser.executeJavascript("try {getEmbeddedObject()." + property + " = " + getObjectArgument(value) + ";} catch(exxxxx) {}");
   }
   
   /**
    * @return The value, potentially a String, Number, boolean.
    */
   public Object getObjectProperty(String property) {
-    return webBrowser.executeWithResult("return getEmbeddedObject()." + property);
+    return webBrowser.executeJavascriptWithResult("return getEmbeddedObject()." + property);
   }
   
   /**
    * Invoke a function on the object, with optional arguments (Strings, numbers, booleans).
    */
   public void invokeObjectFunction(String functionName, Object... args) {
-    webBrowser.execute("try {" + getObjectFunctionCall(functionName, args) + ";} catch(exxxxx) {}");
+    webBrowser.executeJavascript("try {" + getObjectFunctionCall(functionName, args) + ";} catch(exxxxx) {}");
   }
   
   /**
@@ -461,7 +461,7 @@ public abstract class WebBrowserObject implements Disposable {
    * @return The value, potentially a String, Number, boolean.
    */
   public Object invokeObjectFunctionWithResult(String functionName, Object... args) {
-    return webBrowser.executeWithResult("return " + getObjectFunctionCall(functionName, args));
+    return webBrowser.executeJavascriptWithResult("return " + getObjectFunctionCall(functionName, args));
   }
   
   private String getObjectFunctionCall(String functionName, Object... args) {

@@ -64,7 +64,7 @@ public class VisibilityConstraintOption extends JPanel {
     JWebBrowser webBrowser = new JWebBrowser();
     webBrowser.setBarsVisible(false);
     webBrowser.setStatusBarVisible(true);
-    webBrowser.setText(
+    webBrowser.setHTMLContent(
         "<html>" + LS +
         "  <body>" + LS +
         "    <h1>A web page</h1>" + LS +

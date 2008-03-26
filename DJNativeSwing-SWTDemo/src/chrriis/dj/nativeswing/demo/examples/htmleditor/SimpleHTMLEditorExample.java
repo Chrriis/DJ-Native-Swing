@@ -65,16 +65,16 @@ public class SimpleHTMLEditorExample extends JPanel {
     add(southPanel, BorderLayout.SOUTH);
     getHTMLButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        htmlTextArea.setText(htmlEditor.getHTML());
+        htmlTextArea.setText(htmlEditor.getHTMLContent());
         htmlTextArea.setCaretPosition(0);
       }
     });
     setHTMLButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        htmlEditor.setHTML(htmlTextArea.getText());
+        htmlEditor.setHTMLContent(htmlTextArea.getText());
       }
     });
-    htmlEditor.setHTML(htmlTextArea.getText());
+    htmlEditor.setHTMLContent(htmlTextArea.getText());
   }
   
   /* Standard main method to try that test as a standalone application. */

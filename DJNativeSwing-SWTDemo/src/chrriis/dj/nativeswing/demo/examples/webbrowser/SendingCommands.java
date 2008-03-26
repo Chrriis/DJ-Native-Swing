@@ -61,7 +61,7 @@ public class SendingCommands extends JPanel {
         }
       }
     });
-    webBrowser.setText(
+    webBrowser.setHTMLContent(
         "<html>" + LS +
         "  <head>" + LS +
         "    <script language=\"JavaScript\" type=\"text/javascript\">" + LS +

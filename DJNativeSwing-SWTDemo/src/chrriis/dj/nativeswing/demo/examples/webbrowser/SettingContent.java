@@ -59,7 +59,7 @@ public class SettingContent extends JPanel {
     JButton setContentButton = new JButton("Set Content");
     setContentButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        webBrowser.setText(configurationTextArea.getText());
+        webBrowser.setHTMLContent(configurationTextArea.getText());
       }
     });
     configurationButtonPanel.add(setContentButton);

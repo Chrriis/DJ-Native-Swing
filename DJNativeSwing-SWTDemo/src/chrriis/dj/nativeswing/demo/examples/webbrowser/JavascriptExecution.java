@@ -39,7 +39,7 @@ public class JavascriptExecution extends JPanel {
     final JWebBrowser webBrowser = new JWebBrowser();
     webBrowser.setBarsVisible(false);
     webBrowser.setStatusBarVisible(true);
-    webBrowser.setText(
+    webBrowser.setHTMLContent(
         "<html>" + LS +
         "  <body>" + LS +
         "    <h1>Some header</h1>" + LS +
@@ -62,7 +62,7 @@ public class JavascriptExecution extends JPanel {
     JButton executeJavascriptButton = new JButton("Execute Javascript");
     executeJavascriptButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        webBrowser.execute(configurationTextArea.getText());
+        webBrowser.executeJavascript(configurationTextArea.getText());
       }
     });
     configurationButtonPanel.add(executeJavascriptButton);

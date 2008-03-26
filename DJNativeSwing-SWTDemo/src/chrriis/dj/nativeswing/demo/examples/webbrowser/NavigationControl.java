@@ -36,7 +36,7 @@ public class NavigationControl extends JPanel {
     final JWebBrowser webBrowser = new JWebBrowser();
     webBrowser.setBarsVisible(false);
     webBrowser.setStatusBarVisible(true);
-    webBrowser.setText(
+    webBrowser.setHTMLContent(
         "<html>" + LS +
         "  <body>" + LS +
         "    <a href=\"http://java.sun.com\">http://java.sun.com</a>: create a new tab.<br/>" + LS +

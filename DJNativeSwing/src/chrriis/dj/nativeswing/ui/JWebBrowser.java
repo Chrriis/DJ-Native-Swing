@@ -162,7 +162,7 @@ public class JWebBrowser extends JPanel implements Disposable {
   public void copyContent(JWebBrowser webBrowser) {
     String url = webBrowser.getURL();
     if("about:blank".equals(url)) {
-      setText(webBrowser.getText());
+      setHTMLContent(webBrowser.getHTMLContent());
     } else {
       setURL(url);
     }
@@ -395,12 +395,12 @@ public class JWebBrowser extends JPanel implements Disposable {
     return nativeComponent.getStatus();
   }
 
-  public String getText() {
-    return nativeComponent.getText();
+  public String getHTMLContent() {
+    return nativeComponent.getHTMLContent();
   }
   
-  public boolean setText(String html) {
-    return nativeComponent.setText(html);
+  public boolean setHTMLContent(String html) {
+    return nativeComponent.setHTMLContent(html);
   }
   
   public String getURL() {
@@ -438,27 +438,27 @@ public class JWebBrowser extends JPanel implements Disposable {
   /**
    * Execute a script and wait for the indication of success.
    */
-  public boolean executeAndWait(String script) {
-    return nativeComponent.executeAndWait(script);
+  public boolean executeJavascriptAndWait(String javascript) {
+    return nativeComponent.executeJavascriptAndWait(javascript);
   }
   
-  public void execute(String script) {
-    nativeComponent.execute(script);
+  public void executeJavascript(String javascript) {
+    nativeComponent.executeJavascript(javascript);
   }
   
   private static final String LS = System.getProperty("line.separator");
 
   /**
-   * @param script Some javascript containing explicit return statements. 
+   * @param javascript Some javascript containing explicit return statements. 
    * @return The value, potentially a String, Number, Boolean.
    */
-  public Object executeWithResult(String script) {
-    if(!script.endsWith(";")) {
-      script = script + ";";
+  public Object executeJavascriptWithResult(String javascript) {
+    if(!javascript.endsWith(";")) {
+      javascript = javascript + ";";
     }
-    String[] result = executeWithCommandResult("[[getScriptResult]]",
+    String[] result = executeJavascriptWithCommandResult("[[getScriptResult]]",
         "try {" + LS +
-        "  var result = function() {" + script + "}();" + LS +
+        "  var result = function() {" + javascript + "}();" + LS +
         "  var type = result? typeof(result): '';" + LS +
         "  if('string' == type) {" + LS +
         "    window.location = 'command://' + encodeURIComponent('[[getScriptResult]]') + '&' + encodeURIComponent(result);" + LS +
@@ -499,22 +499,32 @@ public class JWebBrowser extends JPanel implements Disposable {
     return value;
   }
   
-  public String[] executeWithCommandResult(final String commandName, String script) {
+  private static class NCommandListener extends WebBrowserAdapter {
+    private NativeWebBrowser nativeComponent;
+    private String command;
+    private Object[] resultArray;
+    private NCommandListener(NativeWebBrowser nativeComponent, String command, Object[] resultArray) {
+      this.nativeComponent = nativeComponent;
+      this.command = command;
+      this.resultArray = resultArray;
+    }
+    @Override
+    public void commandReceived(WebBrowserEvent e, String command, String[] args) {
+      if(this.command.equals(command)) {
+        resultArray[0] = args;
+        nativeComponent.removeWebBrowserListener(this);
+      }
+    }
+  }
+  
+  private String[] executeJavascriptWithCommandResult(final String command, String script) {
     if(!nativeComponent.isInitialized()) {
       return null;
     }
     final Object[] resultArray = new Object[] {null};
-    WebBrowserAdapter webBrowserListener = new WebBrowserAdapter() {
-      @Override
-      public void commandReceived(WebBrowserEvent e, String command, String[] args) {
-        if(command.equals(commandName)) {
-          resultArray[0] = args;
-          nativeComponent.removeWebBrowserListener(this);
-        }
-      }
-    };
+    WebBrowserAdapter webBrowserListener = new NCommandListener(nativeComponent, command, resultArray);
     nativeComponent.addWebBrowserListener(webBrowserListener);
-    if(nativeComponent.executeAndWait(script)) {
+    if(nativeComponent.executeJavascriptAndWait(script)) {
       for(int i=0; i<20; i++) {
         if(resultArray[0] != null) {
           break;

@@ -479,29 +479,29 @@ class NativeWebBrowser extends NativeComponent {
     return Boolean.TRUE.equals(runSync(new CMN_setURL(), url));
   }
   
-  private static class CMN_getText extends ControlCommandMessage {
+  private static class CMN_getHTMLContent extends ControlCommandMessage {
     @Override
     public Object run() {
       return ((Browser)getControl()).getText();
     }
   }
   
-  public String getText() {
-    return (String)runSync(new CMN_getText());
+  public String getHTMLContent() {
+    return (String)runSync(new CMN_getHTMLContent());
   }
   
-  private static class CMN_setText extends ControlCommandMessage {
+  private static class CMN_setHTMLContent extends ControlCommandMessage {
     @Override
     public Object run() {
       return ((Browser)getControl()).setText((String)args[0]);
     }
   }
   
-  public boolean setText(String html) {
-    return Boolean.TRUE.equals(runSync(new CMN_setText(), html));
+  public boolean setHTMLContent(String html) {
+    return Boolean.TRUE.equals(runSync(new CMN_setHTMLContent(), html));
   }
   
-  private static class CMN_execute extends ControlCommandMessage {
+  private static class CMN_executeJavascript extends ControlCommandMessage {
     private static Pattern JAVASCRIPT_LINE_COMMENT_PATTERN = Pattern.compile("^\\s*//.*$", Pattern.MULTILINE);
     @Override
     public Object run() {
@@ -512,13 +512,12 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
   
-  
-  public boolean executeAndWait(String script) {
-    return Boolean.TRUE.equals(runSync(new CMN_execute(), script));
+  public boolean executeJavascriptAndWait(String script) {
+    return Boolean.TRUE.equals(runSync(new CMN_executeJavascript(), script));
   }
   
-  public void execute(String script) {
-    runAsync(new CMN_execute(), script);
+  public void executeJavascript(String script) {
+    runAsync(new CMN_executeJavascript(), script);
   }
   
   private static class CMN_stop extends ControlCommandMessage {
