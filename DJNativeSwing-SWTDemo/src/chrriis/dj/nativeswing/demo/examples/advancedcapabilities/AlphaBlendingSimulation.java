@@ -7,17 +7,21 @@
  */
 package chrriis.dj.nativeswing.demo.examples.advancedcapabilities;
 
+import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 
 import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.MouseInputAdapter;
 
 import chrriis.common.Disposable;
+import chrriis.dj.nativeswing.NativeInterfaceHandler;
+import chrriis.dj.nativeswing.NativeInterfaceHandler.NativeInterfaceInitOptions;
 import chrriis.dj.nativeswing.ui.JWebBrowser;
 import chrriis.dj.nativeswing.ui.NativeComponent;
 import chrriis.dj.nativeswing.ui.NativeComponent.Options.VisibilityConstraint;
@@ -47,7 +51,7 @@ public class AlphaBlendingSimulation extends JPanel implements Disposable {
     descriptionLabel.setSize(descriptionLabel.getPreferredSize());
     descriptionLabel.setLocation(5, 15);
     add(descriptionLabel);
-    ImageIcon icon = new ImageIcon(getClass().getResource("../../resource/DJIcon48x48.png"));
+    ImageIcon icon = new ImageIcon(getClass().getResource("resource/DJIcon48x48.png"));
     final JLabel imageLabel = new JLabel(icon);
     MouseInputAdapter mouseInputAdapter = new MouseInputAdapter() {
       private Point originalMouseLocation;
@@ -96,6 +100,23 @@ public class AlphaBlendingSimulation extends JPanel implements Disposable {
   
   public void dispose() {
     isDisposed = true;
+  }
+  
+  /* Standard main method to try that test as a standalone application. */
+  public static void main(String[] args) {
+    NativeInterfaceInitOptions options = new NativeInterfaceInitOptions();
+    options.setPreferredLookAndFeelApplied(true);
+    NativeInterfaceHandler.init(options);
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        JFrame frame = new JFrame("DJ Native Swing Test");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.getContentPane().add(new AlphaBlendingSimulation(), BorderLayout.CENTER);
+        frame.setSize(800, 600);
+        frame.setLocationByPlatform(true);
+        frame.setVisible(true);
+      }
+    });
   }
   
 }

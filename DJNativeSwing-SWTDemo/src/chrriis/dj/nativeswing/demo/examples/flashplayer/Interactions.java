@@ -15,13 +15,17 @@ import java.util.HashMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 
+import chrriis.dj.nativeswing.NativeInterfaceHandler;
+import chrriis.dj.nativeswing.NativeInterfaceHandler.NativeInterfaceInitOptions;
 import chrriis.dj.nativeswing.ui.JFlashPlayer;
 import chrriis.dj.nativeswing.ui.JFlashPlayer.FlashLoadingOptions;
 
@@ -77,6 +81,23 @@ public class Interactions extends JPanel {
     getSetSouthPanel.add(getLabel);
     variablePanel.add(getSetSouthPanel, BorderLayout.SOUTH);
     add(variablePanel, BorderLayout.NORTH);
+  }
+  
+  /* Standard main method to try that test as a standalone application. */
+  public static void main(String[] args) {
+    NativeInterfaceInitOptions options = new NativeInterfaceInitOptions();
+    options.setPreferredLookAndFeelApplied(true);
+    NativeInterfaceHandler.init(options);
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        JFrame frame = new JFrame("DJ Native Swing Test");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.getContentPane().add(new Interactions(), BorderLayout.CENTER);
+        frame.setSize(800, 600);
+        frame.setLocationByPlatform(true);
+        frame.setVisible(true);
+      }
+    });
   }
   
 }

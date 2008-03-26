@@ -22,10 +22,14 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
+import chrriis.dj.nativeswing.NativeInterfaceHandler;
+import chrriis.dj.nativeswing.NativeInterfaceHandler.NativeInterfaceInitOptions;
 import chrriis.dj.nativeswing.ui.JVLCPlayer;
 
 /**
@@ -96,6 +100,23 @@ public class SimpleVLCPlayerExample extends JPanel {
     });
     buttonPanel.add(controlBarCheckBox);
     add(buttonPanel, BorderLayout.SOUTH);
+  }
+  
+  /* Standard main method to try that test as a standalone application. */
+  public static void main(String[] args) {
+    NativeInterfaceInitOptions options = new NativeInterfaceInitOptions();
+    options.setPreferredLookAndFeelApplied(true);
+    NativeInterfaceHandler.init(options);
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        JFrame frame = new JFrame("DJ Native Swing Test");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.getContentPane().add(new SimpleVLCPlayerExample(), BorderLayout.CENTER);
+        frame.setSize(800, 600);
+        frame.setLocationByPlatform(true);
+        frame.setVisible(true);
+      }
+    });
   }
   
 }

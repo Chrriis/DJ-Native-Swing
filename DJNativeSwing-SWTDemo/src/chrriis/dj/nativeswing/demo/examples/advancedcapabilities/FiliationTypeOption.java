@@ -13,10 +13,14 @@ import java.awt.GridBagLayout;
 
 import javax.swing.JButton;
 import javax.swing.JDesktopPane;
+import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import chrriis.common.Disposable;
+import chrriis.dj.nativeswing.NativeInterfaceHandler;
+import chrriis.dj.nativeswing.NativeInterfaceHandler.NativeInterfaceInitOptions;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
 import chrriis.dj.nativeswing.ui.JFlashPlayer;
 import chrriis.dj.nativeswing.ui.JWebBrowser;
@@ -97,6 +101,23 @@ public class FiliationTypeOption extends JPanel implements Disposable {
     // webBrowser 2 is disposed on finalization.
     // Rather than waiting for garbage collection, release when the demo leaves this screen.
     webBrowser2.dispose();
+  }
+  
+  /* Standard main method to try that test as a standalone application. */
+  public static void main(String[] args) {
+    NativeInterfaceInitOptions options = new NativeInterfaceInitOptions();
+    options.setPreferredLookAndFeelApplied(true);
+    NativeInterfaceHandler.init(options);
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        JFrame frame = new JFrame("DJ Native Swing Test");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.getContentPane().add(new FiliationTypeOption(), BorderLayout.CENTER);
+        frame.setSize(800, 600);
+        frame.setLocationByPlatform(true);
+        frame.setVisible(true);
+      }
+    });
   }
   
 }

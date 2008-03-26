@@ -9,8 +9,12 @@ package chrriis.dj.nativeswing.demo.examples.flashplayer;
 
 import java.awt.BorderLayout;
 
+import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
+import chrriis.dj.nativeswing.NativeInterfaceHandler;
+import chrriis.dj.nativeswing.NativeInterfaceHandler.NativeInterfaceInitOptions;
 import chrriis.dj.nativeswing.ui.JFlashPlayer;
 
 /**
@@ -23,6 +27,23 @@ public class SimpleFlashExample extends JPanel {
     JFlashPlayer flashPlayer = new JFlashPlayer();
     flashPlayer.load(getClass(), "resource/Movement-pointer_or_click.swf");
     add(flashPlayer, BorderLayout.CENTER);
+  }
+  
+  /* Standard main method to try that test as a standalone application. */
+  public static void main(String[] args) {
+    NativeInterfaceInitOptions options = new NativeInterfaceInitOptions();
+    options.setPreferredLookAndFeelApplied(true);
+    NativeInterfaceHandler.init(options);
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        JFrame frame = new JFrame("DJ Native Swing Test");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.getContentPane().add(new SimpleFlashExample(), BorderLayout.CENTER);
+        frame.setSize(800, 600);
+        frame.setLocationByPlatform(true);
+        frame.setVisible(true);
+      }
+    });
   }
   
 }
