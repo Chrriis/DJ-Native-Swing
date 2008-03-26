@@ -24,7 +24,7 @@ public abstract class Message implements Serializable {
   private boolean isUI = true;
   
   public Message() {
-    if(NativeInterfaceHandler.isNativeSide()) {
+    if(NativeInterface.isNativeSide()) {
       id = -nextID++;
     } else {
       id = nextID++;
@@ -52,11 +52,11 @@ public abstract class Message implements Serializable {
   }
   
   public void asyncExec() {
-    NativeInterfaceHandler.asyncExec(this);
+    NativeInterface.asyncExec(this);
   }
   
   public Object syncExec() {
-    return NativeInterfaceHandler.syncExec(this);
+    return NativeInterface.syncExec(this);
   }
   
   /**

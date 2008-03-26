@@ -23,7 +23,7 @@ import javax.swing.SwingUtilities;
 import org.eclipse.swt.SWT;
 
 import chrriis.common.Registry;
-import chrriis.dj.nativeswing.NativeInterfaceHandler.NativeInterfaceListener;
+import chrriis.dj.nativeswing.NativeInterface.NativeInterfaceListener;
 import chrriis.dj.nativeswing.ui.NativeComponent;
 
 /**
@@ -106,7 +106,7 @@ abstract class MessagingInterface {
               }
               e.printStackTrace();
               try {
-                NativeInterfaceHandler.createCommunicationChannel();
+                NativeInterface.createCommunicationChannel();
               } catch(Exception ex) {
                 ex.printStackTrace();
               }
@@ -124,16 +124,16 @@ abstract class MessagingInterface {
                 }
               }
             }
-            if(!NativeInterfaceHandler.isNativeSide()) {
+            if(!NativeInterface.isNativeSide()) {
               SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                  for(Canvas c: NativeInterfaceHandler._Internal_.getCanvas()) {
+                  for(Canvas c: NativeInterface._Internal_.getCanvas()) {
                     if(c instanceof NativeComponent) {
                       ((NativeComponent)c).invalidateControl("The native peer died unexpectantly.");
                     }
                     c.repaint();
                   }
-                  for(NativeInterfaceListener listener: NativeInterfaceHandler.getNativeInterfaceListeners()) {
+                  for(NativeInterfaceListener listener: NativeInterface.getNativeInterfaceListeners()) {
                     listener.nativeInterfaceRestarted();
                   }
                 }
@@ -246,7 +246,7 @@ abstract class MessagingInterface {
   
   public void checkUIThread() {
     if(!isUIThread()) {
-      if(NativeInterfaceHandler.isNativeSide()) {
+      if(NativeInterface.isNativeSide()) {
         SWT.error(SWT.ERROR_THREAD_INVALID_ACCESS);
         return;
       }
@@ -260,7 +260,7 @@ abstract class MessagingInterface {
   private static class CM_asyncExecResponse extends CommandMessage {
     @Override
     public Object run() throws Exception {
-      MessagingInterface messagingInterface = NativeInterfaceHandler.getMessagingInterface();
+      MessagingInterface messagingInterface = NativeInterface.getMessagingInterface();
       int instanceID = (Integer)args[0];
       Thread thread = (Thread)messagingInterface.syncThreadRegistry.get(instanceID);
       messagingInterface.syncThreadRegistry.remove(instanceID);
@@ -280,7 +280,7 @@ abstract class MessagingInterface {
     public Object run() throws Exception {
       Message message = (Message)args[1];
       message.setSyncExec(false);
-      new CM_asyncExecResponse().asyncExecArgs(args[0], NativeInterfaceHandler.getMessagingInterface().runMessage(message));
+      new CM_asyncExecResponse().asyncExecArgs(args[0], NativeInterface.getMessagingInterface().runMessage(message));
       return null;
     }
   }

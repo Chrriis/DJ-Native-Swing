@@ -14,8 +14,8 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
-import chrriis.dj.nativeswing.NativeInterfaceHandler;
-import chrriis.dj.nativeswing.NativeInterfaceHandler.NativeInterfaceInitOptions;
+import chrriis.dj.nativeswing.NativeInterface;
+import chrriis.dj.nativeswing.NativeInterface.NativeInterfaceInitOptions;
 import chrriis.dj.nativeswing.ui.JWebBrowser;
 import chrriis.dj.nativeswing.ui.JWebBrowserWindow;
 import chrriis.dj.nativeswing.ui.event.WebBrowserAdapter;
@@ -113,7 +113,7 @@ public class NavigationControl extends JPanel {
   public static void main(String[] args) {
     NativeInterfaceInitOptions options = new NativeInterfaceInitOptions();
     options.setPreferredLookAndFeelApplied(true);
-    NativeInterfaceHandler.init(options);
+    NativeInterface.init(options);
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
