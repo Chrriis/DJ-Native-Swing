@@ -197,7 +197,7 @@ public class JMultiMediaPlayer extends JPanel implements Disposable {
     }
     
     /**
-     * @param time The time in milliseconds.
+     * @return The time in milliseconds.
      */
     public int getTime() {
       try {

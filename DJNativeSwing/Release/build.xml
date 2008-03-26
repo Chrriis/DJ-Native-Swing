@@ -18,7 +18,7 @@
       <!-- DJNativeSwing sources -->
       <zipfileset dir="../DJNativeSwing/src" prefix="src/DJNativeSwing"/>
       <!-- DJNativeSwing documentation -->
-      <zipfileset dir="../DJNativeSwing/documentation/javadoc" prefix="javadoc"/>
+      <zipfileset dir="../DJNativeSwing/documentation/javadoc" prefix="api"/>
     </zip>
   </target>
 
