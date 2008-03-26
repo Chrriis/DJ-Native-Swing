@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<project name="DJNativeSwing Build Script" default="createJavadoc" basedir="..">
+
+  <target name="createJavadoc" description="Create the javadoc">
+    <delete dir="documentation/javadoc"/>
+    <javadoc destdir="documentation/javadoc" windowtitle="DJ Native Swing">
+      <classpath path="lib/swt/swt-3.4M5-win32-win32-x86.jar"/>
+      <classpath path="lib/jna/jna.jar"/>
+      <classpath path="lib/jna/jna_WindowUtils.jar"/>
+      <packageset dir="src">
+        <include name="chrriis/**"/>
+      </packageset>
+      <packageset dir="win32">
+        <include name="chrriis/**"/>
+      </packageset>
+      <link offline="true" href="http://java.sun.com/javase/6/docs/api/" packagelistloc="documentation/javadoc-package-lists/jdk"/>
+      <link offline="true" href="http://help.eclipse.org/stable/nftopic/org.eclipse.platform.doc.isv/reference/api/" packagelistloc="documentation/javadoc-package-lists/swt"/>
+    </javadoc>
+  </target>
+
+</project>

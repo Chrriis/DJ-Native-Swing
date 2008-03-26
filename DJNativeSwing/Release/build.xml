@@ -3,16 +3,7 @@
 
   <target name="createRelease" description="Create the release">
     <delete file="DJNativeSwing.zip"/>
-    <delete dir="javadoc"/>
-    <javadoc destdir="javadoc" classpath="lib/swt/swt-3.4M5-win32-win32-x86.jar lib/jna/jna.jar lib/jna/jna_WindowUtils.jar" link="yes">
-      <packageset dir="src" defaultexcludes="yes">
-        <include name="chrriis/**"/>
-      </packageset>
-      <link offline="true" href="http://java.sun.com/javase/6/docs/api/" packagelistloc="C:\Program Files\Java\jdk1.6.0_04\docs\api"/>
-      <link href="http://help.eclipse.org/stable/nftopic/org.eclipse.platform.doc.isv/reference/api/"/>
-    </javadoc>
-  </target>
-  <target name="createRelease2" description="Create the release">
+    <ant antfile="documentation/build.xml" inheritall="false"/>
     <ant antfile="build.xml" inheritall="false"/>
     <ant antfile="../DJNativeSwingDemo/build.xml" inheritall="false"/>
     <zip duplicate="preserve" destfile="Release/DJNativeSwing.zip">
@@ -26,8 +17,9 @@
       <zipfileset dir="../DJNativeSwingDemo/src" prefix="src/DJNativeSwingDemo"/>
       <!-- DJNativeSwing sources -->
       <zipfileset dir="../DJNativeSwing/src" prefix="src/DJNativeSwing"/>
+      <!-- DJNativeSwing documentation -->
+      <zipfileset dir="../DJNativeSwing/documentation/javadoc" prefix="javadoc"/>
     </zip>
-    <delete dir="javadoc"/>
   </target>
 
 </project>

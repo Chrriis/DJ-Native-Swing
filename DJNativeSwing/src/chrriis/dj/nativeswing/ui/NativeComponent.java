@@ -454,7 +454,7 @@ public abstract class NativeComponent extends Canvas {
     return new Object[] {mouseEventType, e.x, e.y, e.button, e.count, e.stateMask, e.display.getCursorLocation()};
   }
   
-  protected static void configureControl(final Control control, int componentID) {
+  private static void configureControl(final Control control, int componentID) {
     control.setData("NS_ID", componentID);
     control.addMouseListener(new MouseAdapter() {
       @Override
