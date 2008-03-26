@@ -460,12 +460,19 @@ public class JWebBrowser extends JPanel implements Disposable {
         "try {" + LS +
         "  var result = function() {" + script + "}();" + LS +
         "  var type = result? typeof(result): '';" + LS +
-        "  sendCommand('[[getScriptResult]]', type, result);" + LS +
+        "  if('string' == type) {" + LS +
+        "    window.location = 'command://' + encodeURIComponent('[[getScriptResult]]') + '&' + encodeURIComponent(result);" + LS +
+        "  } else {" + LS +
+        "    window.location = 'command://' + encodeURIComponent('[[getScriptResult]]') + '&' + encodeURIComponent(type) + '&' + encodeURIComponent(result);" + LS +
+        "  }" + LS +
         "} catch(exxxxx) {" + LS +
-        "  sendCommand('[[getScriptResult]]', '', null);" + LS +
+        "  window.location = 'command://' + encodeURIComponent('[[getScriptResult]]') + '&&'" + LS +
         "}");
     if(result == null) {
       return null;
+    }
+    if(result.length == 1) {
+      return convertJSObject("string", result[0]);
     }
     return convertJSObject(result[0], result[1]);
   }
