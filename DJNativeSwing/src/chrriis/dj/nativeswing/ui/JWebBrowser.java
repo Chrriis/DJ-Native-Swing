@@ -98,10 +98,10 @@ public class JWebBrowser extends JPanel implements Disposable {
       webBrowser.stopButton.setEnabled(false);
       webBrowser.stopMenuItem.setEnabled(false);
       webBrowser.addressField.setText(webBrowser.nativeComponent.getURL());
-      boolean isBackEnabled = webBrowser.nativeComponent.isBackEnabled();
+      boolean isBackEnabled = webBrowser.nativeComponent.isGoBackEnabled();
       webBrowser.backButton.setEnabled(isBackEnabled);
       webBrowser.backMenuItem.setEnabled(isBackEnabled);
-      boolean isForwardEnabled = webBrowser.nativeComponent.isForwardEnabled();
+      boolean isForwardEnabled = webBrowser.nativeComponent.isGoForwardEnabled();
       webBrowser.forwardButton.setEnabled(isForwardEnabled);
       webBrowser.forwardMenuItem.setEnabled(isForwardEnabled);
     }
@@ -124,10 +124,10 @@ public class JWebBrowser extends JPanel implements Disposable {
       webBrowser.stopButton.setEnabled(false);
       webBrowser.stopMenuItem.setEnabled(false);
       webBrowser.addressField.setText(webBrowser.nativeComponent.getURL());
-      boolean isBackEnabled = webBrowser.nativeComponent.isBackEnabled();
+      boolean isBackEnabled = webBrowser.nativeComponent.isGoBackEnabled();
       webBrowser.backButton.setEnabled(isBackEnabled);
       webBrowser.backMenuItem.setEnabled(isBackEnabled);
-      boolean isForwardEnabled = webBrowser.nativeComponent.isForwardEnabled();
+      boolean isForwardEnabled = webBrowser.nativeComponent.isGoForwardEnabled();
       webBrowser.forwardButton.setEnabled(isForwardEnabled);
       webBrowser.forwardMenuItem.setEnabled(isForwardEnabled);
     }
@@ -183,7 +183,7 @@ public class JWebBrowser extends JPanel implements Disposable {
     backButton.setToolTipText(RESOURCES.getString("BackText"));
     ActionListener backActionListener = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        back();
+        goBack();
         nativeComponent.requestFocus();
       }
     };
@@ -194,7 +194,7 @@ public class JWebBrowser extends JPanel implements Disposable {
     forwardButton.setEnabled(false);
     ActionListener forwardActionListener = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        forward();
+        goForward();
         nativeComponent.requestFocus();
       }
     };
@@ -411,20 +411,20 @@ public class JWebBrowser extends JPanel implements Disposable {
     return nativeComponent.setURL(url);
   }
   
-  public boolean isBackEnabled() {
-    return nativeComponent.isBackEnabled();
+  public boolean isGoBackEnabled() {
+    return nativeComponent.isGoBackEnabled();
   }
   
-  public void back() {
-    nativeComponent.back();
+  public void goBack() {
+    nativeComponent.goBack();
   }
   
-  public boolean isForwardEnabled() {
-    return nativeComponent.isForwardEnabled();
+  public boolean isGoForwardEnabled() {
+    return nativeComponent.isGoForwardEnabled();
   }
   
-  public void forward() {
-    nativeComponent.forward();
+  public void goForward() {
+    nativeComponent.goForward();
   }
   
   public void refresh() {

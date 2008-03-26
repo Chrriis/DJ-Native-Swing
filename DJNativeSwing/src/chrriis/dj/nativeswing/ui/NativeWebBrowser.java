@@ -544,48 +544,48 @@ class NativeWebBrowser extends NativeComponent {
     runAsync(new CMN_refresh());
   }
   
-  private static class CMN_isBackEnabled extends ControlCommandMessage {
+  private static class CMN_isGoBackEnabled extends ControlCommandMessage {
     @Override
     public Object run() {
       return ((Browser)getControl()).isBackEnabled();
     }
   }
   
-  public boolean isBackEnabled() {
-    return Boolean.TRUE.equals(runSync(new CMN_isBackEnabled()));
+  public boolean isGoBackEnabled() {
+    return Boolean.TRUE.equals(runSync(new CMN_isGoBackEnabled()));
   }
   
-  private static class CMN_back extends ControlCommandMessage {
+  private static class CMN_goBack extends ControlCommandMessage {
     @Override
     public Object run() {
       return ((Browser)getControl()).back();
     }
   }
   
-  public void back() {
-    runAsync(new CMN_back());
+  public void goBack() {
+    runAsync(new CMN_goBack());
   }
   
-  private static class CMN_forward extends ControlCommandMessage {
-    @Override
-    public Object run() {
-      return ((Browser)getControl()).forward();
-    }
-  }
-  
-  private static class CMN_isForwardEnabled extends ControlCommandMessage {
+  private static class CMN_isGoForwardEnabled extends ControlCommandMessage {
     @Override
     public Object run() {
       return ((Browser)getControl()).isForwardEnabled();
     }
   }
   
-  public boolean isForwardEnabled() {
-    return Boolean.TRUE.equals(runSync(new CMN_isForwardEnabled()));
+  public boolean isGoForwardEnabled() {
+    return Boolean.TRUE.equals(runSync(new CMN_isGoForwardEnabled()));
   }
   
-  public void forward() {
-    runAsync(new CMN_forward());
+  private static class CMN_goForward extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      return ((Browser)getControl()).forward();
+    }
+  }
+  
+  public void goForward() {
+    runAsync(new CMN_goForward());
   }
   
   private String status;
