@@ -24,7 +24,6 @@ import org.eclipse.swt.SWT;
 
 import chrriis.common.Registry;
 import chrriis.dj.nativeswing.NativeInterface.NativeInterfaceListener;
-import chrriis.dj.nativeswing.ui.NativeComponent;
 
 /**
  * @author Christopher Deckers
@@ -127,9 +126,9 @@ abstract class MessagingInterface {
             if(!NativeInterface.isNativeSide()) {
               SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                  for(Canvas c: NativeInterface._Internal_.getCanvas()) {
+                  for(Canvas c: NativeInterface.getCanvas()) {
                     if(c instanceof NativeComponent) {
-                      ((NativeComponent)c).invalidateControl("The native peer died unexpectantly.");
+                      ((NativeComponent)c).invalidateNativePeer("The native peer died unexpectantly.");
                     }
                     c.repaint();
                   }

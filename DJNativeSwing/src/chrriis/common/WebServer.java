@@ -125,7 +125,7 @@ public class WebServer {
     
     public static final String MIME_APPLICATION_OCTET_STREAM = "application/octet-stream";
     
-    protected static Map<String, String> extensionToMimeTypeMap = new HashMap<String, String>();
+    private static Map<String, String> extensionToMimeTypeMap = new HashMap<String, String>();
     static {
       extensionToMimeTypeMap.put("323", "text/h323");
       extensionToMimeTypeMap.put("acx", "application/internet-property-stream");
@@ -350,7 +350,7 @@ public class WebServer {
     
   }
   
-  protected static class WebServerConnectionThread extends Thread {
+  private static class WebServerConnectionThread extends Thread {
     
     private static int threadInitNumber;
     private static Semaphore semaphore = new Semaphore(10);
@@ -359,7 +359,7 @@ public class WebServer {
       return threadInitNumber++;
     }
 
-    protected Socket socket;
+    private Socket socket;
     
     public WebServerConnectionThread(Socket socket) {
       super("WebServer Connection-" + nextThreadNumber());
@@ -367,9 +367,9 @@ public class WebServer {
       setDaemon(true);
     }
     
-    protected static final String LS = System.getProperty("line.separator");
+    private static final String LS = Utils.LINE_SEPARATOR;
     
-    protected static void writeHTTPHeaders(BufferedOutputStream out, int code, String contentType, long contentLength, long lastModified) {
+    static void writeHTTPHeaders(BufferedOutputStream out, int code, String contentType, long contentLength, long lastModified) {
       StringBuilder sb = new StringBuilder();
       sb.append("HTTP/1.0 " + code + " OK" + LS);
       sb.append("Content-Type: " + contentType + LS);
@@ -388,7 +388,7 @@ public class WebServer {
       }
     }
 
-    protected static void writeHTTPError(BufferedOutputStream out, int code, String message) {
+    static void writeHTTPError(BufferedOutputStream out, int code, String message) {
       writeHTTPHeaders(out, code, "text/html", message.length(), System.currentTimeMillis());
       try {
         out.write(message.getBytes("UTF-8"));
@@ -614,7 +614,7 @@ public class WebServer {
     
   }
   
-  protected int port;
+  private int port;
 
   public WebServer() {
     this(0);
@@ -624,7 +624,7 @@ public class WebServer {
     this.port = port;
   }
   
-  protected volatile boolean isRunning;
+  private volatile boolean isRunning;
   
   public void stop() {
     isRunning = false;
@@ -823,9 +823,9 @@ public class WebServer {
     return null;
   }
 
-  protected static WebServer webServer;
-  protected static Object LOCK = new Object();
-  protected static final String HOST_ADDRESS = "127.0.0.1";
+  private static WebServer webServer;
+  private static Object LOCK = new Object();
+  private static final String HOST_ADDRESS = "127.0.0.1";
   
   public static WebServer getDefaultWebServer() {
     synchronized(LOCK) {

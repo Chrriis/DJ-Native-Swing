@@ -19,13 +19,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
+import chrriis.dj.nativeswing.NativeComponent;
 import chrriis.dj.nativeswing.NativeInterface;
+import chrriis.dj.nativeswing.NativeComponent.Options.VisibilityConstraint;
 import chrriis.dj.nativeswing.NativeInterface.NativeInterfaceInitOptions;
+import chrriis.dj.nativeswing.components.JFlashPlayer;
+import chrriis.dj.nativeswing.components.JWebBrowser;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
-import chrriis.dj.nativeswing.ui.JFlashPlayer;
-import chrriis.dj.nativeswing.ui.JWebBrowser;
-import chrriis.dj.nativeswing.ui.NativeComponent;
-import chrriis.dj.nativeswing.ui.NativeComponent.Options.VisibilityConstraint;
 
 /**
  * @author Christopher Deckers

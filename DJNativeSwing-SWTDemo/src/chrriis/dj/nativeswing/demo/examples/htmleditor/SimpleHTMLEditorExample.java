@@ -24,9 +24,9 @@ import javax.swing.SwingUtilities;
 
 import chrriis.dj.nativeswing.NativeInterface;
 import chrriis.dj.nativeswing.NativeInterface.NativeInterfaceInitOptions;
-import chrriis.dj.nativeswing.ui.JHTMLEditor;
-import chrriis.dj.nativeswing.ui.event.HTMLEditorListener;
-import chrriis.dj.nativeswing.ui.event.HTMLEditorSaveEvent;
+import chrriis.dj.nativeswing.components.HTMLEditorListener;
+import chrriis.dj.nativeswing.components.HTMLEditorSaveEvent;
+import chrriis.dj.nativeswing.components.JHTMLEditor;
 
 /**
  * @author Christopher Deckers

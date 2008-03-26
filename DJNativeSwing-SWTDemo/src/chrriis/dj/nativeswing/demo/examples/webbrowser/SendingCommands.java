@@ -20,9 +20,9 @@ import javax.swing.SwingUtilities;
 
 import chrriis.dj.nativeswing.NativeInterface;
 import chrriis.dj.nativeswing.NativeInterface.NativeInterfaceInitOptions;
-import chrriis.dj.nativeswing.ui.JWebBrowser;
-import chrriis.dj.nativeswing.ui.event.WebBrowserAdapter;
-import chrriis.dj.nativeswing.ui.event.WebBrowserEvent;
+import chrriis.dj.nativeswing.components.JWebBrowser;
+import chrriis.dj.nativeswing.components.WebBrowserAdapter;
+import chrriis.dj.nativeswing.components.WebBrowserEvent;
 
 /**
  * @author Christopher Deckers

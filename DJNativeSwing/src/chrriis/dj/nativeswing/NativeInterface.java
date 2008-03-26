@@ -53,7 +53,6 @@ import org.eclipse.swt.widgets.Display;
 import chrriis.common.NetworkURLClassLoader;
 import chrriis.common.Utils;
 import chrriis.common.WebServer;
-import chrriis.dj.nativeswing.ui.NativeComponent;
 
 /**
  * @author Christopher Deckers
@@ -200,52 +199,44 @@ public class NativeInterface {
     
   }
   
-  /**
-   * This class is not part of the public API.
-   * @author Christopher Deckers
-   */
-  public static class _Internal_ {
-    
-    private static volatile List<Canvas> canvasList;
+  private static volatile List<Canvas> canvasList;
 
-    public static Canvas[] getCanvas() {
-      if(canvasList == null) {
-        return new Canvas[0];
-      }
-      return canvasList.toArray(new Canvas[0]);
+  static Canvas[] getCanvas() {
+    if(canvasList == null) {
+      return new Canvas[0];
     }
-    
-    public static void addCanvas(Canvas canvas) {
-      if(canvasList == null) {
-        canvasList = new ArrayList<Canvas>();
-      }
-      canvasList.add(canvas);
-      HeavyweightForcer.activate(canvas);
+    return canvasList.toArray(new Canvas[0]);
+  }
+  
+  static void addCanvas(Canvas canvas) {
+    if(canvasList == null) {
+      canvasList = new ArrayList<Canvas>();
     }
-    
-    public static void removeCanvas(Canvas canvas) {
-      canvasList.remove(canvas);
-    }
-    
-    private static Set<Window> windowSet;
-    
-    public static Window[] getWindows() {
-      if(Utils.IS_JAVA_6_OR_GREATER) {
-        List<Window> windowList = new ArrayList<Window>();
-        for(Window window: Window.getWindows()) {
-          if(!(window instanceof HeavyweightForcerWindow)) {
-            windowList.add(window);
-          }
+    canvasList.add(canvas);
+    HeavyweightForcer.activate(canvas);
+  }
+  
+  static void removeCanvas(Canvas canvas) {
+    canvasList.remove(canvas);
+  }
+  
+  private static Set<Window> windowSet;
+  
+  static Window[] getWindows() {
+    if(Utils.IS_JAVA_6_OR_GREATER) {
+      List<Window> windowList = new ArrayList<Window>();
+      for(Window window: Window.getWindows()) {
+        if(!(window instanceof HeavyweightForcerWindow)) {
+          windowList.add(window);
         }
-        return windowList.toArray(new Window[0]);
       }
-      return windowSet == null? new Window[0]: windowSet.toArray(new Window[0]);
+      return windowList.toArray(new Window[0]);
     }
-    
-    public static boolean isInterfaceAlive() {
-      return isInitialized() && messagingInterface.isAlive();
-    }
-    
+    return windowSet == null? new Window[0]: windowSet.toArray(new Window[0]);
+  }
+  
+  static boolean isInterfaceAlive() {
+    return isInitialized() && messagingInterface.isAlive();
   }
   
   private static boolean isFirstStart = true;
@@ -336,11 +327,11 @@ public class NativeInterface {
         protected Set<Dialog> dialogSet = new HashSet<Dialog>();
         protected volatile Set<Window> blockedWindowSet = new HashSet<Window>();
         protected void adjustNativeComponents() {
-          if(_Internal_.canvasList == null) {
+          if(canvasList == null) {
             return;
           }
-          for(int i=_Internal_.canvasList.size()-1; i>=0; i--) {
-            final Canvas canvas = _Internal_.canvasList.get(i);
+          for(int i=canvasList.size()-1; i>=0; i--) {
+            final Canvas canvas = canvasList.get(i);
             Component c = canvas;
             if(canvas instanceof NativeComponent) {
               Component componentProxy = ((NativeComponent)canvas).getComponentProxy();
@@ -369,17 +360,17 @@ public class NativeInterface {
               break;
           }
           if(!Utils.IS_JAVA_6_OR_GREATER && e.getSource() instanceof Window) {
-            if(_Internal_.windowSet == null) {
-              _Internal_.windowSet = new HashSet<Window>();
+            if(windowSet == null) {
+              windowSet = new HashSet<Window>();
             }
             switch(e.getID()) {
               case WindowEvent.WINDOW_OPENED:
               case ComponentEvent.COMPONENT_SHOWN:
-                _Internal_.windowSet.add((Window)e.getSource());
+                windowSet.add((Window)e.getSource());
                 break;
               case WindowEvent.WINDOW_CLOSED:
               case ComponentEvent.COMPONENT_HIDDEN:
-                _Internal_.windowSet.remove(e.getSource());
+                windowSet.remove(e.getSource());
                 break;
             }
           }
@@ -602,7 +593,7 @@ public class NativeInterface {
       public void run() {
         try {
           ByteArrayOutputStream baos = new ByteArrayOutputStream();
-          String lineSeparator = System.getProperty("line.separator");
+          String lineSeparator = Utils.LINE_SEPARATOR;
           byte lastByte = (byte)lineSeparator.charAt(lineSeparator.length() - 1);
           boolean addMessage = true;
           byte[] bytes = new byte[1024];
@@ -688,14 +679,14 @@ public class NativeInterface {
   }
   
   public static boolean isUIThread() {
-    if(!_Internal_.isInterfaceAlive()) {
+    if(!isInterfaceAlive()) {
       throw new IllegalStateException("The native interface is not alive!");
     }
     return messagingInterface.isUIThread();
   }
   
   public static void checkUIThread() {
-    if(!_Internal_.isInterfaceAlive()) {
+    if(!isInterfaceAlive()) {
       throw new IllegalStateException("The native interface is not alive!");
     }
     messagingInterface.checkUIThread();

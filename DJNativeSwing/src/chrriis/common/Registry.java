@@ -50,7 +50,7 @@ public class Registry {
     cleanUpThread.start();
   }
   
-  protected Object LOCK = new Object();
+  private Object LOCK = new Object();
   private int nextInstanceID = 1;
   private Map<Integer, WeakReference<Object>> instanceIDToObjectReferenceMap = new HashMap<Integer, WeakReference<Object>>();
   

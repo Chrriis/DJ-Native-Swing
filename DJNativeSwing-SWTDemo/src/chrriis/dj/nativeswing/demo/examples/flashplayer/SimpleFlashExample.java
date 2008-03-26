@@ -15,7 +15,7 @@ import javax.swing.SwingUtilities;
 
 import chrriis.dj.nativeswing.NativeInterface;
 import chrriis.dj.nativeswing.NativeInterface.NativeInterfaceInitOptions;
-import chrriis.dj.nativeswing.ui.JFlashPlayer;
+import chrriis.dj.nativeswing.components.JFlashPlayer;
 
 /**
  * @author Christopher Deckers

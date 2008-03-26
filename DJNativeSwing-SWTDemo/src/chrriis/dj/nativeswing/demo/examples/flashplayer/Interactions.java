@@ -26,8 +26,8 @@ import javax.swing.text.PlainDocument;
 
 import chrriis.dj.nativeswing.NativeInterface;
 import chrriis.dj.nativeswing.NativeInterface.NativeInterfaceInitOptions;
-import chrriis.dj.nativeswing.ui.JFlashPlayer;
-import chrriis.dj.nativeswing.ui.JFlashPlayer.FlashLoadingOptions;
+import chrriis.dj.nativeswing.components.JFlashPlayer;
+import chrriis.dj.nativeswing.components.JFlashPlayer.FlashLoadingOptions;
 
 /**
  * @author Christopher Deckers

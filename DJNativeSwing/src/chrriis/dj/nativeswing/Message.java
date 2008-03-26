@@ -12,11 +12,8 @@ import java.io.Serializable;
 /**
  * @author Christopher Deckers
  */
-public abstract class Message implements Serializable {
+public class Message implements Serializable {
 
-  public static class EmptyMessage extends Message {
-  }
-  
   private static int nextID = 1;
   
   private int id;

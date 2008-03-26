@@ -7,12 +7,15 @@
  */
 package chrriis.dj.nativeswing;
 
+import java.util.EventObject;
+
 /**
- * A local message is a special message that is not sent through the messaging interface. It is normally used to sequence a local command among remote commands.
  * @author Christopher Deckers
  */
-public abstract class LocalMessage extends CommandMessage {
+public class InitializationEvent extends EventObject {
 
-  public abstract Object run();
-
+  public InitializationEvent(Object source) {
+    super(source);
+  }
+  
 }

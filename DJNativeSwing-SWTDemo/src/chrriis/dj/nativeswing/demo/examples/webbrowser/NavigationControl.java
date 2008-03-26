@@ -16,11 +16,11 @@ import javax.swing.SwingUtilities;
 
 import chrriis.dj.nativeswing.NativeInterface;
 import chrriis.dj.nativeswing.NativeInterface.NativeInterfaceInitOptions;
-import chrriis.dj.nativeswing.ui.JWebBrowser;
-import chrriis.dj.nativeswing.ui.JWebBrowserWindow;
-import chrriis.dj.nativeswing.ui.event.WebBrowserAdapter;
-import chrriis.dj.nativeswing.ui.event.WebBrowserNavigationEvent;
-import chrriis.dj.nativeswing.ui.event.WebBrowserWindowWillOpenEvent;
+import chrriis.dj.nativeswing.components.JWebBrowser;
+import chrriis.dj.nativeswing.components.JWebBrowserWindow;
+import chrriis.dj.nativeswing.components.WebBrowserAdapter;
+import chrriis.dj.nativeswing.components.WebBrowserNavigationEvent;
+import chrriis.dj.nativeswing.components.WebBrowserWindowWillOpenEvent;
 
 /**
  * @author Christopher Deckers
@@ -88,7 +88,7 @@ public class NavigationControl extends JPanel {
             } else if(newURL.startsWith("http://www.eclipse.org/")) {
               isBlocked = true;
               JWebBrowser newWebBrowser = new JWebBrowser();
-              newWebBrowser.copyAppearance(webBrowser);
+              JWebBrowser.copyAppearance(webBrowser, newWebBrowser);
               newWebBrowser.setURL(newURL);
               tabbedPane.addTab("www.eclipse.org", newWebBrowser);
             }
@@ -97,7 +97,7 @@ public class NavigationControl extends JPanel {
               // The URL Changing event is special: it is synchronous so disposal must be deferred.
               SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                  webBrowser.getBrowserWindow().dispose();
+                  webBrowser.getWebBrowserWindow().dispose();
                 }
               });
             }

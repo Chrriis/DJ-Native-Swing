@@ -18,12 +18,12 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import chrriis.common.Disposable;
+import chrriis.dj.nativeswing.NativeComponent;
 import chrriis.dj.nativeswing.NativeInterface;
+import chrriis.dj.nativeswing.NativeComponent.Options.DestructionTime;
 import chrriis.dj.nativeswing.NativeInterface.NativeInterfaceInitOptions;
+import chrriis.dj.nativeswing.components.JFlashPlayer;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
-import chrriis.dj.nativeswing.ui.JFlashPlayer;
-import chrriis.dj.nativeswing.ui.NativeComponent;
-import chrriis.dj.nativeswing.ui.NativeComponent.Options.DestructionTime;
 
 /**
  * @author Christopher Deckers
@@ -59,7 +59,7 @@ public class DestructionTimeOption extends JPanel implements Disposable {
   }
   
   public void dispose() {
-    flashPlayer.dispose();
+    flashPlayer.disposeNativePeer();
   }
   
   /* Standard main method to try that test as a standalone application. */

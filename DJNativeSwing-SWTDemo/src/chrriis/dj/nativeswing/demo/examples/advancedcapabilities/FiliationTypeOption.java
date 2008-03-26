@@ -19,14 +19,14 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import chrriis.common.Disposable;
+import chrriis.dj.nativeswing.NativeComponent;
 import chrriis.dj.nativeswing.NativeInterface;
+import chrriis.dj.nativeswing.NativeComponent.Options.DestructionTime;
+import chrriis.dj.nativeswing.NativeComponent.Options.FiliationType;
 import chrriis.dj.nativeswing.NativeInterface.NativeInterfaceInitOptions;
+import chrriis.dj.nativeswing.components.JFlashPlayer;
+import chrriis.dj.nativeswing.components.JWebBrowser;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
-import chrriis.dj.nativeswing.ui.JFlashPlayer;
-import chrriis.dj.nativeswing.ui.JWebBrowser;
-import chrriis.dj.nativeswing.ui.NativeComponent;
-import chrriis.dj.nativeswing.ui.NativeComponent.Options.DestructionTime;
-import chrriis.dj.nativeswing.ui.NativeComponent.Options.FiliationType;
 
 /**
  * @author Christopher Deckers
@@ -100,7 +100,7 @@ public class FiliationTypeOption extends JPanel implements Disposable {
   public void dispose() {
     // webBrowser 2 is disposed on finalization.
     // Rather than waiting for garbage collection, release when the demo leaves this screen.
-    webBrowser2.dispose();
+    webBrowser2.disposeNativePeer();
   }
   
   /* Standard main method to try that test as a standalone application. */

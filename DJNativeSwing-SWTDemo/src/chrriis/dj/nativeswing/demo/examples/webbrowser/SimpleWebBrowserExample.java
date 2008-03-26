@@ -20,7 +20,7 @@ import javax.swing.SwingUtilities;
 
 import chrriis.dj.nativeswing.NativeInterface;
 import chrriis.dj.nativeswing.NativeInterface.NativeInterfaceInitOptions;
-import chrriis.dj.nativeswing.ui.JWebBrowser;
+import chrriis.dj.nativeswing.components.JWebBrowser;
 
 /**
  * @author Christopher Deckers
