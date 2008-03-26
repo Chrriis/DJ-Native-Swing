@@ -257,7 +257,7 @@ public class NativeInterface {
   
   private static void checkInitialized() {
     if(!isInitialized()) {
-      throw new IllegalStateException("The native interface handler is not initialized! Please refer to the instructions to set it up properly.");
+      throw new IllegalStateException("The native interface is not initialized! Please refer to the instructions to set it up properly.");
     }
   }
   

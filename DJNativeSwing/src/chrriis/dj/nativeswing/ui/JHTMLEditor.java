@@ -28,7 +28,7 @@ import chrriis.common.WebServer;
 import chrriis.common.WebServer.HTTPRequest;
 import chrriis.common.WebServer.WebServerContent;
 import chrriis.dj.nativeswing.LocalMessage;
-import chrriis.dj.nativeswing.NativeInterfaceHandler;
+import chrriis.dj.nativeswing.NativeInterface;
 import chrriis.dj.nativeswing.Message.EmptyMessage;
 import chrriis.dj.nativeswing.ui.event.HTMLEditorListener;
 import chrriis.dj.nativeswing.ui.event.HTMLEditorSaveEvent;
@@ -81,7 +81,7 @@ public class JHTMLEditor extends JPanel implements Disposable {
       InitializationListener initializationListener = (InitializationListener)args[0];
       Boolean[] resultArray = (Boolean[])args[1];
       for(long time = System.currentTimeMillis(); !resultArray[0].booleanValue() && System.currentTimeMillis() - time < 4000; ) {
-        NativeInterfaceHandler.syncExec(new EmptyMessage());
+        NativeInterface.syncExec(new EmptyMessage());
         try {
           Thread.sleep(50);
         } catch(Exception e) {}
@@ -348,7 +348,7 @@ public class JHTMLEditor extends JPanel implements Disposable {
         html = (String)tempResult;
         break;
       }
-      NativeInterfaceHandler.syncExec(new EmptyMessage());
+      NativeInterface.syncExec(new EmptyMessage());
       if(tempResult != this) {
         html = (String)tempResult;
         break;

@@ -39,7 +39,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 
 import chrriis.common.Disposable;
-import chrriis.dj.nativeswing.NativeInterfaceHandler;
+import chrriis.dj.nativeswing.NativeInterface;
 import chrriis.dj.nativeswing.Message.EmptyMessage;
 import chrriis.dj.nativeswing.ui.event.InitializationListener;
 import chrriis.dj.nativeswing.ui.event.WebBrowserAdapter;
@@ -529,7 +529,7 @@ public class JWebBrowser extends JPanel implements Disposable {
         if(resultArray[0] != null) {
           break;
         }
-        NativeInterfaceHandler.syncExec(new EmptyMessage());
+        NativeInterface.syncExec(new EmptyMessage());
         if(resultArray[0] != null) {
           break;
         }

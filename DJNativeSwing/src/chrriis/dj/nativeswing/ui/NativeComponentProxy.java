@@ -33,7 +33,7 @@ import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
 
 import chrriis.common.Disposable;
-import chrriis.dj.nativeswing.NativeInterfaceHandler;
+import chrriis.dj.nativeswing.NativeInterface;
 import chrriis.dj.nativeswing.ui.NativeComponent.Options;
 import chrriis.dj.nativeswing.ui.NativeComponent.Options.DestructionTime;
 import chrriis.dj.nativeswing.ui.NativeComponent.Options.VisibilityConstraint;
@@ -212,7 +212,7 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
     super.paint(g);
     // On Linux, a JInternalFrame brought to the front may generate a paint call only to that one.
     // We need to adjust the shape of the frames that go to the back as well.
-    for(Canvas canvas: NativeInterfaceHandler._Internal_.getCanvas()) {
+    for(Canvas canvas: NativeInterface._Internal_.getCanvas()) {
       if(canvas instanceof NativeComponent) {
         Component componentProxy = ((NativeComponent)canvas).getComponentProxy();
         if(componentProxy instanceof NativeComponentProxy) {
@@ -307,7 +307,7 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
       c = parent;
       parent = c.getParent();
     }
-    for(Window window: NativeInterfaceHandler._Internal_.getWindows()) {
+    for(Window window: NativeInterface._Internal_.getWindows()) {
       if(!(window instanceof EmbeddedWindow) && window.isVisible()) {
         for(Window owner = window; (owner=owner.getOwner()) != null; ) {
           if(owner == windowAncestor) {

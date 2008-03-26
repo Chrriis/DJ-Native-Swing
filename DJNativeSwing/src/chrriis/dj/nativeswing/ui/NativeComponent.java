@@ -60,7 +60,7 @@ import chrriis.common.Utils;
 import chrriis.dj.nativeswing.CommandMessage;
 import chrriis.dj.nativeswing.LocalMessage;
 import chrriis.dj.nativeswing.Message;
-import chrriis.dj.nativeswing.NativeInterfaceHandler;
+import chrriis.dj.nativeswing.NativeInterface;
 import chrriis.dj.nativeswing.ui.NativeComponent.Options.DestructionTime;
 import chrriis.dj.nativeswing.ui.NativeComponent.Options.FiliationType;
 import chrriis.dj.nativeswing.ui.NativeComponent.Options.VisibilityConstraint;
@@ -75,7 +75,7 @@ import com.sun.jna.Native;
 public abstract class NativeComponent extends Canvas {
 
   static Object syncExec(Control control, CommandMessage commandMessage, Object... args) {
-    NativeInterfaceHandler.checkUIThread();
+    NativeInterface.checkUIThread();
     if(commandMessage instanceof ControlCommandMessage) {
       ((ControlCommandMessage)commandMessage).setControl(control);
     }
@@ -83,7 +83,7 @@ public abstract class NativeComponent extends Canvas {
   }
   
   static void asyncExec(Control control, CommandMessage commandMessage, Object... args) {
-    NativeInterfaceHandler.checkUIThread();
+    NativeInterface.checkUIThread();
     if(commandMessage instanceof ControlCommandMessage) {
       ((ControlCommandMessage)commandMessage).setControl(control);
     }
@@ -91,7 +91,7 @@ public abstract class NativeComponent extends Canvas {
   }
   
   public Object syncExec(CommandMessage commandMessage, Object... args) {
-    NativeInterfaceHandler.checkUIThread();
+    NativeInterface.checkUIThread();
     if(commandMessage instanceof ControlCommandMessage) {
       ((ControlCommandMessage)commandMessage).setNativeComponent(this);
     }
@@ -99,7 +99,7 @@ public abstract class NativeComponent extends Canvas {
   }
   
   public void asyncExec(CommandMessage commandMessage, Object... args) {
-    NativeInterfaceHandler.checkUIThread();
+    NativeInterface.checkUIThread();
     if(commandMessage instanceof ControlCommandMessage) {
       ((ControlCommandMessage)commandMessage).setNativeComponent(this);
     }
@@ -128,8 +128,8 @@ public abstract class NativeComponent extends Canvas {
    * If the component is disposed before the command has a chance to run, it is ignored silently.
    */
   protected Object runSync(CommandMessage commandMessage, Object... args) {
-    if(NativeInterfaceHandler._Internal_.isInterfaceAlive()) {
-      NativeInterfaceHandler.checkUIThread();
+    if(NativeInterface._Internal_.isInterfaceAlive()) {
+      NativeInterface.checkUIThread();
     }
     if(initializationCommandMessageList != null) {
       commandMessage.setArgs(args);
@@ -152,8 +152,8 @@ public abstract class NativeComponent extends Canvas {
    * If the component is disposed before the command has a chance to run, it is ignored silently.
    */
   protected void runAsync(CommandMessage commandMessage, Object... args) {
-    if(NativeInterfaceHandler._Internal_.isInterfaceAlive()) {
-      NativeInterfaceHandler.checkUIThread();
+    if(NativeInterface._Internal_.isInterfaceAlive()) {
+      NativeInterface.checkUIThread();
     }
     if(initializationCommandMessageList != null) {
       commandMessage.setArgs(args);
@@ -198,7 +198,7 @@ public abstract class NativeComponent extends Canvas {
     }
     @Override
     public boolean isValid() {
-      if(NativeInterfaceHandler.isNativeSide()) {
+      if(NativeInterface.isNativeSide()) {
         return getControl() != null;
       }
       return getComponent() != null;
@@ -394,13 +394,13 @@ public abstract class NativeComponent extends Canvas {
         shellCreationMethod = Shell.class.getMethod(SWT.getPlatform() + "_new", Display.class, int.class); 
       } catch(Exception e) {}
       if(shellCreationMethod != null) {
-        return (Shell)shellCreationMethod.invoke(null, NativeInterfaceHandler.getDisplay(), (int)handle);
+        return (Shell)shellCreationMethod.invoke(null, NativeInterface.getDisplay(), (int)handle);
       }
       try {
         shellCreationMethod = Shell.class.getMethod(SWT.getPlatform() + "_new", Display.class, long.class); 
       } catch(Exception e) {}
       if(shellCreationMethod != null) {
-        return (Shell)shellCreationMethod.invoke(null, NativeInterfaceHandler.getDisplay(), handle);
+        return (Shell)shellCreationMethod.invoke(null, NativeInterface.getDisplay(), handle);
       }
       Constructor<Shell> shellConstructor = null;
       try {
@@ -408,14 +408,14 @@ public abstract class NativeComponent extends Canvas {
       } catch(Exception e) {}
       if(shellConstructor != null) {
         shellConstructor.setAccessible(true);
-        return shellConstructor.newInstance(NativeInterfaceHandler.getDisplay(), null, SWT.NO_TRIM, (int)handle);
+        return shellConstructor.newInstance(NativeInterface.getDisplay(), null, SWT.NO_TRIM, (int)handle);
       }
       try {
         shellConstructor = Shell.class.getConstructor(Display.class, Shell.class, int.class, long.class); 
       } catch(Exception e) {}
       if(shellConstructor != null) {
         shellConstructor.setAccessible(true);
-        return shellConstructor.newInstance(NativeInterfaceHandler.getDisplay(), null, SWT.NO_TRIM, handle);
+        return shellConstructor.newInstance(NativeInterface.getDisplay(), null, SWT.NO_TRIM, handle);
       }
       throw new IllegalStateException("Failed to create a Shell!");
     }
@@ -542,8 +542,8 @@ public abstract class NativeComponent extends Canvas {
    * This call fails if the component is not in a component hierarchy with a Window ancestor.
    */
   public void initializeNativePeer() {
-    if(NativeInterfaceHandler._Internal_.isInterfaceAlive()) {
-      NativeInterfaceHandler.checkUIThread();
+    if(NativeInterface._Internal_.isInterfaceAlive()) {
+      NativeInterface.checkUIThread();
     }
     Window windowAncestor = SwingUtilities.getWindowAncestor(this);
     if(windowAncestor == null) {
@@ -556,11 +556,11 @@ public abstract class NativeComponent extends Canvas {
   }
   
   private void createResources() {
-    boolean isInterfaceAlive = NativeInterfaceHandler._Internal_.isInterfaceAlive();
+    boolean isInterfaceAlive = NativeInterface._Internal_.isInterfaceAlive();
     if(isInterfaceAlive) {
-      NativeInterfaceHandler.checkUIThread();
+      NativeInterface.checkUIThread();
     }
-    NativeInterfaceHandler._Internal_.addCanvas(this);
+    NativeInterface._Internal_.addCanvas(this);
     if(initializationCommandMessageList == null) {
       isValidControl = false;
       invalidControlText = "Failed to create " + NativeComponent.this.getClass().getName() + "[" + NativeComponent.this.hashCode() + "]\n\nReason:\nA native component cannot be re-created after having been disposed.";
@@ -633,7 +633,7 @@ public abstract class NativeComponent extends Canvas {
     if(!isDisposed) {
       isDisposed = true;
       if(isInitialized) {
-        NativeInterfaceHandler._Internal_.removeCanvas(this);
+        NativeInterface._Internal_.removeCanvas(this);
         if(isValidControl()) {
           runSync(new CMN_destroyControl());
         }
@@ -651,7 +651,7 @@ public abstract class NativeComponent extends Canvas {
   }
   
   public boolean isValidControl() {
-    return isValidControl && NativeInterfaceHandler._Internal_.isInterfaceAlive();
+    return isValidControl && NativeInterface._Internal_.isInterfaceAlive();
   }
   
   public void invalidateControl(String invalidControlText) {
@@ -948,7 +948,7 @@ public abstract class NativeComponent extends Canvas {
       if(size.x <= 0 || size.y <= 0) {
         return null;
       }
-      final Image image = new Image(NativeInterfaceHandler.getDisplay(), size.x, size.y);
+      final Image image = new Image(NativeInterface.getDisplay(), size.x, size.y);
       GC gc = new GC(image);
       control.print(gc);
       gc.dispose();
@@ -960,7 +960,7 @@ public abstract class NativeComponent extends Canvas {
       dataFile.deleteOnExit();
       final Control control = getControl();
       ImageData imageData;
-      if(!NativeInterfaceHandler.isUIThread()) {
+      if(!NativeInterface.isUIThread()) {
         final Exception[] eArray = new Exception[1];
         final ImageData[] resultArray = new ImageData[1];
         control.getDisplay().syncExec(new Runnable() {
