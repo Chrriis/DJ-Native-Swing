@@ -310,6 +310,7 @@ public class JVLCPlayer extends JPanel implements NSComponent {
   
   /**
    * Get the web browser that contains this component. The web browser should only be used to add listeners, for example to listen to window creation events.
+   * @return the web browser.
    */
   public JWebBrowser getWebBrowser() {
     return webBrowser;
@@ -326,12 +327,17 @@ public class JVLCPlayer extends JPanel implements NSComponent {
     load((VLCLoadingOptions)null);
   }
   
+  /**
+   * Load a file.
+   * @param resourcePath the path to the file.
+   */
   public void load(String resourcePath) {
     load(resourcePath, null);
   }
   
   /**
    * Load the player, with no content.
+   * @param loadingOptions the options to better configure the initialization of the VLC plugin.
    */
   public void load(VLCLoadingOptions loadingOptions) {
     load("", loadingOptions);
@@ -339,6 +345,8 @@ public class JVLCPlayer extends JPanel implements NSComponent {
   
   /**
    * Load a file from the classpath.
+   * @param clazz the reference clazz of the file to load.
+   * @param resourcePath the path to the file.
    */
   public void load(Class<?> clazz, String resourcePath) {
     load(clazz, resourcePath, null);
@@ -346,6 +354,9 @@ public class JVLCPlayer extends JPanel implements NSComponent {
   
   /**
    * Load a file from the classpath.
+   * @param clazz the reference clazz of the file to load.
+   * @param resourcePath the path to the file.
+   * @param loadingOptions the options to better configure the initialization of the VLC plugin.
    */
   public void load(Class<?> clazz, String resourcePath, VLCLoadingOptions loadingOptions) {
     load(WebServer.getDefaultWebServer().getClassPathResourceURL(clazz.getName(), resourcePath), loadingOptions);
@@ -353,6 +364,11 @@ public class JVLCPlayer extends JPanel implements NSComponent {
   
   private VLCLoadingOptions loadingOptions;
   
+  /**
+   * Load a file.
+   * @param resourcePath the path to the file.
+   * @param loadingOptions the options to better configure the initialization of the VLC plugin.
+   */
   public void load(String resourcePath, VLCLoadingOptions loadingOptions) {
     if("".equals(resourcePath)) {
       resourcePath = null;
@@ -376,10 +392,18 @@ public class JVLCPlayer extends JPanel implements NSComponent {
     }
   }
 
+  /**
+   * Indicate whether the control bar is visible.
+   * @return true if the control bar is visible.
+   */
   public boolean isControlBarVisible() {
     return controlBarPane.isVisible();
   }
   
+  /**
+   * Set whether the control bar is visible.
+   * @param isButtonBarVisible true if the control bar should be visible, false otherwise.
+   */
   public void setControlBarVisible(boolean isVisible) {
     controlBarPane.setVisible(isVisible);
     adjustBorder();
@@ -464,6 +488,10 @@ public class JVLCPlayer extends JPanel implements NSComponent {
   
   private VLCAudio vlcAudio = new VLCAudio(this);
   
+  /**
+   * Get the VLC object responsible for audio-related actions.
+   * @return the VLC audio object.
+   */
   public VLCAudio getVLCAudio() {
     return vlcAudio;
   }
@@ -543,6 +571,10 @@ public class JVLCPlayer extends JPanel implements NSComponent {
   
   private VLCInput vlcInput = new VLCInput(this);
   
+  /**
+   * Get the VLC object responsible for input-related actions.
+   * @return the VLC input object.
+   */
   public VLCInput getVLCInput() {
     return vlcInput;
   }
@@ -604,6 +636,10 @@ public class JVLCPlayer extends JPanel implements NSComponent {
   
   private VLCPlaylist vlcPlaylist = new VLCPlaylist(this);
   
+  /**
+   * Get the VLC object responsible for playlist-related actions.
+   * @return the VLC playlist object.
+   */
   public VLCPlaylist getVLCPlaylist() {
     return vlcPlaylist;
   }
@@ -673,12 +709,16 @@ public class JVLCPlayer extends JPanel implements NSComponent {
   
   private VLCVideo vlcVideo = new VLCVideo(this);
   
+  /**
+   * Get the VLC object responsible for video-related actions.
+   * @return the VLC video object.
+   */
   public VLCVideo getVLCVideo() {
     return vlcVideo;
   }
   
-  public void run(Runnable runnable) {
-    webBrowser.run(runnable);
+  public void runInSequence(Runnable runnable) {
+    webBrowser.runInSequence(runnable);
   }
   
   public void initializeNativePeer() {

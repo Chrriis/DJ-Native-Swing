@@ -740,8 +740,8 @@ public class JWebBrowser extends JPanel implements NSComponent {
     return nativeComponent.isNativePeerDisposed();
   }
   
-  public void run(Runnable runnable) {
-    nativeComponent.run(runnable);
+  public void runInSequence(Runnable runnable) {
+    nativeComponent.runInSequence(runnable);
   }
   
   /**

@@ -220,8 +220,8 @@ public class WMediaPlayer extends JPanel implements NSComponent {
     return nativeComponent.isNativePeerValid();
   }
   
-  public void run(Runnable runnable) {
-    nativeComponent.run(runnable);
+  public void runInSequence(Runnable runnable) {
+    nativeComponent.runInSequence(runnable);
   }
   
   public String getLoadedResource() {

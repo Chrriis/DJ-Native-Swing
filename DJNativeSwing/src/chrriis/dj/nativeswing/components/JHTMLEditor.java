@@ -450,8 +450,8 @@ public class JHTMLEditor extends JPanel implements NSComponent {
     return webBrowser.isNativePeerValid();
   }
   
-  public void run(Runnable runnable) {
-    webBrowser.run(runnable);
+  public void runInSequence(Runnable runnable) {
+    webBrowser.runInSequence(runnable);
   }
   
   private void addInitializationListener(InitializationListener listener) {

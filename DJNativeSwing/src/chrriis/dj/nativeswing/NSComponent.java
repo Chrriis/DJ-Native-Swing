@@ -44,7 +44,8 @@ public interface NSComponent {
   
   /**
    * Run a command in sequence with other method calls from this class. Calls are performed only when the native peer is initialized, and this method adds the command to the queue of calls in case it is not.
+   * @param runnable the command to run in sequence with other method calls.
    */
-  public void run(Runnable runnable);
+  public void runInSequence(Runnable runnable);
   
 }

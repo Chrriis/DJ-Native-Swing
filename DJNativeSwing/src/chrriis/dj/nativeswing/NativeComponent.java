@@ -100,7 +100,7 @@ public abstract class NativeComponent extends Canvas {
     commandMessage.asyncExecArgs(args);
   }
   
-  private class CMLocal_execRunnable extends LocalMessage {
+  private class CMLocal_runInSequence extends LocalMessage {
     @Override
     public Object run() {
       ((Runnable)args[0]).run();
@@ -110,9 +110,10 @@ public abstract class NativeComponent extends Canvas {
 
   /**
    * Run a command in sequence with other calls from this class. Calls are performed only when the component is initialized, and this method adds to the queue of calls in case it is not.
+   * @param runnable the command to run in sequence with other method calls.
    */
-  public void run(Runnable runnable) {
-    runSync(new CMLocal_execRunnable(), runnable);
+  public void runInSequence(Runnable runnable) {
+    runSync(new CMLocal_runInSequence(), runnable);
   }
   
   private volatile List<CommandMessage> initializationCommandMessageList = new ArrayList<CommandMessage>();

@@ -205,7 +205,7 @@ public class JFlashPlayer extends JPanel implements NSComponent {
   }
   
   /**
-   * Load a file from.
+   * Load a file.
    * @param resourcePath the path to the file.
    */
   public void load(String resourcePath) {
@@ -351,8 +351,8 @@ public class JFlashPlayer extends JPanel implements NSComponent {
     return webBrowser.isNativePeerValid();
   }
   
-  public void run(Runnable runnable) {
-    webBrowser.run(runnable);
+  public void runInSequence(Runnable runnable) {
+    webBrowser.runInSequence(runnable);
   }
   
 }
