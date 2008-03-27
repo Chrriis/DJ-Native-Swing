@@ -405,13 +405,13 @@ abstract class MessagingInterface {
       }
     }
     synchronized(oos) {
-      oos.writeObject(message);
+      oos.writeUnshared(message);
       oos.flush();
     }
   }
   
   private Message readMessage() throws IOException, ClassNotFoundException {
-    Object o = MessagingInterface.this.ois.readObject();
+    Object o = MessagingInterface.this.ois.readUnshared();
     if(o instanceof Message) {
       Message message = (Message)o;
       if(isDebuggingMessages) {

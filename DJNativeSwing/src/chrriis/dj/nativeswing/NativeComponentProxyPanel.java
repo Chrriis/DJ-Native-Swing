@@ -151,6 +151,9 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
   
   @Override
   protected void destroyPeer() {
+    if(panel == null) {
+      return;
+    }
     Container parent = panel.getParent();
     if(parent != null) {
       parent.remove(panel);
@@ -322,8 +325,14 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     if(!isCapturing) {
       return;
     }
-    WindowUtils.setComponentMask(panel, lastArea);
-    panel.setVisible(!lastArea.isEmpty());
+    if(!lastArea.isEmpty()) {
+      WindowUtils.setComponentMask(panel, lastArea);
+      if(!panel.isVisible()) {
+        panel.setVisible(true);
+      }
+    } else {
+      panel.setVisible(false);
+    }
     isCapturing = false;
     if(capturingComponent != null) {
       Container parent = capturingComponent.getParent();

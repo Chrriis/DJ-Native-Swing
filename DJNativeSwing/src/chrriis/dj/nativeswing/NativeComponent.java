@@ -609,6 +609,7 @@ public abstract class NativeComponent extends Canvas {
       if(!control.isDisposed()) {
         control.getShell().dispose();
       }
+      control.dispose();
       return null;
     }
   }
@@ -829,6 +830,7 @@ public abstract class NativeComponent extends Canvas {
   
   protected Component createEmbeddableComponent() {
     NativeComponentOptions nextInstanceOptions = getNextInstanceOptions();
+    setNextInstanceOptions(null);
     FiliationType filiationType = nextInstanceOptions.getFiliationType();
     DestructionTime destructionTime = nextInstanceOptions.getDestructionTime();
     if(destructionTime == DestructionTime.AUTO) {
