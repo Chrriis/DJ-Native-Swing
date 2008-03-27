@@ -7,7 +7,7 @@
  */
 
 /**
- * A component suite using the native integration framework, but specifically targetting the Windows operating system.
+ * A set of components using the native integration framework, specifically targetting the Windows operating system.
  * @author Christopher Deckers
  */
 package chrriis.dj.nativeswing.components.win32;
