@@ -240,28 +240,28 @@ public class WMediaPlayer extends JPanel implements NSComponent {
     return Boolean.TRUE.equals("full".equals(nativeComponent.getOleProperty("uiMode")));
   }
   
-  public static enum WMPState {
+  public static enum WMPMediaState {
     UNDEFINED, STOPPED, PAUSED, PLAYING, SCAN_FORWARD, SCAN_REVERSE, BUFFERING, WAITING, MEDIA_ENDED, TRANSITIONING, READY, RECONNECTING
   }
   
-  public WMPState getState() {
+  public WMPMediaState getMediaState() {
     try {
       switch((Integer)nativeComponent.getOleProperty("playState")) {
-        case 1: return WMPState.STOPPED;
-        case 2: return WMPState.PAUSED;
-        case 3: return WMPState.PLAYING;
-        case 4: return WMPState.SCAN_FORWARD;
-        case 5: return WMPState.SCAN_REVERSE;
-        case 6: return WMPState.BUFFERING;
-        case 7: return WMPState.WAITING;
-        case 8: return WMPState.MEDIA_ENDED;
-        case 9: return WMPState.TRANSITIONING;
-        case 10: return WMPState.READY;
-        case 11: return WMPState.RECONNECTING;
+        case 1: return WMPMediaState.STOPPED;
+        case 2: return WMPMediaState.PAUSED;
+        case 3: return WMPMediaState.PLAYING;
+        case 4: return WMPMediaState.SCAN_FORWARD;
+        case 5: return WMPMediaState.SCAN_REVERSE;
+        case 6: return WMPMediaState.BUFFERING;
+        case 7: return WMPMediaState.WAITING;
+        case 8: return WMPMediaState.MEDIA_ENDED;
+        case 9: return WMPMediaState.TRANSITIONING;
+        case 10: return WMPMediaState.READY;
+        case 11: return WMPMediaState.RECONNECTING;
       }
     } catch(Exception e) {
     }
-    return WMPState.UNDEFINED;
+    return WMPMediaState.UNDEFINED;
   }
 
 }

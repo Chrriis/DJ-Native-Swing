@@ -206,7 +206,7 @@ public class JFlashPlayer extends JPanel implements NSComponent {
   
   /**
    * Load a file.
-   * @param resourcePath the path to the file.
+   * @param resourcePath the path or URL to the file.
    */
   public void load(String resourcePath) {
     load(resourcePath, null);
@@ -216,7 +216,7 @@ public class JFlashPlayer extends JPanel implements NSComponent {
   
   /**
    * Load a file.
-   * @param resourcePath the path to the file.
+   * @param resourcePath the path or URL to the file.
    * @param loadingOptions the options to better configure the initialization of the flash plugin.
    */
   public void load(String resourcePath, FlashLoadingOptions loadingOptions) {
