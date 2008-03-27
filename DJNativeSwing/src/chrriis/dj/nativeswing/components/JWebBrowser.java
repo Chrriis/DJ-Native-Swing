@@ -8,7 +8,6 @@
 package chrriis.dj.nativeswing.components;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -38,7 +37,6 @@ import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 
-import chrriis.common.Disposable;
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.Message;
 import chrriis.dj.nativeswing.NSComponent;
@@ -62,7 +60,6 @@ public class JWebBrowser extends JPanel implements NSComponent {
   
   private final ResourceBundle RESOURCES = ResourceBundle.getBundle(JWebBrowser.class.getPackage().getName().replace('.', '/') + "/resource/WebBrowser");
 
-  private Component embeddableComponent;
   private NativeWebBrowser nativeComponent;
 
   private JMenuBar menuBar;
@@ -263,8 +260,7 @@ public class JWebBrowser extends JPanel implements NSComponent {
     menuToolAndAddressBarPanel.add(addressBarPanel, BorderLayout.CENTER);
     add(menuToolAndAddressBarPanel, BorderLayout.NORTH);
     webBrowserPanel = new JPanel(new BorderLayout(0, 0));
-    embeddableComponent = nativeComponent.createEmbeddableComponent();
-    webBrowserPanel.add(embeddableComponent, BorderLayout.CENTER);
+    webBrowserPanel.add(nativeComponent.createEmbeddableComponent(), BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);
     statusBarPanel = new JPanel(new BorderLayout(0, 0));
     statusBarPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, statusBarPanel.getBackground().darker()), BorderFactory.createEmptyBorder(2, 2, 2, 2)));
@@ -737,9 +733,6 @@ public class JWebBrowser extends JPanel implements NSComponent {
   }
   
   public void disposeNativePeer() {
-    if(embeddableComponent instanceof Disposable) {
-      ((Disposable)embeddableComponent).dispose();
-    }
     nativeComponent.releaseResources();
   }
   

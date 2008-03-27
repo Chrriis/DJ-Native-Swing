@@ -334,7 +334,7 @@ public class NativeInterface {
             final Canvas canvas = canvasList.get(i);
             Component c = canvas;
             if(canvas instanceof NativeComponent) {
-              Component componentProxy = ((NativeComponent)canvas).getComponentProxy();
+              Component componentProxy = ((NativeComponent)canvas).getNativeComponentProxy();
               if(componentProxy != null) {
                 c = componentProxy;
               }

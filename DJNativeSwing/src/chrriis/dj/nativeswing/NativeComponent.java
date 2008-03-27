@@ -626,9 +626,13 @@ public abstract class NativeComponent extends Canvas {
   protected void releaseResources() {
     if(!isNativePeerDisposed) {
       isNativePeerDisposed = true;
+      if(nativeComponentProxy != null) {
+        nativeComponentProxy.dispose();
+      }
       if(isNativePeerInitialized) {
         NativeInterface.removeCanvas(this);
         if(isNativePeerValid()) {
+          System.err.println("destroy: " + hashCode());
           runSync(new CMN_destroyControl());
         }
       }
@@ -783,14 +787,14 @@ public abstract class NativeComponent extends Canvas {
   
   static interface NativeComponentHolder {}
   
-  private NativeComponentProxy componentProxy;
+  private NativeComponentProxy nativeComponentProxy;
   
-  void setComponentProxy(NativeComponentProxy componentProxy) {
-    this.componentProxy = componentProxy;
+  void setNativeComponentProxy(NativeComponentProxy nativeComponentProxy) {
+    this.nativeComponentProxy = nativeComponentProxy;
   }
   
-  Component getComponentProxy() {
-    return componentProxy;
+  Component getNativeComponentProxy() {
+    return nativeComponentProxy;
   }
   
   static class SimpleNativeComponentHolder extends JPanel implements NativeComponentHolder {
@@ -1018,8 +1022,8 @@ public abstract class NativeComponent extends Canvas {
     if(size.width <= 0 || size.height <= 0) {
       return;
     }
-    if(componentProxy != null) {
-      componentProxy.startCapture();
+    if(nativeComponentProxy != null) {
+      nativeComponentProxy.startCapture();
     }
     Dimension resultSize;
     File dataFile;
@@ -1034,8 +1038,8 @@ public abstract class NativeComponent extends Canvas {
       resultSize = null;
       dataFile = null;
     }
-    if(componentProxy != null) {
-      componentProxy.stopCapture();
+    if(nativeComponentProxy != null) {
+      nativeComponentProxy.stopCapture();
     }
     if(resultSize == null) {
       return;
@@ -1077,14 +1081,14 @@ public abstract class NativeComponent extends Canvas {
   }
   
   public void createBackBuffer() {
-    if(componentProxy != null) {
-      componentProxy.createBackgroundBuffer();
+    if(nativeComponentProxy != null) {
+      nativeComponentProxy.createBackgroundBuffer();
     }
   }
   
   public void releaseBackBuffer() {
-    if(componentProxy != null) {
-      componentProxy.releaseBackgroundBuffer();
+    if(nativeComponentProxy != null) {
+      nativeComponentProxy.releaseBackgroundBuffer();
     }
   }
   

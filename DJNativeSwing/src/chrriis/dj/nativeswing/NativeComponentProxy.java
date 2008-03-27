@@ -32,7 +32,6 @@ import javax.swing.JLayeredPane;
 import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
 
-import chrriis.common.Disposable;
 import chrriis.dj.nativeswing.NativeComponent.Options;
 import chrriis.dj.nativeswing.NativeComponent.Options.DestructionTime;
 import chrriis.dj.nativeswing.NativeComponent.Options.VisibilityConstraint;
@@ -41,7 +40,7 @@ import chrriis.dj.nativeswing.NativeComponentProxyWindow.EmbeddedWindow;
 /**
  * @author Christopher Deckers
  */
-abstract class NativeComponentProxy extends JComponent implements Disposable {
+abstract class NativeComponentProxy extends JComponent {
 
   NativeComponent nativeComponent;
   boolean isDestructionOnFinalization;
@@ -83,7 +82,7 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
               break;
           }
           if(isAdjustingShape) {
-            if(NativeComponentProxy.this.nativeComponent.getComponentProxy() == NativeComponentProxy.this) {
+            if(NativeComponentProxy.this.nativeComponent.getNativeComponentProxy() == NativeComponentProxy.this) {
               adjustPeerShape();
             }
           }
@@ -97,7 +96,7 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
   @Override
   public void addNotify() {
     super.addNotify();
-    nativeComponent.setComponentProxy(this);
+    nativeComponent.setNativeComponentProxy(this);
     if(hierarchyListener != null) {
       addHierarchyListener(hierarchyListener);
     }
@@ -126,7 +125,7 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
   @Override
   public void removeNotify() {
     super.removeNotify();
-    nativeComponent.setComponentProxy(null);
+    nativeComponent.setNativeComponentProxy(null);
     if(hierarchyListener != null) {
       removeHierarchyListener(hierarchyListener);
     }
@@ -213,7 +212,7 @@ abstract class NativeComponentProxy extends JComponent implements Disposable {
     // We need to adjust the shape of the frames that go to the back as well.
     for(Canvas canvas: NativeInterface.getCanvas()) {
       if(canvas instanceof NativeComponent) {
-        Component componentProxy = ((NativeComponent)canvas).getComponentProxy();
+        Component componentProxy = ((NativeComponent)canvas).getNativeComponentProxy();
         if(componentProxy instanceof NativeComponentProxy) {
           NativeComponentProxy nativeComponentProxy = (NativeComponentProxy)componentProxy;
           if(nativeComponentProxy.isVisibilityConstrained) {

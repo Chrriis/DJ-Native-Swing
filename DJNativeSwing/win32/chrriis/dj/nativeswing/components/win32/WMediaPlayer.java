@@ -8,13 +8,11 @@
 package chrriis.dj.nativeswing.components.win32;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 
 import javax.swing.JPanel;
 
-import chrriis.common.Disposable;
 import chrriis.dj.nativeswing.InitializationEvent;
 import chrriis.dj.nativeswing.InitializationListener;
 import chrriis.dj.nativeswing.NSComponent;
@@ -28,7 +26,6 @@ import chrriis.dj.nativeswing.NativeComponent;
  */
 public class WMediaPlayer extends JPanel implements NSComponent {
 
-  private Component embeddableComponent;
   private NativeWMediaPlayer nativeComponent;
   
   private static class NInitializationListener implements InitializationListener {
@@ -60,8 +57,7 @@ public class WMediaPlayer extends JPanel implements NSComponent {
     wmpSettings = new WMPSettings(this);
     wmpControls = new WMPControls(this);
     nativeComponent.addInitializationListener(new NInitializationListener(this));
-    embeddableComponent = nativeComponent.createEmbeddableComponent();
-    add(embeddableComponent, BorderLayout.CENTER);
+    add(nativeComponent.createEmbeddableComponent(), BorderLayout.CENTER);
     wmpSettings.setAutoStart(true);
     wmpSettings.setErrorDialogsEnabled(false);
     setControlBarVisible(true);
@@ -209,9 +205,6 @@ public class WMediaPlayer extends JPanel implements NSComponent {
   }
   
   public void disposeNativePeer() {
-    if(embeddableComponent instanceof Disposable) {
-      ((Disposable)embeddableComponent).dispose();
-    }
     nativeComponent.releaseResources();
   }
   
