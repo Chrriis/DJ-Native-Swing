@@ -41,6 +41,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseMoveListener;
@@ -60,8 +61,6 @@ import chrriis.common.Utils;
 import chrriis.dj.nativeswing.NativeComponent.NativeComponentOptions.DestructionTime;
 import chrriis.dj.nativeswing.NativeComponent.NativeComponentOptions.FiliationType;
 import chrriis.dj.nativeswing.NativeComponent.NativeComponentOptions.VisibilityConstraint;
-
-import com.sun.jna.Native;
 
 /**
  * @author Christopher Deckers
@@ -550,6 +549,23 @@ public abstract class NativeComponent extends Canvas {
     }
   }
   
+  private boolean isSWTInitialized;
+  private long getHandle() {
+    try {
+      if(!isSWTInitialized) {
+        Method loadLibraryMethod = SWT_AWT.class.getDeclaredMethod("loadLibrary");
+        loadLibraryMethod.setAccessible(true);
+        loadLibraryMethod.invoke(null);
+      }
+      Method getAWTHandleMethod = SWT_AWT.class.getDeclaredMethod("getAWTHandle", Canvas.class);
+      getAWTHandleMethod.setAccessible(true);
+      return ((Number)getAWTHandleMethod.invoke(null, this)).longValue();
+    } catch(Exception e) {
+      e.printStackTrace();
+    }
+    return 0;
+  }
+  
   private void createNativePeer() {
     boolean isInterfaceAlive = NativeInterface.isInterfaceAlive();
     if(isInterfaceAlive) {
@@ -567,7 +583,7 @@ public abstract class NativeComponent extends Canvas {
     isNativePeerValid = true;
     if(isInterfaceAlive) {
       try {
-        runSync(new CMN_createControl(), componentID, NativeComponent.this.getClass().getName(), Native.getComponentID(this));
+        runSync(new CMN_createControl(), componentID, NativeComponent.this.getClass().getName(), getHandle());
       } catch(Exception e) {
         isNativePeerValid = false;
         StringBuilder sb = new StringBuilder();
