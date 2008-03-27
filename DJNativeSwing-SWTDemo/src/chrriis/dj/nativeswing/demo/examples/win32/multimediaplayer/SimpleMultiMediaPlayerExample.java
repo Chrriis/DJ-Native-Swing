@@ -30,7 +30,7 @@ import javax.swing.SwingUtilities;
 
 import chrriis.dj.nativeswing.NativeInterface;
 import chrriis.dj.nativeswing.NativeInterface.NativeInterfaceInitOptions;
-import chrriis.dj.nativeswing.components.win32.WMediaPlayer;
+import chrriis.dj.nativeswing.components.win32.JWMediaPlayer;
 
 /**
  * @author Christopher Deckers
@@ -42,7 +42,7 @@ public class SimpleMultiMediaPlayerExample extends JPanel {
     final JCheckBox controlBarCheckBox = new JCheckBox("Control Bar");
     JPanel playerPanel = new JPanel(new BorderLayout(0, 0));
     playerPanel.setBorder(BorderFactory.createTitledBorder("Native Multi Media Player component"));
-    final WMediaPlayer player = new WMediaPlayer();
+    final JWMediaPlayer player = new JWMediaPlayer();
     GridBagLayout gridBag = new GridBagLayout();
     GridBagConstraints cons = new GridBagConstraints();
     JPanel playerFilePanel = new JPanel(gridBag);
