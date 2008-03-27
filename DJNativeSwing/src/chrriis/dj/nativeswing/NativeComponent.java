@@ -549,16 +549,16 @@ public abstract class NativeComponent extends Canvas {
     }
   }
   
-  private boolean isSWTInitialized;
+  private Method getAWTHandleMethod;
   private long getHandle() {
     try {
-      if(!isSWTInitialized) {
+      if(getAWTHandleMethod == null) {
         Method loadLibraryMethod = SWT_AWT.class.getDeclaredMethod("loadLibrary");
         loadLibraryMethod.setAccessible(true);
         loadLibraryMethod.invoke(null);
+        getAWTHandleMethod = SWT_AWT.class.getDeclaredMethod("getAWTHandle", Canvas.class);
+        getAWTHandleMethod.setAccessible(true);
       }
-      Method getAWTHandleMethod = SWT_AWT.class.getDeclaredMethod("getAWTHandle", Canvas.class);
-      getAWTHandleMethod.setAccessible(true);
       return ((Number)getAWTHandleMethod.invoke(null, this)).longValue();
     } catch(Exception e) {
       e.printStackTrace();
