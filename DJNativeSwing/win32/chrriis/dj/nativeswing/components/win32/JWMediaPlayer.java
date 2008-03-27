@@ -22,17 +22,17 @@ import chrriis.dj.nativeswing.NativeComponent;
  * If the initialization fail, the methods will not have any effect. The results from methods have relevant values only when the component is valid. 
  * @author Christopher Deckers
  */
-public class WMediaPlayer extends NSPanelComponent {
+public class JWMediaPlayer extends NSPanelComponent {
 
   private NativeWMediaPlayer nativeComponent;
   
   private static class NInitializationListener implements InitializationListener {
-    private Reference<WMediaPlayer> multiMediaPlayer;
-    private NInitializationListener(WMediaPlayer multiMediaPlayer) {
-      this.multiMediaPlayer = new WeakReference<WMediaPlayer>(multiMediaPlayer);
+    private Reference<JWMediaPlayer> multiMediaPlayer;
+    private NInitializationListener(JWMediaPlayer multiMediaPlayer) {
+      this.multiMediaPlayer = new WeakReference<JWMediaPlayer>(multiMediaPlayer);
     }
     public void objectInitialized(InitializationEvent e) {
-      WMediaPlayer multiMediaPlayer = this.multiMediaPlayer.get();
+      JWMediaPlayer multiMediaPlayer = this.multiMediaPlayer.get();
       if(multiMediaPlayer == null) {
         return;
       }
@@ -49,7 +49,7 @@ public class WMediaPlayer extends NSPanelComponent {
     }
   }
   
-  public WMediaPlayer() {
+  public JWMediaPlayer() {
     nativeComponent = new NativeWMediaPlayer();
     initialize(nativeComponent);
     wmpSettings = new WMPSettings(this);
@@ -69,7 +69,7 @@ public class WMediaPlayer extends NSPanelComponent {
     
     private NativeWMediaPlayer nativeComponent;
     
-    private WMPSettings(WMediaPlayer multiMediaPlayer) {
+    private WMPSettings(JWMediaPlayer multiMediaPlayer) {
       this.nativeComponent = multiMediaPlayer.nativeComponent;
     }
     
@@ -148,7 +148,7 @@ public class WMediaPlayer extends NSPanelComponent {
     
     private NativeWMediaPlayer nativeComponent;
     
-    private WMPControls(WMediaPlayer multiMediaPlayer) {
+    private WMPControls(JWMediaPlayer multiMediaPlayer) {
       this.nativeComponent = multiMediaPlayer.nativeComponent;
     }
     
