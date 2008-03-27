@@ -22,7 +22,7 @@ import javax.swing.event.MouseInputAdapter;
 import chrriis.common.Disposable;
 import chrriis.dj.nativeswing.NativeComponent;
 import chrriis.dj.nativeswing.NativeInterface;
-import chrriis.dj.nativeswing.NativeComponent.Options.VisibilityConstraint;
+import chrriis.dj.nativeswing.NativeComponent.NativeComponentOptions.VisibilityConstraint;
 import chrriis.dj.nativeswing.NativeInterface.NativeInterfaceInitOptions;
 import chrriis.dj.nativeswing.components.JWebBrowser;
 

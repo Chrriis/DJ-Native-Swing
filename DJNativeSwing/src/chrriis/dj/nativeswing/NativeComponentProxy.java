@@ -32,9 +32,9 @@ import javax.swing.JLayeredPane;
 import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
 
-import chrriis.dj.nativeswing.NativeComponent.Options;
-import chrriis.dj.nativeswing.NativeComponent.Options.DestructionTime;
-import chrriis.dj.nativeswing.NativeComponent.Options.VisibilityConstraint;
+import chrriis.dj.nativeswing.NativeComponent.NativeComponentOptions;
+import chrriis.dj.nativeswing.NativeComponent.NativeComponentOptions.DestructionTime;
+import chrriis.dj.nativeswing.NativeComponent.NativeComponentOptions.VisibilityConstraint;
 import chrriis.dj.nativeswing.NativeComponentProxyWindow.EmbeddedWindow;
 
 /**
@@ -49,7 +49,7 @@ abstract class NativeComponentProxy extends JComponent {
   private AWTEventListener shapeAdjustmentEventListener;
 
   protected NativeComponentProxy(NativeComponent nativeComponent) {
-    Options options = nativeComponent.getOptions();
+    NativeComponentOptions options = nativeComponent.getOptions();
     DestructionTime destructionTime = options.getDestructionTime();
     isDestructionOnFinalization = destructionTime == DestructionTime.ON_FINALIZATION;
     isVisibilityConstrained = options.getVisibilityConstraint() != VisibilityConstraint.NONE;

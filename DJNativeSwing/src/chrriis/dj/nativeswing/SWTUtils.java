@@ -24,7 +24,7 @@ import org.eclipse.swt.graphics.RGB;
 /**
  * @author Christopher Deckers
  */
-public class UIUtils {
+public class SWTUtils {
 
   public static int translateSWTKeyCode(int key) {
     switch(key) {

@@ -20,7 +20,7 @@ import javax.swing.SwingUtilities;
 import chrriis.common.Disposable;
 import chrriis.dj.nativeswing.NativeComponent;
 import chrriis.dj.nativeswing.NativeInterface;
-import chrriis.dj.nativeswing.NativeComponent.Options.DestructionTime;
+import chrriis.dj.nativeswing.NativeComponent.NativeComponentOptions.DestructionTime;
 import chrriis.dj.nativeswing.NativeInterface.NativeInterfaceInitOptions;
 import chrriis.dj.nativeswing.components.JFlashPlayer;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;

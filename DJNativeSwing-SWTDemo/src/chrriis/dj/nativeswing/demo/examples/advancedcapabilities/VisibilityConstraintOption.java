@@ -21,7 +21,7 @@ import javax.swing.SwingUtilities;
 
 import chrriis.dj.nativeswing.NativeComponent;
 import chrriis.dj.nativeswing.NativeInterface;
-import chrriis.dj.nativeswing.NativeComponent.Options.VisibilityConstraint;
+import chrriis.dj.nativeswing.NativeComponent.NativeComponentOptions.VisibilityConstraint;
 import chrriis.dj.nativeswing.NativeInterface.NativeInterfaceInitOptions;
 import chrriis.dj.nativeswing.components.JFlashPlayer;
 import chrriis.dj.nativeswing.components.JWebBrowser;

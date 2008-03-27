@@ -8,7 +8,7 @@
 package chrriis.dj.nativeswing;
 
 /**
- * The interface that all components should expose.
+ * The interface that all Swing wrappers of native components should expose.
  * @author Christopher Deckers
  */
 public interface NSComponent {

@@ -57,9 +57,9 @@ import org.eclipse.swt.widgets.Shell;
 
 import chrriis.common.Registry;
 import chrriis.common.Utils;
-import chrriis.dj.nativeswing.NativeComponent.Options.DestructionTime;
-import chrriis.dj.nativeswing.NativeComponent.Options.FiliationType;
-import chrriis.dj.nativeswing.NativeComponent.Options.VisibilityConstraint;
+import chrriis.dj.nativeswing.NativeComponent.NativeComponentOptions.DestructionTime;
+import chrriis.dj.nativeswing.NativeComponent.NativeComponentOptions.FiliationType;
+import chrriis.dj.nativeswing.NativeComponent.NativeComponentOptions.VisibilityConstraint;
 
 import com.sun.jna.Native;
 
@@ -299,7 +299,7 @@ public abstract class NativeComponent extends Canvas {
         case MouseEvent.MOUSE_MOVED:
           break;
       }
-      int button = UIUtils.translateSWTMouseButton(e_button);
+      int button = SWTUtils.translateSWTMouseButton(e_button);
       if(button == 0) {
         switch(type) {
           case MouseEvent.MOUSE_PRESSED:
@@ -315,15 +315,15 @@ public abstract class NativeComponent extends Canvas {
       if(Utils.IS_JAVA_6_OR_GREATER) {
         // Not specifying the absX and Y in Java 6 results in a deadlock when pressing alt+F4 while moving the mouse over a native control
         if(type == MouseEvent.MOUSE_WHEEL) {
-          me = new MouseWheelEvent(nativeComponent, type, System.currentTimeMillis(), UIUtils.translateSWTModifiers(e_stateMask), e_x, e_y, e_cursorLocation.x, e_cursorLocation.y, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, e_count, 1);
+          me = new MouseWheelEvent(nativeComponent, type, System.currentTimeMillis(), SWTUtils.translateSWTModifiers(e_stateMask), e_x, e_y, e_cursorLocation.x, e_cursorLocation.y, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, e_count, 1);
         } else {
-          me = new MouseEvent(nativeComponent, type, System.currentTimeMillis(), UIUtils.translateSWTModifiers(e_stateMask), e_x, e_y, e_cursorLocation.x, e_cursorLocation.y, e_count, false, button);
+          me = new MouseEvent(nativeComponent, type, System.currentTimeMillis(), SWTUtils.translateSWTModifiers(e_stateMask), e_x, e_y, e_cursorLocation.x, e_cursorLocation.y, e_count, false, button);
         }
       } else {
         if(type == MouseEvent.MOUSE_WHEEL) {
-          me = new MouseWheelEvent(nativeComponent, type, System.currentTimeMillis(), UIUtils.translateSWTModifiers(e_stateMask), e_x, e_y, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, e_count, 1);
+          me = new MouseWheelEvent(nativeComponent, type, System.currentTimeMillis(), SWTUtils.translateSWTModifiers(e_stateMask), e_x, e_y, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, e_count, 1);
         } else {
-          me = new MouseEvent(nativeComponent, type, System.currentTimeMillis(), UIUtils.translateSWTModifiers(e_stateMask), e_x, e_y, e_count, false, button);
+          me = new MouseEvent(nativeComponent, type, System.currentTimeMillis(), SWTUtils.translateSWTModifiers(e_stateMask), e_x, e_y, e_count, false, button);
         }
       }
       nativeComponent.dispatchEvent(me);
@@ -367,9 +367,9 @@ public abstract class NativeComponent extends Canvas {
         }
         keyCode = KeyEvent.VK_UNDEFINED;
       } else {
-        keyCode = UIUtils.translateSWTKeyCode(e_keyCode);
+        keyCode = SWTUtils.translateSWTKeyCode(e_keyCode);
       }
-      final KeyEvent ke = new KeyEvent(nativeComponent, type, System.currentTimeMillis(), UIUtils.translateSWTModifiers(e_stateMask), keyCode, character);
+      final KeyEvent ke = new KeyEvent(nativeComponent, type, System.currentTimeMillis(), SWTUtils.translateSWTModifiers(e_stateMask), keyCode, character);
       nativeComponent.dispatchEvent(ke);
       return null;
     }
@@ -665,17 +665,17 @@ public abstract class NativeComponent extends Canvas {
     }
   }
   
-  private Options options;
+  private NativeComponentOptions options;
   
-  private void setOptions(Options options) {
+  private void setOptions(NativeComponentOptions options) {
     this.options = options;
   }
   
-  public Options getOptions() {
+  public NativeComponentOptions getOptions() {
     return options;
   }
   
-  public static class Options implements Cloneable {
+  public static class NativeComponentOptions implements Cloneable {
     
     public static enum FiliationType {
       AUTO,
@@ -756,32 +756,32 @@ public abstract class NativeComponent extends Canvas {
     
   }
   
-  private static Options defaultOptions;
+  private static NativeComponentOptions defaultOptions;
   
-  public static Options getDefaultOptions() {
+  public static NativeComponentOptions getDefaultOptions() {
     if(defaultOptions == null) {
-      defaultOptions = new Options();
+      defaultOptions = new NativeComponentOptions();
     }
     return defaultOptions;
   }
   
-  public static void setDefaultOptions(Options defaultOptions) {
+  public static void setDefaultOptions(NativeComponentOptions defaultOptions) {
     NativeComponent.defaultOptions = defaultOptions;
   }
   
-  private static Options nextInstanceOptions;
+  private static NativeComponentOptions nextInstanceOptions;
   
   /**
    * The next instance options are a copy of the default options from the moment this method is called the first time before a new instance is created.
    */
-  public static Options getNextInstanceOptions() {
+  public static NativeComponentOptions getNextInstanceOptions() {
     if(nextInstanceOptions == null) {
-      nextInstanceOptions = (Options)getDefaultOptions().clone();
+      nextInstanceOptions = (NativeComponentOptions)getDefaultOptions().clone();
     }
     return nextInstanceOptions;
   }
   
-  public static void setNextInstanceOptions(Options nextInstanceOptions) {
+  public static void setNextInstanceOptions(NativeComponentOptions nextInstanceOptions) {
     NativeComponent.nextInstanceOptions = nextInstanceOptions;
   }
   
@@ -828,7 +828,7 @@ public abstract class NativeComponent extends Canvas {
   }
   
   protected Component createEmbeddableComponent() {
-    Options nextInstanceOptions = getNextInstanceOptions();
+    NativeComponentOptions nextInstanceOptions = getNextInstanceOptions();
     FiliationType filiationType = nextInstanceOptions.getFiliationType();
     DestructionTime destructionTime = nextInstanceOptions.getDestructionTime();
     if(destructionTime == DestructionTime.AUTO) {
@@ -857,7 +857,7 @@ public abstract class NativeComponent extends Canvas {
     if(destructionTime == DestructionTime.ON_FINALIZATION && filiationType == FiliationType.AUTO) {
       filiationType = FiliationType.COMPONENT_PROXYING;
     }
-    Options options = (Options)nextInstanceOptions.clone();
+    NativeComponentOptions options = (NativeComponentOptions)nextInstanceOptions.clone();
     options.setDestructionTime(destructionTime);
     options.setFiliationType(filiationType);
     options.setVisibilityConstraint(visibilityConstraint);

@@ -27,7 +27,7 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.program.Program;
 
 import chrriis.dj.nativeswing.CommandMessage;
-import chrriis.dj.nativeswing.UIUtils;
+import chrriis.dj.nativeswing.SWTUtils;
 
 
 
@@ -68,7 +68,7 @@ public class FileTypeLauncher {
       if(!isIconInitialized) {
         isIconInitialized = true;
         ImageData imageData = program.getImageData();
-        icon = imageData == null? null: new ImageIcon(UIUtils.convertSWTImage(imageData));
+        icon = imageData == null? null: new ImageIcon(SWTUtils.convertSWTImage(imageData));
       }
       return icon;
     }
