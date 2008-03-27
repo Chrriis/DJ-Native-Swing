@@ -166,7 +166,7 @@ public class JVLCPlayer extends JPanel implements NSComponent {
               VLCMediaState state = vlcInput.getMediaState();
               boolean isValid = state == VLCMediaState.OPENING || state == VLCMediaState.BUFFERING || state == VLCMediaState.PLAYING || state == VLCMediaState.PAUSED || state == VLCMediaState.STOPPING;
               if(isValid) {
-                int time = vlcInput.getTime();
+                int time = vlcInput.getAbsolutePosition();
                 int length = vlcInput.getMediaLength();
                 isValid = time >= 0 && length > 0;
                 if(isValid) {
@@ -214,7 +214,7 @@ public class JVLCPlayer extends JPanel implements NSComponent {
     seekBarSlider.addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
         if(!isAdjustingSeekBar) {
-          getVLCInput().setPosition(((float)seekBarSlider.getValue()) / 10000);
+          getVLCInput().setRelativePosition(((float)seekBarSlider.getValue()) / 10000);
         }
       }
     });
@@ -568,10 +568,10 @@ public class JVLCPlayer extends JPanel implements NSComponent {
       return Boolean.TRUE.equals(webBrowserObject.getObjectProperty("input.isVout"));
     }
     /**
-     * Set the current position on the timeline.
+     * Set the current relative position on the timeline.
      * @param position A value between 0 and 1.
      */
-    public void setPosition(float position) {
+    public void setRelativePosition(float position) {
       if(position >= 0 && position <= 1) {
         webBrowserObject.setObjectProperty("input.position", position);
         return;
@@ -579,25 +579,25 @@ public class JVLCPlayer extends JPanel implements NSComponent {
       throw new IllegalArgumentException("The position must be between 0 and 1");
     }
     /**
-     * Get the current position on the timeline as a float between 0 and 1.
-     * @return the current position, or Float.NaN if not available.
+     * Get the current relative position on the timeline as a float between 0 and 1.
+     * @return the current relative position, or Float.NaN if not available.
      */
-    public float getPosition() {
+    public float getRelativePosition() {
       Object value = webBrowserObject.getObjectProperty("input.position");
       return value == null? Float.NaN: ((Number)value).floatValue();
     }
     /**
-     * Set the time on the timeline.
-     * @param time The time in milliseconds.
+     * Set the current position on the timeline.
+     * @param time The current position in milliseconds.
      */
-    public void setTime(int time) {
+    public void setAbsolutePosition(int time) {
       webBrowserObject.setObjectProperty("input.time", time);
     }
     /**
-     * Get the time on the timeline.
-     * @return the time in milliseconds.
+     * Get the current position on the timeline.
+     * @return the current position in milliseconds.
      */
-    public int getTime() {
+    public int getAbsolutePosition() {
       Object value = webBrowserObject.getObjectProperty("input.time");
       return value == null? -1: ((Number)value).intValue();
     }
@@ -625,17 +625,17 @@ public class JVLCPlayer extends JPanel implements NSComponent {
       return null;
     }
     /**
-     * Set the rate at which the media is played.
-     * @param rate the rate.
+     * Set the speed factor that is applied when a media is played.
+     * @param speedFactor the speed factor.
      */
-    public void setPlayRate(float rate) {
-      webBrowserObject.setObjectProperty("input.rate", rate);
+    public void setPlayRate(float speedFactor) {
+      webBrowserObject.setObjectProperty("input.rate", speedFactor);
     }
     /**
-     * Get the rate at which the media is played.
-     * @return the rate.
+     * Get the speed factor that is applied when a media is played.
+     * @return the speed factor.
      */
-    public float getPlayRate() {
+    public float getPlaySpeedFactor() {
       Object value = webBrowserObject.getObjectProperty("input.rate");
       return value == null? Float.NaN: ((Number)value).floatValue();
     }
