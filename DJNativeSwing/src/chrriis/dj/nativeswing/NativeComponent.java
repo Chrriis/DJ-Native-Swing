@@ -1025,7 +1025,11 @@ public abstract class NativeComponent extends Canvas {
       return;
     }
     if(nativeComponentProxy != null) {
-      nativeComponentProxy.startCapture();
+      try {
+        nativeComponentProxy.startCapture();
+      } catch(Exception e) {
+        e.printStackTrace();
+      }
     }
     Dimension resultSize;
     File dataFile;

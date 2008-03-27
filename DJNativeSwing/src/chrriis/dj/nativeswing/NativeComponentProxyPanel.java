@@ -219,6 +219,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
 
   private boolean isCapturing;
   private Canvas capturingComponent;
+  private static Robot robot;
   
   @Override
   void startCapture() {
@@ -229,8 +230,8 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
             startCapture();
           }
         });
-      } catch(Exception e) {
-        e.printStackTrace();
+      } catch(Throwable e) {
+        throw new RuntimeException(e.getCause());
       }
       return;
     }
@@ -248,7 +249,10 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
       boolean isValidBounds = r.width > 0 && r.height > 0;
       final BufferedImage image;
       if(isValidBounds) {
-        image = new Robot().createScreenCapture(r);
+        if(robot == null) {
+          robot = new Robot();
+        }
+        image = robot.createScreenCapture(r);
         Point location = r.getLocation();
         SwingUtilities.convertPointFromScreen(location, parent);
         r.setLocation(location);
