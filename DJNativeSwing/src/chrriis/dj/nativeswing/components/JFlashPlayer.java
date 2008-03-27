@@ -26,7 +26,7 @@ import javax.swing.border.BevelBorder;
 
 import chrriis.common.Utils;
 import chrriis.common.WebServer;
-import chrriis.dj.nativeswing.NSComponent;
+import chrriis.dj.nativeswing.NSPanelComponent;
 import chrriis.dj.nativeswing.WebBrowserObject;
 
 /**
@@ -35,7 +35,7 @@ import chrriis.dj.nativeswing.WebBrowserObject;
  * If the initialization fail, the methods will not have any effect. The results from methods have relevant values only when the component is valid. 
  * @author Christopher Deckers
  */
-public class JFlashPlayer extends JPanel implements NSComponent {
+public class JFlashPlayer extends NSPanelComponent {
 
   public static class FlashLoadingOptions {
     
@@ -143,7 +143,7 @@ public class JFlashPlayer extends JPanel implements NSComponent {
    * Construct a flash player.
    */
   public JFlashPlayer() {
-    super(new BorderLayout(0, 0));
+    setNativeComponent(webBrowser.getNativeComponent());
     webBrowserPanel = new JPanel(new BorderLayout(0, 0));
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);
@@ -345,30 +345,6 @@ public class JFlashPlayer extends JPanel implements NSComponent {
   public void setControlBarVisible(boolean isControlBarVisible) {
     controlBarPane.setVisible(isControlBarVisible);
     adjustBorder();
-  }
-  
-  public void initializeNativePeer() {
-    webBrowser.initializeNativePeer();
-  }
-  
-  public void disposeNativePeer() {
-    webBrowserObject.disposeNativePeer();
-  }
-  
-  public boolean isNativePeerDisposed() {
-    return webBrowserObject.isNativePeerDisposed();
-  }
-  
-  public boolean isNativePeerInitialized() {
-    return webBrowser.isNativePeerInitialized();
-  }
-  
-  public boolean isNativePeerValid() {
-    return webBrowser.isNativePeerValid();
-  }
-  
-  public void runInSequence(Runnable runnable) {
-    webBrowser.runInSequence(runnable);
   }
   
 }

@@ -624,8 +624,8 @@ class NativeWebBrowser extends NativeComponent {
   }
   
   @Override
-  protected void releaseResources() {
-    super.releaseResources();
+  protected void disposeNativePeer() {
+    super.disposeNativePeer();
   }
   
 }

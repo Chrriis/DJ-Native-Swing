@@ -409,17 +409,6 @@ public abstract class WebBrowserObject {
     return null;
   }
   
-  /**
-   * Explicitely dispose the native resources. This is particularly useful if deferred destruction is used (cf native component options) and the component is not going to be used anymore.
-   */
-  public void disposeNativePeer() {
-    webBrowser.disposeNativePeer();
-  }
-  
-  public boolean isNativePeerDisposed() {
-    return webBrowser.isNativePeerDisposed();
-  }
-
   private EventListenerList listenerList = new EventListenerList();
   
   private void addInitializationListener(InitializationListener listener) {

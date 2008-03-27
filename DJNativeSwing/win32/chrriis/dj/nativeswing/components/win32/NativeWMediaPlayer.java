@@ -44,8 +44,8 @@ class NativeWMediaPlayer extends OleNativeComponent {
   }
   
   @Override
-  protected void releaseResources() {
-    super.releaseResources();
+  protected void disposeNativePeer() {
+    super.disposeNativePeer();
   }
   
 }

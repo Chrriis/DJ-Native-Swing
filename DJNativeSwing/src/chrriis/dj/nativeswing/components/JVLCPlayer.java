@@ -34,7 +34,7 @@ import javax.swing.event.ChangeListener;
 
 import chrriis.common.Utils;
 import chrriis.common.WebServer;
-import chrriis.dj.nativeswing.NSComponent;
+import chrriis.dj.nativeswing.NSPanelComponent;
 import chrriis.dj.nativeswing.WebBrowserObject;
 import chrriis.dj.nativeswing.components.JVLCPlayer.VLCInput.VLCMediaState;
 
@@ -44,7 +44,7 @@ import chrriis.dj.nativeswing.components.JVLCPlayer.VLCInput.VLCMediaState;
  * If the initialization fail, the methods will not have any effect. The results from methods have relevant values only when the component is valid. 
  * @author Christopher Deckers
  */
-public class JVLCPlayer extends JPanel implements NSComponent {
+public class JVLCPlayer extends NSPanelComponent {
 
   public static class VLCLoadingOptions {
     
@@ -204,7 +204,7 @@ public class JVLCPlayer extends JPanel implements NSComponent {
   }
   
   public JVLCPlayer() {
-    super(new BorderLayout(0, 0));
+    setNativeComponent(webBrowser.getNativeComponent());
     webBrowserPanel = new JPanel(new BorderLayout(0, 0));
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);
@@ -415,14 +415,6 @@ public class JVLCPlayer extends JPanel implements NSComponent {
   public void setControlBarVisible(boolean isControlBarVisible) {
     controlBarPane.setVisible(isControlBarVisible);
     adjustBorder();
-  }
-  
-  public void disposeNativePeer() {
-    webBrowserObject.disposeNativePeer();
-  }
-  
-  public boolean isNativePeerDisposed() {
-    return webBrowserObject.isNativePeerDisposed();
   }
   
   /* ------------------------- VLC API exposed ------------------------- */
@@ -860,22 +852,6 @@ public class JVLCPlayer extends JPanel implements NSComponent {
    */
   public VLCVideo getVLCVideo() {
     return vlcVideo;
-  }
-  
-  public void runInSequence(Runnable runnable) {
-    webBrowser.runInSequence(runnable);
-  }
-  
-  public void initializeNativePeer() {
-    webBrowser.initializeNativePeer();
-  }
-  
-  public boolean isNativePeerInitialized() {
-    return webBrowser.isNativePeerInitialized();
-  }
-  
-  public boolean isNativePeerValid() {
-    return webBrowser.isNativePeerValid();
   }
   
 }

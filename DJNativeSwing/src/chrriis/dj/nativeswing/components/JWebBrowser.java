@@ -39,7 +39,7 @@ import javax.swing.border.BevelBorder;
 
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.Message;
-import chrriis.dj.nativeswing.NSComponent;
+import chrriis.dj.nativeswing.NSPanelComponent;
 import chrriis.dj.nativeswing.NativeComponent;
 import chrriis.dj.nativeswing.NativeInterface;
 
@@ -49,7 +49,7 @@ import chrriis.dj.nativeswing.NativeInterface;
  * If the initialization fail, the methods will not have any effect. The results from methods have relevant values only when the component is valid. 
  * @author Christopher Deckers
  */
-public class JWebBrowser extends JPanel implements NSComponent {
+public class JWebBrowser extends NSPanelComponent {
 
   /**
    * Clear all session cookies from all current web browser instances.
@@ -183,8 +183,8 @@ public class JWebBrowser extends JPanel implements NSComponent {
    * Construct a new web browser.
    */
   public JWebBrowser() {
-    setLayout(new BorderLayout(0, 0));
     nativeComponent = new NativeWebBrowser(this);
+    setNativeComponent(nativeComponent);
     JPanel menuToolAndAddressBarPanel = new JPanel(new BorderLayout(0, 0));
     menuBar = new JMenuBar();
     menuToolAndAddressBarPanel.add(menuBar, BorderLayout.NORTH);
@@ -699,14 +699,6 @@ public class JWebBrowser extends JPanel implements NSComponent {
     return nativeComponent;
   }
   
-  public boolean isNativePeerInitialized() {
-    return nativeComponent.isNativePeerInitialized();
-  }
-  
-  public boolean isNativePeerValid() {
-    return nativeComponent.isNativePeerValid();
-  }
-  
   /**
    * Get the menu bar, which allows to modify the items.
    * @return the menu bar.
@@ -726,22 +718,6 @@ public class JWebBrowser extends JPanel implements NSComponent {
   private Icon createIcon(String resourceKey) {
     String value = RESOURCES.getString(resourceKey);
     return value.length() == 0? null: new ImageIcon(JWebBrowser.class.getResource(value));
-  }
-  
-  public void initializeNativePeer() {
-    nativeComponent.initializeNativePeer();
-  }
-  
-  public void disposeNativePeer() {
-    nativeComponent.releaseResources();
-  }
-  
-  public boolean isNativePeerDisposed() {
-    return nativeComponent.isNativePeerDisposed();
-  }
-  
-  public void runInSequence(Runnable runnable) {
-    nativeComponent.runInSequence(runnable);
   }
   
   /**

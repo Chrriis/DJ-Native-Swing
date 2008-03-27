@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import chrriis.common.Registry;
@@ -30,7 +29,7 @@ import chrriis.dj.nativeswing.InitializationEvent;
 import chrriis.dj.nativeswing.InitializationListener;
 import chrriis.dj.nativeswing.LocalMessage;
 import chrriis.dj.nativeswing.Message;
-import chrriis.dj.nativeswing.NSComponent;
+import chrriis.dj.nativeswing.NSPanelComponent;
 import chrriis.dj.nativeswing.NativeInterface;
 
 /**
@@ -39,7 +38,7 @@ import chrriis.dj.nativeswing.NativeInterface;
  * If the initialization fail, the methods will not have any effect. The results from methods have relevant values only when the component is valid. 
  * @author Christopher Deckers
  */
-public class JHTMLEditor extends JPanel implements NSComponent {
+public class JHTMLEditor extends NSPanelComponent {
 
   private static final String FCK_INSTANCE = "FCKeditor1";
   
@@ -91,11 +90,11 @@ public class JHTMLEditor extends JPanel implements NSComponent {
   }
   
   public JHTMLEditor() {
-    super(new BorderLayout(0, 0));
     if(getClass().getResource("/fckeditor/fckeditor.js") == null) {
       throw new IllegalStateException("The FCKEditor distribution is missing from the classpath!");
     }
     webBrowser = new JWebBrowser();
+    setNativeComponent(webBrowser.getNativeComponent());
     webBrowser.addWebBrowserListener(new NWebBrowserListener(this));
     webBrowser.setBarsVisible(false);
     add(webBrowser, BorderLayout.CENTER);
@@ -428,30 +427,6 @@ public class JHTMLEditor extends JPanel implements NSComponent {
    */
   public HTMLEditorListener[] getHTMLEditorListeners() {
     return listenerList.getListeners(HTMLEditorListener.class);
-  }
-  
-  public void initializeNativePeer() {
-    webBrowser.initializeNativePeer();
-  }
-  
-  public void disposeNativePeer() {
-    webBrowser.disposeNativePeer();
-  }
-  
-  public boolean isNativePeerDisposed() {
-    return webBrowser.isNativePeerDisposed();
-  }
-  
-  public boolean isNativePeerInitialized() {
-    return webBrowser.isNativePeerInitialized();
-  }
-  
-  public boolean isNativePeerValid() {
-    return webBrowser.isNativePeerValid();
-  }
-  
-  public void runInSequence(Runnable runnable) {
-    webBrowser.runInSequence(runnable);
   }
   
   private void addInitializationListener(InitializationListener listener) {

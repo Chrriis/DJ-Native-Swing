@@ -11,11 +11,9 @@ import java.awt.BorderLayout;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 
-import javax.swing.JPanel;
-
 import chrriis.dj.nativeswing.InitializationEvent;
 import chrriis.dj.nativeswing.InitializationListener;
-import chrriis.dj.nativeswing.NSComponent;
+import chrriis.dj.nativeswing.NSPanelComponent;
 import chrriis.dj.nativeswing.NativeComponent;
 
 /**
@@ -24,7 +22,7 @@ import chrriis.dj.nativeswing.NativeComponent;
  * If the initialization fail, the methods will not have any effect. The results from methods have relevant values only when the component is valid. 
  * @author Christopher Deckers
  */
-public class WMediaPlayer extends JPanel implements NSComponent {
+public class WMediaPlayer extends NSPanelComponent {
 
   private NativeWMediaPlayer nativeComponent;
   
@@ -52,8 +50,8 @@ public class WMediaPlayer extends JPanel implements NSComponent {
   }
   
   public WMediaPlayer() {
-    setLayout(new BorderLayout(0, 0));
     nativeComponent = new NativeWMediaPlayer();
+    setNativeComponent(nativeComponent);
     wmpSettings = new WMPSettings(this);
     wmpControls = new WMPControls(this);
     nativeComponent.addInitializationListener(new NInitializationListener(this));
@@ -200,30 +198,6 @@ public class WMediaPlayer extends JPanel implements NSComponent {
     return wmpControls;
   }
 
-  public void initializeNativePeer() {
-    nativeComponent.initializeNativePeer();
-  }
-  
-  public void disposeNativePeer() {
-    nativeComponent.releaseResources();
-  }
-  
-  public boolean isNativePeerDisposed() {
-    return nativeComponent.isNativePeerDisposed();
-  }
-  
-  public boolean isNativePeerInitialized() {
-    return nativeComponent.isNativePeerInitialized();
-  }
-  
-  public boolean isNativePeerValid() {
-    return nativeComponent.isNativePeerValid();
-  }
-  
-  public void runInSequence(Runnable runnable) {
-    nativeComponent.runInSequence(runnable);
-  }
-  
   public String getLoadedResource() {
     return (String)nativeComponent.getOleProperty(new String[] {"url"});
   }

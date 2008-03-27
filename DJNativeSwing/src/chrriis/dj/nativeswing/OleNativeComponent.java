@@ -22,6 +22,7 @@ import org.eclipse.swt.ole.win32.Variant;
 
 
 /**
+ * A convenience class for Windows Ole-based native components.
  * @author Christopher Deckers
  */
 public abstract class OleNativeComponent extends NativeComponent {

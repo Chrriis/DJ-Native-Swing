@@ -526,7 +526,7 @@ public abstract class NativeComponent extends Canvas {
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         if(!isNativePeerInitialized && !isNativePeerDisposed) {
-          createResources();
+          createNativePeer();
         }
       }
     });
@@ -546,11 +546,11 @@ public abstract class NativeComponent extends Canvas {
     }
     if(!isNativePeerInitialized && !isNativePeerDisposed) {
       windowAncestor.addNotify();
-      createResources();
+      createNativePeer();
     }
   }
   
-  private void createResources() {
+  private void createNativePeer() {
     boolean isInterfaceAlive = NativeInterface.isInterfaceAlive();
     if(isInterfaceAlive) {
       NativeInterface.checkUIThread();
@@ -615,7 +615,7 @@ public abstract class NativeComponent extends Canvas {
   
   @Override
   public void removeNotify() {
-    releaseResources();
+    disposeNativePeer();
     super.removeNotify();
   }
   
@@ -624,7 +624,7 @@ public abstract class NativeComponent extends Canvas {
   private boolean isNativePeerInitialized;
   private boolean isNativePeerDisposed;
   
-  protected void releaseResources() {
+  protected void disposeNativePeer() {
     if(!isNativePeerDisposed) {
       isNativePeerDisposed = true;
       if(nativeComponentProxy != null) {
