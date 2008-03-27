@@ -49,11 +49,19 @@ public class JVLCPlayer extends JPanel implements NSComponent {
   public static class VLCLoadingOptions {
     
     private Map<String, String> keyToValueParameterMap = new HashMap<String, String>();
-    
+
+    /**
+     * Get the VLC plugin HTML parameters.
+     * @return the parameters.
+     */
     public Map<String, String> getParameters() {
       return keyToValueParameterMap;
     }
     
+    /**
+     * Set the VLC HTML parameters that will be used when the plugin is created.
+     * @param keyToValueParameterMap the map of key/value pairs.
+     */
     public void setParameters(Map<String, String> keyToValueParameterMap) {
       if(keyToValueParameterMap == null) {
         keyToValueParameterMap = new HashMap<String, String>();
@@ -460,9 +468,17 @@ public class JVLCPlayer extends JPanel implements NSComponent {
       Object value = webBrowserObject.getObjectProperty("audio.volume");
       return value == null? -1: Math.max(0, (int)Math.round((((Number)value).intValue() - 1) / 1.99));
     }
+    /**
+     * Set the audio track, or 0 to disable it.
+     * @param track the track to play.
+     */
     public void setTrack(int track) {
       webBrowserObject.setObjectProperty("audio.track", track);
     }
+    /**
+     * Get the audio track, or 0 if disabled.
+     * @return the audio track.
+     */
     public int getTrack() {
       Object value = webBrowserObject.getObjectProperty("audio.track");
       return value == null? -1: ((Number)value).intValue();
@@ -470,6 +486,10 @@ public class JVLCPlayer extends JPanel implements NSComponent {
     public enum VLCChannel {
       STEREO, REVERSE_STEREO, LEFT, RIGHT, DOLBY
     }
+    /**
+     * Set the audio channel to use.
+     * @param channel the audio channel to use.
+     */
     public void setChannel(VLCChannel channel) {
       int value;
       switch(channel) {
@@ -482,6 +502,10 @@ public class JVLCPlayer extends JPanel implements NSComponent {
       }
       webBrowserObject.setObjectProperty("audio.channel", value);
     }
+    /**
+     * Get the audio channel.
+     * @return the audio channel.
+     */
     public VLCChannel getChannel() {
       Object value = webBrowserObject.getObjectProperty("audio.channel");
       if(value == null) {

@@ -1016,7 +1016,7 @@ public abstract class NativeComponent extends Canvas {
    * Can be called from a non-UI thread.
    */
   public void paintComponent(BufferedImage image) {
-    if(!isNativePeerValid() || isNativePeerDisposed) {
+    if(image == null || !isNativePeerValid() || isNativePeerDisposed) {
       return;
     }
     Dimension size = getSize();
@@ -1057,15 +1057,17 @@ public abstract class NativeComponent extends Canvas {
     int count = 0;
     try {
       BufferedInputStream in = new BufferedInputStream(new FileInputStream(dataFile));
-      for(int x=0; x<width; x++) {
-        for(int y=0; y<height; y++) {
-          if(count == 0) {
-            in.read(bytes);
-          }
-          image.setRGB(x, y, 0xFF000000 | (0xFF & bytes[count]) << 16 | (0xFF & bytes[count + 1]) << 8 | (0xFF & bytes[count + 2]));
-          count += 3;
-          if(count == bytes.length) {
-            count = 0;
+      synchronized(image) {
+        for(int x=0; x<width; x++) {
+          for(int y=0; y<height; y++) {
+            if(count == 0) {
+              in.read(bytes);
+            }
+            image.setRGB(x, y, 0xFF000000 | (0xFF & bytes[count]) << 16 | (0xFF & bytes[count + 1]) << 8 | (0xFF & bytes[count + 2]));
+            count += 3;
+            if(count == bytes.length) {
+              count = 0;
+            }
           }
         }
       }

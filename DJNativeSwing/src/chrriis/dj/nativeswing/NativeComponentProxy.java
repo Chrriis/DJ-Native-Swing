@@ -323,21 +323,29 @@ abstract class NativeComponentProxy extends JComponent {
   private BufferedImage backgroundBuffer;
   
   public void createBackgroundBuffer() {
-    Dimension size = getSize();
-    if(size.width <= 0 || size.height <= 0) {
+    int width = getWidth();
+    int height = getHeight();
+    if(width <= 0 || height <= 0) {
       backgroundBuffer = null;
       return;
     }
-    BufferedImage backgroundBuffer = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_ARGB);
-    nativeComponent.paintComponent(backgroundBuffer);
-    synchronized(backgroundBufferLock) {
-      this.backgroundBuffer = backgroundBuffer;
-      repaint();
+    BufferedImage image;
+    if(backgroundBuffer != null && backgroundBuffer.getWidth() == width && backgroundBuffer.getHeight() == height) {
+      image = backgroundBuffer;
+    } else {
+      image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
     }
+    nativeComponent.paintComponent(image);
+    synchronized(backgroundBufferLock) {
+      this.backgroundBuffer = image;
+    }
+    repaint();
   }
   
   public void releaseBackgroundBuffer() {
-    backgroundBuffer = null;
+    synchronized(backgroundBufferLock) {
+      backgroundBuffer = null;
+    }
   }
   
   @Override
@@ -351,7 +359,9 @@ abstract class NativeComponentProxy extends JComponent {
   protected void paintComponent(Graphics g) {
     synchronized(backgroundBufferLock) {
       if(backgroundBuffer != null) {
-        g.drawImage(backgroundBuffer, 0, 0, this);
+        synchronized(backgroundBuffer) {
+          g.drawImage(backgroundBuffer, 0, 0, this);
+        }
       }
     }
   }

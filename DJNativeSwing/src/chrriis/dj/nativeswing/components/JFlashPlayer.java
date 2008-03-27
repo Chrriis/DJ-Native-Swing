@@ -41,10 +41,18 @@ public class JFlashPlayer extends JPanel implements NSComponent {
     
     private Map<String, String> keyToValueVariableMap = new HashMap<String, String>();
     
+    /**
+     * Get the Flash plugin variables.
+     * @return the variables.
+     */
     public Map<String, String> getVariables() {
       return keyToValueVariableMap;
     }
     
+    /**
+     * Set the Flash variables that will be set when the plugin is created.
+     * @param keyToValueVariableMap the map of key/value pairs.
+     */
     public void setVariables(Map<String, String> keyToValueVariableMap) {
       if(keyToValueVariableMap == null) {
         keyToValueVariableMap = new HashMap<String, String>();
@@ -54,10 +62,18 @@ public class JFlashPlayer extends JPanel implements NSComponent {
     
     private Map<String, String> keyToValueParameterMap = new HashMap<String, String>();
     
+    /**
+     * Get the Flash plugin HTML parameters.
+     * @return the parameters.
+     */
     public Map<String, String> getParameters() {
       return keyToValueParameterMap;
     }
     
+    /**
+     * Set the Flash HTML parameters that will be used when the plugin is created.
+     * @param keyToValueParameterMap the map of key/value pairs.
+     */
     public void setParameters(Map<String, String> keyToValueParameterMap) {
       if(keyToValueParameterMap == null) {
         keyToValueParameterMap = new HashMap<String, String>();
