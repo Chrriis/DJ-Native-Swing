@@ -10,6 +10,7 @@ package chrriis.dj.nativeswing;
 import java.io.Serializable;
 
 /**
+ * The root class of all the messages that are exchanged at the native interface.
  * @author Christopher Deckers
  */
 public class Message implements Serializable {
@@ -20,6 +21,9 @@ public class Message implements Serializable {
   private boolean isSyncExec;
   private boolean isUI = true;
   
+  /**
+   * Create an empty message.
+   */
   public Message() {
     if(NativeInterface.isNativeSide()) {
       id = -nextID++;
@@ -48,18 +52,26 @@ public class Message implements Serializable {
     return isSyncExec;
   }
   
+  /**
+   * Execute that message asynchronously.
+   */
   public void asyncExec() {
     NativeInterface.asyncExec(this);
   }
   
+  /**
+   * Execute that message synchronously, potentially returning a result if the message type allows that.
+   * @return the result if any.
+   */
   public Object syncExec() {
     return NativeInterface.syncExec(this);
   }
   
   /**
-   * Valid message will be executed.
+   * Indicate whether the message is valid. This is called before interpreting it to give a chance for the message to prevent its interpretation.
+   * @return true if the message is valid and should be interpreted, false otherwise.
    */
-  public boolean isValid() {
+  protected boolean isValid() {
     return true;
   }
   

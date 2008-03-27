@@ -8,12 +8,17 @@
 package chrriis.dj.nativeswing;
 
 /**
+ * A type of message that executes a command, with some arguments, and returning a result.
  * @author Christopher Deckers
  */
 public abstract class CommandMessage extends Message {
 
   protected Object[] args;
   
+  /**
+   * Set the arguments that will be used when the message is run.
+   * @param args the arguments, which must be serializable.
+   */
   public void setArgs(Object... args) {
     if(args.length == 0) {
       args = null;
@@ -21,20 +26,30 @@ public abstract class CommandMessage extends Message {
     this.args = args;
   }
   
-  public CommandMessage(Object... args) {
-    setArgs(args);
-  }
-  
+  /**
+   * Execute that message asynchronously with the given arguments.
+   * @param args the arguments, which must be serializable.
+   */
   public void asyncExecArgs(Object... args) {
     setArgs(args);
     asyncExec();
   }
   
+  /**
+   * Execute that message synchronously with the given arguments and return the result.
+   * @param args the arguments, which must be serializable.
+   * @return the result of the execution.
+   */
   public Object syncExecArgs(Object... args) {
     setArgs(args);
     return syncExec();
   }
   
+  /**
+   * Run the message.
+   * @return the result that may be passed back to the caller.
+   * @throws Exception any exception that may happen, and which would be passed back if it is a synchronous execution.
+   */
   public abstract Object run() throws Exception;
   
   @Override

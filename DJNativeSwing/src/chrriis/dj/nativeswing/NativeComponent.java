@@ -192,7 +192,7 @@ public abstract class NativeComponent extends Canvas {
       return (NativeComponent)NativeComponent.registry.get(componentID);
     }
     @Override
-    public boolean isValid() {
+    protected boolean isValid() {
       if(NativeInterface.isNativeSide()) {
         return getControl() != null;
       }
