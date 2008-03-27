@@ -13,6 +13,9 @@ package chrriis.dj.nativeswing;
  */
 public abstract class CommandMessage extends Message {
 
+  /**
+   * The arguments, which are accessed directly from within the run method.
+   */
   protected Object[] args;
   
   /**
