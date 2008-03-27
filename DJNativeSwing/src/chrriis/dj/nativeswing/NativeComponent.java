@@ -633,7 +633,6 @@ public abstract class NativeComponent extends Canvas {
       if(isNativePeerInitialized) {
         NativeInterface.removeCanvas(this);
         if(isNativePeerValid()) {
-          System.err.println("destroy: " + hashCode());
           runSync(new CMN_destroyControl());
         }
       }
