@@ -234,7 +234,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
       }
       return;
     }
-    if(!isVisibilityConstrained) {
+    if(!isVisibilityConstrained || panel == null) {
       return;
     }
     isCapturing = true;
