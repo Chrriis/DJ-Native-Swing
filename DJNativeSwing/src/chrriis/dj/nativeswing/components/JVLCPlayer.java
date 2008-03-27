@@ -204,7 +204,7 @@ public class JVLCPlayer extends NSPanelComponent {
   }
   
   public JVLCPlayer() {
-    setNativeComponent(webBrowser.getNativeComponent());
+    initialize(webBrowser.getNativeComponent());
     webBrowserPanel = new JPanel(new BorderLayout(0, 0));
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);

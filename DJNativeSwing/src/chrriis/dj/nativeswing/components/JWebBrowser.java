@@ -184,7 +184,7 @@ public class JWebBrowser extends NSPanelComponent {
    */
   public JWebBrowser() {
     nativeComponent = new NativeWebBrowser(this);
-    setNativeComponent(nativeComponent);
+    initialize(nativeComponent);
     JPanel menuToolAndAddressBarPanel = new JPanel(new BorderLayout(0, 0));
     menuBar = new JMenuBar();
     menuToolAndAddressBarPanel.add(menuBar, BorderLayout.NORTH);

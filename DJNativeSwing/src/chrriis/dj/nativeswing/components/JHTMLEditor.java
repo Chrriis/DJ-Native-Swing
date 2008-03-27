@@ -94,7 +94,7 @@ public class JHTMLEditor extends NSPanelComponent {
       throw new IllegalStateException("The FCKEditor distribution is missing from the classpath!");
     }
     webBrowser = new JWebBrowser();
-    setNativeComponent(webBrowser.getNativeComponent());
+    initialize(webBrowser.getNativeComponent());
     webBrowser.addWebBrowserListener(new NWebBrowserListener(this));
     webBrowser.setBarsVisible(false);
     add(webBrowser, BorderLayout.CENTER);

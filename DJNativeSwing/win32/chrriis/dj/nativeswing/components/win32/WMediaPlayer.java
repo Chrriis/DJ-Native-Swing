@@ -51,7 +51,7 @@ public class WMediaPlayer extends NSPanelComponent {
   
   public WMediaPlayer() {
     nativeComponent = new NativeWMediaPlayer();
-    setNativeComponent(nativeComponent);
+    initialize(nativeComponent);
     wmpSettings = new WMPSettings(this);
     wmpControls = new WMPControls(this);
     nativeComponent.addInitializationListener(new NInitializationListener(this));

@@ -23,12 +23,15 @@ public class NSPanelComponent extends JPanel implements NSComponent {
     super(new BorderLayout(0, 0));
   }
   
-  protected void setNativeComponent(NativeComponent nativeComponent) {
+  /**
+   * Initialize this class with its native component.
+   * @param nativeComponent the native component that this component relates to.
+   */
+  protected void initialize(NativeComponent nativeComponent) {
+    if(this.nativeComponent != null) {
+      throw new IllegalStateException("The native component is already initialized!");
+    }
     this.nativeComponent = nativeComponent;
-  }
-  
-  public NativeComponent getNativeComponent() {
-    return nativeComponent;
   }
   
   public void initializeNativePeer() {

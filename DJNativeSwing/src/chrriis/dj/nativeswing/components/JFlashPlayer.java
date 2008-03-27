@@ -143,7 +143,7 @@ public class JFlashPlayer extends NSPanelComponent {
    * Construct a flash player.
    */
   public JFlashPlayer() {
-    setNativeComponent(webBrowser.getNativeComponent());
+    initialize(webBrowser.getNativeComponent());
     webBrowserPanel = new JPanel(new BorderLayout(0, 0));
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);
