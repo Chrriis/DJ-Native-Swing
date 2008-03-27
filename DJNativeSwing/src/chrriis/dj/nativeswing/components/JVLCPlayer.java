@@ -410,10 +410,10 @@ public class JVLCPlayer extends JPanel implements NSComponent {
   
   /**
    * Set whether the control bar is visible.
-   * @param isButtonBarVisible true if the control bar should be visible, false otherwise.
+   * @param isControlBarVisible true if the control bar should be visible, false otherwise.
    */
-  public void setControlBarVisible(boolean isVisible) {
-    controlBarPane.setVisible(isVisible);
+  public void setControlBarVisible(boolean isControlBarVisible) {
+    controlBarPane.setVisible(isControlBarVisible);
     adjustBorder();
   }
   
@@ -783,7 +783,7 @@ public class JVLCPlayer extends JPanel implements NSComponent {
     }
     /**
      * Set whether the video is playing in full screen mode.
-     * @param true if the full screen mode should be active, false otherwise.
+     * @param isFullScreen true if the full screen mode should be active, false otherwise.
      */
     public void setFullScreen(boolean isFullScreen) {
       webBrowserObject.setObjectProperty("video.fullscreen", isFullScreen);
