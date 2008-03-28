@@ -193,6 +193,10 @@ public class JFlashPlayer extends NSPanelComponent {
     return value.length() == 0? null: new ImageIcon(JWebBrowser.class.getResource(value));
   }
   
+  /**
+   * Get the javascript definitions (functions) that are added to the HTML page that contains the plugin. This method id meant to be overriden by subclasses that want to add custom definitions.
+   * @return the Javascript definitions to include.
+   */
   protected String getJavascriptDefinitions() {
     return null;
   }

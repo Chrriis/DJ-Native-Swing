@@ -12,10 +12,10 @@ import java.awt.BorderLayout;
 import javax.swing.JPanel;
 
 /**
- * A convenience class for Swing wrappers of native components.
+ * A convenience Swing component superclass, for Swing wrappers of native components.
  * @author Christopher Deckers
  */
-public class NSPanelComponent extends JPanel implements NSComponent {
+public abstract class NSPanelComponent extends JPanel implements NSComponent {
 
   private NativeComponent nativeComponent;
   
