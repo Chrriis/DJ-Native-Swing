@@ -8,7 +8,7 @@
 package chrriis.dj.nativeswing;
 
 /**
- * Options that native components use when they are created, per-instance or for all of them.
+ * Options that native components use when they are created, set per next instance creation or as defaults.
  * @author Christopher Deckers
  */
 public class NativeComponentOptions implements Cloneable {

@@ -10,7 +10,7 @@ package chrriis.dj.nativeswing;
 import org.eclipse.swt.widgets.Control;
 
 /**
- * A message that make the link between a local component and a native peer control.
+ * A message that makes the link between a native component on the local side and its native peer control.
  * @author Christopher Deckers
  */
 public abstract class ControlCommandMessage extends CommandMessage {

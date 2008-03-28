@@ -8,7 +8,7 @@
 package chrriis.dj.nativeswing;
 
 /**
- * A type of message that executes a command, with some arguments, and returning a result.
+ * A type of message that executes a command with optional arguments and returns a result.
  * @author Christopher Deckers
  */
 public abstract class CommandMessage extends Message {
