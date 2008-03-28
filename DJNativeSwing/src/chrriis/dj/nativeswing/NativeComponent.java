@@ -644,9 +644,6 @@ public abstract class NativeComponent extends Canvas {
   protected void disposeNativePeer() {
     if(!isNativePeerDisposed) {
       isNativePeerDisposed = true;
-      if(nativeComponentProxy != null) {
-        nativeComponentProxy.dispose();
-      }
       if(isNativePeerInitialized) {
         NativeInterface.removeCanvas(this);
         if(isNativePeerValid()) {
@@ -655,6 +652,9 @@ public abstract class NativeComponent extends Canvas {
       }
       NativeComponent.registry.remove(componentID);
       isNativePeerValid = false;
+      if(nativeComponentProxy != null) {
+        nativeComponentProxy.dispose();
+      }
     }
   }
   
