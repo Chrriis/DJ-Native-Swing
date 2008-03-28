@@ -376,7 +376,7 @@ public abstract class NativeComponent extends Canvas {
   }
   
   private static class CMN_createControl extends CommandMessage {
-    public Shell createShell(long handle) throws Exception {
+    public Shell createShell(Object handle) throws Exception {
       // these are the methods that are in the Shell class, and can create the embedded shell:
       // win32: public static Shell win32_new (Display display, int handle) {
       // photon: public static Shell photon_new (Display display, int handle) {
@@ -388,7 +388,7 @@ public abstract class NativeComponent extends Canvas {
         shellCreationMethod = Shell.class.getMethod(SWT.getPlatform() + "_new", Display.class, int.class); 
       } catch(Exception e) {}
       if(shellCreationMethod != null) {
-        return (Shell)shellCreationMethod.invoke(null, NativeInterface.getDisplay(), (int)handle);
+        return (Shell)shellCreationMethod.invoke(null, NativeInterface.getDisplay(), handle);
       }
       try {
         shellCreationMethod = Shell.class.getMethod(SWT.getPlatform() + "_new", Display.class, long.class); 
@@ -402,7 +402,7 @@ public abstract class NativeComponent extends Canvas {
       } catch(Exception e) {}
       if(shellConstructor != null) {
         shellConstructor.setAccessible(true);
-        return shellConstructor.newInstance(NativeInterface.getDisplay(), null, SWT.NO_TRIM, (int)handle);
+        return shellConstructor.newInstance(NativeInterface.getDisplay(), null, SWT.NO_TRIM, handle);
       }
       try {
         shellConstructor = Shell.class.getConstructor(Display.class, Shell.class, int.class, long.class); 
@@ -415,7 +415,7 @@ public abstract class NativeComponent extends Canvas {
     }
     @Override
     public Object run() throws Exception {
-      Shell shell = createShell((Long)args[2]);
+      Shell shell = createShell(args[2]);
       shell.setVisible (true);
       shell.setLayout(new FillLayout());
       int componentID = (Integer)args[0];
@@ -550,7 +550,7 @@ public abstract class NativeComponent extends Canvas {
   }
   
   private Method getAWTHandleMethod;
-  private long getHandle() {
+  private Object getHandle() {
     try {
       if(getAWTHandleMethod == null) {
         Method loadLibraryMethod = SWT_AWT.class.getDeclaredMethod("loadLibrary");
@@ -559,7 +559,7 @@ public abstract class NativeComponent extends Canvas {
         getAWTHandleMethod = SWT_AWT.class.getDeclaredMethod("getAWTHandle", Canvas.class);
         getAWTHandleMethod.setAccessible(true);
       }
-      return ((Number)getAWTHandleMethod.invoke(null, this)).longValue();
+      return getAWTHandleMethod.invoke(null, this);
     } catch(Exception e) {
       e.printStackTrace();
     }
