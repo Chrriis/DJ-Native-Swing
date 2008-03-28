@@ -32,9 +32,8 @@ import javax.swing.JLayeredPane;
 import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
 
-import chrriis.dj.nativeswing.NativeComponent.NativeComponentOptions;
-import chrriis.dj.nativeswing.NativeComponent.NativeComponentOptions.DestructionTime;
-import chrriis.dj.nativeswing.NativeComponent.NativeComponentOptions.VisibilityConstraint;
+import chrriis.dj.nativeswing.NativeComponentOptions.DestructionTime;
+import chrriis.dj.nativeswing.NativeComponentOptions.VisibilityConstraint;
 import chrriis.dj.nativeswing.NativeComponentProxyWindow.EmbeddedWindow;
 
 /**

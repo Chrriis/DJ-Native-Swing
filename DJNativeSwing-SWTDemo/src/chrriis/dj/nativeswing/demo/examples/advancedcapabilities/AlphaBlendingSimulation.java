@@ -20,9 +20,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.MouseInputAdapter;
 
 import chrriis.common.Disposable;
-import chrriis.dj.nativeswing.NativeComponent;
+import chrriis.dj.nativeswing.NativeComponentOptions;
 import chrriis.dj.nativeswing.NativeInterface;
-import chrriis.dj.nativeswing.NativeComponent.NativeComponentOptions.VisibilityConstraint;
+import chrriis.dj.nativeswing.NativeComponentOptions.VisibilityConstraint;
 import chrriis.dj.nativeswing.NativeInterface.NativeInterfaceInitOptions;
 import chrriis.dj.nativeswing.components.JWebBrowser;
 
@@ -41,7 +41,7 @@ public class AlphaBlendingSimulation extends JPanel implements Disposable {
   
   public AlphaBlendingSimulation() {
     super(null);
-    NativeComponent.getNextInstanceOptions().setVisibilityConstraint(VisibilityConstraint.FULL_COMPONENT_TREE);
+    NativeComponentOptions.getNextInstanceOptions().setVisibilityConstraint(VisibilityConstraint.FULL_COMPONENT_TREE);
     webBrowser = new JWebBrowser();
     webBrowser.setBarsVisible(false);
     webBrowser.setURL("http://www.google.com");

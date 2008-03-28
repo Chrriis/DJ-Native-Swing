@@ -19,10 +19,10 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import chrriis.common.Disposable;
-import chrriis.dj.nativeswing.NativeComponent;
+import chrriis.dj.nativeswing.NativeComponentOptions;
 import chrriis.dj.nativeswing.NativeInterface;
-import chrriis.dj.nativeswing.NativeComponent.NativeComponentOptions.DestructionTime;
-import chrriis.dj.nativeswing.NativeComponent.NativeComponentOptions.FiliationType;
+import chrriis.dj.nativeswing.NativeComponentOptions.DestructionTime;
+import chrriis.dj.nativeswing.NativeComponentOptions.FiliationType;
 import chrriis.dj.nativeswing.NativeInterface.NativeInterfaceInitOptions;
 import chrriis.dj.nativeswing.components.JFlashPlayer;
 import chrriis.dj.nativeswing.components.JWebBrowser;
@@ -43,7 +43,7 @@ public class FiliationTypeOption extends JPanel implements Disposable {
     webBrowser1InternalFrame.setBounds(10, 10, 400, 280);
     webBrowser1InternalFrame.setResizable(true);
     webBrowser1InternalFrame.setVisible(true);
-    NativeComponent.getNextInstanceOptions().setFiliationType(FiliationType.COMPONENT_PROXYING);
+    NativeComponentOptions.getNextInstanceOptions().setFiliationType(FiliationType.COMPONENT_PROXYING);
     JWebBrowser webBrowser1 = new JWebBrowser();
     webBrowser1.setURL("http://djproject.sf.net");
     webBrowser1InternalFrame.add(webBrowser1, BorderLayout.CENTER);
@@ -53,7 +53,7 @@ public class FiliationTypeOption extends JPanel implements Disposable {
     flashPlayerInternalFrame.setBounds(100, 100, 400, 280);
     flashPlayerInternalFrame.setResizable(true);
     flashPlayerInternalFrame.setVisible(true);
-    NativeComponent.getNextInstanceOptions().setFiliationType(FiliationType.COMPONENT_PROXYING);
+    NativeComponentOptions.getNextInstanceOptions().setFiliationType(FiliationType.COMPONENT_PROXYING);
     JFlashPlayer flashPlayer = new JFlashPlayer();
     flashPlayer.setControlBarVisible(false);
     flashPlayer.load(SimpleFlashExample.class, "resource/Movement-pointer_or_click.swf");
@@ -75,9 +75,9 @@ public class FiliationTypeOption extends JPanel implements Disposable {
         return false;
       }
     };
-    NativeComponent.getNextInstanceOptions().setFiliationType(FiliationType.COMPONENT_PROXYING);
+    NativeComponentOptions.getNextInstanceOptions().setFiliationType(FiliationType.COMPONENT_PROXYING);
     // When a frame is iconified, components are destroyed. To avoid this, we use the option to destroy on finalization.
-    NativeComponent.getNextInstanceOptions().setDestructionTime(DestructionTime.ON_FINALIZATION);
+    NativeComponentOptions.getNextInstanceOptions().setDestructionTime(DestructionTime.ON_FINALIZATION);
     webBrowser2 = new JWebBrowser();
     webBrowser2.setURL("http://www.google.com");
     cons.weightx = 1;

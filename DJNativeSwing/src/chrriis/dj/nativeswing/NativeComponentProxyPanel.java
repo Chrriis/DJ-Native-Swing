@@ -35,7 +35,7 @@ import javax.swing.RootPaneContainer;
 import javax.swing.SwingUtilities;
 
 import chrriis.dj.nativeswing.NativeComponent.NativeComponentHolder;
-import chrriis.dj.nativeswing.NativeComponent.NativeComponentOptions.FiliationType;
+import chrriis.dj.nativeswing.NativeComponentOptions.FiliationType;
 
 import com.sun.jna.examples.WindowUtils;
 
