@@ -185,7 +185,7 @@ public class NativeInterface {
     return windowSet == null? new Window[0]: windowSet.toArray(new Window[0]);
   }
   
-  static boolean isInterfaceAlive() {
+  static boolean isAlive() {
     return isInitialized() && messagingInterface.isAlive();
   }
   
@@ -202,6 +202,9 @@ public class NativeInterface {
     }
   }
   
+  /**
+   * Initialize the native interface, which creates the peer VM handling the native side of the native integration.
+   */
   public static void initialize() {
     initialize(new NativeInterfaceOptions());
   }
@@ -223,6 +226,9 @@ public class NativeInterface {
     }
   }
   
+  /**
+   * Destroy the native interface, which closes the native side (peer VM). The native interface can be re-created later using the initialize() method.
+   */
   public static void destroy() {
     isInitialized = false;
     messagingInterface.destroy();
@@ -253,6 +259,10 @@ public class NativeInterface {
     }
   }
   
+  /**
+   * Initialize the native interface, which creates the peer VM handling the native side of the native integration.
+   * @param nativeInterfaceOptions the options to configure the native interface.
+   */
   public static void initialize(NativeInterfaceOptions nativeInterfaceOptions) {
     if(isInitialized()) {
       return;
@@ -260,9 +270,9 @@ public class NativeInterface {
     loadClipboardProperties();
     NativeInterface.nativeInterfaceOptions = nativeInterfaceOptions;
     isInitialized = true;
-    boolean isFullInit = isFirstStart;
+    boolean isFullInitialization = isFirstStart;
     isFirstStart = false;
-    if(isFullInit) {
+    if(isFullInitialization) {
       if(nativeInterfaceOptions.isPreferredLookAndFeelApplied()) {
         setPreferredLookAndFeel();
       }
@@ -630,20 +640,29 @@ public class NativeInterface {
     return display != null;
   }
   
+  /**
+   * Indicate if the current thread is the user interface thread.
+   * @return true if the current thread is the user interface thread.
+   * @throws IllegalStateException when the native interface is not alive.
+   */
   public static boolean isUIThread() {
-    if(!isInterfaceAlive()) {
+    if(!isAlive()) {
       throw new IllegalStateException("The native interface is not alive!");
     }
     return messagingInterface.isUIThread();
   }
   
-  public static void checkUIThread() {
-    if(!isInterfaceAlive()) {
+  static void checkUIThread() {
+    if(!isAlive()) {
       throw new IllegalStateException("The native interface is not alive!");
     }
     messagingInterface.checkUIThread();
   }
   
+  /**
+   * The main method that is called by the native side (peer VM).
+   * @param args the arguments that are passed to the peer VM.
+   */
   public static void main(String[] args) throws Exception {
     if(Boolean.parseBoolean(System.getProperty("dj.nativeswing.native.initmessage"))) {
       System.err.println("Starting spawned VM");
@@ -722,7 +741,6 @@ public class NativeInterface {
       throw new IllegalStateException("The native side did not receive an incoming connection!");
     }
     display = new Display();
-    final Thread uiThread = Thread.currentThread();
     messagingInterface = new MessagingInterface(socket, true) {
       @Override
       protected void asyncUIExec(Runnable runnable) {
@@ -730,7 +748,7 @@ public class NativeInterface {
       }
       @Override
       public boolean isUIThread() {
-        return Thread.currentThread() == uiThread;
+        return Thread.currentThread() == display.getThread();
       }
     };
     while(display != null && !display.isDisposed()) {

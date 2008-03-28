@@ -123,7 +123,7 @@ public abstract class NativeComponent extends Canvas {
    * If the component is disposed before the command has a chance to run, it is ignored silently.
    */
   public Object runSync(CommandMessage commandMessage, Object... args) {
-    if(NativeInterface.isInterfaceAlive()) {
+    if(NativeInterface.isAlive()) {
       NativeInterface.checkUIThread();
     }
     if(initializationCommandMessageList != null) {
@@ -147,7 +147,7 @@ public abstract class NativeComponent extends Canvas {
    * If the component is disposed before the command has a chance to run, it is ignored silently.
    */
   public void runAsync(CommandMessage commandMessage, Object... args) {
-    if(NativeInterface.isInterfaceAlive()) {
+    if(NativeInterface.isAlive()) {
       NativeInterface.checkUIThread();
     }
     if(initializationCommandMessageList != null) {
@@ -515,7 +515,7 @@ public abstract class NativeComponent extends Canvas {
    * This call fails if the component is not in a component hierarchy with a Window ancestor.
    */
   public void initializeNativePeer() {
-    if(NativeInterface.isInterfaceAlive()) {
+    if(NativeInterface.isAlive()) {
       NativeInterface.checkUIThread();
     }
     Window windowAncestor = SwingUtilities.getWindowAncestor(this);
@@ -546,7 +546,7 @@ public abstract class NativeComponent extends Canvas {
   }
   
   private void createNativePeer() {
-    boolean isInterfaceAlive = NativeInterface.isInterfaceAlive();
+    boolean isInterfaceAlive = NativeInterface.isAlive();
     if(isInterfaceAlive) {
       NativeInterface.checkUIThread();
     }
@@ -650,7 +650,7 @@ public abstract class NativeComponent extends Canvas {
    * @return true if the native peer is valid.
    */
   public boolean isNativePeerValid() {
-    return isNativePeerValid && NativeInterface.isInterfaceAlive();
+    return isNativePeerValid && NativeInterface.isAlive();
   }
   
   void invalidateNativePeer(String invalidNativePeerText) {
