@@ -689,7 +689,7 @@ public abstract class NativeComponent extends Canvas {
     this.options = options;
   }
   
-  public NativeComponentOptions getOptions() {
+  NativeComponentOptions getOptions() {
     return options;
   }
   

@@ -637,7 +637,7 @@ public class NativeInterface {
     return messagingInterface;
   }
   
-  public static Object syncExec(final Message message) {
+  static Object syncExec(final Message message) {
     checkInitialized();
     if(message instanceof LocalMessage) {
       return ((LocalMessage)message).run();
@@ -645,7 +645,7 @@ public class NativeInterface {
     return messagingInterface.syncExec(message);
   }
   
-  public static void asyncExec(final Message message) {
+  static void asyncExec(final Message message) {
     checkInitialized();
     if(message instanceof LocalMessage) {
       ((LocalMessage)message).run();
