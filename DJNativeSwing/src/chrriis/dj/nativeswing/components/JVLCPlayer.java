@@ -81,7 +81,7 @@ public class JVLCPlayer extends NSPanelComponent {
   private JButton pauseButton;
   private JButton stopButton;
 
-  private WebBrowserObject webBrowserObject = new WebBrowserObject(this, webBrowser) {
+  private WebBrowserObject webBrowserObject = new WebBrowserObject(webBrowser) {
     
     protected ObjectHTMLConfiguration getObjectHtmlConfiguration() {
       ObjectHTMLConfiguration objectHTMLConfiguration = new ObjectHTMLConfiguration();

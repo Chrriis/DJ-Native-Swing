@@ -584,16 +584,6 @@ public abstract class NativeComponent extends Canvas {
         initCommandMessage.asyncExec();
       }
     }
-    Object[] listeners = listenerList.getListenerList();
-    InitializationEvent e = null;
-    for(int i=listeners.length-2; i>=0; i-=2) {
-      if(listeners[i] == InitializationListener.class) {
-        if(e == null) {
-          e = new InitializationEvent(NativeComponent.this);
-        }
-        ((InitializationListener)listeners[i + 1]).objectInitialized(e);
-      }
-    }
   }
   
   private static class CMN_destroyControl extends ControlCommandMessage {
@@ -1007,30 +997,6 @@ public abstract class NativeComponent extends Canvas {
       return super.getListeners(listenerType); 
     }
     return result; 
-  }
-  
-  /**
-   * Add a listener that is notified when the native peer is initialized. This listener is called after all the method calls that were waiting are run.
-   * @param listener The initialization listener to add.
-   */
-  public void addInitializationListener(InitializationListener listener) {
-    listenerList.add(InitializationListener.class, listener);
-  }
-  
-  /**
-   * Remove an initialization listener.
-   * @param listener The listener to remove.
-   */
-  public void removeInitializationListener(InitializationListener listener) {
-    listenerList.remove(InitializationListener.class, listener);
-  }
-  
-  /**
-   * Get all the initialization listeners.
-   * @return the initialization listeners.
-   */
-  public InitializationListener[] getInitializationListeners() {
-    return listenerList.getListeners(InitializationListener.class);
   }
   
 }

@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
+import java.util.EventListener;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,8 +26,6 @@ import chrriis.common.Utils;
 import chrriis.common.WebServer;
 import chrriis.common.WebServer.HTTPRequest;
 import chrriis.common.WebServer.WebServerContent;
-import chrriis.dj.nativeswing.InitializationEvent;
-import chrriis.dj.nativeswing.InitializationListener;
 import chrriis.dj.nativeswing.LocalMessage;
 import chrriis.dj.nativeswing.Message;
 import chrriis.dj.nativeswing.NSPanelComponent;
@@ -59,13 +58,9 @@ public class JHTMLEditor extends NSPanelComponent {
       }
       if("JH_setLoaded".equals(command)) {
         Object[] listeners = htmlEditor.listenerList.getListenerList();
-        InitializationEvent ev = null;
         for(int i=listeners.length-2; i>=0; i-=2) {
           if(listeners[i] == InitializationListener.class) {
-            if(ev == null) {
-              ev = new InitializationEvent(htmlEditor);
-            }
-            ((InitializationListener)listeners[i + 1]).objectInitialized(ev);
+            ((InitializationListener)listeners[i + 1]).objectInitialized();
           }
         }
       }
@@ -100,7 +95,7 @@ public class JHTMLEditor extends NSPanelComponent {
     instanceID = Registry.getInstance().add(this);
     final Boolean[] resultArray = new Boolean[] {Boolean.FALSE};
     InitializationListener initializationListener = new InitializationListener() {
-      public void objectInitialized(InitializationEvent e) {
+      public void objectInitialized() {
         removeInitializationListener(this);
         resultArray[0] = Boolean.TRUE;
       }
@@ -428,6 +423,10 @@ public class JHTMLEditor extends NSPanelComponent {
     return listenerList.getListeners(HTMLEditorListener.class);
   }
   
+  private static interface InitializationListener extends EventListener {
+    public void objectInitialized();
+  }
+
   private void addInitializationListener(InitializationListener listener) {
     listenerList.add(InitializationListener.class, listener);
   }

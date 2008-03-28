@@ -8,11 +8,7 @@
 package chrriis.dj.nativeswing.components.win32;
 
 import java.awt.BorderLayout;
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
 
-import chrriis.dj.nativeswing.InitializationEvent;
-import chrriis.dj.nativeswing.InitializationListener;
 import chrriis.dj.nativeswing.NSPanelComponent;
 import chrriis.dj.nativeswing.NativeComponent;
 
@@ -26,35 +22,11 @@ public class JWMediaPlayer extends NSPanelComponent {
 
   private NativeWMediaPlayer nativeComponent;
   
-  private static class NInitializationListener implements InitializationListener {
-    private Reference<JWMediaPlayer> multiMediaPlayer;
-    private NInitializationListener(JWMediaPlayer multiMediaPlayer) {
-      this.multiMediaPlayer = new WeakReference<JWMediaPlayer>(multiMediaPlayer);
-    }
-    public void objectInitialized(InitializationEvent e) {
-      JWMediaPlayer multiMediaPlayer = this.multiMediaPlayer.get();
-      if(multiMediaPlayer == null) {
-        return;
-      }
-      Object[] listeners = multiMediaPlayer.listenerList.getListenerList();
-      e = null;
-      for(int i=listeners.length-2; i>=0; i-=2) {
-        if(listeners[i] == InitializationListener.class) {
-          if(e == null) {
-            e = new InitializationEvent(multiMediaPlayer);
-          }
-          ((InitializationListener)listeners[i + 1]).objectInitialized(e);
-        }
-      }
-    }
-  }
-  
   public JWMediaPlayer() {
     nativeComponent = new NativeWMediaPlayer();
     initialize(nativeComponent);
     wmpSettings = new WMPSettings(this);
     wmpControls = new WMPControls(this);
-    nativeComponent.addInitializationListener(new NInitializationListener(this));
     add(nativeComponent.createEmbeddableComponent(), BorderLayout.CENTER);
     wmpSettings.setAutoStart(true);
     wmpSettings.setErrorDialogsEnabled(false);

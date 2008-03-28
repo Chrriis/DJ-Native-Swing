@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -48,25 +49,19 @@ public abstract class WebBrowserObject {
       }
       if("WB_setLoaded".equals(command)) {
         Object[] listeners = webBrowserObject.listenerList.getListenerList();
-        InitializationEvent ev = null;
         for(int i=listeners.length-2; i>=0; i-=2) {
           if(listeners[i] == InitializationListener.class) {
-            if(ev == null) {
-              ev = new InitializationEvent(webBrowserObject.source);
-            }
-            ((InitializationListener)listeners[i + 1]).objectInitialized(ev);
+            ((InitializationListener)listeners[i + 1]).objectInitialized();
           }
         }
       }
     }
   }
   
-  private Object source;
   private JWebBrowser webBrowser;
   private int instanceID;
   
-  public WebBrowserObject(Object source, JWebBrowser webBrowser) {
-    this.source = source;
+  public WebBrowserObject(JWebBrowser webBrowser) {
     this.webBrowser = webBrowser;
     webBrowser.setBarsVisible(false);
     webBrowser.addWebBrowserListener(new NWebBrowserListener(this));
@@ -111,7 +106,7 @@ public abstract class WebBrowserObject {
     resourcePath = WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "html/" + instanceID);
     final Boolean[] resultArray = new Boolean[] {Boolean.FALSE};
     InitializationListener initializationListener = new InitializationListener() {
-      public void objectInitialized(InitializationEvent e) {
+      public void objectInitialized() {
         removeInitializationListener(this);
         resultArray[0] = Boolean.TRUE;
       }
@@ -409,6 +404,10 @@ public abstract class WebBrowserObject {
     return null;
   }
   
+  private static interface InitializationListener extends EventListener {
+    public void objectInitialized();
+  }
+
   private EventListenerList listenerList = new EventListenerList();
   
   private void addInitializationListener(InitializationListener listener) {
