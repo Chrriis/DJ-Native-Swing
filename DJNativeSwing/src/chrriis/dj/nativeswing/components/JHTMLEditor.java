@@ -30,7 +30,6 @@ import chrriis.dj.nativeswing.InitializationListener;
 import chrriis.dj.nativeswing.LocalMessage;
 import chrriis.dj.nativeswing.Message;
 import chrriis.dj.nativeswing.NSPanelComponent;
-import chrriis.dj.nativeswing.NativeInterface;
 
 /**
  * An HTML editor. It is a browser-based component, which relies on the FCKeditor.<br/>
@@ -79,7 +78,7 @@ public class JHTMLEditor extends NSPanelComponent {
       InitializationListener initializationListener = (InitializationListener)args[0];
       Boolean[] resultArray = (Boolean[])args[1];
       for(long time = System.currentTimeMillis(); !resultArray[0].booleanValue() && System.currentTimeMillis() - time < 4000; ) {
-        NativeInterface.syncExec(new Message());
+        new Message().syncExec();
         try {
           Thread.sleep(50);
         } catch(Exception e) {}
@@ -351,7 +350,7 @@ public class JHTMLEditor extends NSPanelComponent {
         html = (String)tempResult;
         break;
       }
-      NativeInterface.syncExec(new Message());
+      new Message().syncExec();
       if(tempResult != this) {
         html = (String)tempResult;
         break;

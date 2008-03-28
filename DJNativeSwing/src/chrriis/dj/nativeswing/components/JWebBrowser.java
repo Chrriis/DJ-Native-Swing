@@ -41,7 +41,6 @@ import chrriis.common.Utils;
 import chrriis.dj.nativeswing.Message;
 import chrriis.dj.nativeswing.NSPanelComponent;
 import chrriis.dj.nativeswing.NativeComponent;
-import chrriis.dj.nativeswing.NativeInterface;
 
 /**
  * A native web browser, using Internet Explorer or Mozilla on Windows, and Mozilla on other platforms.<br/>
@@ -625,7 +624,7 @@ public class JWebBrowser extends NSPanelComponent {
         if(resultArray[0] != null) {
           break;
         }
-        NativeInterface.syncExec(new Message());
+        new Message().syncExec();
         if(resultArray[0] != null) {
           break;
         }

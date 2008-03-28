@@ -668,13 +668,14 @@ public class NativeInterface {
   private static Display display;
   
   /**
-   * Only possible when in the native context
+   * Get the SWT display. This is only possible when in the native context.
+   * @return the display, or null.
    */
   public static Display getDisplay() {
     return display;
   }
   
-  public static boolean isNativeSide() {
+  static boolean isNativeSide() {
     return display != null;
   }
   
@@ -798,14 +799,26 @@ public class NativeInterface {
 
   private static EventListenerList listenerList = new EventListenerList();
   
+  /**
+   * Add a native interface listener.
+   * @param listener the native listener to add.
+   */
   public static void addNativeInterfaceListener(NativeInterfaceListener listener) {
     listenerList.add(NativeInterfaceListener.class, listener);
   }
   
+  /**
+   * Remove a native interface listener.
+   * @param listener the native listener to remove.
+   */
   public static void removeNativeInterfaceListener(NativeInterfaceListener listener) {
     listenerList.remove(NativeInterfaceListener.class, listener);
   }
   
+  /**
+   * Get all the native interface listeners.
+   * @return the native interface listeners.
+   */
   public static NativeInterfaceListener[] getNativeInterfaceListeners() {
     return listenerList.getListeners(NativeInterfaceListener.class);
   }
