@@ -624,7 +624,7 @@ public class JWebBrowser extends NSPanelComponent {
         if(resultArray[0] != null) {
           break;
         }
-        new Message().syncExec();
+        new Message().syncSend();
         if(resultArray[0] != null) {
           break;
         }

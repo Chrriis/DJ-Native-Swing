@@ -333,14 +333,14 @@ class NativeWebBrowser extends NativeComponent {
     final Browser browser = new Browser(shell, style);
     browser.addCloseWindowListener(new CloseWindowListener() {
       public void close(WindowEvent event) {
-        asyncExec(browser, new CMJ_closeWindow());
+        new CMJ_closeWindow().asyncExec(browser);
       }
     });
     browser.addOpenWindowListener(new OpenWindowListener() {
       public void open(WindowEvent e) {
         // This forces the user to open it himself
         e.required = true;
-        final Integer componentID = (Integer)syncExec(browser, new CMJ_createWindow());
+        final Integer componentID = (Integer)new CMJ_createWindow().syncExecArgs(browser);
         final Browser newWebBrowser;
         final boolean isDisposed;
         if(componentID == null) {
@@ -365,7 +365,7 @@ class NativeWebBrowser extends NativeComponent {
               });
             } else {
               (browser).removeVisibilityWindowListener(this);
-              asyncExec(newWebBrowser, new CMJ_showWindow(), componentID, e.menuBar, e.toolBar, e.addressBar, e.statusBar, e.location == null? null: new Point(e.location.x, e.location.y), e.size == null? null: new Dimension(e.size.x, e.size.y));
+              new CMJ_showWindow().asyncExec(newWebBrowser, componentID, e.menuBar, e.toolBar, e.addressBar, e.statusBar, e.location == null? null: new Point(e.location.x, e.location.y), e.size == null? null: new Dimension(e.size.x, e.size.y));
             }
           }
         });
@@ -373,7 +373,7 @@ class NativeWebBrowser extends NativeComponent {
     });
     browser.addLocationListener(new LocationListener() {
       public void changed(LocationEvent e) {
-        asyncExec(browser, new CMJ_urlChanged(), e.location, e.top);
+        new CMJ_urlChanged().asyncExec(browser, e.location, e.top);
       }
       public void changing(LocationEvent e) {
         final String location = e.location;
@@ -403,35 +403,35 @@ class NativeWebBrowser extends NativeComponent {
           }
           String command = queryElementList.isEmpty()? "": queryElementList.remove(0);
           String[] args = queryElementList.toArray(new String[0]);
-          asyncExec(browser, new CMJ_commandReceived(), command, args);
+          new CMJ_commandReceived().asyncExec(browser, command, args);
           return;
         }
         if(location.startsWith("javascript:")) {
           return;
         }
-        e.doit = (Boolean)syncExec(browser, new CMJ_urlChanging(), location, e.top);
+        e.doit = (Boolean)new CMJ_urlChanging().syncExecArgs(browser, location, e.top);
         if(!e.doit) {
-          asyncExec(browser, new CMJ_urlChangeCanceled(), location, e.top);
+          new CMJ_urlChangeCanceled().asyncExec(browser, location, e.top);
         }
       }
     });
     browser.addTitleListener(new TitleListener() {
       public void changed(TitleEvent e) {
-        asyncExec(browser, new CMJ_updateTitle(), e.title);
+        new CMJ_updateTitle().asyncExec(browser, e.title);
       }
     });
     browser.addStatusTextListener(new StatusTextListener() {
       public void changed(StatusTextEvent e) {
-        asyncExec(browser, new CMJ_updateStatus(), e.text);
+        new CMJ_updateStatus().asyncExec(browser, e.text);
       }
     });
     browser.addProgressListener(new ProgressListener() {
       public void changed(ProgressEvent e) {
         int loadingProgressValue = e.total == 0? 100: e.current * 100 / e.total;
-        asyncExec(browser, new CMJ_updateProgress(), loadingProgressValue);
+        new CMJ_updateProgress().asyncExec(browser, loadingProgressValue);
       }
       public void completed(ProgressEvent progressevent) {
-        asyncExec(browser, new CMJ_updateProgress(), 100);
+        new CMJ_updateProgress().asyncExec(browser, 100);
       }
     });
     return browser;

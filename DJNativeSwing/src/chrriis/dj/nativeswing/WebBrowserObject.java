@@ -83,7 +83,7 @@ public abstract class WebBrowserObject {
       InitializationListener initializationListener = (InitializationListener)args[0];
       Boolean[] resultArray = (Boolean[])args[1];
       for(long time = System.currentTimeMillis(); !resultArray[0].booleanValue() && System.currentTimeMillis() - time < 4000; ) {
-        new Message().syncExec();
+        new Message().syncSend();
         try {
           Thread.sleep(50);
         } catch(Exception e) {}

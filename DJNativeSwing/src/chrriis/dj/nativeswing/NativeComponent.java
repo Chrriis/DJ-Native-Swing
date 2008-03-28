@@ -68,38 +68,6 @@ import chrriis.dj.nativeswing.NativeComponentOptions.VisibilityConstraint;
  */
 public abstract class NativeComponent extends Canvas {
 
-  public static Object syncExec(Control control, CommandMessage commandMessage, Object... args) {
-    NativeInterface.checkUIThread();
-    if(commandMessage instanceof ControlCommandMessage) {
-      ((ControlCommandMessage)commandMessage).setControl(control);
-    }
-    return commandMessage.syncExecArgs(args);
-  }
-  
-  public static void asyncExec(Control control, CommandMessage commandMessage, Object... args) {
-    NativeInterface.checkUIThread();
-    if(commandMessage instanceof ControlCommandMessage) {
-      ((ControlCommandMessage)commandMessage).setControl(control);
-    }
-    commandMessage.asyncExecArgs(args);
-  }
-  
-  public Object syncExec(CommandMessage commandMessage, Object... args) {
-    NativeInterface.checkUIThread();
-    if(commandMessage instanceof ControlCommandMessage) {
-      ((ControlCommandMessage)commandMessage).setNativeComponent(this);
-    }
-    return commandMessage.syncExecArgs(args);
-  }
-  
-  public void asyncExec(CommandMessage commandMessage, Object... args) {
-    NativeInterface.checkUIThread();
-    if(commandMessage instanceof ControlCommandMessage) {
-      ((ControlCommandMessage)commandMessage).setNativeComponent(this);
-    }
-    commandMessage.asyncExecArgs(args);
-  }
-  
   private class CMLocal_runInSequence extends LocalMessage {
     @Override
     public Object run() {
@@ -119,18 +87,20 @@ public abstract class NativeComponent extends Canvas {
   private volatile List<CommandMessage> initializationCommandMessageList = new ArrayList<CommandMessage>();
 
   /**
-   * Run the given command if the control is created, or store it to play it when the creation occurs.
+   * Run the given command if the control is created, or store it to run it when the creation occurs.
    * If the component is disposed before the command has a chance to run, it is ignored silently.
+   * @param commandMessage the command message to run.
+   * @param args the arguments to pass to the command message.
    */
   public Object runSync(CommandMessage commandMessage, Object... args) {
     if(NativeInterface.isAlive()) {
       NativeInterface.checkUIThread();
     }
+    if(commandMessage instanceof ControlCommandMessage) {
+      ((ControlCommandMessage)commandMessage).setNativeComponent(this);
+    }
     if(initializationCommandMessageList != null) {
       commandMessage.setArgs(args);
-      if(commandMessage instanceof ControlCommandMessage) {
-        ((ControlCommandMessage)commandMessage).setNativeComponent(this);
-      }
       initializationCommandMessageList.add(commandMessage);
       return null;
     }
@@ -139,28 +109,30 @@ public abstract class NativeComponent extends Canvas {
       printFailedInvocation(commandMessage);
       return null;
     }
-    return syncExec(commandMessage, args);
+    return commandMessage.syncExec(args);
   }
   
   /**
-   * Run the given command if the control is created, or store it to play it when the creation occurs.
+   * Run the given command if the control is created, or store it to run it when the creation occurs.
    * If the component is disposed before the command has a chance to run, it is ignored silently.
+   * @param commandMessage the command message to run.
+   * @param args the arguments to pass to the command message.
    */
   public void runAsync(CommandMessage commandMessage, Object... args) {
     if(NativeInterface.isAlive()) {
       NativeInterface.checkUIThread();
     }
+    if(commandMessage instanceof ControlCommandMessage) {
+      ((ControlCommandMessage)commandMessage).setNativeComponent(this);
+    }
     if(initializationCommandMessageList != null) {
       commandMessage.setArgs(args);
-      if(commandMessage instanceof ControlCommandMessage) {
-        ((ControlCommandMessage)commandMessage).setNativeComponent(this);
-      }
       initializationCommandMessageList.add(commandMessage);
     } else if(!isNativePeerValid()) {
       commandMessage.setArgs(args);
       printFailedInvocation(commandMessage);
     } else {
-      asyncExec(commandMessage, args);
+      commandMessage.asyncExec(args);
     }
   }
   
@@ -241,7 +213,7 @@ public abstract class NativeComponent extends Canvas {
             public void run() {
               if(isNativePeerValid()) {
                 resizeThread = null;
-                asyncExec(new CMN_reshape(), getWidth(), getHeight());
+                new CMN_reshape().asyncExec(NativeComponent.this, getWidth(), getHeight());
               }
             }
           });
@@ -434,14 +406,14 @@ public abstract class NativeComponent extends Canvas {
       public void mouseDown(org.eclipse.swt.events.MouseEvent e) {
         Object[] mouseEventArgs = getMouseEventArgs(control, e, MouseEvent.MOUSE_PRESSED);
         if(mouseEventArgs != null) {
-          NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), mouseEventArgs);
+          new CMJ_dispatchMouseEvent().asyncExec(control, mouseEventArgs);
         }
       }
       @Override
       public void mouseUp(org.eclipse.swt.events.MouseEvent e) {
         Object[] mouseEventArgs = getMouseEventArgs(control, e, MouseEvent.MOUSE_RELEASED);
         if(mouseEventArgs != null) {
-          NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), mouseEventArgs);
+          new CMJ_dispatchMouseEvent().asyncExec(control, mouseEventArgs);
         }
       }
     });
@@ -449,7 +421,7 @@ public abstract class NativeComponent extends Canvas {
       public void mouseMove(org.eclipse.swt.events.MouseEvent e) {
         Object[] mouseEventArgs = getMouseEventArgs(control, e, MouseEvent.MOUSE_MOVED);
         if(mouseEventArgs != null) {
-          NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), mouseEventArgs);
+          new CMJ_dispatchMouseEvent().asyncExec(control, mouseEventArgs);
         }
       }
     });
@@ -457,7 +429,7 @@ public abstract class NativeComponent extends Canvas {
       public void mouseScrolled(org.eclipse.swt.events.MouseEvent e) {
         Object[] mouseEventArgs = getMouseEventArgs(control, e, MouseEvent.MOUSE_WHEEL);
         if(mouseEventArgs != null) {
-          NativeComponent.asyncExec(control, new CMJ_dispatchMouseEvent(), mouseEventArgs);
+          new CMJ_dispatchMouseEvent().asyncExec(control, mouseEventArgs);
         }
       }
     });
@@ -466,12 +438,12 @@ public abstract class NativeComponent extends Canvas {
         if((e.stateMask & SWT.CONTROL) != 0 && e.keyCode == SWT.TAB) {
           e.doit = false;
         }
-        NativeComponent.asyncExec(control, new CMJ_dispatchKeyEvent(), getKeyEventArgs(e, KeyEvent.KEY_PRESSED));
+        new CMJ_dispatchKeyEvent().asyncExec(control, getKeyEventArgs(e, KeyEvent.KEY_PRESSED));
       }
       public void keyReleased(org.eclipse.swt.events.KeyEvent e) {
-        NativeComponent.asyncExec(control, new CMJ_dispatchKeyEvent(), getKeyEventArgs(e, KeyEvent.KEY_RELEASED));
+        new CMJ_dispatchKeyEvent().asyncExec(control, getKeyEventArgs(e, KeyEvent.KEY_RELEASED));
         // TODO: Maybe innacurate: swing may issue pressed events when a key is stuck. verify this behavior some day.
-        NativeComponent.asyncExec(control, new CMJ_dispatchKeyEvent(), getKeyEventArgs(e, KeyEvent.KEY_TYPED));
+        new CMJ_dispatchKeyEvent().asyncExec(control, getKeyEventArgs(e, KeyEvent.KEY_TYPED));
       }
     });
   }
@@ -572,7 +544,7 @@ public abstract class NativeComponent extends Canvas {
         invalidNativePeerText = "Failed to create " + NativeComponent.this.getClass().getName() + "[" + NativeComponent.this.hashCode() + "]\n\nReason:\n" + sb.toString();
         e.printStackTrace();
       }
-      asyncExec(new CMN_reshape(), getWidth(), getHeight());
+      new CMN_reshape().asyncExec(this, getWidth(), getHeight());
     } else {
       isNativePeerValid = false;
       invalidNativePeerText = "Failed to create " + NativeComponent.this.getClass().getName() + "[" + NativeComponent.this.hashCode() + "]\n\nReason:\nThe native interface is not alive! It may not have been initialized.";
@@ -581,7 +553,7 @@ public abstract class NativeComponent extends Canvas {
       if(!isNativePeerValid()) {
         printFailedInvocation(initCommandMessage);
       } else {
-        initCommandMessage.asyncExec();
+        initCommandMessage.asyncSend();
       }
     }
   }
@@ -787,6 +759,10 @@ public abstract class NativeComponent extends Canvas {
     }
   }
 
+  /**
+   * Set whether this component and its native peer are enabled.
+   * @param isEnabled true it the component and its native peer should be enabled, false otherwise.
+   */
   @Override
   public void setEnabled(boolean isEnabled) {
     super.setEnabled(isEnabled);
@@ -804,7 +780,7 @@ public abstract class NativeComponent extends Canvas {
   public boolean hasFocus() {
     boolean hasFocus = super.hasFocus();
     if(!hasFocus && isNativePeerValid() && !isNativePeerDisposed) {
-      return Boolean.TRUE.equals(syncExec(new CMN_hasFocus()));
+      return Boolean.TRUE.equals(new CMN_hasFocus().syncExecArgs(this));
     }
     return hasFocus;
   }
@@ -822,7 +798,7 @@ public abstract class NativeComponent extends Canvas {
   public Dimension getPreferredSize() {
     Dimension result = null;
     if(isNativePeerValid() && !isNativePeerDisposed) {
-      result = (Dimension)syncExec(new CMN_getPreferredSize());
+      result = (Dimension)new CMN_getPreferredSize().syncExecArgs(this);
     }
     if(result == null) {
       result = super.getPreferredSize();
@@ -927,7 +903,7 @@ public abstract class NativeComponent extends Canvas {
       dataFile.deleteOnExit();
       CMN_getComponentImage getComponentImage = new CMN_getComponentImage();
       getComponentImage.setNativeComponent(this);
-      resultSize = (Dimension)getComponentImage.syncExecArgs(dataFile.getAbsolutePath());
+      resultSize = (Dimension)getComponentImage.syncExec(dataFile.getAbsolutePath());
     } catch(Exception e) {
       e.printStackTrace();
       resultSize = null;

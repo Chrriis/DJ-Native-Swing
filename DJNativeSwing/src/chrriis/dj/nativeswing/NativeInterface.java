@@ -377,7 +377,7 @@ public class NativeInterface {
     // Create the interface to communicate with the process handling the native side
     messagingInterface = createMessagingInterface(nativeInterfaceOptions);
     // Set the system properties
-    new CMN_setProperties().syncExecArgs(System.getProperties());
+    new CMN_setProperties().syncExec(System.getProperties());
   }
   
   private static Process createProcess(NativeInterfaceOptions nativeInterfaceOptions, int port) {
@@ -598,21 +598,21 @@ public class NativeInterface {
     return messagingInterface;
   }
   
-  static Object syncExec(final Message message) {
+  static Object syncSend(final Message message) {
     checkInitialized();
     if(message instanceof LocalMessage) {
       return ((LocalMessage)message).run();
     }
-    return messagingInterface.syncExec(message);
+    return messagingInterface.syncSend(message);
   }
   
-  static void asyncExec(final Message message) {
+  static void asyncSend(final Message message) {
     checkInitialized();
     if(message instanceof LocalMessage) {
       ((LocalMessage)message).run();
       return;
     }
-    messagingInterface.asyncExec(message);
+    messagingInterface.asyncSend(message);
   }
   
   private static void setPreferredLookAndFeel() {

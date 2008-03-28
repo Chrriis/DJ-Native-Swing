@@ -73,7 +73,7 @@ public class JHTMLEditor extends NSPanelComponent {
       InitializationListener initializationListener = (InitializationListener)args[0];
       Boolean[] resultArray = (Boolean[])args[1];
       for(long time = System.currentTimeMillis(); !resultArray[0].booleanValue() && System.currentTimeMillis() - time < 4000; ) {
-        new Message().syncExec();
+        new Message().syncSend();
         try {
           Thread.sleep(50);
         } catch(Exception e) {}
@@ -345,7 +345,7 @@ public class JHTMLEditor extends NSPanelComponent {
         html = (String)tempResult;
         break;
       }
-      new Message().syncExec();
+      new Message().syncSend();
       if(tempResult != this) {
         html = (String)tempResult;
         break;

@@ -22,7 +22,7 @@ public abstract class CommandMessage extends Message {
    * Set the arguments that will be used when the message is run.
    * @param args the arguments, which must be serializable.
    */
-  public void setArgs(Object... args) {
+  void setArgs(Object... args) {
     if(args.length == 0) {
       args = null;
     }
@@ -33,9 +33,9 @@ public abstract class CommandMessage extends Message {
    * Execute that message asynchronously with the given arguments.
    * @param args the arguments, which must be serializable.
    */
-  public void asyncExecArgs(Object... args) {
+  public void asyncExec(Object... args) {
     setArgs(args);
-    asyncExec();
+    asyncSend();
   }
   
   /**
@@ -43,9 +43,9 @@ public abstract class CommandMessage extends Message {
    * @param args the arguments, which must be serializable.
    * @return the result of the execution.
    */
-  public Object syncExecArgs(Object... args) {
+  public Object syncExec(Object... args) {
     setArgs(args);
-    return syncExec();
+    return syncSend();
   }
   
   /**

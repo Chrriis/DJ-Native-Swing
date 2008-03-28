@@ -53,18 +53,18 @@ public class Message implements Serializable {
   }
   
   /**
-   * Execute that message asynchronously.
+   * Send that message asynchronously.
    */
-  public void asyncExec() {
-    NativeInterface.asyncExec(this);
+  public void asyncSend() {
+    NativeInterface.asyncSend(this);
   }
   
   /**
-   * Execute that message synchronously, potentially returning a result if the message type allows that.
+   * Send that message synchronously, potentially returning a result if the message type allows that.
    * @return the result if any.
    */
-  public Object syncExec() {
-    return NativeInterface.syncExec(this);
+  public Object syncSend() {
+    return NativeInterface.syncSend(this);
   }
   
   /**

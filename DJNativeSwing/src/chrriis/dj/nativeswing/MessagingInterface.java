@@ -217,7 +217,7 @@ abstract class MessagingInterface {
       }
       if(commandMessage.isSyncExec()) {
         commandResultMessage = new CommandResultMessage(commandMessage.getID(), result, throwable);
-        asyncExec(commandResultMessage);
+        asyncSend(commandResultMessage);
       } else {
         if(throwable != null) {
           throwable.printStackTrace();
@@ -227,7 +227,7 @@ abstract class MessagingInterface {
     } else {
       commandResultMessage = new CommandResultMessage(message.getID(), null, null);
       if(message.isSyncExec()) {
-        asyncExec(commandResultMessage);
+        asyncSend(commandResultMessage);
       }
     }
     if(isDebuggingMessages) {
@@ -278,7 +278,7 @@ abstract class MessagingInterface {
     public Object run() throws Exception {
       Message message = (Message)args[1];
       message.setSyncExec(false);
-      new CM_asyncExecResponse().asyncExecArgs(args[0], NativeInterface.getMessagingInterface().runMessage(message));
+      new CM_asyncExecResponse().asyncExec(args[0], NativeInterface.getMessagingInterface().runMessage(message));
       return null;
     }
   }
@@ -288,7 +288,7 @@ abstract class MessagingInterface {
   private Object nonUISyncExec(Message message) {
     Thread thread = Thread.currentThread();
     final int instanceID = syncThreadRegistry.add(Thread.currentThread());
-    new CM_asyncExec().asyncExecArgs(instanceID, message);
+    new CM_asyncExec().asyncExec(instanceID, message);
     synchronized(thread) {
       while(syncThreadRegistry.get(instanceID) instanceof Thread) {
         try {
@@ -311,7 +311,7 @@ abstract class MessagingInterface {
     System.err.println("Failed messaging: " + message);
   }
   
-  public Object syncExec(Message message) {
+  public Object syncSend(Message message) {
     if(!isUIThread()) {
       return nonUISyncExec(message);
     }
@@ -383,7 +383,7 @@ abstract class MessagingInterface {
     return commandResultMessage.getResult();
   }
   
-  public void asyncExec(Message message) {
+  public void asyncSend(Message message) {
     message.setUI(isUIThread());
     message.setSyncExec(false);
     try {

@@ -53,6 +53,70 @@ public abstract class ControlCommandMessage extends CommandMessage {
     return (NativeComponent)NativeComponent.registry.get(componentID);
   }
   
+  /**
+   * Execute that message asynchronously with the given arguments.
+   * @param nativeComponent the native component.
+   * @param args the arguments, which must be serializable.
+   */
+  public void asyncExec(NativeComponent nativeComponent, Object... args) {
+    setNativeComponent(nativeComponent);
+    asyncExec(args);
+  }
+  
+  /**
+   * Execute that message asynchronously with the given arguments.
+   * @param control the native component.
+   * @param args the arguments, which must be serializable.
+   */
+  public void asyncExec(Control control, Object... args) {
+    setControl(control);
+    asyncExec(args);
+  }
+  
+  /**
+   * Execute that message synchronously with the given arguments and return the result.
+   * @param nativeComponent the native component.
+   * @param args the arguments, which must be serializable.
+   * @return the result of the execution.
+   */
+  public Object syncExecArgs(NativeComponent nativeComponent, Object... args) {
+    setNativeComponent(nativeComponent);
+    return syncExec(args);
+  }
+  
+  /**
+   * Execute that message synchronously with the given arguments and return the result.
+   * @param control the control.
+   * @param args the arguments, which must be serializable.
+   * @return the result of the execution.
+   */
+  public Object syncExecArgs(Control control, Object... args) {
+    setControl(control);
+    return syncExec(args);
+  }
+  
+  @Override
+  public Object syncExec(Object... args) {
+    if(componentID == 0) {
+      if(NativeInterface.isNativeSide()) {
+        throw new IllegalStateException("The control was not specified!");
+      }
+      throw new IllegalStateException("The native component was not specified!");
+    }
+    return super.syncExec(args);
+  }
+  
+  @Override
+  public void asyncExec(Object... args) {
+    if(componentID == 0) {
+      if(NativeInterface.isNativeSide()) {
+        throw new IllegalStateException("The control was not specified!");
+      }
+      throw new IllegalStateException("The native component was not specified!");
+    }
+    super.asyncExec(args);
+  }
+  
   @Override
   protected boolean isValid() {
     if(NativeInterface.isNativeSide()) {

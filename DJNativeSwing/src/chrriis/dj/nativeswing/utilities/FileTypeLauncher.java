@@ -196,7 +196,7 @@ public class FileTypeLauncher {
   public String[] getRegisteredExtensions() {
     if(registeredExtensions == null) {
       initializeExtensions();
-      registeredExtensions = (String[])new CMN_getRegisteredExtensions().syncExecArgs(id);
+      registeredExtensions = (String[])new CMN_getRegisteredExtensions().syncExec(id);
     }
     return registeredExtensions;
   }
@@ -212,7 +212,7 @@ public class FileTypeLauncher {
   
   public String getName() {
     if(name == null) {
-      name = (String)new CMN_getName().syncExecArgs(id);
+      name = (String)new CMN_getName().syncExec(id);
     }
     return name;
   }
@@ -230,7 +230,7 @@ public class FileTypeLauncher {
   public ImageIcon getIcon() {
     if(!isIconInitialized) {
       isIconInitialized = true;
-      icon = (ImageIcon)new CMN_getIcon().syncExecArgs(id);
+      icon = (ImageIcon)new CMN_getIcon().syncExec(id);
     }
     return icon == null? getDefaultIcon(): icon;
   }
@@ -251,7 +251,7 @@ public class FileTypeLauncher {
   
   public int hashCode() {
     if(hashCode == null) {
-      hashCode = (Integer)new CMN_hashCode().syncExecArgs(id);
+      hashCode = (Integer)new CMN_hashCode().syncExec(id);
     }
     return hashCode;
   }
@@ -265,7 +265,7 @@ public class FileTypeLauncher {
   }
   
   public void launch(String fileName) {
-    new CMN_launch().asyncExecArgs(id, fileName);
+    new CMN_launch().asyncExec(id, fileName);
   }
   
   private static Map<Integer, FileTypeLauncher> idToFileTypeLauncherMap;
@@ -303,7 +303,7 @@ public class FileTypeLauncher {
       return null;
     }
     final String extension = fileName.substring(index);
-    Integer id = (Integer)new CMN_getLauncherID().syncExecArgs(extension);
+    Integer id = (Integer)new CMN_getLauncherID().syncExec(extension);
     if(id == null) {
       return null;
     }
