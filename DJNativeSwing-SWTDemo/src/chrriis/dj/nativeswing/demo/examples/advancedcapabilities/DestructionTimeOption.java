@@ -20,8 +20,8 @@ import javax.swing.SwingUtilities;
 import chrriis.common.Disposable;
 import chrriis.dj.nativeswing.NativeComponentOptions;
 import chrriis.dj.nativeswing.NativeInterface;
+import chrriis.dj.nativeswing.NativeInterfaceOptions;
 import chrriis.dj.nativeswing.NativeComponentOptions.DestructionTime;
-import chrriis.dj.nativeswing.NativeInterface.NativeInterfaceInitOptions;
 import chrriis.dj.nativeswing.components.JFlashPlayer;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
 
@@ -64,9 +64,9 @@ public class DestructionTimeOption extends JPanel implements Disposable {
   
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    NativeInterfaceInitOptions options = new NativeInterfaceInitOptions();
+    NativeInterfaceOptions options = new NativeInterfaceOptions();
     options.setPreferredLookAndFeelApplied(true);
-    NativeInterface.init(options);
+    NativeInterface.initialize(options);
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");

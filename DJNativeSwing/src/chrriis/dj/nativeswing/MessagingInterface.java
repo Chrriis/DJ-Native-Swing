@@ -23,7 +23,6 @@ import javax.swing.SwingUtilities;
 import org.eclipse.swt.SWT;
 
 import chrriis.common.Registry;
-import chrriis.dj.nativeswing.NativeInterface.NativeInterfaceListener;
 
 /**
  * @author Christopher Deckers

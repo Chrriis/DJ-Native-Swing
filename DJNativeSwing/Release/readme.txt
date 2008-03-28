@@ -28,7 +28,7 @@ Java 5.0 or later is required.
 Then, you need to add the following to your main method:
 
 public static void main(String[] args) {
-  NativeInterface.init();
+  NativeInterface.initialize();
   // Here goes the rest of the initialization
 }
 

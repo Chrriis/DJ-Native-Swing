@@ -168,36 +168,10 @@ public abstract class NativeComponent extends Canvas {
     System.err.println("Invalid " + getClass().getName() + "[" + hashCode() + "]: " + message);
   }
   
-  private static Registry registry = new Registry();
+  static Registry registry = new Registry();
   
   protected static Registry getRegistry() {
     return registry;
-  }
-  
-  protected abstract static class ControlCommandMessage extends CommandMessage {
-    private int componentID;
-    public int getComponentID() {
-      return componentID;
-    }
-    public void setControl(Control control) {
-      this.componentID = (Integer)control.getData("NS_ID");
-    }
-    public void setNativeComponent(NativeComponent nativeComponent) {
-      this.componentID = nativeComponent.componentID;
-    }
-    public Control getControl() {
-      return (Control)NativeComponent.registry.get(componentID);
-    }
-    public NativeComponent getComponent() {
-      return (NativeComponent)NativeComponent.registry.get(componentID);
-    }
-    @Override
-    protected boolean isValid() {
-      if(NativeInterface.isNativeSide()) {
-        return getControl() != null;
-      }
-      return getComponent() != null;
-    }
   }
   
   private static class CMN_reshape extends ControlCommandMessage {
@@ -210,6 +184,10 @@ public abstract class NativeComponent extends Canvas {
 
   private int componentID;
   
+  /**
+   * Get the unique identifier of this native component.
+   * @return the component ID.
+   */
   protected int getComponentID() {
     return componentID;
   }
@@ -278,7 +256,7 @@ public abstract class NativeComponent extends Canvas {
     private static int buttonPressedCount;
     @Override
     public Object run() {
-      NativeComponent nativeComponent = getComponent();
+      NativeComponent nativeComponent = getNativeComponent();
       if(!nativeComponent.isShowing()) {
         return null;
       }
@@ -339,7 +317,7 @@ public abstract class NativeComponent extends Canvas {
   private static class CMJ_dispatchKeyEvent extends ControlCommandMessage {
     @Override
     public Object run() {
-      NativeComponent nativeComponent = getComponent();
+      NativeComponent nativeComponent = getNativeComponent();
       if(!nativeComponent.isShowing()) {
         return null;
       }

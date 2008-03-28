@@ -37,7 +37,6 @@ import java.net.Socket;
 import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EventListener;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -55,60 +54,11 @@ import chrriis.common.Utils;
 import chrriis.common.WebServer;
 
 /**
+ * The native interface, which establishes the link between the peer VM (native side) and the local side.
  * @author Christopher Deckers
  */
 public class NativeInterface {
 
-  public static class NativeInterfaceInitOptions {
-    
-    private boolean isNativeSideRespawnedOnError = true;
-    private boolean isPreferredLookAndFeelApplied;
-    private Class<?>[] nativeClassPathReferenceClasses;
-    private String[] nativeClassPathReferenceResources;
-    private String[] peerVMParams;
-    
-    public void setNativeSideRespawnedOnError(boolean isNativeSideRespawnedOnError) {
-      this.isNativeSideRespawnedOnError = isNativeSideRespawnedOnError;
-    }
-    
-    public boolean isNativeSideRespawnedOnError() {
-      return isNativeSideRespawnedOnError;
-    }
-    
-    public void setPreferredLookAndFeelApplied(boolean isPreferredLookAndFeelApplied) {
-      this.isPreferredLookAndFeelApplied = isPreferredLookAndFeelApplied;
-    }
-    
-    public boolean isPreferredLookAndFeelApplied() {
-      return isPreferredLookAndFeelApplied;
-    }
-    
-    public void setNativeClassPathReferenceClasses(Class<?>... nativeClassPathReferenceClasses) {
-      this.nativeClassPathReferenceClasses = nativeClassPathReferenceClasses;
-    }
-    
-    public Class<?>[] getNativeClassPathReferenceClasses() {
-      return nativeClassPathReferenceClasses;
-    }
-    
-    public void setNativeClassPathReferenceResources(String... nativeClassPathReferenceResources) {
-      this.nativeClassPathReferenceResources = nativeClassPathReferenceResources;
-    }
-    
-    public String[] getNativeClassPathReferenceResources() {
-      return nativeClassPathReferenceResources;
-    }
-    
-    public void setPeerVMParams(String... peerVMParams) {
-      this.peerVMParams = peerVMParams;
-    }
-    
-    public String[] getPeerVMParams() {
-      return peerVMParams;
-    }
-    
-  }
-  
   private static class HeavyweightForcerWindow extends Window {
     
     private boolean isPacked;
@@ -252,8 +202,8 @@ public class NativeInterface {
     }
   }
   
-  public static void init() {
-    init(new NativeInterfaceInitOptions());
+  public static void initialize() {
+    initialize(new NativeInterfaceOptions());
   }
   
   private static class CMN_setProperties extends CommandMessage {
@@ -277,10 +227,10 @@ public class NativeInterface {
     isInitialized = false;
     messagingInterface.destroy();
     messagingInterface = null;
-    nativeInterfaceInitOptions = null;
+    nativeInterfaceOptions = null;
   }
 
-  private static NativeInterfaceInitOptions nativeInterfaceInitOptions;
+  private static NativeInterfaceOptions nativeInterfaceOptions;
   
   private static void loadClipboardProperties() {
     try {
@@ -303,17 +253,17 @@ public class NativeInterface {
     }
   }
   
-  public static void init(NativeInterfaceInitOptions nativeInterfaceInitOptions) {
+  public static void initialize(NativeInterfaceOptions nativeInterfaceOptions) {
     if(isInitialized()) {
       return;
     }
     loadClipboardProperties();
-    NativeInterface.nativeInterfaceInitOptions = nativeInterfaceInitOptions;
+    NativeInterface.nativeInterfaceOptions = nativeInterfaceOptions;
     isInitialized = true;
     boolean isFullInit = isFirstStart;
     isFirstStart = false;
     if(isFullInit) {
-      if(nativeInterfaceInitOptions.isPreferredLookAndFeelApplied()) {
+      if(nativeInterfaceOptions.isPreferredLookAndFeelApplied()) {
         setPreferredLookAndFeel();
       }
       // Specific Sun property to prevent heavyweight components from erasing their background.
@@ -411,26 +361,26 @@ public class NativeInterface {
   }
   
   static void createCommunicationChannel() {
-    if(messagingInterface != null && !nativeInterfaceInitOptions.isNativeSideRespawnedOnError()) {
+    if(messagingInterface != null && !nativeInterfaceOptions.isNativeSideRespawnedOnError()) {
       return;
     }
     // Create the interface to communicate with the process handling the native side
-    messagingInterface = createMessagingInterface(nativeInterfaceInitOptions);
+    messagingInterface = createMessagingInterface(nativeInterfaceOptions);
     // Set the system properties
     new CMN_setProperties().syncExecArgs(System.getProperties());
   }
   
-  private static Process createProcess(NativeInterfaceInitOptions nativeInterfaceInitOptions, int port) {
+  private static Process createProcess(NativeInterfaceOptions nativeInterfaceOptions, int port) {
     List<String> classPathList = new ArrayList<String>();
     String pathSeparator = System.getProperty("path.separator");
     List<Object> referenceList = new ArrayList<Object>();
     referenceList.add(NativeInterface.class);
     referenceList.add("org/eclipse/swt/widgets/Display.class");
-    Class<?>[] nativeClassPathReferenceClasses = nativeInterfaceInitOptions.getNativeClassPathReferenceClasses();
+    Class<?>[] nativeClassPathReferenceClasses = nativeInterfaceOptions.getNativeClassPathReferenceClasses();
     if(nativeClassPathReferenceClasses != null) {
       referenceList.addAll(Arrays.asList(nativeClassPathReferenceClasses));
     }
-    String[] nativeClassPathReferenceResources = nativeInterfaceInitOptions.getNativeClassPathReferenceResources();
+    String[] nativeClassPathReferenceResources = nativeInterfaceOptions.getNativeClassPathReferenceResources();
     if(nativeClassPathReferenceResources != null) {
       referenceList.addAll(Arrays.asList(nativeClassPathReferenceResources));
     }
@@ -495,8 +445,9 @@ public class NativeInterface {
     // Create the argument list for the Java process that will be created
     List<String> argList = new ArrayList<String>();
     argList.add(null);
-    if(nativeInterfaceInitOptions.peerVMParams != null) {
-      for(String param: nativeInterfaceInitOptions.peerVMParams) {
+    String[] peerVMParams = nativeInterfaceOptions.getPeerVMParams();
+    if(peerVMParams != null) {
+      for(String param: peerVMParams) {
         argList.add(param);
       }
     }
@@ -530,7 +481,7 @@ public class NativeInterface {
     return p;
   }
   
-  private static MessagingInterface createMessagingInterface(NativeInterfaceInitOptions nativeInterfaceInitOptions) {
+  private static MessagingInterface createMessagingInterface(NativeInterfaceOptions nativeInterfaceOptions) {
     int port = Integer.parseInt(System.getProperty("dj.nativeswing.messaging.port", "-1"));
     if(port <= 0) {
       ServerSocket serverSocket;
@@ -551,7 +502,7 @@ public class NativeInterface {
     if(Boolean.parseBoolean(System.getProperty("dj.nativeswing.messaging.nocreateprocess"))) {
       p = null;
     } else {
-      p = createProcess(nativeInterfaceInitOptions, port);
+      p = createProcess(nativeInterfaceOptions, port);
     }
     Socket socket = null;
     for(int i=99; i>=0; i--) {
@@ -793,10 +744,6 @@ public class NativeInterface {
     }
   }
   
-  public static interface NativeInterfaceListener extends EventListener {
-    public void nativeInterfaceRestarted();
-  }
-
   private static EventListenerList listenerList = new EventListenerList();
   
   /**

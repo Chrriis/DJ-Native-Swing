@@ -45,7 +45,7 @@ import javax.swing.tree.TreeSelectionModel;
 import chrriis.common.Disposable;
 import chrriis.common.ui.source.SourcePane;
 import chrriis.dj.nativeswing.NativeInterface;
-import chrriis.dj.nativeswing.NativeInterface.NativeInterfaceInitOptions;
+import chrriis.dj.nativeswing.NativeInterfaceOptions;
 
 /**
  * @author Christopher Deckers
@@ -194,9 +194,9 @@ public class DemoFrame extends JFrame {
   }
   
   public static void main(String[] args) {
-    NativeInterfaceInitOptions nativeInterfaceInitOptions = new NativeInterfaceInitOptions();
-    nativeInterfaceInitOptions.setPreferredLookAndFeelApplied(true);
-    NativeInterface.init(nativeInterfaceInitOptions);
+    NativeInterfaceOptions nativeInterfaceOptions = new NativeInterfaceOptions();
+    nativeInterfaceOptions.setPreferredLookAndFeelApplied(true);
+    NativeInterface.initialize(nativeInterfaceOptions);
     Toolkit.getDefaultToolkit().setDynamicLayout(true);
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {

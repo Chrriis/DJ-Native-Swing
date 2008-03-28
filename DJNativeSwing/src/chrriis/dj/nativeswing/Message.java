@@ -10,7 +10,7 @@ package chrriis.dj.nativeswing;
 import java.io.Serializable;
 
 /**
- * The root class of all the messages that are exchanged at the native interface.
+ * The superclass of all the messages that are exchanged at the native interface.
  * @author Christopher Deckers
  */
 public class Message implements Serializable {

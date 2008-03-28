@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.CommandMessage;
+import chrriis.dj.nativeswing.ControlCommandMessage;
 import chrriis.dj.nativeswing.NativeComponent;
 
 /**
@@ -51,7 +52,7 @@ class NativeWebBrowser extends NativeComponent {
   private static class CMJ_closeWindow extends ControlCommandMessage {
     @Override
     public Object run() throws Exception {
-      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getComponent();
+      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
       JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
         return null;
@@ -77,7 +78,7 @@ class NativeWebBrowser extends NativeComponent {
   private static class CMJ_createWindow extends ControlCommandMessage {
     @Override
     public Object run() {
-      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getComponent();
+      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
       JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
         return null;
@@ -113,7 +114,7 @@ class NativeWebBrowser extends NativeComponent {
   private static class CMJ_showWindow extends ControlCommandMessage {
     @Override
     public Object run() {
-      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getComponent();
+      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
       final JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
         return null;
@@ -160,7 +161,7 @@ class NativeWebBrowser extends NativeComponent {
   private static class CMJ_urlChanged extends ControlCommandMessage {
     @Override
     public Object run() {
-      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getComponent();
+      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
       JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
         return null;
@@ -184,7 +185,7 @@ class NativeWebBrowser extends NativeComponent {
   private static class CMJ_commandReceived extends ControlCommandMessage {
     @Override
     public Object run() {
-      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getComponent();
+      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
       JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
         return null;
@@ -208,7 +209,7 @@ class NativeWebBrowser extends NativeComponent {
   private static class CMJ_urlChanging extends ControlCommandMessage {
     @Override
     public Object run() {
-      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getComponent();
+      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
       JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
         return false;
@@ -234,7 +235,7 @@ class NativeWebBrowser extends NativeComponent {
   private static class CMJ_urlChangeCanceled extends ControlCommandMessage {
     @Override
     public Object run() {
-      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getComponent();
+      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
       JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
         return null;
@@ -258,7 +259,7 @@ class NativeWebBrowser extends NativeComponent {
   private static class CMJ_updateTitle extends ControlCommandMessage {
     @Override
     public Object run() {
-      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getComponent();
+      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
       JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
         return null;
@@ -281,7 +282,7 @@ class NativeWebBrowser extends NativeComponent {
   private static class CMJ_updateStatus extends ControlCommandMessage {
     @Override
     public Object run() {
-      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getComponent();
+      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
       JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
         return null;
@@ -304,7 +305,7 @@ class NativeWebBrowser extends NativeComponent {
   private static class CMJ_updateProgress extends ControlCommandMessage {
     @Override
     public Object run() {
-      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getComponent();
+      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
       JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
         return null;
