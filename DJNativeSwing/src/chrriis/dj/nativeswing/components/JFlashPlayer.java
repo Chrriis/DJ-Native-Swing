@@ -255,7 +255,7 @@ public class JFlashPlayer extends NSPanelComponent {
   }
 
   /**
-   * Play a timeline based flash applications. 
+   * Play a timeline-based flash applications. 
    */
   public void play() {
     if(!webBrowserObject.hasContent()) {
@@ -265,7 +265,7 @@ public class JFlashPlayer extends NSPanelComponent {
   }
   
   /**
-   * Pause the execution of timeline based flash applications. 
+   * Pause the execution of timeline-based flash applications. 
    */
   public void pause() {
     if(!webBrowserObject.hasContent()) {
@@ -275,7 +275,7 @@ public class JFlashPlayer extends NSPanelComponent {
   }
   
   /**
-   * Stop the execution of timeline based flash applications. 
+   * Stop the execution of timeline-based flash applications. 
    */
   public void stop() {
     if(!webBrowserObject.hasContent()) {
