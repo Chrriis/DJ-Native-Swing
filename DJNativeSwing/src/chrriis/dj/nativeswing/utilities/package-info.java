@@ -10,4 +10,4 @@
  * A collection of native utilities.
  * @author Christopher Deckers
  */
-package chrriis.dj.nativeswing.util;
+package chrriis.dj.nativeswing.utilities;

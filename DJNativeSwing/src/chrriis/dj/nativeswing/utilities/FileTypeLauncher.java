@@ -5,7 +5,7 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.dj.nativeswing.util;
+package chrriis.dj.nativeswing.utilities;
 
 import java.awt.Dimension;
 import java.awt.Graphics;

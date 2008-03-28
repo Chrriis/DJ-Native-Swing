@@ -38,7 +38,7 @@ import javax.swing.table.TableCellRenderer;
 import chrriis.common.ui.TableSorter;
 import chrriis.dj.nativeswing.NativeInterface;
 import chrriis.dj.nativeswing.NativeInterfaceOptions;
-import chrriis.dj.nativeswing.util.FileTypeLauncher;
+import chrriis.dj.nativeswing.utilities.FileTypeLauncher;
 
 /**
  * @author Christopher Deckers
