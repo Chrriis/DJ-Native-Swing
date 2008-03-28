@@ -917,7 +917,7 @@ public abstract class NativeComponent extends Canvas {
       return;
     }
     isShellEnabled = isEnabled;
-    runSync(new CMN_setShellEnabled(), isEnabled);
+    runAsync(new CMN_setShellEnabled(), isEnabled);
   }
 
   private static class CMN_setEnabled extends ControlCommandMessage {
@@ -931,7 +931,7 @@ public abstract class NativeComponent extends Canvas {
   @Override
   public void setEnabled(boolean isEnabled) {
     super.setEnabled(isEnabled);
-    runSync(new CMN_setEnabled(), isEnabled);
+    runAsync(new CMN_setEnabled(), isEnabled);
   }
   
   private static class CMN_hasFocus extends ControlCommandMessage {
