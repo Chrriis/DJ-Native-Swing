@@ -7,6 +7,7 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.5 (xxxxxxxxxxxxxx):
 
+- NativeComponent.setEnabled(b) is added.
 - Javadoc is generated and part of the distribution.
 - Calls to get values from browser are now typed (not just Strings).
 - NativeComponent.createBackBuffer() is added.

@@ -920,6 +920,20 @@ public abstract class NativeComponent extends Canvas {
     runSync(new CMN_setShellEnabled(), isEnabled);
   }
 
+  private static class CMN_setEnabled extends ControlCommandMessage {
+    @Override
+    public Object run() {
+      getControl().setEnabled((Boolean)args[0]);
+      return null;
+    }
+  }
+
+  @Override
+  public void setEnabled(boolean isEnabled) {
+    super.setEnabled(isEnabled);
+    runSync(new CMN_setEnabled(), isEnabled);
+  }
+  
   private static class CMN_hasFocus extends ControlCommandMessage {
     @Override
     public Object run() throws Exception {
