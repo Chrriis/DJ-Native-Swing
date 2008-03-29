@@ -32,6 +32,7 @@ import chrriis.dj.nativeswing.demo.examples.introduction.NativeIntegration;
 import chrriis.dj.nativeswing.demo.examples.introduction.TheSolution;
 import chrriis.dj.nativeswing.demo.examples.utilities.FileAssociations;
 import chrriis.dj.nativeswing.demo.examples.vlcplayer.SimpleVLCPlayerExample;
+import chrriis.dj.nativeswing.demo.examples.webbrowser.ClasspathPages;
 import chrriis.dj.nativeswing.demo.examples.webbrowser.JavascriptExecution;
 import chrriis.dj.nativeswing.demo.examples.webbrowser.NavigationControl;
 import chrriis.dj.nativeswing.demo.examples.webbrowser.SendingCommands;
@@ -60,6 +61,7 @@ public class DemoTree extends JTree {
         new Example("Javascript Execution", JavascriptExecution.class, "Javscript can be executed in the web browser component.", true),
         new Example("Navigation Control", NavigationControl.class, "The Java application can control the navigation happening in the web browser.\nThis feature allows to block certain links and/or the creation of new windows, or to open links and/or new windows elsewhere.", true),
         new Example("Sending Commands", SendingCommands.class, "Use static links or simple Javascript to send commands with arguments to the application:\n    function sendCommand(command) {\n      var s = 'command://' + encodeURIComponent(command);\n      for(var i=1; i<arguments.length; s+='&'+encodeURIComponent(arguments[i++]));\n      window.location = s;\n    }", true),
+        new Example("Classpath pages", ClasspathPages.class, "Load web pages from the classpath with the help of a simple embedded web server.", true),
     }));
     exampleGroupList.add(new ExampleGroup("JFlashPlayer", new Example[] {
         new Example("Simple Example", SimpleFlashExample.class, "Display a flash application.", true),
