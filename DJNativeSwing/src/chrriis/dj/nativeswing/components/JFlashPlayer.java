@@ -12,10 +12,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -24,7 +21,6 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
-import chrriis.common.Utils;
 import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.NSPanelComponent;
 import chrriis.dj.nativeswing.WebBrowserObject;
@@ -37,69 +33,6 @@ import chrriis.dj.nativeswing.WebBrowserObject;
  */
 public class JFlashPlayer extends NSPanelComponent {
 
-  public static class FlashLoadingOptions {
-    
-    private Map<String, String> keyToValueVariableMap = new HashMap<String, String>();
-    
-    /**
-     * Get the Flash plugin variables.
-     * @return the variables.
-     */
-    public Map<String, String> getVariables() {
-      return keyToValueVariableMap;
-    }
-    
-    /**
-     * Set the Flash variables that will be set when the plugin is created.
-     * @param keyToValueVariableMap the map of key/value pairs.
-     */
-    public void setVariables(Map<String, String> keyToValueVariableMap) {
-      if(keyToValueVariableMap == null) {
-        keyToValueVariableMap = new HashMap<String, String>();
-      }
-      this.keyToValueVariableMap = keyToValueVariableMap;
-    }
-    
-    private Map<String, String> keyToValueParameterMap = new HashMap<String, String>();
-    
-    /**
-     * Get the Flash plugin HTML parameters.
-     * @return the parameters.
-     */
-    public Map<String, String> getParameters() {
-      return keyToValueParameterMap;
-    }
-    
-    /**
-     * Set the Flash HTML parameters that will be used when the plugin is created.
-     * @param keyToValueParameterMap the map of key/value pairs.
-     */
-    public void setParameters(Map<String, String> keyToValueParameterMap) {
-      if(keyToValueParameterMap == null) {
-        keyToValueParameterMap = new HashMap<String, String>();
-      }
-      this.keyToValueParameterMap = keyToValueParameterMap;
-    }
-    
-    Map<String, String> getHTMLParameters() {
-      HashMap<String, String> htmlParameters = new HashMap<String, String>(getParameters());
-      StringBuffer variablesSB = new StringBuffer();
-      for(Entry<String, String> variable: getVariables().entrySet()) {
-        if(variablesSB.length() > 0) {
-          variablesSB.append('&');
-        }
-        variablesSB.append(Utils.escapeXML(variable.getKey())).append('=').append(Utils.escapeXML(variable.getValue()));
-      }
-      if(variablesSB.length() > 0) {
-        htmlParameters.put("flashvars", variablesSB.toString());
-      }
-      htmlParameters.put("allowScriptAccess", "always");
-      htmlParameters.put("swliveconnect", "true");
-      return htmlParameters;
-    }
-    
-  }
-  
   private final ResourceBundle RESOURCES = ResourceBundle.getBundle(JFlashPlayer.class.getPackage().getName().replace('.', '/') + "/resource/FlashPlayer");
 
   private JPanel webBrowserPanel;

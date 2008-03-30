@@ -22,6 +22,9 @@ public class JWMediaPlayer extends NSPanelComponent {
 
   private NativeWMediaPlayer nativeComponent;
   
+  /**
+   * Construct a Windows Media Player.
+   */
   public JWMediaPlayer() {
     nativeComponent = new NativeWMediaPlayer();
     initialize(nativeComponent);
@@ -33,146 +36,37 @@ public class JWMediaPlayer extends NSPanelComponent {
     setControlBarVisible(true);
   }
   
+  /**
+   * Get the native component.
+   * @return the native component.
+   */
   public NativeComponent getNativeComponent() {
     return nativeComponent;
   }
   
-  public static class WMPSettings {
-    
-    private NativeWMediaPlayer nativeComponent;
-    
-    private WMPSettings(JWMediaPlayer multiMediaPlayer) {
-      this.nativeComponent = multiMediaPlayer.nativeComponent;
-    }
-    
-    public void setErrorDialogsEnabled(boolean isErrorDialogEnabled) {
-      nativeComponent.setOleProperty(new String[] {"settings", "enableErrorDialogs"}, isErrorDialogEnabled);
-    }
-    
-    public void setVolume(int volume) {
-      if(volume < 0 || volume > 100) {
-        throw new IllegalArgumentException("The volume must be between 0 and 100");
-      }
-      nativeComponent.setOleProperty(new String[] {"settings", "volume"}, volume);
-    }
-    
-    /**
-     * @return The volume, between 0 and 100. When mute, the volume is still returned. -1 indicate that it could not be accessed.
-     */
-    public int getVolume() {
-      try {
-        return (Integer)nativeComponent.getOleProperty(new String[] {"settings", "volume"});
-      } catch(Exception e) {
-        return -1;
-      }
-    }
-    
-    /**
-     * @param stereoBalance The stereo balance between -100 and 100, with 0 being the default.
-     */
-    public void setStereoBalance(int stereoBalance) {
-      if(stereoBalance < 100 || stereoBalance > 100) {
-        throw new IllegalArgumentException("The stereo balance must be between -100 and 100");
-      }
-      nativeComponent.setOleProperty(new String[] {"settings", "balance"}, stereoBalance);
-    }
-    
-    /**
-     * @return The stereo balance, between -100 and 100, with 0 being the default. When mute, the balance is still returned.
-     */
-    public int getStereoBalance() {
-      try {
-        return (Integer)nativeComponent.getOleProperty(new String[] {"settings", "balance"});
-      } catch(Exception e) {
-        return -1;
-      }
-    }
-    
-    public void setAutoStart(boolean isAutoStart) {
-      nativeComponent.setOleProperty(new String[] {"settings", "autoStart"}, isAutoStart);
-    }
-    
-    public boolean isAutoStart() {
-      return Boolean.TRUE.equals(nativeComponent.getOleProperty(new String[] {"settings", "autoStart"}));
-    }
-    
-    public void setMute(boolean isMute) {
-      nativeComponent.setOleProperty(new String[] {"settings", "mute"}, isMute);
-    }
-    
-    public boolean isMute() {
-      return Boolean.TRUE.equals(nativeComponent.getOleProperty(new String[] {"settings", "mute"}));
-    }
-    
-    public boolean isPlayEnabled() {
-      return Boolean.TRUE.equals(nativeComponent.getOleProperty(new String[] {"controls", "isAvailable"}, "Play"));
-    }
-    
-  }
-  
   private WMPSettings wmpSettings;
   
+  /**
+   * Get the Media Player object responsible for settings-related actions.
+   * @return the Media Player settings object.
+   */
   public WMPSettings getWMPSettings() {
     return wmpSettings;
   }
 
-  public static class WMPControls {
-    
-    private NativeWMediaPlayer nativeComponent;
-    
-    private WMPControls(JWMediaPlayer multiMediaPlayer) {
-      this.nativeComponent = multiMediaPlayer.nativeComponent;
-    }
-    
-    public void play() {
-      nativeComponent.invokeOleFunction(new String[] {"controls", "Play"});
-    }
-    
-    public boolean isStopEnabled() {
-      return Boolean.TRUE.equals(nativeComponent.getOleProperty(new String[] {"controls", "isAvailable"}, "Stop"));
-    }
-    
-    public void stop() {
-      nativeComponent.invokeOleFunction(new String[] {"controls", "Stop"});
-    }
-    
-    public boolean isPauseEnabled() {
-      return Boolean.TRUE.equals(nativeComponent.getOleProperty(new String[] {"controls", "isAvailable"}, "Pause"));
-    }
-    
-    public void pause() {
-      nativeComponent.invokeOleFunction(new String[] {"controls", "Pause"});
-    }
-    
-    /**
-     * @param time The time in milliseconds.
-     */
-    public void setTime(int time) {
-      nativeComponent.setOleProperty(new String[] {"controls", "currentPosition"}, time / 1000d);
-    }
-    
-    /**
-     * @return The time in milliseconds.
-     */
-    public int getTime() {
-      try {
-        return (int)Math.round((Double)nativeComponent.getOleProperty(new String[] {"controls", "currentPosition"}) * 1000);
-      } catch(Exception e) {
-        return -1;
-      }
-    }
-    
-  }
-  
   private WMPControls wmpControls;
   
+  /**
+   * Get the Media Player object responsible for controls-related actions.
+   * @return the Media Player controls object.
+   */
   public WMPControls getWMPControls() {
     return wmpControls;
   }
 
-  public String getLoadedResource() {
-    return (String)nativeComponent.getOleProperty(new String[] {"url"});
-  }
+//  public String getLoadedResource() {
+//    return (String)nativeComponent.getOleProperty(new String[] {"url"});
+//  }
   
   public void load(String resourcePath) {
     nativeComponent.setOleProperty("url", resourcePath == null? "": resourcePath);
@@ -190,6 +84,10 @@ public class JWMediaPlayer extends NSPanelComponent {
     UNDEFINED, STOPPED, PAUSED, PLAYING, SCAN_FORWARD, SCAN_REVERSE, BUFFERING, WAITING, MEDIA_ENDED, TRANSITIONING, READY, RECONNECTING
   }
   
+  /**
+   * Get the state of the media.
+   * @return the state of the media.
+   */
   public WMPMediaState getMediaState() {
     try {
       switch((Integer)nativeComponent.getOleProperty("playState")) {

@@ -15,9 +15,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -32,11 +29,10 @@ import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import chrriis.common.Utils;
 import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.NSPanelComponent;
 import chrriis.dj.nativeswing.WebBrowserObject;
-import chrriis.dj.nativeswing.components.JVLCPlayer.VLCInput.VLCMediaState;
+import chrriis.dj.nativeswing.components.VLCInput.VLCMediaState;
 
 /**
  * A native multimedia player. It is a browser-based component, which relies on the VLC plugin.<br/>
@@ -46,31 +42,6 @@ import chrriis.dj.nativeswing.components.JVLCPlayer.VLCInput.VLCMediaState;
  */
 public class JVLCPlayer extends NSPanelComponent {
 
-  public static class VLCLoadingOptions {
-    
-    private Map<String, String> keyToValueParameterMap = new HashMap<String, String>();
-
-    /**
-     * Get the VLC plugin HTML parameters.
-     * @return the parameters.
-     */
-    public Map<String, String> getParameters() {
-      return keyToValueParameterMap;
-    }
-    
-    /**
-     * Set the VLC HTML parameters that will be used when the plugin is created.
-     * @param keyToValueParameterMap the map of key/value pairs.
-     */
-    public void setParameters(Map<String, String> keyToValueParameterMap) {
-      if(keyToValueParameterMap == null) {
-        keyToValueParameterMap = new HashMap<String, String>();
-      }
-      this.keyToValueParameterMap = keyToValueParameterMap;
-    }
-    
-  }
-  
   private final ResourceBundle RESOURCES = ResourceBundle.getBundle(JVLCPlayer.class.getPackage().getName().replace('.', '/') + "/resource/VLCPlayer");
 
   private JPanel webBrowserPanel;
@@ -100,6 +71,10 @@ public class JVLCPlayer extends NSPanelComponent {
     
   };
   
+  WebBrowserObject getWebBrowserObject() {
+    return webBrowserObject;
+  }
+  
   private JSlider seekBarSlider;
   private volatile boolean isAdjustingSeekBar;
   private volatile Thread updateThread;
@@ -108,7 +83,7 @@ public class JVLCPlayer extends NSPanelComponent {
   private JSlider volumeSlider;
   private boolean isAdjustingVolume;
 
-  private void adjustVolumePanel() {
+  void adjustVolumePanel() {
     volumeButton.setEnabled(true);
     VLCAudio vlcAudio = getVLCAudio();
     boolean isMute = vlcAudio.isMute();
@@ -419,108 +394,6 @@ public class JVLCPlayer extends NSPanelComponent {
   
   /* ------------------------- VLC API exposed ------------------------- */
   
-  public static class VLCAudio {
-    private JVLCPlayer vlcPlayer;
-    private WebBrowserObject webBrowserObject;
-    private VLCAudio(JVLCPlayer vlcPlayer) {
-      this.vlcPlayer = vlcPlayer;
-      this.webBrowserObject = vlcPlayer.webBrowserObject;
-    }
-    /**
-     * Set whether audio is mute.
-     * @param isMute true if audio should be mute, false otherwise.
-     */
-    public void setMute(boolean isMute) {
-      webBrowserObject.setObjectProperty("audio.mute", isMute);
-      vlcPlayer.adjustVolumePanel();
-    }
-    /**
-     * Indicate whether audio is mute.
-     * @return true if audio is mute.
-     */
-    public boolean isMute() {
-      return Boolean.TRUE.equals(webBrowserObject.getObjectProperty("audio.mute"));
-    }
-    /**
-     * Set the volume.
-     * @param volume the new volume, with a value between 0 and 100. Note that a value of 0 may not make it completely silent, mute should be used instead.
-     */
-    public void setVolume(int volume) {
-      if(volume < 0 || volume > 100) {
-        throw new IllegalArgumentException("The volume must be between 0 and 100");
-      }
-      webBrowserObject.setObjectProperty("audio.volume", Math.round((volume * 1.99 + 1)));
-      vlcPlayer.adjustVolumePanel();
-    }
-    /**
-     * Get the volume, as a value between 0 and 100.
-     * @return the volume.
-     */
-    public int getVolume() {
-      Object value = webBrowserObject.getObjectProperty("audio.volume");
-      return value == null? -1: Math.max(0, (int)Math.round((((Number)value).intValue() - 1) / 1.99));
-    }
-    /**
-     * Set the audio track, or 0 to disable it.
-     * @param track the track to play.
-     */
-    public void setTrack(int track) {
-      webBrowserObject.setObjectProperty("audio.track", track);
-    }
-    /**
-     * Get the audio track, or 0 if disabled.
-     * @return the audio track.
-     */
-    public int getTrack() {
-      Object value = webBrowserObject.getObjectProperty("audio.track");
-      return value == null? -1: ((Number)value).intValue();
-    }
-    public enum VLCChannel {
-      STEREO, REVERSE_STEREO, LEFT, RIGHT, DOLBY
-    }
-    /**
-     * Set the audio channel to use.
-     * @param channel the audio channel to use.
-     */
-    public void setChannel(VLCChannel channel) {
-      int value;
-      switch(channel) {
-        case STEREO: value = 1; break;
-        case REVERSE_STEREO: value = 2; break;
-        case LEFT: value = 3; break;
-        case RIGHT: value = 4; break;
-        case DOLBY: value = 5; break;
-        default: throw new IllegalArgumentException("The channel value is invalid!");
-      }
-      webBrowserObject.setObjectProperty("audio.channel", value);
-    }
-    /**
-     * Get the audio channel.
-     * @return the audio channel.
-     */
-    public VLCChannel getChannel() {
-      Object value = webBrowserObject.getObjectProperty("audio.channel");
-      if(value == null) {
-        return null;
-      }
-      switch(((Number)value).intValue()) {
-        case 1: return VLCChannel.STEREO;
-        case 2: return VLCChannel.REVERSE_STEREO;
-        case 3: return VLCChannel.LEFT;
-        case 4: return VLCChannel.RIGHT;
-        case 5: return VLCChannel.DOLBY;
-      }
-      return null;
-    }
-    /**
-     * Toggle the mute state.
-     */
-    public void toggleMute() {
-      webBrowserObject.invokeObjectFunction("audio.toggleMute");
-      vlcPlayer.adjustVolumePanel();
-    }
-  }
-  
   private VLCAudio vlcAudio = new VLCAudio(this);
   
   /**
@@ -529,108 +402,6 @@ public class JVLCPlayer extends NSPanelComponent {
    */
   public VLCAudio getVLCAudio() {
     return vlcAudio;
-  }
-  
-  public static class VLCInput {
-    private WebBrowserObject webBrowserObject;
-    private VLCInput(JVLCPlayer vlcPlayer) {
-      this.webBrowserObject = vlcPlayer.webBrowserObject;
-    }
-    /**
-     * Get the length in milliseconds of the current media.
-     * @return the length in milliseconds.
-     */
-    public int getMediaLength() {
-      Object value = webBrowserObject.getObjectProperty("input.length");
-      return value == null? -1: ((Number)value).intValue();
-    }
-    /**
-     * Get the number of frames per second.
-     * @return the number of frames per second.
-     */
-    public float getFrameRate() {
-      Object value = webBrowserObject.getObjectProperty("input.fps");
-      return value == null? Float.NaN: ((Number)value).floatValue();
-    }
-    /**
-     * Indicate if a video is currently displayed.
-     * @return true if a video is displayed.
-     */
-    public boolean isVideoDisplayed() {
-      return Boolean.TRUE.equals(webBrowserObject.getObjectProperty("input.isVout"));
-    }
-    /**
-     * Set the current relative position on the timeline.
-     * @param position A value between 0 and 1.
-     */
-    public void setRelativePosition(float position) {
-      if(position >= 0 && position <= 1) {
-        webBrowserObject.setObjectProperty("input.position", position);
-        return;
-      }
-      throw new IllegalArgumentException("The position must be between 0 and 1");
-    }
-    /**
-     * Get the current relative position on the timeline as a float between 0 and 1.
-     * @return the current relative position, or Float.NaN if not available.
-     */
-    public float getRelativePosition() {
-      Object value = webBrowserObject.getObjectProperty("input.position");
-      return value == null? Float.NaN: ((Number)value).floatValue();
-    }
-    /**
-     * Set the current position on the timeline.
-     * @param time The current position in milliseconds.
-     */
-    public void setAbsolutePosition(int time) {
-      webBrowserObject.setObjectProperty("input.time", time);
-    }
-    /**
-     * Get the current position on the timeline.
-     * @return the current position in milliseconds.
-     */
-    public int getAbsolutePosition() {
-      Object value = webBrowserObject.getObjectProperty("input.time");
-      return value == null? -1: ((Number)value).intValue();
-    }
-    public enum VLCMediaState {
-      IDLE_CLOSE, OPENING, BUFFERING, PLAYING, PAUSED, STOPPING, ERROR,
-    }
-    /**
-     * Get the state.
-     * @return the state.
-     */
-    public VLCMediaState getMediaState() {
-      Object value = webBrowserObject.getObjectProperty("input.state");
-      if(value == null) {
-        return null;
-      }
-      switch(((Number)value).intValue()) {
-        case 0: return VLCMediaState.IDLE_CLOSE;
-        case 1: return VLCMediaState.OPENING;
-        case 2: return VLCMediaState.BUFFERING;
-        case 3: return VLCMediaState.PLAYING;
-        case 4: return VLCMediaState.PAUSED;
-        case 5: return VLCMediaState.STOPPING;
-        case 6: return VLCMediaState.ERROR;
-      }
-      return null;
-    }
-    /**
-     * Set the speed factor that is applied when a media is played.
-     * @param speedFactor the speed factor.
-     */
-    public void setPlayRate(float speedFactor) {
-      webBrowserObject.setObjectProperty("input.rate", speedFactor);
-    }
-    /**
-     * Get the speed factor that is applied when a media is played.
-     * @return the speed factor.
-     */
-    public float getPlaySpeedFactor() {
-      Object value = webBrowserObject.getObjectProperty("input.rate");
-      return value == null? Float.NaN: ((Number)value).floatValue();
-    }
   }
   
   private VLCInput vlcInput = new VLCInput(this);
@@ -643,105 +414,6 @@ public class JVLCPlayer extends NSPanelComponent {
     return vlcInput;
   }
   
-  public static class VLCPlaylist {
-    private JVLCPlayer vlcPlayer;
-    private WebBrowserObject webBrowserObject;
-    private VLCPlaylist(JVLCPlayer vlcPlayer) {
-      this.vlcPlayer = vlcPlayer;
-      this.webBrowserObject = vlcPlayer.webBrowserObject;
-    }
-    /**
-     * Get the number of items in the playlist.
-     * @return the item count.
-     */
-    public int getItemCount() {
-      Object value = webBrowserObject.getObjectProperty("playlist.items.count");
-      return value == null? -1: ((Number)value).intValue();
-    }
-    /**
-     * Indicate whether the playlist is currently playing an item.
-     * @return true if an item is being played.
-     */
-    public boolean isPlaying() {
-      return Boolean.TRUE.equals(webBrowserObject.getObjectProperty("playlist.isPlaying"));
-    }
-    /**
-     * Add an item from the classpath to the playlist and get its ID for future manipulation.
-     * @param clazz the reference clazz of the file to load.
-     * @param resourcePath the path to the file.
-     */
-    public int addItem(Class<?> clazz, String resourcePath) {
-      return addItem(WebServer.getDefaultWebServer().getClassPathResourceURL(clazz.getName(), resourcePath));
-    }
-    /**
-     * Add an item to the playlist and get its ID for future manipulation.
-     * @param resourcePath the path or URL to the file.
-     * @return the item ID, which can be used to add play or remove an item from the playlist.
-     */
-    public int addItem(String resourcePath) {
-      if(!webBrowserObject.hasContent()) {
-        vlcPlayer.load();
-        clear();
-      }
-      File file = Utils.getLocalFile(resourcePath);
-      if(file != null) {
-        resourcePath = webBrowserObject.getLocalFileURL(file);
-      }
-      Object value = webBrowserObject.invokeObjectFunctionWithResult("playlist.add", resourcePath);
-      return value == null? -1: ((Number)value).intValue();
-    }
-    /**
-     * Start playing the playlist.
-     */
-    public void play() {
-      webBrowserObject.invokeObjectFunction("playlist.play");
-    }
-    /**
-     * Start playing an item from the playlist using its ID.
-     * @param itemID the ID of the item to play.
-     */
-    public void playItem(int itemID) {
-      webBrowserObject.invokeObjectFunction("playlist.playItem", itemID);
-    }
-    /**
-     * Toggle the pause state.
-     */
-    public void togglePause() {
-      webBrowserObject.invokeObjectFunction("playlist.togglePause");
-    }
-    /**
-     * Stop playing.
-     */
-    public void stop() {
-      webBrowserObject.invokeObjectFunction("playlist.stop");
-    }
-    /**
-     * Move to the next item of the playlist.
-     */
-    public void next() {
-      webBrowserObject.invokeObjectFunction("playlist.next");
-    }
-    /**
-     * Move to the previous item of the playlist.
-     */
-    public void prev() {
-      webBrowserObject.invokeObjectFunction("playlist.prev");
-    }
-    /**
-     * Clear the playlist.
-     */
-    public void clear() {
-      webBrowserObject.invokeObjectFunction("playlist.items.clear");
-    }
-    /**
-     * Remove an item using its ID.
-     * @param itemID the ID of the item.
-     */
-    public void removeItem(int itemID) {
-      webBrowserObject.invokeObjectFunction("playlist.items.removeItem", itemID);
-    }
-  }
-  
   private VLCPlaylist vlcPlaylist = new VLCPlaylist(this);
   
   /**
@@ -750,98 +422,6 @@ public class JVLCPlayer extends NSPanelComponent {
    */
   public VLCPlaylist getVLCPlaylist() {
     return vlcPlaylist;
-  }
-  
-  public static class VLCVideo {
-    private WebBrowserObject webBrowserObject;
-    private VLCVideo(JVLCPlayer vlcPlayer) {
-      this.webBrowserObject = vlcPlayer.webBrowserObject;
-    }
-    /**
-     * Get the width of the video.
-     * @return the width.
-     */
-    public int getWidth() {
-      Object value = webBrowserObject.getObjectProperty("video.width");
-      return value == null? -1: ((Number)value).intValue();
-    }
-    /**
-     * Get the height of the video.
-     * @return the height.
-     */
-    public int getHeight() {
-      Object value = webBrowserObject.getObjectProperty("video.height");
-      return value == null? -1: ((Number)value).intValue();
-    }
-    /**
-     * Set whether the video is playing in full screen mode.
-     * @param isFullScreen true if the full screen mode should be active, false otherwise.
-     */
-    public void setFullScreen(boolean isFullScreen) {
-      webBrowserObject.setObjectProperty("video.fullscreen", isFullScreen);
-    }
-    /**
-     * Indicate whether the video is in full screen mode.
-     * @return true if the video is in full screen mode.
-     */
-    public boolean isFullScreen() {
-      return Boolean.TRUE.equals(webBrowserObject.getObjectProperty("video.fullscreen"));
-    }
-    public enum VLCAspectRatio {
-      _1x1, _4x3, _16x9, _16x10, _221x100, _5x4,
-    }
-    /**
-     * Set the aspect ration of the video.
-     * @param aspectRatio the aspect ratio.
-     */
-    public void setAspectRatio(VLCAspectRatio aspectRatio) {
-      String value;
-      switch(aspectRatio) {
-        case _1x1: value = "1:1"; break;
-        case _4x3: value = "4:3"; break;
-        case _16x9: value = "16:9"; break;
-        case _16x10: value = "16:10"; break;
-        case _221x100: value = "221:100"; break;
-        case _5x4: value = "5:4"; break;
-        default: throw new IllegalArgumentException("The aspect ratio value is invalid!");
-      }
-      webBrowserObject.setObjectProperty("video.aspectRatio", value);
-    }
-    /**
-     * Get the aspect ratio of the video media.
-     * @return the aspect ratio.
-     */
-    public VLCAspectRatio getAspectRatio() {
-      String value = (String)webBrowserObject.getObjectProperty("video.aspectRatio");
-      if("1:1".equals(value)) return VLCAspectRatio._1x1;
-      if("4:3".equals(value)) return VLCAspectRatio._4x3;
-      if("16:9".equals(value)) return VLCAspectRatio._16x9;
-      if("16:10".equals(value)) return VLCAspectRatio._16x10;
-      if("221:100".equals(value)) return VLCAspectRatio._221x100;
-      if("5:4".equals(value)) return VLCAspectRatio._5x4;
-      return null;
-    }
-    /**
-     * Set the track of the subtitles.
-     * @param subtitleTrack The track of the subtitles, or 0 to disable them.
-     */
-    public void setSubtitleTrack(int subtitleTrack) {
-      webBrowserObject.setObjectProperty("video.subtitle", subtitleTrack);
-    }
-    /**
-     * Get the track of the subtitles.
-     * @return the track of the subtitles, or 0 if disabled.
-     */
-    public int getSubtitleTrack() {
-      Object value = webBrowserObject.getObjectProperty("video.subtitle");
-      return value == null? -1: ((Number)value).intValue();
-    }
-    /**
-     * Toggle full screen mode.
-     */
-    public void toggleFullScreen() {
-      webBrowserObject.invokeObjectFunction("video.toggleFullscreen");
-    }
   }
   
   private VLCVideo vlcVideo = new VLCVideo(this);
