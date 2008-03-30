@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * A convenient class to register objects to an ID.
  * @author Christopher Deckers
  */
 public class Registry {
@@ -55,20 +56,31 @@ public class Registry {
   private Map<Integer, WeakReference<Object>> instanceIDToObjectReferenceMap = new HashMap<Integer, WeakReference<Object>>();
   
   /**
-   * @return an instance ID that is strictly greater than 0.
+   * Add an object to the registry.
+   * @param o the object to add.
+   * @return an unused instance ID that is strictly greater than 0.
    */
   public int add(Object o) {
     synchronized (LOCK) {
-      int instanceID = nextInstanceID++;
-      if(o == null) {
-        return instanceID;
+      while(true) {
+        int instanceID = nextInstanceID++;
+        if(!instanceIDToObjectReferenceMap.containsKey(instanceID)) {
+          if(o == null) {
+            return instanceID;
+          }
+          instanceIDToObjectReferenceMap.put(instanceID, new WeakReference<Object>(o));
+          startThread();
+          return instanceID;
+        }
       }
-      instanceIDToObjectReferenceMap.put(instanceID, new WeakReference<Object>(o));
-      startThread();
-      return instanceID;
     }
   }
   
+  /**
+   * Add an object to the registry, specifying its ID, wich throws an exception if the ID is already in use.
+   * @param o the object to add.
+   * @param instanceID the ID to associate the object to.
+   */
   public void add(Object o, int instanceID) {
     synchronized (LOCK) {
       Object o2 = get(instanceID);
@@ -94,10 +106,18 @@ public class Registry {
     }
   }
   
+  /**
+   * Remove an object from the registry using its instance ID.
+   * @param instanceID the ID of the object to remove.
+   */
   public void remove(int instanceID) {
     instanceIDToObjectReferenceMap.remove(instanceID);
   }
   
+  /**
+   * Get all the instance IDs that are used in this registry.
+   * @return the instance IDs.
+   */
   public int[] getInstanceIDs() {
     Object[] instanceIDObjects = instanceIDToObjectReferenceMap.keySet().toArray();
     int[] instanceIDs = new int[instanceIDObjects.length];
@@ -109,6 +129,9 @@ public class Registry {
   
   private static Registry registry = new Registry();
   
+  /**
+   * Get the default shared instance of a registry.
+   */
   public static Registry getInstance() {
     return registry;
   }
