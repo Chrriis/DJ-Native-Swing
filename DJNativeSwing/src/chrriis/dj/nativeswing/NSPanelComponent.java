@@ -19,6 +19,9 @@ public abstract class NSPanelComponent extends JPanel implements NSComponent {
 
   private NativeComponent nativeComponent;
   
+  /**
+   * Construct an NativeSwing panel-based component, which by default has a border layout with no margins.
+   */
   public NSPanelComponent() {
     super(new BorderLayout(0, 0));
   }

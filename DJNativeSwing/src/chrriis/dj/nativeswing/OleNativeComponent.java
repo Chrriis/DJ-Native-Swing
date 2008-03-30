@@ -27,6 +27,9 @@ import org.eclipse.swt.ole.win32.Variant;
  */
 public abstract class OleNativeComponent extends NativeComponent {
 
+  /**
+   * Construct an OLE native component.
+   */
   public OleNativeComponent() {
   }
   

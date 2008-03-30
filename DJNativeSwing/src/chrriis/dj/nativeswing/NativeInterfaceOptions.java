@@ -13,6 +13,12 @@ package chrriis.dj.nativeswing;
  */
 public class NativeInterfaceOptions {
   
+  /**
+   * Construct native interface options.
+   */
+  public NativeInterfaceOptions() {
+  }
+  
   private boolean isNativeSideRespawnedOnError = true;
   private boolean isPreferredLookAndFeelApplied;
   private Class<?>[] nativeClassPathReferenceClasses;

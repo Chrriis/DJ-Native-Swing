@@ -14,20 +14,25 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
+ * A class loader that loads classes from a give codebase.
  * @author Christopher Deckers
  */
 public class NetworkURLClassLoader extends ClassLoader {
 
-  private URL codeBaseURL;
-  
-  public NetworkURLClassLoader(String codeBase) throws MalformedURLException {
-    this.codeBaseURL = new URL(codeBase);
+  private URL codebaseURL;
+
+  /**
+   * Construct a network URL classloader, that will load resources from the give codebase.
+   * @param codebase the codebase to load the resources from.
+   */
+  public NetworkURLClassLoader(String codebase) throws MalformedURLException {
+    this.codebaseURL = new URL(codebase);
   }
   
   @Override
   protected URL findResource(String name) {
     try {
-      return new URL(codeBaseURL, name);
+      return new URL(codebaseURL, name);
     } catch(MalformedURLException e) {
       e.printStackTrace();
     }

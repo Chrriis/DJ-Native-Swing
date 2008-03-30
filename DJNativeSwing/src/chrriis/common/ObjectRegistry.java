@@ -56,7 +56,7 @@ public class ObjectRegistry {
   private Map<Integer, WeakReference<Object>> instanceIDToObjectReferenceMap = new HashMap<Integer, WeakReference<Object>>();
   
   /**
-   * Construct a registry.
+   * Construct an object registry.
    */
   public ObjectRegistry() {
   }
@@ -98,6 +98,10 @@ public class ObjectRegistry {
     }
   }
   
+  /**
+   * Get an object using its ID.
+   * @return the object, or null.
+   */
   public Object get(int instanceID) {
     synchronized (LOCK) {
       WeakReference<Object> weakReference = instanceIDToObjectReferenceMap.get(instanceID);
