@@ -311,60 +311,64 @@ abstract class MessagingInterface {
     System.err.println("Failed messaging: " + message);
   }
   
+  private Object LOCK = new Object();
+  
   public Object syncSend(Message message) {
     if(!isUIThread()) {
       return nonUISyncExec(message);
     }
-    message.setUI(true);
-    message.setSyncExec(true);
-    if(!isAlive()) {
-      printFailedInvocation(message);
-      return null;
-    }
-    CommandResultMessage commandResultMessage = null;
-    try {
-      writeMessage(message);
-      List<CommandResultMessage> commandResultMessageList = new ArrayList<CommandResultMessage>();
-      while(true) {
-        commandResultMessage = processReceivedMessages();
-        if(commandResultMessage != null) {
-          if(commandResultMessage.getOriginalID() != message.getID()) {
-            commandResultMessageList.add(commandResultMessage);
-            commandResultMessage = null;
+    synchronized(LOCK) {
+      message.setUI(true);
+      message.setSyncExec(true);
+      if(!isAlive()) {
+        printFailedInvocation(message);
+        return null;
+      }
+      CommandResultMessage commandResultMessage = null;
+      try {
+        writeMessage(message);
+        List<CommandResultMessage> commandResultMessageList = new ArrayList<CommandResultMessage>();
+        while(true) {
+          commandResultMessage = processReceivedMessages();
+          if(commandResultMessage != null) {
+            if(commandResultMessage.getOriginalID() != message.getID()) {
+              commandResultMessageList.add(commandResultMessage);
+              commandResultMessage = null;
+            } else {
+              break;
+            }
           } else {
-            break;
+            synchronized(RECEIVER_LOCK) {
+              if(receivedMessageList.isEmpty()) {
+                isWaitingResponse = true;
+                RECEIVER_LOCK.wait();
+                isWaitingResponse = false;
+              }
+            }
           }
-        } else {
-          synchronized(RECEIVER_LOCK) {
-            if(receivedMessageList.isEmpty()) {
-              isWaitingResponse = true;
-              RECEIVER_LOCK.wait();
-              isWaitingResponse = false;
+          if(!isAlive()) {
+            printFailedInvocation(message);
+            return null;
+          }
+        }
+        synchronized(RECEIVER_LOCK) {
+          if(!commandResultMessageList.isEmpty()) {
+            receivedMessageList.addAll(0, commandResultMessageList);
+          } else {
+            if(!receivedMessageList.isEmpty()) {
+              asyncUIExec(new Runnable() {
+                public void run() {
+                  processReceivedMessages();
+                }
+              });
             }
           }
         }
-        if(!isAlive()) {
-          printFailedInvocation(message);
-          return null;
-        }
+      } catch(Exception e) {
+        throw new IllegalStateException(e);
       }
-      synchronized(RECEIVER_LOCK) {
-        if(!commandResultMessageList.isEmpty()) {
-          receivedMessageList.addAll(0, commandResultMessageList);
-        } else {
-          if(!receivedMessageList.isEmpty()) {
-            asyncUIExec(new Runnable() {
-              public void run() {
-                processReceivedMessages();
-              }
-            });
-          }
-        }
-      }
-    } catch(Exception e) {
-      throw new IllegalStateException(e);
+      return processCommandResult(commandResultMessage);
     }
-    return processCommandResult(commandResultMessage);
   }
   
   private Object processCommandResult(CommandResultMessage commandResultMessage) {
