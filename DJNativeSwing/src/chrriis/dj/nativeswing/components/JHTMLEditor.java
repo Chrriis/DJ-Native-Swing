@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 
 import javax.swing.SwingUtilities;
 
-import chrriis.common.Registry;
+import chrriis.common.ObjectRegistry;
 import chrriis.common.Utils;
 import chrriis.common.WebServer;
 import chrriis.common.WebServer.HTTPRequest;
@@ -95,7 +95,7 @@ public class JHTMLEditor extends NSPanelComponent {
     webBrowser.addWebBrowserListener(new NWebBrowserListener(this));
     webBrowser.setBarsVisible(false);
     add(webBrowser, BorderLayout.CENTER);
-    instanceID = Registry.getInstance().add(this);
+    instanceID = ObjectRegistry.getInstance().add(this);
     final Boolean[] resultArray = new Boolean[] {Boolean.FALSE};
     InitializationListener initializationListener = new InitializationListener() {
       public void objectInitialized() {
@@ -121,7 +121,7 @@ public class JHTMLEditor extends NSPanelComponent {
     int index = resourcePath.indexOf('/');
     final int instanceID = Integer.parseInt(resourcePath.substring(0, index));
     final String resourcePath_ = resourcePath.substring(index + 1);
-    final JHTMLEditor htmlEditor = (JHTMLEditor)Registry.getInstance().get(instanceID);
+    final JHTMLEditor htmlEditor = (JHTMLEditor)ObjectRegistry.getInstance().get(instanceID);
     if(htmlEditor == null) {
       return null;
     }

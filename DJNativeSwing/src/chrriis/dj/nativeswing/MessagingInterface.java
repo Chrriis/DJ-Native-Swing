@@ -22,7 +22,7 @@ import javax.swing.SwingUtilities;
 
 import org.eclipse.swt.SWT;
 
-import chrriis.common.Registry;
+import chrriis.common.ObjectRegistry;
 
 /**
  * @author Christopher Deckers
@@ -283,7 +283,7 @@ abstract class MessagingInterface {
     }
   }
   
-  private Registry syncThreadRegistry = new Registry();
+  private ObjectRegistry syncThreadRegistry = new ObjectRegistry();
   
   private Object nonUISyncExec(Message message) {
     Thread thread = Thread.currentThread();

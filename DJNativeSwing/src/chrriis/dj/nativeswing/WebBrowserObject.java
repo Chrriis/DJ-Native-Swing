@@ -19,7 +19,7 @@ import java.util.Map.Entry;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
 
-import chrriis.common.Registry;
+import chrriis.common.ObjectRegistry;
 import chrriis.common.Utils;
 import chrriis.common.WebServer;
 import chrriis.common.WebServer.HTTPData;
@@ -96,13 +96,13 @@ public abstract class WebBrowserObject {
   @SuppressWarnings("deprecation")
   public void load(String resourcePath) {
     this.resourcePath = resourcePath;
-    Registry.getInstance().remove(instanceID);
+    ObjectRegistry.getInstance().remove(instanceID);
     if(resourcePath == null) {
       webBrowser.setHTMLContent("");
       return;
     }
-    Registry.getInstance().remove(instanceID);
-    instanceID = Registry.getInstance().add(this);
+    ObjectRegistry.getInstance().remove(instanceID);
+    instanceID = ObjectRegistry.getInstance().add(this);
     resourcePath = WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "html/" + instanceID);
     final Boolean[] resultArray = new Boolean[] {Boolean.FALSE};
     InitializationListener initializationListener = new InitializationListener() {
@@ -133,7 +133,7 @@ public abstract class WebBrowserObject {
     resourcePath = resourcePath.substring(index + 1);
     if("html".equals(type)) {
       final int instanceID = Integer.parseInt(resourcePath);
-      final WebBrowserObject component = (WebBrowserObject)Registry.getInstance().get(instanceID);
+      final WebBrowserObject component = (WebBrowserObject)ObjectRegistry.getInstance().get(instanceID);
       if(component == null) {
         return null;
       }
@@ -205,7 +205,7 @@ public abstract class WebBrowserObject {
     }
     if("js".equals(type)) {
       final int instanceID = Integer.parseInt(resourcePath);
-      final WebBrowserObject webBrowserObject = (WebBrowserObject)Registry.getInstance().get(instanceID);
+      final WebBrowserObject webBrowserObject = (WebBrowserObject)ObjectRegistry.getInstance().get(instanceID);
       if(webBrowserObject == null) {
         return null;
       }
@@ -263,7 +263,7 @@ public abstract class WebBrowserObject {
     }
     if("postCommand".equals(type)) {
       final int instanceID = Integer.parseInt(resourcePath);
-      final WebBrowserObject webBrowserObject = (WebBrowserObject)Registry.getInstance().get(instanceID);
+      final WebBrowserObject webBrowserObject = (WebBrowserObject)ObjectRegistry.getInstance().get(instanceID);
       if(webBrowserObject == null) {
         return null;
       }

@@ -58,7 +58,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import chrriis.common.Registry;
+import chrriis.common.ObjectRegistry;
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.NativeComponentOptions.DestructionTime;
 import chrriis.dj.nativeswing.NativeComponentOptions.FiliationType;
@@ -142,13 +142,13 @@ public abstract class NativeComponent extends Canvas {
     System.err.println("Invalid " + getClass().getName() + "[" + hashCode() + "]: " + message);
   }
   
-  static Registry registry = new Registry();
+  static ObjectRegistry registry = new ObjectRegistry();
   
   /**
    * Get the registry of the components, which references created components/controls using the component ID.
    * @return the registry.
    */
-  protected static Registry getRegistry() {
+  protected static ObjectRegistry getRegistry() {
     return registry;
   }
   

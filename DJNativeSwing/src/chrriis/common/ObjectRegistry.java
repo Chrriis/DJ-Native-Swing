@@ -15,7 +15,7 @@ import java.util.Map;
  * A convenient class to register objects to an ID.
  * @author Christopher Deckers
  */
-public class Registry {
+public class ObjectRegistry {
 
   private Thread cleanUpThread;
   
@@ -54,6 +54,12 @@ public class Registry {
   private Object LOCK = new Object();
   private int nextInstanceID = 1;
   private Map<Integer, WeakReference<Object>> instanceIDToObjectReferenceMap = new HashMap<Integer, WeakReference<Object>>();
+  
+  /**
+   * Construct a registry.
+   */
+  public ObjectRegistry() {
+  }
   
   /**
    * Add an object to the registry.
@@ -127,12 +133,12 @@ public class Registry {
     return instanceIDs;
   }
   
-  private static Registry registry = new Registry();
+  private static ObjectRegistry registry = new ObjectRegistry();
   
   /**
    * Get the default shared instance of a registry.
    */
-  public static Registry getInstance() {
+  public static ObjectRegistry getInstance() {
     return registry;
   }
   
