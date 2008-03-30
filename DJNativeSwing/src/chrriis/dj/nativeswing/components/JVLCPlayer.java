@@ -178,6 +178,9 @@ public class JVLCPlayer extends NSPanelComponent {
     return sb.toString();
   }
   
+  /**
+   * Construct a VLC player.
+   */
   public JVLCPlayer() {
     initialize(webBrowser.getNativeComponent());
     webBrowserPanel = new JPanel(new BorderLayout(0, 0));

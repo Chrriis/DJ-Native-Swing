@@ -16,6 +16,12 @@ import java.util.Map;
  */
 public class VLCOptions {
   
+  /**
+   * Construct new VLC options.
+   */
+  public VLCOptions() {
+  }
+  
   private Map<String, String> keyToValueParameterMap = new HashMap<String, String>();
 
   /**

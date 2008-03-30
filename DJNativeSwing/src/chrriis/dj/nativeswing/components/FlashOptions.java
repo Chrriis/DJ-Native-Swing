@@ -20,7 +20,7 @@ import chrriis.common.Utils;
 public class FlashOptions {
   
   /**
-   * Construct new Flash loading options.
+   * Construct new Flash options.
    */
   public FlashOptions() {
   }

@@ -13,13 +13,21 @@ package chrriis.dj.nativeswing.components;
  */
 public class HTMLEditorSaveEvent extends HTMLEditorEvent {
 
-  protected String text;
+  private String text;
 
+  /**
+   * Construct an HTML editor save event.
+   * @param htmlEditor the editor.
+   * @param text The text that is asked to be saved.
+   */
   public HTMLEditorSaveEvent(JHTMLEditor htmlEditor, String text) {
     super(htmlEditor);
     this.text = text;
   }
   
+  /**
+   * Get the text to save.
+   */
   public String getText() {
     return text;
   }

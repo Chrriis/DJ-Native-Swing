@@ -83,6 +83,9 @@ public class JHTMLEditor extends NSPanelComponent {
     }
   }
   
+  /**
+   * Construct an HTML editor.
+   */
   public JHTMLEditor() {
     if(getClass().getResource("/fckeditor/fckeditor.js") == null) {
       throw new IllegalStateException("The FCKEditor distribution is missing from the classpath!");

@@ -144,6 +144,10 @@ public abstract class NativeComponent extends Canvas {
   
   static Registry registry = new Registry();
   
+  /**
+   * Get the registry of the components, which references created components/controls using the component ID.
+   * @return the registry.
+   */
   protected static Registry getRegistry() {
     return registry;
   }
@@ -159,7 +163,7 @@ public abstract class NativeComponent extends Canvas {
   private int componentID;
   
   /**
-   * Get the unique identifier of this native component.
+   * Get the unique identifier of this native component, used as a reference to communicate with the native peer.
    * @return the component ID.
    */
   protected int getComponentID() {
@@ -174,6 +178,9 @@ public abstract class NativeComponent extends Canvas {
     }
   }
 
+  /**
+   * Construct a native component.
+   */
   public NativeComponent() {
     componentID = NativeComponent.registry.add(this);
     addFocusListener(new FocusAdapter() {
@@ -584,6 +591,9 @@ public abstract class NativeComponent extends Canvas {
   private boolean isNativePeerInitialized;
   private boolean isNativePeerDisposed;
   
+  /**
+   * Explicitely dispose the native resources. This is particularly useful if deferred destruction is used (cf native component options) and the component is not going to be used anymore.
+   */
   protected void disposeNativePeer() {
     if(!isNativePeerDisposed) {
       isNativePeerDisposed = true;
@@ -601,10 +611,18 @@ public abstract class NativeComponent extends Canvas {
     }
   }
   
+  /**
+   * Indicate whether the native peer is disposed.
+   * @return true if the native peer is disposed. This method returns false if the native peer is not initialized.
+   */
   public boolean isNativePeerDisposed() {
     return isNativePeerDisposed;
   }
   
+  /**
+   * Indicate whether the native peer initialization phase has happened. This method returns true even if the native peer is disposed of if the creation of the peer failed.
+   * @return true if the native peer is initialized.
+   */
   public boolean isNativePeerInitialized() {
     return isNativePeerInitialized;
   }
@@ -677,6 +695,10 @@ public abstract class NativeComponent extends Canvas {
     return false;
   }
   
+  /**
+   * A native component instance cannot be added directly to a component hierarchy. This method needs to be called to get a component that will add the native component.
+   * @return the component that contains the native component and that can be added to the component hierarchy.
+   */
   protected Component createEmbeddableComponent() {
     NativeComponentOptions nextInstanceOptions = NativeComponentOptions.getNextInstanceOptions();
     NativeComponentOptions.setNextInstanceOptions(null);
@@ -989,6 +1011,9 @@ public abstract class NativeComponent extends Canvas {
     return new Dimension(0, 0);
   }
   
+  /**
+   * Create an image as a back buffer, which can be used for example to simulate alpha blending. Note that this is only possible for proxied components (cf component options). 
+   */
   public void createBackBuffer() {
     if(nativeComponentProxy != null) {
       nativeComponentProxy.createBackgroundBuffer();
@@ -1004,6 +1029,9 @@ public abstract class NativeComponent extends Canvas {
     }
   }
   
+  /**
+   * Releases the resources held by the back buffer.
+   */
   public void releaseBackBuffer() {
     if(nativeComponentProxy != null) {
       nativeComponentProxy.releaseBackBuffer();

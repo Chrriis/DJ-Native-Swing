@@ -14,6 +14,10 @@ import java.util.EventListener;
  */
 public interface HTMLEditorListener extends EventListener {
 
+  /**
+   * Invoked when the save action was triggered on an HTML editor.
+   * @param e the save event.
+   */
   public void saveHTML(HTMLEditorSaveEvent e);
 
 }

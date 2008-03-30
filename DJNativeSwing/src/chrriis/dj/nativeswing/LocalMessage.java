@@ -14,6 +14,12 @@ package chrriis.dj.nativeswing;
 public abstract class LocalMessage extends CommandMessage {
 
   /**
+   * Construct a local message.
+   */
+  public LocalMessage() {
+  }
+  
+  /**
    * Run the message.
    * @return the result.
    */
