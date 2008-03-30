@@ -254,4 +254,20 @@ public class UIUtils {
     return shape;
   }
 
+  /**
+   * Get the bounds containing all the rectangles.
+   * @param rectangles the rectangles to get the bounds for.
+   * @return a rectangle that contains all the rectangles, potentially an empty rectangle.
+   */
+  public static Rectangle getBounds(Rectangle[] rectangles) {
+    Rectangle bounds = new Rectangle();
+    if(rectangles.length > 0) {
+      bounds.setBounds(rectangles[0]);
+      for(int i=1; i<rectangles.length; i++) {
+        Rectangle.union(bounds, rectangles[i], bounds);
+      }
+    }
+    return bounds;
+  }
+  
 }

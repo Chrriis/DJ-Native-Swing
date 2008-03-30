@@ -245,13 +245,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     Window windowAncestor = SwingUtilities.getWindowAncestor(panel);
     Rectangle[] subtractingArea = new Rectangle[] {new Rectangle(panel.getWidth(), panel.getHeight())};
     subtractingArea = UIUtils.subtract(subtractingArea, lastArea);
-    final Rectangle imageBounds = new Rectangle();
-    if(subtractingArea.length > 0) {
-      imageBounds.setBounds(subtractingArea[0]);
-      for(int i=1; i<subtractingArea.length; i++) {
-        Rectangle.union(imageBounds, subtractingArea[i], imageBounds);
-      }
-    }
+    final Rectangle imageBounds = UIUtils.getBounds(subtractingArea);
     Point panelLocation = panel.getLocation();
     SwingUtilities.convertPointToScreen(panelLocation, parent);
     Rectangle r = new Rectangle(imageBounds.x + panelLocation.x, imageBounds.y + panelLocation.y, imageBounds.width, imageBounds.height);

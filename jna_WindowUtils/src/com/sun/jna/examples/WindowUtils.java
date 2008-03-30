@@ -444,7 +444,6 @@ public class WindowUtils {
         area.add(new Area(rectangles[i]));
       }
       setWindowMask(c, area);
-      throw new UnsupportedOperationException("Window masking is not available");
     }
     
     /**
@@ -1007,6 +1006,42 @@ public class WindowUtils {
       return pm;
     }
 
+    private Pixmap createBitmap(final Display dpy, X11.Window win, Rectangle[] rectangles) {
+      final X11 x11 = X11.INSTANCE;
+      Rectangle bounds = new Rectangle();
+      if(rectangles.length > 0) {
+        bounds.setBounds(rectangles[0]);
+        for(int i=1; i<rectangles.length; i++) {
+          Rectangle.union(bounds, rectangles[i], bounds);
+        }
+      }
+      int width = bounds.x + bounds.width;
+      int height = bounds.y + bounds.height;
+      final Pixmap pm = x11.XCreatePixmap(dpy, win, width, height, 1);
+      final GC gc = x11.XCreateGC(dpy, pm, new NativeLong(0), null);
+      if (gc == null) {
+        return null;
+      }
+      x11.XSetForeground(dpy, gc, new NativeLong(0));
+      x11.XFillRectangle(dpy, pm, gc, 0, 0, width, height);
+      final int UNMASKED = 1;
+      x11.XSetForeground(dpy, gc, new NativeLong(UNMASKED));
+      X11.XWindowAttributes atts = new X11.XWindowAttributes();
+      int status = x11.XGetWindowAttributes(dpy, win, atts);
+      if (status == 0) {
+        return null;
+      }
+      try {
+        for(int i=0; i<rectangles.length; i++) {
+          Rectangle rect = rectangles[i];
+          x11.XFillRectangle(dpy, pm, gc, rect.x, rect.y, rect.width, rect.height);
+        }
+      } finally {
+        x11.XFreeGC(dpy, gc);
+      }
+      return pm;
+    }
+    
     private boolean didCheck;
 
     private long[] alphaVisualIDs = {};
@@ -1248,6 +1283,34 @@ public class WindowUtils {
       });
     }
 
+    protected void setMask(final Component w, final Rectangle[] rectangles) {
+      Runnable action = new Runnable() {
+        public void run() {
+          X11 x11 = X11.INSTANCE;
+          Xext ext = Xext.INSTANCE;
+          Display dpy = x11.XOpenDisplay(null);
+          if (dpy == null)
+            return;
+          Pixmap pm = null;
+          try {
+            X11.Window win = getDrawable(w);
+            if (rectangles == null || ((pm = createBitmap(dpy, win, rectangles)) == null)) {
+              ext.XShapeCombineMask(dpy, win, X11.Xext.ShapeBounding, 0, 0, Pixmap.None, X11.Xext.ShapeSet);
+            } else {
+              ext.XShapeCombineMask(dpy, win, X11.Xext.ShapeBounding, 0, 0, pm, X11.Xext.ShapeSet);
+            }
+          } finally {
+            if (pm != null) {
+              x11.XFreePixmap(dpy, pm);
+            }
+            x11.XCloseDisplay(dpy);
+          }
+          setForceHeavyweightPopups(getWindow(w), rectangles != null);
+        }
+      };
+      whenDisplayable(w, action);
+    }
+    
     protected void setMask(final Component w, final Raster raster) {
       Runnable action = new Runnable() {
         public void run() {
