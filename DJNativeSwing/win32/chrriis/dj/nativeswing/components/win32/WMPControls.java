@@ -19,37 +19,64 @@ public class WMPControls {
     this.nativeComponent = (NativeWMediaPlayer)multiMediaPlayer.getNativeComponent();
   }
   
+  /**
+   * Indicate if the play functionality is enabled.
+   * @return true if the play functionality is enabled.
+   */
+  public boolean isPlayEnabled() {
+    return Boolean.TRUE.equals(nativeComponent.getOleProperty(new String[] {"controls", "isAvailable"}, "Play"));
+  }
+  
+  /**
+   * Start playing the loaded media.
+   */
   public void play() {
     nativeComponent.invokeOleFunction(new String[] {"controls", "Play"});
   }
   
+  /**
+   * Indicate if the stop functionality is enabled.
+   * @return true if the stop functionality is enabled.
+   */
   public boolean isStopEnabled() {
     return Boolean.TRUE.equals(nativeComponent.getOleProperty(new String[] {"controls", "isAvailable"}, "Stop"));
   }
   
+  /**
+   * Stop the currently playing media.
+   */
   public void stop() {
     nativeComponent.invokeOleFunction(new String[] {"controls", "Stop"});
   }
   
+  /**
+   * Indicate if the pause functionality is enabled.
+   * @return true if the pause functionality is enabled.
+   */
   public boolean isPauseEnabled() {
     return Boolean.TRUE.equals(nativeComponent.getOleProperty(new String[] {"controls", "isAvailable"}, "Pause"));
   }
   
+  /**
+   * Pause the currently playing media.
+   */
   public void pause() {
     nativeComponent.invokeOleFunction(new String[] {"controls", "Pause"});
   }
   
   /**
-   * @param time The time in milliseconds.
+   * Set the current position on the timeline.
+   * @param time The current position in milliseconds.
    */
-  public void setTime(int time) {
+  public void setAbsolutePosition(int time) {
     nativeComponent.setOleProperty(new String[] {"controls", "currentPosition"}, time / 1000d);
   }
   
   /**
-   * @return The time in milliseconds.
+   * Get the current position on the timeline.
+   * @return the current position in milliseconds.
    */
-  public int getTime() {
+  public int getAbsolutePosition() {
     try {
       return (int)Math.round((Double)nativeComponent.getOleProperty(new String[] {"controls", "currentPosition"}) * 1000);
     } catch(Exception e) {

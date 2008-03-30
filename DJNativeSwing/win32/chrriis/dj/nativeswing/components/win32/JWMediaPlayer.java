@@ -9,6 +9,7 @@ package chrriis.dj.nativeswing.components.win32;
 
 import java.awt.BorderLayout;
 
+import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.NSPanelComponent;
 import chrriis.dj.nativeswing.NativeComponent;
 
@@ -68,18 +69,43 @@ public class JWMediaPlayer extends NSPanelComponent {
 //    return (String)nativeComponent.getOleProperty(new String[] {"url"});
 //  }
   
+  /**
+   * Load a file.
+   * @param resourcePath the path or URL to the file.
+   */
   public void load(String resourcePath) {
     nativeComponent.setOleProperty("url", resourcePath == null? "": resourcePath);
   }
   
+  /**
+   * Load a file from the classpath.
+   * @param clazz the reference clazz of the file to load.
+   * @param resourcePath the path to the file.
+   */
+  public void load(Class<?> clazz, String resourcePath) {
+    load(WebServer.getDefaultWebServer().getClassPathResourceURL(clazz.getName(), resourcePath));
+  }
+  
+  /**
+   * Set whether the control bar is visible.
+   * @param isControlBarVisible true if the control bar should be visible, false otherwise.
+   */
   public void setControlBarVisible(boolean isControlBarVisible) {
     nativeComponent.setOleProperty("uiMode", isControlBarVisible? "full": "none");
   }
 
+  /**
+   * Indicate whether the control bar is visible.
+   * @return true if the control bar is visible.
+   */
   public boolean isControlBarVisible() {
     return Boolean.TRUE.equals("full".equals(nativeComponent.getOleProperty("uiMode")));
   }
   
+  /**
+   * The state of a media.
+   * @author Christopher Deckers
+   */
   public static enum WMPMediaState {
     UNDEFINED, STOPPED, PAUSED, PLAYING, SCAN_FORWARD, SCAN_REVERSE, BUFFERING, WAITING, MEDIA_ENDED, TRANSITIONING, READY, RECONNECTING
   }

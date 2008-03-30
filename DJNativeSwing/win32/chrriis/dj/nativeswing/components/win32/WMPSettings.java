@@ -19,7 +19,7 @@ public class WMPSettings {
     this.nativeComponent = (NativeWMediaPlayer)multiMediaPlayer.getNativeComponent();
   }
   
-  public void setErrorDialogsEnabled(boolean isErrorDialogEnabled) {
+  void setErrorDialogsEnabled(boolean isErrorDialogEnabled) {
     nativeComponent.setOleProperty(new String[] {"settings", "enableErrorDialogs"}, isErrorDialogEnabled);
   }
   
@@ -52,6 +52,7 @@ public class WMPSettings {
   }
   
   /**
+   * Get the stereo balance.
    * @return The stereo balance, between -100 and 100, with 0 being the default. When mute, the balance is still returned.
    */
   public int getStereoBalance() {
@@ -62,10 +63,18 @@ public class WMPSettings {
     }
   }
   
+  /**
+   * Set whether loaded media should automatically start.
+   * @param isAutoStart true if the media should start playing automatically when loaded, false otherwise.
+   */
   public void setAutoStart(boolean isAutoStart) {
     nativeComponent.setOleProperty(new String[] {"settings", "autoStart"}, isAutoStart);
   }
   
+  /**
+   * Indicate whether loading some media should start playing automatically.
+   * @return true if loading some media should start playing automatically.
+   */
   public boolean isAutoStart() {
     return Boolean.TRUE.equals(nativeComponent.getOleProperty(new String[] {"settings", "autoStart"}));
   }
@@ -76,10 +85,6 @@ public class WMPSettings {
   
   public boolean isMute() {
     return Boolean.TRUE.equals(nativeComponent.getOleProperty(new String[] {"settings", "mute"}));
-  }
-  
-  public boolean isPlayEnabled() {
-    return Boolean.TRUE.equals(nativeComponent.getOleProperty(new String[] {"controls", "isAvailable"}, "Play"));
   }
   
 }
