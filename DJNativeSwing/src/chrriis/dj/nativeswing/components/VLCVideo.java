@@ -55,6 +55,10 @@ public class VLCVideo {
     return Boolean.TRUE.equals(webBrowserObject.getObjectProperty("video.fullscreen"));
   }
   
+  /**
+   * An aspect ratio.
+   * @author Christopher Deckers
+   */
   public enum VLCAspectRatio {
     _1x1, _4x3, _16x9, _16x10, _221x100, _5x4,
   }

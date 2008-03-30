@@ -17,11 +17,19 @@ public class WebBrowserEvent extends EventObject{
 
   private JWebBrowser webBrowser;
   
+  /**
+   * Construct a web browser event.
+   * @param webBrowser the web browser.
+   */
   public WebBrowserEvent(JWebBrowser webBrowser) {
     super(webBrowser);
     this.webBrowser = webBrowser;
   }
   
+  /**
+   * Get the web browser.
+   * @return the web browser.
+   */
   public JWebBrowser getWebBrowser() {
     return webBrowser;
   }

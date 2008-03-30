@@ -103,14 +103,14 @@ public class VLCPlaylist {
   /**
    * Move to the next item of the playlist.
    */
-  public void next() {
+  public void goNext() {
     webBrowserObject.invokeObjectFunction("playlist.next");
   }
   
   /**
    * Move to the previous item of the playlist.
    */
-  public void prev() {
+  public void goPrevious() {
     webBrowserObject.invokeObjectFunction("playlist.prev");
   }
   

@@ -78,6 +78,10 @@ public class VLCAudio {
     return value == null? -1: ((Number)value).intValue();
   }
   
+  /**
+   * An audio channel.
+   * @author Christopher Deckers
+   */
   public enum VLCChannel {
     STEREO, REVERSE_STEREO, LEFT, RIGHT, DOLBY
   }

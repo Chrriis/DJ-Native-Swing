@@ -85,6 +85,10 @@ public class VLCInput {
     return value == null? -1: ((Number)value).intValue();
   }
   
+  /**
+   * The state of a media.
+   * @author Christopher Deckers
+   */
   public enum VLCMediaState {
     IDLE_CLOSE, OPENING, BUFFERING, PLAYING, PAUSED, STOPPING, ERROR,
   }
@@ -114,7 +118,7 @@ public class VLCInput {
    * Set the speed factor that is applied when a media is played.
    * @param speedFactor the speed factor.
    */
-  public void setPlayRate(float speedFactor) {
+  public void setPlaySpeedFactor(float speedFactor) {
     webBrowserObject.setObjectProperty("input.rate", speedFactor);
   }
   
