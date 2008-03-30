@@ -32,6 +32,7 @@ import chrriis.dj.nativeswing.SWTUtils;
 
 
 /**
+ * A utility class to get the launchers of certain file types.
  * @author Christopher Deckers
  */
 public class FileTypeLauncher {
@@ -168,7 +169,9 @@ public class FileTypeLauncher {
   }
   
   /**
+   * Get all the registered file extensions.
    * Some global loading of data is performed the first time, if it is needed.
+   * @return all the registered file extensions.
    */
   public static String[] getAllRegisteredExtensions() {
     initializeExtensions();
@@ -191,7 +194,9 @@ public class FileTypeLauncher {
   private String[] registeredExtensions;
 
   /**
+   * Get the extensions of the files that can be launched.
    * Some global loading of data is performed the first time, if it is needed.
+   * @return the file extensions.
    */
   public String[] getRegisteredExtensions() {
     if(registeredExtensions == null) {
@@ -210,6 +215,10 @@ public class FileTypeLauncher {
     }
   }
   
+  /**
+   * Get the name of the launcher.
+   * @return the name.
+   */
   public String getName() {
     if(name == null) {
       name = (String)new CMN_getName().syncExec(id);
@@ -227,6 +236,10 @@ public class FileTypeLauncher {
     }
   }
   
+  /**
+   * Get the icon associated with this file type.
+   * @return the icon, which could be the default icon.
+   */
   public ImageIcon getIcon() {
     if(!isIconInitialized) {
       isIconInitialized = true;
@@ -264,8 +277,12 @@ public class FileTypeLauncher {
     }
   }
   
-  public void launch(String fileName) {
-    new CMN_launch().asyncExec(id, fileName);
+  /**
+   * Launch a file using this launcher.
+   * @param filePath the path to the file to launch.
+   */
+  public void launch(String filePath) {
+    new CMN_launch().asyncExec(id, filePath);
   }
   
   private static Map<Integer, FileTypeLauncher> idToFileTypeLauncherMap;
@@ -358,6 +375,10 @@ public class FileTypeLauncher {
   private static boolean isDefaultIconLoaded;
   private static ImageIcon defaultIcon;
 
+  /**
+   * Get the default icon for files that don't have a custom icon.
+   * @return the default icon.
+   */
   public static ImageIcon getDefaultIcon() {
     if(!isDefaultIconLoaded) {
       isDefaultIconLoaded = true;
@@ -386,6 +407,10 @@ public class FileTypeLauncher {
     return defaultIcon;
   }
   
+  /**
+   * Get the size of the icons that can be obtained.
+   * @return the size of the icons.
+   */
   public static Dimension getIconSize() {
     ImageIcon defaultIcon = getDefaultIcon();
     // TODO: check if a null default icon can happen, and if yes find alternate code

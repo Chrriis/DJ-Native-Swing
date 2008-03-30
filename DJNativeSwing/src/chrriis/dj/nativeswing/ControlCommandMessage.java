@@ -15,6 +15,12 @@ import org.eclipse.swt.widgets.Control;
  */
 public abstract class ControlCommandMessage extends CommandMessage {
 
+  /**
+   * Construct a control command message.
+   */
+  public ControlCommandMessage() {
+  }
+  
   private int componentID;
   
   int getComponentID() {
