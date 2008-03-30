@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<project name="Build Script" default="createJar">
+
+  <target name="createJar" description="Create the Jar files">
+    <delete file="../DJNativeSwing/lib/jna/jna_WindowUtils.jar"/>
+    <jar duplicate="preserve" destfile="../DJNativeSwing/lib/jna/jna_WindowUtils.jar">
+	    <fileset dir="bin"/>
+		</jar>
+  </target>
+
+</project>
