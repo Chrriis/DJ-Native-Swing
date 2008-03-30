@@ -14,7 +14,7 @@ import java.util.Map;
  * The options for the VLC player to better configure the initialization of the VLC plugin.
  * @author Christopher Deckers
  */
-public class VLCLoadingOptions {
+public class VLCOptions {
   
   private Map<String, String> keyToValueParameterMap = new HashMap<String, String>();
 

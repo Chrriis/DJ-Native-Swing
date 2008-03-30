@@ -48,14 +48,14 @@ public class JFlashPlayer extends NSPanelComponent {
     protected ObjectHTMLConfiguration getObjectHtmlConfiguration() {
       ObjectHTMLConfiguration objectHTMLConfiguration = new ObjectHTMLConfiguration();
       objectHTMLConfiguration.setHTMLLoadingMessage(RESOURCES.getString("LoadingMessage"));
-      objectHTMLConfiguration.setHTMLParameters(loadingOptions.getHTMLParameters());
+      objectHTMLConfiguration.setHTMLParameters(options.getHTMLParameters());
       objectHTMLConfiguration.setWindowsClassID("D27CDB6E-AE6D-11cf-96B8-444553540000");
       objectHTMLConfiguration.setWindowsInstallationURL("http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,0,0");
       objectHTMLConfiguration.setMimeType("application/x-shockwave-flash");
       objectHTMLConfiguration.setInstallationURL("http://www.adobe.com/go/getflashplayer");
       objectHTMLConfiguration.setWindowsParamName("movie");
       objectHTMLConfiguration.setParamName("src");
-      loadingOptions = null;
+      options = null;
       return objectHTMLConfiguration;
     }
     
@@ -151,10 +151,10 @@ public class JFlashPlayer extends NSPanelComponent {
    * Load a file from the classpath.
    * @param clazz the reference clazz of the file to load.
    * @param resourcePath the path to the file.
-   * @param loadingOptions the options to better configure the initialization of the flash plugin.
+   * @param options the options to better configure the initialization of the flash plugin.
    */
-  public void load(Class<?> clazz, String resourcePath, FlashLoadingOptions loadingOptions) {
-    load(WebServer.getDefaultWebServer().getClassPathResourceURL(clazz.getName(), resourcePath), loadingOptions);
+  public void load(Class<?> clazz, String resourcePath, FlashOptions options) {
+    load(WebServer.getDefaultWebServer().getClassPathResourceURL(clazz.getName(), resourcePath), options);
   }
   
   /**
@@ -165,21 +165,21 @@ public class JFlashPlayer extends NSPanelComponent {
     load(resourcePath, null);
   }
   
-  private FlashLoadingOptions loadingOptions;
+  private FlashOptions options;
   
   /**
    * Load a file.
    * @param resourcePath the path or URL to the file.
-   * @param loadingOptions the options to better configure the initialization of the flash plugin.
+   * @param options the options to better configure the initialization of the flash plugin.
    */
-  public void load(String resourcePath, FlashLoadingOptions loadingOptions) {
+  public void load(String resourcePath, FlashOptions options) {
     if("".equals(resourcePath)) {
       resourcePath = null;
     }
-    if(loadingOptions == null) {
-      loadingOptions = new FlashLoadingOptions();
+    if(options == null) {
+      options = new FlashOptions();
     }
-    this.loadingOptions = loadingOptions;
+    this.options = options;
     webBrowserObject.load(resourcePath);
     boolean isEnabled = resourcePath != null;
     playButton.setEnabled(isEnabled);

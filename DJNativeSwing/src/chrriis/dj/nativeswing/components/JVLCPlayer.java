@@ -57,7 +57,7 @@ public class JVLCPlayer extends NSPanelComponent {
     protected ObjectHTMLConfiguration getObjectHtmlConfiguration() {
       ObjectHTMLConfiguration objectHTMLConfiguration = new ObjectHTMLConfiguration();
       objectHTMLConfiguration.setHTMLLoadingMessage(RESOURCES.getString("LoadingMessage"));
-      objectHTMLConfiguration.setHTMLParameters(loadingOptions.getParameters());
+      objectHTMLConfiguration.setHTMLParameters(options.getParameters());
       objectHTMLConfiguration.setWindowsClassID("9BE31822-FDAD-461B-AD51-BE1D1C159921");
       objectHTMLConfiguration.setWindowsInstallationURL("http://downloads.videolan.org/pub/videolan/vlc/latest/win32/axvlc.cab");
       objectHTMLConfiguration.setMimeType("application/x-vlc-plugin");
@@ -65,7 +65,7 @@ public class JVLCPlayer extends NSPanelComponent {
       objectHTMLConfiguration.setWindowsParamName("Src");
       objectHTMLConfiguration.setParamName("target");
       objectHTMLConfiguration.setVersion("VideoLAN.VLCPlugin.2");
-      loadingOptions = null;
+      options = null;
       return objectHTMLConfiguration;
     }
     
@@ -307,7 +307,7 @@ public class JVLCPlayer extends NSPanelComponent {
    * Load the player, with no content.
    */
   public void load() {
-    load((VLCLoadingOptions)null);
+    load((VLCOptions)null);
   }
   
   /**
@@ -320,10 +320,10 @@ public class JVLCPlayer extends NSPanelComponent {
   
   /**
    * Load the player, with no content.
-   * @param loadingOptions the options to better configure the initialization of the VLC plugin.
+   * @param options the options to better configure the initialization of the VLC plugin.
    */
-  public void load(VLCLoadingOptions loadingOptions) {
-    load("", loadingOptions);
+  public void load(VLCOptions options) {
+    load("", options);
   }
   
   /**
@@ -339,31 +339,31 @@ public class JVLCPlayer extends NSPanelComponent {
    * Load a file from the classpath.
    * @param clazz the reference clazz of the file to load.
    * @param resourcePath the path to the file.
-   * @param loadingOptions the options to better configure the initialization of the VLC plugin.
+   * @param options the options to better configure the initialization of the VLC plugin.
    */
-  public void load(Class<?> clazz, String resourcePath, VLCLoadingOptions loadingOptions) {
-    load(WebServer.getDefaultWebServer().getClassPathResourceURL(clazz.getName(), resourcePath), loadingOptions);
+  public void load(Class<?> clazz, String resourcePath, VLCOptions options) {
+    load(WebServer.getDefaultWebServer().getClassPathResourceURL(clazz.getName(), resourcePath), options);
   }
   
-  private VLCLoadingOptions loadingOptions;
+  private VLCOptions options;
   
   /**
    * Load a file.
    * @param resourcePath the path or URL to the file.
-   * @param loadingOptions the options to better configure the initialization of the VLC plugin.
+   * @param options the options to better configure the initialization of the VLC plugin.
    */
-  public void load(String resourcePath, VLCLoadingOptions loadingOptions) {
+  public void load(String resourcePath, VLCOptions options) {
     if("".equals(resourcePath)) {
       resourcePath = null;
     }
-    load_(resourcePath, loadingOptions);
+    load_(resourcePath, options);
   }
   
-  private void load_(String resourcePath, VLCLoadingOptions loadingOptions) {
-    if(loadingOptions == null) {
-      loadingOptions = new VLCLoadingOptions();
+  private void load_(String resourcePath, VLCOptions options) {
+    if(options == null) {
+      options = new VLCOptions();
     }
-    this.loadingOptions = loadingOptions;
+    this.options = options;
     webBrowserObject.load(resourcePath);
     boolean hasContent = webBrowserObject.hasContent();
     playButton.setEnabled(hasContent);
