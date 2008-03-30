@@ -23,6 +23,10 @@ public class WMPSettings {
     nativeComponent.setOleProperty(new String[] {"settings", "enableErrorDialogs"}, isErrorDialogEnabled);
   }
   
+  /**
+   * Set the volume.
+   * @param volume the new volume, with a value between 0 and 100.
+   */
   public void setVolume(int volume) {
     if(volume < 0 || volume > 100) {
       throw new IllegalArgumentException("The volume must be between 0 and 100");
@@ -31,7 +35,8 @@ public class WMPSettings {
   }
   
   /**
-   * @return The volume, between 0 and 100. When mute, the volume is still returned. -1 indicate that it could not be accessed.
+   * Get the volume, as a value between 0 and 100.
+   * @return The volume, between 0 and 100. When mute, the volume is still returned.
    */
   public int getVolume() {
     try {
@@ -79,10 +84,18 @@ public class WMPSettings {
     return Boolean.TRUE.equals(nativeComponent.getOleProperty(new String[] {"settings", "autoStart"}));
   }
   
+  /**
+   * Set whether audio is mute.
+   * @param isMute true if audio should be mute, false otherwise.
+   */
   public void setMute(boolean isMute) {
     nativeComponent.setOleProperty(new String[] {"settings", "mute"}, isMute);
   }
   
+  /**
+   * Indicate whether audio is mute.
+   * @return true if audio is mute.
+   */
   public boolean isMute() {
     return Boolean.TRUE.equals(nativeComponent.getOleProperty(new String[] {"settings", "mute"}));
   }
