@@ -27,7 +27,7 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 
 import chrriis.common.UIUtils;
-import chrriis.common.Visitor;
+import chrriis.common.Filter;
 import chrriis.dj.nativeswing.NativeComponentOptions.DestructionTime;
 import chrriis.dj.nativeswing.NativeComponentOptions.VisibilityConstraint;
 import chrriis.dj.nativeswing.NativeComponentProxyWindow.EmbeddedWindow;
@@ -231,7 +231,7 @@ abstract class NativeComponentProxy extends JComponent {
   protected abstract Rectangle[] getPeerShapeArea();
   
   protected Rectangle[] computePeerShapeArea() {
-    Rectangle[] shape = UIUtils.getComponentVisibleArea(this, new Visitor<Component>() {
+    Rectangle[] shape = UIUtils.getComponentVisibleArea(this, new Filter<Component>() {
       public boolean accept(Component element) {
         return true;
       }
@@ -269,12 +269,12 @@ abstract class NativeComponentProxy extends JComponent {
   }
   
   protected Rectangle[] getTranslucentOverlays() {
-    Rectangle[] nonOpaqueAreas = UIUtils.subtract(new Rectangle[] {new Rectangle(0, 0, getWidth(), getHeight())}, UIUtils.getComponentVisibleArea(this, new Visitor<Component>() {
+    Rectangle[] nonOpaqueAreas = UIUtils.subtract(new Rectangle[] {new Rectangle(0, 0, getWidth(), getHeight())}, UIUtils.getComponentVisibleArea(this, new Filter<Component>() {
       public boolean accept(Component c) {
         return !c.isOpaque();
       }
     }));
-    return UIUtils.subtract(nonOpaqueAreas, UIUtils.getComponentVisibleArea(this, new Visitor<Component>() {
+    return UIUtils.subtract(nonOpaqueAreas, UIUtils.getComponentVisibleArea(this, new Filter<Component>() {
       public boolean accept(Component c) {
         return c.isOpaque();
       }

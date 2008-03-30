@@ -8,13 +8,13 @@
 package chrriis.common;
 
 /**
- * A simple generic visitor.
+ * A generic filter.
  * @author Christopher Deckers
  */
-public interface Visitor<T> {
+public interface Filter<T> {
 
   /**
-   * Indicate whether the element is accepted.
+   * Test whether the element should be accepted.
    */
   public boolean accept(T element);
 

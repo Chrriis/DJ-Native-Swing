@@ -18,6 +18,8 @@ import java.net.URLEncoder;
  */
 public class Utils {
 
+  private Utils() {}
+  
   public static final boolean IS_JAVA_6_OR_GREATER = System.getProperty("java.version").compareTo("1.6") >= 0;
 
   public static final String LINE_SEPARATOR = System.getProperty("line.separator");

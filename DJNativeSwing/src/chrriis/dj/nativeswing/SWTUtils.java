@@ -26,6 +26,8 @@ import org.eclipse.swt.graphics.RGB;
  */
 public class SWTUtils {
 
+  private SWTUtils() {}
+  
   public static int translateSWTKeyCode(int key) {
     switch(key) {
       /* Keyboard and Mouse Masks */

@@ -25,6 +25,8 @@ import javax.swing.SwingUtilities;
  */
 public class UIUtils {
 
+  private UIUtils() {}
+  
   /**
    * Subtracts the area specified by the rectangle rect from each of the areas specified by the rectangles in rects.
    * @param rects The rectangles to substract from.
@@ -163,7 +165,7 @@ public class UIUtils {
    * Get the area that is not covered by components obeying the condition imposed by the visitor. Usually, the visitor focuses on all components, or opaque components.
    * @return an array of rectangles specify the visible area.
    */
-  public static Rectangle[] getComponentVisibleArea(Component component, Visitor<Component> visitor) {
+  public static Rectangle[] getComponentVisibleArea(Component component, Filter<Component> filter) {
     Window windowAncestor = SwingUtilities.getWindowAncestor(component);
     int width = component.getWidth();
     int height = component.getHeight();
@@ -180,7 +182,7 @@ public class UIUtils {
           break;
         }
         if(c.isVisible()) {
-          if(visitor.accept(c)) {
+          if(filter.accept(c)) {
             tempRectangle.setBounds(c.getX(), c.getY(), c.getWidth(), c.getHeight());
             shape = UIUtils.subtract(shape, tempRectangle);
           }
@@ -230,14 +232,14 @@ public class UIUtils {
             if(parent instanceof JRootPane && ((JRootPane)parent).getGlassPane() == child) {
               if(child instanceof JComponent) {
                 for(Component child2: ((JComponent)child).getComponents()) {
-                  if(visitor.accept(child2)) {
+                  if(filter.accept(child2)) {
                     tempRectangle.setBounds(child2.getX(), child2.getY(), child2.getWidth(), child2.getHeight());
                     shape = UIUtils.subtract(shape, SwingUtilities.convertRectangle(child, tempRectangle, component));
                   }
                 }
               }
             } else {
-              if(visitor.accept(child)) {
+              if(filter.accept(child)) {
                 tempRectangle.setBounds(child.getX(), child.getY(), child.getWidth(), child.getHeight());
                 shape = UIUtils.subtract(shape, SwingUtilities.convertRectangle(parent, tempRectangle, component));
               }
