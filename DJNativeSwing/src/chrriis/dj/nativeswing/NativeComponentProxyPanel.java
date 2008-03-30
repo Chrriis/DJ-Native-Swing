@@ -24,16 +24,16 @@ import java.awt.event.HierarchyBoundsListener;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyVetoException;
+import java.util.Arrays;
 
 import javax.swing.JInternalFrame;
 import javax.swing.JLayeredPane;
 import javax.swing.RootPaneContainer;
 import javax.swing.SwingUtilities;
 
+import chrriis.common.UIUtils;
 import chrriis.dj.nativeswing.NativeComponent.NativeComponentHolder;
 import chrriis.dj.nativeswing.NativeComponentOptions.FiliationType;
 
@@ -187,33 +187,35 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     super.adjustPeerBounds();
   }
   
-  private Area lastArea = new Area();
+  private Rectangle[] lastArea = new Rectangle[] {new Rectangle(getSize())};
+  
+  protected Rectangle[] getPeerShapeArea() {
+    return lastArea;
+  }
   
   protected void adjustPeerShape_() {
     if(panel == null) {
       return;
     }
-    Area area = computePeerShapeArea();
-    if(area == null) {
+    Rectangle[] area = computePeerShapeArea();
+    if(Arrays.equals(lastArea, area)) {
       return;
     }
-    if(!lastArea.equals(area)) {
-      lastArea = area;
-      if(area.isEmpty()) {
-        if(!isCapturing) {
-          panel.setVisible(false);
-        }
-      } else {
-        if(!panel.isVisible()) {
-          panel.setVisible(true);
-        }
-        if(!isCapturing) {
-          WindowUtils.setComponentMask(panel, area);
-        } else {
-          updateCapturingComponentBounds();
-        }
-//        nativeComponent.repaintNativeControl();
+    lastArea = area;
+    if(area.length == 0) {
+      if(!isCapturing) {
+        panel.setVisible(false);
       }
+    } else {
+      if(!panel.isVisible()) {
+        panel.setVisible(true);
+      }
+      if(!isCapturing) {
+        WindowUtils.setComponentMask(panel, area);
+      } else {
+        updateCapturingComponentBounds();
+      }
+//      nativeComponent.repaintNativeControl();
     }
   }
 
@@ -241,9 +243,18 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     isCapturing = true;
     Container parent = panel.getParent();
     Window windowAncestor = SwingUtilities.getWindowAncestor(panel);
+    Rectangle[] subtractingArea = new Rectangle[] {new Rectangle(panel.getWidth(), panel.getHeight())};
+    subtractingArea = UIUtils.subtract(subtractingArea, lastArea);
+    final Rectangle imageBounds = new Rectangle();
+    if(subtractingArea.length > 0) {
+      imageBounds.setBounds(subtractingArea[0]);
+      for(int i=1; i<subtractingArea.length; i++) {
+        Rectangle.union(imageBounds, subtractingArea[i], imageBounds);
+      }
+    }
     Point panelLocation = panel.getLocation();
     SwingUtilities.convertPointToScreen(panelLocation, parent);
-    Rectangle r = new Rectangle(panelLocation, panel.getSize());
+    Rectangle r = new Rectangle(imageBounds.x + panelLocation.x, imageBounds.y + panelLocation.y, imageBounds.width, imageBounds.height);
     r = r.intersection(windowAncestor.getBounds());
     try {
       boolean isValidBounds = r.width > 0 && r.height > 0;
@@ -281,7 +292,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
         parent.add(capturingComponent, 0);
         updateCapturingComponentBounds();
       }
-      WindowUtils.setComponentMask(panel, null);
+      WindowUtils.setComponentMask(panel, (Rectangle[])null);
       if(!panel.isVisible()) {
         panel.setVisible(true);
       }
@@ -296,13 +307,19 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     if(capturingComponent == null) {
       return;
     }
-    Area subtractingArea = (Area)lastArea.clone();
     Point l1 = capturingComponent.getLocation();
     Point l2 = panel.getLocation();
-    subtractingArea.transform(AffineTransform.getTranslateInstance(l2.x - l1.x, l2.y - l1.y));
-    Area area = new Area(new Rectangle(capturingComponent.getSize()));
-    area.subtract(subtractingArea);
-    if(!area.isEmpty()) {
+    int offsetX = l2.x - l1.x;
+    int offsetY = l2.y - l1.y;
+    Rectangle[] subtractingArea = new Rectangle[lastArea.length];
+    for(int i=0; i<subtractingArea.length; i++) {
+      Rectangle r = (Rectangle)lastArea[i].clone();
+      r.translate(offsetX, offsetY);
+      subtractingArea[i] = r;
+    }
+    Rectangle[] area = new Rectangle[] {new Rectangle(capturingComponent.getSize())};
+    area = UIUtils.subtract(area, subtractingArea);
+    if(area.length != 0) {
       WindowUtils.setComponentMask(capturingComponent, area);
       if(!capturingComponent.isVisible()) {
         capturingComponent.setVisible(true);
@@ -329,7 +346,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     if(!isCapturing) {
       return;
     }
-    if(!lastArea.isEmpty()) {
+    if(lastArea.length != 0) {
       WindowUtils.setComponentMask(panel, lastArea);
       if(!panel.isVisible()) {
         panel.setVisible(true);

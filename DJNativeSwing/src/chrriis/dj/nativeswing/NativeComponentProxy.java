@@ -10,7 +10,6 @@ package chrriis.dj.nativeswing;
 import java.awt.AWTEvent;
 import java.awt.Canvas;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
@@ -22,16 +21,13 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ContainerEvent;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
-import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JComponent;
-import javax.swing.JLayeredPane;
-import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
 
+import chrriis.common.UIUtils;
+import chrriis.common.Visitor;
 import chrriis.dj.nativeswing.NativeComponentOptions.DestructionTime;
 import chrriis.dj.nativeswing.NativeComponentOptions.VisibilityConstraint;
 import chrriis.dj.nativeswing.NativeComponentProxyWindow.EmbeddedWindow;
@@ -232,118 +228,86 @@ abstract class NativeComponentProxy extends JComponent {
     adjustPeerBounds();
   }
   
-  protected Area computePeerShapeArea() {
+  protected abstract Rectangle[] getPeerShapeArea();
+  
+  protected Rectangle[] computePeerShapeArea() {
+    Rectangle[] shape = UIUtils.getComponentVisibleArea(this, new Visitor<Component>() {
+      public boolean accept(Component element) {
+        return true;
+      }
+    });
+    if(shape.length == 0) {
+      return shape;
+    }
     Window windowAncestor = SwingUtilities.getWindowAncestor(this);
-    if(windowAncestor == null || !isShowing() || getWidth() == 0 || getHeight() == 0) {
-      return new Area(new Rectangle(0, 0));
-    }
-    Rectangle tempRectangle = new Rectangle(0, 0, getWidth(), getHeight());
-    Area area = new Area(tempRectangle);
-    if(area.isEmpty()) {
-      return area;
-    }
-    for(int i=getComponentCount()-1; i>=0; i--) {
-      Component c = getComponent(i);
-      if(c == this) {
-        break;
-      }
-      if(c.isVisible()) {
-        tempRectangle.setBounds(c.getX(), c.getY(), c.getWidth(), c.getHeight());
-        area.subtract(new Area(tempRectangle));
-      }
-    }
-    if(area.isEmpty()) {
-      return area;
-    }
-    Container c = this;
-    Container parent = c.getParent();
-    while(parent != null && !(parent instanceof Window)) {
-      tempRectangle.setBounds(0, 0, parent.getWidth(), parent.getHeight());
-      area.intersect(new Area(SwingUtilities.convertRectangle(parent, tempRectangle, this)));
-      if(parent instanceof JComponent && !((JComponent)parent).isOptimizedDrawingEnabled()) {
-        Component[] children;
-        if(parent instanceof JLayeredPane) {
-          JLayeredPane layeredPane = (JLayeredPane)parent;
-          List<Component> childList = new ArrayList<Component>(layeredPane.getComponentCount() - 1);
-          for(int i=layeredPane.highestLayer(); i>=layeredPane.getLayer(c); i--) {
-            Component[] components = layeredPane.getComponentsInLayer(i);
-            for(Component child: components) {
-              if(child == c) {
-                break;
-              }
-              childList.add(child);
-            }
-          }
-          children = childList.toArray(new Component[0]);
-        } else {
-          children = parent.getComponents();
-        }
-        for(int i=0; i<children.length; i++) {
-          Component child = children[i];
-          if(child == c) {
-            break;
-          }
-          if(child.isVisible()) {
-            if(parent instanceof JRootPane && ((JRootPane)parent).getGlassPane() == child) {
-              if(child instanceof JComponent) {
-                for(Component child2: ((JComponent)child).getComponents()) {
-                  tempRectangle.setBounds(child2.getX(), child2.getY(), child2.getWidth(), child2.getHeight());
-                  area.subtract(new Area(SwingUtilities.convertRectangle(child, tempRectangle, this)));
-                }
-              }
-            } else {
-              tempRectangle.setBounds(child.getX(), child.getY(), child.getWidth(), child.getHeight());
-              area.subtract(new Area(SwingUtilities.convertRectangle(parent, tempRectangle, this)));
-            }
-          }
-        }
-      }
-      if(area.isEmpty()) {
-        return area;
-      }
-      c = parent;
-      parent = c.getParent();
-    }
+    Rectangle tempRectangle = new Rectangle();
     for(Window window: NativeInterface.getWindows()) {
       if(!(window instanceof EmbeddedWindow) && window.isVisible()) {
         for(Window owner = window; (owner=owner.getOwner()) != null; ) {
           if(owner == windowAncestor) {
             tempRectangle.setBounds(0, 0, window.getWidth(), window.getHeight());
-            area.subtract(new Area(SwingUtilities.convertRectangle(window, tempRectangle, this)));
+            shape = UIUtils.subtract(shape, SwingUtilities.convertRectangle(window, tempRectangle, this));
             break;
           }
         }
       }
     }
-    return area;
+    return shape;
   }
 
-  private final Object backgroundBufferLock = new Object();
-  private BufferedImage backgroundBuffer;
+  private final Object backBufferLock = new Object();
+  private BufferedImage backBuffer;
   
-  public void createBackgroundBuffer() {
+  public void updateBackBufferOnVisibleTranslucentAreas() {
     int width = getWidth();
     int height = getHeight();
     if(width <= 0 || height <= 0) {
-      backgroundBuffer = null;
+      backBuffer = null;
+      return;
+    }
+    updateBackBuffer(getTranslucentOverlays());
+  }
+  
+  protected Rectangle[] getTranslucentOverlays() {
+    Rectangle[] nonOpaqueAreas = UIUtils.subtract(new Rectangle[] {new Rectangle(0, 0, getWidth(), getHeight())}, UIUtils.getComponentVisibleArea(this, new Visitor<Component>() {
+      public boolean accept(Component c) {
+        return !c.isOpaque();
+      }
+    }));
+    return UIUtils.subtract(nonOpaqueAreas, UIUtils.getComponentVisibleArea(this, new Visitor<Component>() {
+      public boolean accept(Component c) {
+        return c.isOpaque();
+      }
+    }));
+  }
+
+  public void createBackgroundBuffer() {
+    updateBackBuffer(new Rectangle[] {new Rectangle(getWidth(), getHeight())});
+  }
+  
+  private void updateBackBuffer(Rectangle[] area) {
+    int width = getWidth();
+    int height = getHeight();
+    if(width <= 0 || height <= 0) {
+      backBuffer = null;
       return;
     }
     BufferedImage image;
-    if(backgroundBuffer != null && backgroundBuffer.getWidth() == width && backgroundBuffer.getHeight() == height) {
-      image = backgroundBuffer;
+    if(backBuffer != null && backBuffer.getWidth() == width && backBuffer.getHeight() == height) {
+      image = backBuffer;
     } else {
       image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
     }
-    nativeComponent.paintComponent(image);
-    synchronized(backgroundBufferLock) {
-      this.backgroundBuffer = image;
+    nativeComponent.paintComponent(image, area);
+    synchronized(backBufferLock) {
+      this.backBuffer = image;
     }
     repaint();
   }
   
-  public void releaseBackgroundBuffer() {
-    synchronized(backgroundBufferLock) {
-      backgroundBuffer = null;
+  public void releaseBackBuffer() {
+    synchronized(backBufferLock) {
+      backBuffer = null;
     }
   }
   
@@ -356,10 +320,10 @@ abstract class NativeComponentProxy extends JComponent {
   
   @Override
   protected void paintComponent(Graphics g) {
-    synchronized(backgroundBufferLock) {
-      if(backgroundBuffer != null) {
-        synchronized(backgroundBuffer) {
-          g.drawImage(backgroundBuffer, 0, 0, this);
+    synchronized(backBufferLock) {
+      if(backBuffer != null) {
+        synchronized(backBuffer) {
+          g.drawImage(backBuffer, 0, 0, this);
         }
       }
     }

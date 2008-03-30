@@ -1,0 +1,257 @@
+/*
+ * Christopher Deckers (chrriis@nextencia.net)
+ * http://www.nextencia.net
+ * 
+ * See the file "readme.txt" for information on usage and redistribution of
+ * this file, and for a DISCLAIMER OF ALL WARRANTIES.
+ */
+package chrriis.common;
+
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Rectangle;
+import java.awt.Window;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.swing.JComponent;
+import javax.swing.JLayeredPane;
+import javax.swing.JRootPane;
+import javax.swing.SwingUtilities;
+
+/**
+ * @author Christopher Deckers
+ */
+public class UIUtils {
+
+  /**
+   * Subtracts the area specified by the rectangle rect from each of the areas specified by the rectangles in rects.
+   * @param rects The rectangles to substract from.
+   * @param rect The rectangle to substract.
+   * @return an array of rectangles, which may not have the same number of rectangles as in rects.
+   */
+  public static Rectangle[] subtract(Rectangle[] rects, Rectangle rect) {
+    return subtract(rects, new Rectangle[] {rect});
+  }
+  
+  /**
+   * Subtracts the area specified by the rectangles in rects2 from each of the areas specified by the rectangles in rects1.
+   * @param rects1 The rectangles to substract from.
+   * @param rects2 The rectangles to substract.
+   * @return an array of rectangles, which may not have the same number of rectangles as in rects1.
+   */
+  public static Rectangle[] subtract(Rectangle[] rects1, Rectangle[] rects2) {
+    List<Rectangle> rectangleList = new ArrayList<Rectangle>(Arrays.asList(rects1));
+    List<Rectangle> newRectangleList = new ArrayList<Rectangle>();
+    for(int i=0; i<rects2.length; i++) {
+      Rectangle r2 = rects2[i];
+      for(Rectangle r1: rectangleList) {
+        if(r1.intersects(r2)) {
+          subtract(r1, r2, newRectangleList);
+        } else {
+          newRectangleList.add((Rectangle)r1.clone());
+        }
+      }
+      rectangleList.clear();
+      if(newRectangleList.isEmpty()) {
+        break;
+      }
+      rectangleList.addAll(newRectangleList);
+      newRectangleList.clear();
+    }
+    return rectangleList.toArray(new Rectangle[0]);
+  }
+   
+  /**
+   * Subtracts the area of r2 from r1, appending the new rectangle(s) to the
+   * list of results.
+   */
+  private static void subtract(Rectangle r1, Rectangle r2, List<Rectangle> resultList) {
+    // discover the edges of r1 that are covered by r2
+    boolean left = r2.x <= r1.x && r2.x + r2.width > r1.x;
+    boolean right = r2.x < r1.x + r1.width && r2.x + r2.width >= r1.x + r1.width;
+    boolean top = r2.y <= r1.y && r2.y + r2.height > r1.y;
+    boolean bottom = r2.y < r1.y + r1.height && r2.y + r2.height >= r1.y + r1.height;
+    if(left && right && top && bottom) {
+      // r2 fully obscures r1; no results
+    } else if(left && right && top) {
+      // r2 across top edge
+      int y = r2.y + r2.height;
+      int height = r1.y + r1.height - y;
+      resultList.add(new Rectangle(r1.x, y, r1.width, height));
+    } else if(left && right && bottom) {
+      // r2 across bottom edge
+      resultList.add(new Rectangle(r1.x, r1.y, r1.width, r2.y - r1.y));
+    } else if(top && bottom && left) {
+      // r2 across left edge
+      int x = r2.x + r2.width;
+      int width = r1.x + r1.width - x;
+      resultList.add(new Rectangle(x, r1.y, width, r1.height));
+    } else if(top && bottom && right) {
+      // r2 across right edge
+      resultList.add(new Rectangle(r1.x, r1.y, r2.x - r1.x, r1.height));
+    } else if(left && top) {
+      // r2 covers top-left corner
+      int x = r2.x + r2.width;
+      int y = r2.y + r2.height;
+      resultList.add(new Rectangle(x, r1.y, r1.x + r1.width - x, y - r1.y));
+      resultList.add(new Rectangle(r1.x, y, r1.width, r1.y + r1.height - y));
+    } else if(left && bottom) {
+      // r2 covers bottom-left corner
+      resultList.add(new Rectangle(r1.x, r1.y, r1.width, r2.y - r1.y));
+      int x = r2.x + r2.width;
+      resultList.add(new Rectangle(x, r2.y, r1.x + r1.width - x, r1.y + r1.height - r2.y));
+    } else if(right && top) {
+      // r2 covers top-right corner
+      int y = r2.y + r2.height;
+      resultList.add(new Rectangle(r1.x, r1.y, r2.x - r1.x, y - r1.y));
+      resultList.add(new Rectangle(r1.x, y, r1.width, r1.y + r1.height - y));
+    } else if(right && bottom) {
+      // r2 covers bottom-right corner
+      resultList.add(new Rectangle(r1.x, r1.y, r1.width, r2.y - r1.y));
+      resultList.add(new Rectangle(r1.x, r2.y, r2.x - r1.x, r1.y + r1.height - r2.y));
+    } else if(left && right) {
+      // r2 divides r1 into 2 horizontal rectangles
+      resultList.add(new Rectangle(r1.x, r1.y, r1.width, r2.y - r1.y));
+      int y = r2.y + r2.height;
+      resultList.add(new Rectangle(r1.x, y, r1.width, r1.y + r1.height - y));
+    } else if(top && bottom) {
+      // r2 divides r1 into 2 vertical rectangles
+      resultList.add(new Rectangle(r1.x, r1.y, r2.x - r1.x, r1.height));
+      int x = r2.x + r2.width;
+      resultList.add(new Rectangle(x, r1.y, r1.x + r1.width - x, r1.height));
+    } else if(left) {
+      // r2 crosses left edge only, dividing r1 into 3 rectangles
+      resultList.add(new Rectangle(r1.x, r1.y, r1.width, r2.y - r1.y));
+      int y = r2.y + r2.height;
+      resultList.add(new Rectangle(r1.x, y, r1.width, r1.y + r1.height - y));
+      int x = r2.x + r2.width;
+      resultList.add(new Rectangle(x, r2.y, r1.x + r1.width - x, r2.height));
+    } else if(right) {
+      // r2 crosses right edge only, dividing r1 into 3 rectangles
+//      results.add(new Rectangle(r1.x, r1.y, r1.width, r2.y - r1.y));
+      int y = r2.y + r2.height;
+      resultList.add(new Rectangle(r1.x, y, r1.width, r1.y + r1.height - y));
+      resultList.add(new Rectangle(r1.x, r2.y, r2.x - r1.x, r2.height));
+    } else if(top) {
+      // r2 crosses top edge only, dividing r1 into 3 rectangles
+      resultList.add(new Rectangle(r1.x, r1.y, r2.x - r1.x, r1.height));
+      int x = r2.x + r2.width;
+      resultList.add(new Rectangle(x, r1.y, r1.x + r1.width - x, r1.height));
+      int y = r2.y + r2.height;
+      resultList.add(new Rectangle(r2.x, y, r2.width, r1.y + r1.height - y));
+    } else if(bottom) {
+      // r2 crosses bottom edge only, dividing r1 into 3 rectangles
+      resultList.add(new Rectangle(r1.x, r1.y, r1.width, r2.y - r1.y));
+      int height = r1.y + r1.width - r2.y;
+      resultList.add(new Rectangle(r1.x, r2.y, r2.x - r1.x, height));
+      int x = r2.x + r2.width;
+      resultList.add(new Rectangle(x, r2.y, r1.x + r1.width - x, height));
+    } else {
+      // r2 is completely contained within r1, dividing r1 into 4 rectangles
+      resultList.add(new Rectangle(r1.x, r1.y, r1.width, r2.y - r1.y));
+      int y = r2.y + r2.height;
+      resultList.add(new Rectangle(r1.x, y, r1.width, r1.y + r1.height - y));
+      resultList.add(new Rectangle(r1.x, r2.y, r2.x - r1.x, r2.height));
+      int x = r2.x + r2.width;
+      resultList.add(new Rectangle(x, r2.y, r1.x + r1.width - x, r2.height));
+    }
+  }
+  
+  /**
+   * Get the area that is not covered by components obeying the condition imposed by the visitor. Usually, the visitor focuses on all components, or opaque components.
+   * @return an array of rectangles specify the visible area.
+   */
+  public static Rectangle[] getComponentVisibleArea(Component component, Visitor<Component> visitor) {
+    Window windowAncestor = SwingUtilities.getWindowAncestor(component);
+    int width = component.getWidth();
+    int height = component.getHeight();
+    if(windowAncestor == null || !component.isShowing() || width <= 0 || height <= 0) {
+      return new Rectangle[0];
+    }
+    Rectangle tempRectangle = new Rectangle(0, 0, width, height);
+    Rectangle[] shape = new Rectangle[] {new Rectangle(width, height)};
+    if(component instanceof Container) {
+      Container container = (Container)component;
+      for(int i=container.getComponentCount()-1; i>=0; i--) {
+        Component c = container.getComponent(i);
+        if(c == component) {
+          break;
+        }
+        if(c.isVisible()) {
+          if(visitor.accept(c)) {
+            tempRectangle.setBounds(c.getX(), c.getY(), c.getWidth(), c.getHeight());
+            shape = UIUtils.subtract(shape, tempRectangle);
+          }
+        }
+      }
+    }
+    if(shape.length == 0) {
+      return shape;
+    }
+    Component c = component;
+    Container parent = c.getParent();
+    while(parent != null && !(parent instanceof Window)) {
+      tempRectangle.setBounds(0, 0, parent.getWidth(), parent.getHeight());
+      Rectangle parentBounds = SwingUtilities.convertRectangle(parent, tempRectangle, component);
+      List<Rectangle> newRectangleList = new ArrayList<Rectangle>();
+      for(Rectangle rectangle: shape) {
+        Rectangle r = rectangle.intersection(parentBounds);
+        if(!r.isEmpty()) {
+          newRectangleList.add(r);
+        }
+      }
+      shape = newRectangleList.toArray(new Rectangle[0]);
+      if(parent instanceof JComponent && !((JComponent)parent).isOptimizedDrawingEnabled()) {
+        Component[] children;
+        if(parent instanceof JLayeredPane) {
+          JLayeredPane layeredPane = (JLayeredPane)parent;
+          List<Component> childList = new ArrayList<Component>(layeredPane.getComponentCount() - 1);
+          for(int i=layeredPane.highestLayer(); i>=layeredPane.getLayer(c); i--) {
+            Component[] components = layeredPane.getComponentsInLayer(i);
+            for(Component child: components) {
+              if(child == c) {
+                break;
+              }
+              childList.add(child);
+            }
+          }
+          children = childList.toArray(new Component[0]);
+        } else {
+          children = parent.getComponents();
+        }
+        for(int i=0; i<children.length; i++) {
+          Component child = children[i];
+          if(child == c) {
+            break;
+          }
+          if(child.isVisible()) {
+            if(parent instanceof JRootPane && ((JRootPane)parent).getGlassPane() == child) {
+              if(child instanceof JComponent) {
+                for(Component child2: ((JComponent)child).getComponents()) {
+                  if(visitor.accept(child2)) {
+                    tempRectangle.setBounds(child2.getX(), child2.getY(), child2.getWidth(), child2.getHeight());
+                    shape = UIUtils.subtract(shape, SwingUtilities.convertRectangle(child, tempRectangle, component));
+                  }
+                }
+              }
+            } else {
+              if(visitor.accept(child)) {
+                tempRectangle.setBounds(child.getX(), child.getY(), child.getWidth(), child.getHeight());
+                shape = UIUtils.subtract(shape, SwingUtilities.convertRectangle(parent, tempRectangle, component));
+              }
+            }
+          }
+        }
+      }
+      if(shape.length == 0) {
+        return shape;
+      }
+      c = parent;
+      parent = c.getParent();
+    }
+    return shape;
+  }
+
+}

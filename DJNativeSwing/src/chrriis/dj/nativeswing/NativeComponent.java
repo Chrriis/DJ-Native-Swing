@@ -14,6 +14,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -51,6 +52,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -807,7 +809,7 @@ public abstract class NativeComponent extends Canvas {
   }
   
   private static class CMN_getComponentImage extends ControlCommandMessage {
-    private ImageData getImageData(Control control) {
+    private ImageData getImageData(Control control, Region region) {
       if(control.isDisposed()) {
         return null;
       }
@@ -817,6 +819,7 @@ public abstract class NativeComponent extends Canvas {
       }
       final Image image = new Image(NativeInterface.getDisplay(), size.x, size.y);
       GC gc = new GC(image);
+      gc.setClipping(region);
       control.print(gc);
       gc.dispose();
       return image.getImageData();
@@ -824,16 +827,21 @@ public abstract class NativeComponent extends Canvas {
     @Override
     public Object run() throws Exception {
       File dataFile = new File((String)args[0]);
+      Rectangle[] area = (Rectangle[])args[1];
       dataFile.deleteOnExit();
       final Control control = getControl();
       ImageData imageData;
+      final Region region = new Region();
+      for(Rectangle rectangle: area) {
+        region.add(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+      }
       if(!NativeInterface.isUIThread()) {
         final Exception[] eArray = new Exception[1];
         final ImageData[] resultArray = new ImageData[1];
         control.getDisplay().syncExec(new Runnable() {
           public void run() {
             try {
-              resultArray[0] = getImageData(control);
+              resultArray[0] = getImageData(control, region);
             } catch (Exception e) {
               eArray[0] = e;
             }
@@ -844,10 +852,10 @@ public abstract class NativeComponent extends Canvas {
         }
         imageData = resultArray[0];
       } else {
-        imageData = getImageData(control);
+        imageData = getImageData(control, region);
       }
       if(imageData == null) {
-        return new Dimension(0, 0);
+        return null;
       }
       int cursor = 0;
       // Has to be a multiple of 3
@@ -855,24 +863,35 @@ public abstract class NativeComponent extends Canvas {
       PaletteData palette = imageData.palette;
       if (palette.isDirect) {
         BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(dataFile));
-        for(int x=0; x<imageData.width; x++) {
-          for(int y=0; y<imageData.height; y++) {
-            int pixel = imageData.getPixel(x, y);
-            int red = pixel & palette.redMask;
-            bytes[cursor++] = (byte)(palette.redShift < 0? red >>> -palette.redShift: red << palette.redShift);
-            int green = pixel & palette.greenMask;
-            bytes[cursor++] = (byte)((palette.greenShift < 0)? green >>> -palette.greenShift: green << palette.greenShift);
-            int blue = pixel & palette.blueMask;
-            bytes[cursor++] = (byte)((palette.blueShift < 0)? blue >>> -palette.blueShift: blue << palette.blueShift);
-            if(cursor == bytes.length) {
-              out.write(bytes);
-              cursor = 0;
+        int width = imageData.width;
+        int height = imageData.height;
+        for(Rectangle rectangle: area) {
+          // TODO: check that imageData.width/height are large enough
+          for(int i=0; i<rectangle.width; i++) {
+            for(int j=0; j<rectangle.height; j++) {
+              int x = rectangle.x + i;
+              int y = rectangle.y + j;
+              if(x < width && y < height) {
+                int pixel = imageData.getPixel(x, y);
+                int red = pixel & palette.redMask;
+                bytes[cursor++] = (byte)(palette.redShift < 0? red >>> -palette.redShift: red << palette.redShift);
+                int green = pixel & palette.greenMask;
+                bytes[cursor++] = (byte)((palette.greenShift < 0)? green >>> -palette.greenShift: green << palette.greenShift);
+                int blue = pixel & palette.blueMask;
+                bytes[cursor++] = (byte)((palette.blueShift < 0)? blue >>> -palette.blueShift: blue << palette.blueShift);
+                if(cursor == bytes.length) {
+                  out.write(bytes);
+                  cursor = 0;
+                }
+              } else {
+                cursor += 3;
+              }
             }
           }
         }
         out.write(bytes, 0, cursor);
         out.close();
-        return new Dimension(imageData.width, imageData.height);
+        return null;
       }
       throw new IllegalStateException("Not implemented");
     }
@@ -882,13 +901,35 @@ public abstract class NativeComponent extends Canvas {
    * Can be called from a non-UI thread.
    */
   public void paintComponent(BufferedImage image) {
+    paintComponent(image, null);
+  }
+  
+  /**
+   * Can be called from a non-UI thread.
+   */
+  public void paintComponent(BufferedImage image, Rectangle[] area) {
     if(image == null || !isNativePeerValid() || isNativePeerDisposed) {
       return;
     }
-    Dimension size = getSize();
-    if(size.width <= 0 || size.height <= 0) {
+    int width = Math.min(getWidth(), image.getWidth());
+    int height = Math.min(getHeight(), image.getHeight());
+    if(width <= 0 || height <= 0) {
       return;
     }
+    if(area == null) {
+      area = new Rectangle[] {new Rectangle(width, height)};
+    }
+    Rectangle bounds = new Rectangle(width, height);
+    List<Rectangle> rectangleList = new ArrayList<Rectangle>();
+    for(Rectangle rectangle: area) {
+      if(rectangle.intersects(bounds)) {
+        rectangleList.add(rectangle.intersection(bounds));
+      }
+    }
+    if(rectangleList.isEmpty()) {
+      return;
+    }
+    area = rectangleList.toArray(new Rectangle[0]);
     if(nativeComponentProxy != null) {
       try {
         nativeComponentProxy.startCapture();
@@ -896,30 +937,23 @@ public abstract class NativeComponent extends Canvas {
         e.printStackTrace();
       }
     }
-    Dimension resultSize;
+    boolean isSuccess = true;
     File dataFile;
     try {
       dataFile = File.createTempFile("~DJNS", null);
       dataFile.deleteOnExit();
       CMN_getComponentImage getComponentImage = new CMN_getComponentImage();
       getComponentImage.setNativeComponent(this);
-      resultSize = (Dimension)getComponentImage.syncExec(dataFile.getAbsolutePath());
+      getComponentImage.syncExec(dataFile.getAbsolutePath(), area);
     } catch(Exception e) {
       e.printStackTrace();
-      resultSize = null;
+      isSuccess = false;
       dataFile = null;
     }
     if(nativeComponentProxy != null) {
       nativeComponentProxy.stopCapture();
     }
-    if(resultSize == null) {
-      return;
-    }
-    int imageWidth = image.getWidth();
-    int imageHeight = image.getHeight();
-    int width = Math.min(resultSize.width, imageWidth);
-    int height = Math.min(resultSize.height, imageHeight);
-    if(width <= 0 || height <= 0) {
+    if(!isSuccess) {
       return;
     }
     // Has to be a multiple of 3
@@ -928,15 +962,17 @@ public abstract class NativeComponent extends Canvas {
     try {
       BufferedInputStream in = new BufferedInputStream(new FileInputStream(dataFile));
       synchronized(image) {
-        for(int x=0; x<width; x++) {
-          for(int y=0; y<height; y++) {
-            if(count == 0) {
-              in.read(bytes);
-            }
-            image.setRGB(x, y, 0xFF000000 | (0xFF & bytes[count]) << 16 | (0xFF & bytes[count + 1]) << 8 | (0xFF & bytes[count + 2]));
-            count += 3;
-            if(count == bytes.length) {
-              count = 0;
+        for(Rectangle rectangle: area) {
+          for(int x=0; x<rectangle.width; x++) {
+            for(int y=0; y<rectangle.height; y++) {
+              if(count == 0) {
+                in.read(bytes);
+              }
+              image.setRGB(rectangle.x + x, rectangle.y + y, 0xFF000000 | (0xFF & bytes[count]) << 16 | (0xFF & bytes[count + 1]) << 8 | (0xFF & bytes[count + 2]));
+              count += 3;
+              if(count == bytes.length) {
+                count = 0;
+              }
             }
           }
         }
@@ -959,9 +995,18 @@ public abstract class NativeComponent extends Canvas {
     }
   }
   
+  /**
+   * Update the back buffer on the areas that have non opaque overlays and that are not covered by opaque components.
+   */
+  public void updateBackBufferOnVisibleTranslucentAreas() {
+    if(nativeComponentProxy != null) {
+      nativeComponentProxy.updateBackBufferOnVisibleTranslucentAreas();
+    }
+  }
+  
   public void releaseBackBuffer() {
     if(nativeComponentProxy != null) {
-      nativeComponentProxy.releaseBackgroundBuffer();
+      nativeComponentProxy.releaseBackBuffer();
     }
   }
   

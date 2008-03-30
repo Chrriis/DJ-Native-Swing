@@ -14,7 +14,6 @@ import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Rectangle;
-import java.awt.Shape;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.AWTEventListener;
@@ -25,10 +24,10 @@ import java.awt.event.HierarchyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
-import java.awt.geom.Area;
 import java.beans.PropertyVetoException;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 
 import javax.swing.JDialog;
 import javax.swing.JInternalFrame;
@@ -224,33 +223,35 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
     });
   }
   
-  private Area lastArea = new Area();
+  private Rectangle[] lastArea = new Rectangle[0];
+  
+  protected Rectangle[] getPeerShapeArea() {
+    return lastArea;
+  }
   
   protected void adjustPeerShape_() {
     if(window == null) {
       return;
     }
-    Area area = computePeerShapeArea();
-    if(area == null) {
-      area = new Area();
+    Rectangle[] area = computePeerShapeArea();
+    if(Arrays.equals(lastArea, area)) {
+      return;
     }
-    if(!lastArea.equals(area)) {
-      lastArea = area;
-      Shape s;
-      Dimension size;
-      if(area.isEmpty()) {
-        size = new Dimension(1, 1);
-        s = new Rectangle(1, 1, 1, 1);
-      } else {
-        size = getSize();
-        s = area;
-      }
-      if(!window.getSize().equals(size)) {
-        window.setSize(size);
-      }
-      WindowUtils.setWindowMask(window, s);
-//      nativeComponent.repaintNativeControl();
+    lastArea = area;
+    Rectangle[] s;
+    Dimension size;
+    if(area.length == 0) {
+      size = new Dimension(1, 1);
+      s = new Rectangle[] {new Rectangle(1, 1, 1, 1)};
+    } else {
+      size = getSize();
+      s = area;
     }
+    if(!window.getSize().equals(size)) {
+      window.setSize(size);
+    }
+    WindowUtils.setWindowMask(window, s);
+//    nativeComponent.repaintNativeControl();
   }
   
   @Override
@@ -258,7 +259,7 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
     if(!isVisibilityConstrained) {
       return super.getPeerSize();
     }
-    if(lastArea.isEmpty()) {
+    if(lastArea.length == 0) {
       return new Dimension(1, 1);
     }
     return super.getPeerSize();

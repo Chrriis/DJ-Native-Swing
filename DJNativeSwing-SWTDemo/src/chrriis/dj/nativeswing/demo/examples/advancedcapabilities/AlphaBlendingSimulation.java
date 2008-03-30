@@ -82,12 +82,20 @@ public class AlphaBlendingSimulation extends JPanel implements Disposable {
   private volatile boolean isDisposed;
   
   private void updateBackgroundBuffer() {
+    // we refresh the background buffer outside the UI thread, to minimize the overhead.
     new Thread() {
       @Override
       public void run() {
+        int i = 0;
         while(!isDisposed) {
-          // we refresh the background buffer outside the UI thread, to minimize the overhead.
-          webBrowser.getNativeComponent().createBackBuffer();
+          if(i == 0) {
+            // Every now and then we refresh the full buffer.
+            webBrowser.getNativeComponent().createBackBuffer();
+          } else {
+            // The rest of the time we only update the areas that is covered with our overlay.
+            webBrowser.getNativeComponent().updateBackBufferOnVisibleTranslucentAreas();
+          }
+          i = (i + 1) % 4;
           try {
             sleep(500);
           } catch(Exception e) {
