@@ -162,10 +162,13 @@ public class UIUtils {
   }
   
   /**
-   * Get the area that is not covered by components obeying the condition imposed by the visitor. Usually, the visitor focuses on all components, or opaque components.
+   * Get the area that is not covered by components obeying the condition imposed by the visitor. Usually, the filter focuses on all components, or opaque components.
+   * @param component the component for which to find the visible areas.
+   * @param filter the filter to consider when determining if an area is hidden.
+   * @param traverseChildren true if children that are not captured by the filter should look into their own children recursively.
    * @return an array of rectangles specify the visible area.
    */
-  public static Rectangle[] getComponentVisibleArea(Component component, Filter<Component> filter) {
+  public static Rectangle[] getComponentVisibleArea(Component component, Filter<Component> filter, boolean traverseChildren) {
     Window windowAncestor = SwingUtilities.getWindowAncestor(component);
     int width = component.getWidth();
     int height = component.getHeight();
@@ -206,52 +209,62 @@ public class UIUtils {
       }
       shape = newRectangleList.toArray(new Rectangle[0]);
       if(parent instanceof JComponent && !((JComponent)parent).isOptimizedDrawingEnabled()) {
-        Component[] children;
-        if(parent instanceof JLayeredPane) {
-          JLayeredPane layeredPane = (JLayeredPane)parent;
-          List<Component> childList = new ArrayList<Component>(layeredPane.getComponentCount() - 1);
-          for(int i=layeredPane.highestLayer(); i>=layeredPane.getLayer(c); i--) {
-            Component[] components = layeredPane.getComponentsInLayer(i);
-            for(Component child: components) {
-              if(child == c) {
-                break;
-              }
-              childList.add(child);
-            }
-          }
-          children = childList.toArray(new Component[0]);
-        } else {
-          children = parent.getComponents();
-        }
-        for(int i=0; i<children.length; i++) {
-          Component child = children[i];
-          if(child == c) {
-            break;
-          }
-          if(child.isVisible()) {
-            if(parent instanceof JRootPane && ((JRootPane)parent).getGlassPane() == child) {
-              if(child instanceof JComponent) {
-                for(Component child2: ((JComponent)child).getComponents()) {
-                  if(filter.accept(child2)) {
-                    tempRectangle.setBounds(child2.getX(), child2.getY(), child2.getWidth(), child2.getHeight());
-                    shape = UIUtils.subtract(shape, SwingUtilities.convertRectangle(child, tempRectangle, component));
-                  }
-                }
-              }
-            } else {
-              if(filter.accept(child)) {
-                tempRectangle.setBounds(child.getX(), child.getY(), child.getWidth(), child.getHeight());
-                shape = UIUtils.subtract(shape, SwingUtilities.convertRectangle(parent, tempRectangle, component));
-              }
-            }
-          }
-        }
+        shape = getChildrenVisibleArea(component, filter, shape, parent, c, traverseChildren);
       }
       if(shape.length == 0) {
         return shape;
       }
       c = parent;
       parent = c.getParent();
+    }
+    return shape;
+  }
+  
+  private static Rectangle[] getChildrenVisibleArea(Component component, Filter<Component> filter, Rectangle[] shape, Container parent, Component c, boolean traverseChildren) {
+    Component[] children;
+    if(parent instanceof JLayeredPane) {
+      JLayeredPane layeredPane = (JLayeredPane)parent;
+      List<Component> childList = new ArrayList<Component>(layeredPane.getComponentCount() - 1);
+      for(int i=layeredPane.highestLayer(); i>=layeredPane.getLayer(c); i--) {
+        Component[] components = layeredPane.getComponentsInLayer(i);
+        for(Component child: components) {
+          if(child == c) {
+            break;
+          }
+          childList.add(child);
+        }
+      }
+      children = childList.toArray(new Component[0]);
+    } else {
+      children = parent.getComponents();
+    }
+    Rectangle tempRectangle = new Rectangle();
+    for(int i=0; i<children.length; i++) {
+      Component child = children[i];
+      if(child == c) {
+        break;
+      }
+      if(child.isVisible()) {
+        if(parent instanceof JRootPane && ((JRootPane)parent).getGlassPane() == child) {
+          if(child instanceof JComponent) {
+            for(Component child2: ((JComponent)child).getComponents()) {
+              if(filter.accept(child2)) {
+                tempRectangle.setBounds(child2.getX(), child2.getY(), child2.getWidth(), child2.getHeight());
+                shape = UIUtils.subtract(shape, SwingUtilities.convertRectangle(child, tempRectangle, component));
+              } else if(traverseChildren && child2 instanceof Container) {
+                shape = getChildrenVisibleArea(component, filter, shape, (Container)child2, c, traverseChildren);
+              }
+            }
+          }
+        } else {
+          if(filter.accept(child)) {
+            tempRectangle.setBounds(child.getX(), child.getY(), child.getWidth(), child.getHeight());
+            shape = UIUtils.subtract(shape, SwingUtilities.convertRectangle(parent, tempRectangle, component));
+          } else if(traverseChildren && child instanceof Container) {
+            shape = getChildrenVisibleArea(component, filter, shape, (Container)child, c, traverseChildren);
+          }
+        }
+      }
     }
     return shape;
   }

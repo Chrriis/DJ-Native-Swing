@@ -274,6 +274,10 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
           public boolean contains(int x, int y) {
             return false;
           }
+          @Override
+          public boolean contains(Point p) {
+            return false;
+          }
         };
         Point mouseLocation = MouseInfo.getPointerInfo().getLocation();
         SwingUtilities.convertPointFromScreen(mouseLocation, windowAncestor);
