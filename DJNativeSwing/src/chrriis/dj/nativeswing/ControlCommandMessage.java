@@ -85,7 +85,7 @@ public abstract class ControlCommandMessage extends CommandMessage {
    * @param args the arguments, which must be serializable.
    * @return the result of the execution.
    */
-  public Object syncExecArgs(NativeComponent nativeComponent, Object... args) {
+  public Object syncExec(NativeComponent nativeComponent, Object... args) {
     setNativeComponent(nativeComponent);
     return syncExec(args);
   }
@@ -96,7 +96,7 @@ public abstract class ControlCommandMessage extends CommandMessage {
    * @param args the arguments, which must be serializable.
    * @return the result of the execution.
    */
-  public Object syncExecArgs(Control control, Object... args) {
+  public Object syncExec(Control control, Object... args) {
     setControl(control);
     return syncExec(args);
   }

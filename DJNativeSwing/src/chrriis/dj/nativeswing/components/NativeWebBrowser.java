@@ -340,7 +340,7 @@ class NativeWebBrowser extends NativeComponent {
       public void open(WindowEvent e) {
         // This forces the user to open it himself
         e.required = true;
-        final Integer componentID = (Integer)new CMJ_createWindow().syncExecArgs(browser);
+        final Integer componentID = (Integer)new CMJ_createWindow().syncExec(browser);
         final Browser newWebBrowser;
         final boolean isDisposed;
         if(componentID == null) {
@@ -409,7 +409,7 @@ class NativeWebBrowser extends NativeComponent {
         if(location.startsWith("javascript:")) {
           return;
         }
-        e.doit = (Boolean)new CMJ_urlChanging().syncExecArgs(browser, location, e.top);
+        e.doit = (Boolean)new CMJ_urlChanging().syncExec(browser, location, e.top);
         if(!e.doit) {
           new CMJ_urlChangeCanceled().asyncExec(browser, location, e.top);
         }

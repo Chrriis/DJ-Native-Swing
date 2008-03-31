@@ -27,12 +27,11 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.StringReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.List;
@@ -661,7 +660,7 @@ public abstract class NativeComponent extends Canvas {
     this.nativeComponentProxy = nativeComponentProxy;
   }
   
-  Component getNativeComponentProxy() {
+  NativeComponentProxy getNativeComponentProxy() {
     return nativeComponentProxy;
   }
   
@@ -804,7 +803,7 @@ public abstract class NativeComponent extends Canvas {
   public boolean hasFocus() {
     boolean hasFocus = super.hasFocus();
     if(!hasFocus && isNativePeerValid() && !isNativePeerDisposed) {
-      return Boolean.TRUE.equals(new CMN_hasFocus().syncExecArgs(this));
+      return Boolean.TRUE.equals(new CMN_hasFocus().syncExec(this));
     }
     return hasFocus;
   }
@@ -822,7 +821,7 @@ public abstract class NativeComponent extends Canvas {
   public Dimension getPreferredSize() {
     Dimension result = null;
     if(isNativePeerValid() && !isNativePeerDisposed) {
-      result = (Dimension)new CMN_getPreferredSize().syncExecArgs(this);
+      result = (Dimension)new CMN_getPreferredSize().syncExec(this);
     }
     if(result == null) {
       result = super.getPreferredSize();
@@ -848,9 +847,8 @@ public abstract class NativeComponent extends Canvas {
     }
     @Override
     public Object run() throws Exception {
-      File dataFile = new File((String)args[0]);
+      int port = (Integer)args[0];
       Rectangle[] area = (Rectangle[])args[1];
-      dataFile.deleteOnExit();
       final Control control = getControl();
       ImageData imageData;
       final Region region = new Region();
@@ -884,35 +882,41 @@ public abstract class NativeComponent extends Canvas {
       byte[] bytes = new byte[1024 * 3];
       PaletteData palette = imageData.palette;
       if (palette.isDirect) {
-        BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(dataFile));
+        Socket socket = new Socket("127.0.0.1", port);
+        BufferedOutputStream out = new BufferedOutputStream(socket.getOutputStream());
         int width = imageData.width;
         int height = imageData.height;
-        for(Rectangle rectangle: area) {
-          // TODO: check that imageData.width/height are large enough
-          for(int i=0; i<rectangle.width; i++) {
-            for(int j=0; j<rectangle.height; j++) {
-              int x = rectangle.x + i;
-              int y = rectangle.y + j;
-              if(x < width && y < height) {
-                int pixel = imageData.getPixel(x, y);
-                int red = pixel & palette.redMask;
-                bytes[cursor++] = (byte)(palette.redShift < 0? red >>> -palette.redShift: red << palette.redShift);
-                int green = pixel & palette.greenMask;
-                bytes[cursor++] = (byte)((palette.greenShift < 0)? green >>> -palette.greenShift: green << palette.greenShift);
-                int blue = pixel & palette.blueMask;
-                bytes[cursor++] = (byte)((palette.blueShift < 0)? blue >>> -palette.blueShift: blue << palette.blueShift);
+        try {
+          for(Rectangle rectangle: area) {
+            // TODO: check that imageData.width/height are large enough
+            for(int i=0; i<rectangle.width; i++) {
+              for(int j=0; j<rectangle.height; j++) {
+                int x = rectangle.x + i;
+                int y = rectangle.y + j;
+                if(x < width && y < height) {
+                  int pixel = imageData.getPixel(x, y);
+                  int red = pixel & palette.redMask;
+                  bytes[cursor++] = (byte)(palette.redShift < 0? red >>> -palette.redShift: red << palette.redShift);
+                  int green = pixel & palette.greenMask;
+                  bytes[cursor++] = (byte)((palette.greenShift < 0)? green >>> -palette.greenShift: green << palette.greenShift);
+                  int blue = pixel & palette.blueMask;
+                  bytes[cursor++] = (byte)((palette.blueShift < 0)? blue >>> -palette.blueShift: blue << palette.blueShift);
+                } else {
+                  cursor += 3;
+                }
                 if(cursor == bytes.length) {
                   out.write(bytes);
                   cursor = 0;
                 }
-              } else {
-                cursor += 3;
               }
             }
           }
+          out.write(bytes, 0, cursor);
+        } catch(Exception e) {
+          // swallow the exception, in case the socket gets closed for example.
         }
-        out.write(bytes, 0, cursor);
         out.close();
+        socket.close();
         return null;
       }
       throw new IllegalStateException("Not implemented");
@@ -959,51 +963,45 @@ public abstract class NativeComponent extends Canvas {
         e.printStackTrace();
       }
     }
-    boolean isSuccess = true;
-    File dataFile;
     try {
-      dataFile = File.createTempFile("~DJNS", null);
-      dataFile.deleteOnExit();
+      ServerSocket serverSocket = new ServerSocket(0);
       CMN_getComponentImage getComponentImage = new CMN_getComponentImage();
       getComponentImage.setNativeComponent(this);
-      getComponentImage.syncExec(dataFile.getAbsolutePath(), area);
-    } catch(Exception e) {
-      e.printStackTrace();
-      isSuccess = false;
-      dataFile = null;
-    }
-    if(nativeComponentProxy != null) {
-      nativeComponentProxy.stopCapture();
-    }
-    if(!isSuccess) {
-      return;
-    }
-    // Has to be a multiple of 3
-    byte[] bytes = new byte[1024 * 3];
-    int count = 0;
-    try {
-      BufferedInputStream in = new BufferedInputStream(new FileInputStream(dataFile));
-      synchronized(image) {
-        for(Rectangle rectangle: area) {
-          for(int x=0; x<rectangle.width; x++) {
-            for(int y=0; y<rectangle.height; y++) {
-              if(count == 0) {
-                in.read(bytes);
-              }
-              image.setRGB(rectangle.x + x, rectangle.y + y, 0xFF000000 | (0xFF & bytes[count]) << 16 | (0xFF & bytes[count + 1]) << 8 | (0xFF & bytes[count + 2]));
-              count += 3;
-              if(count == bytes.length) {
-                count = 0;
+      getComponentImage.asyncExec(serverSocket.getLocalPort(), area);
+      Socket socket = serverSocket.accept();
+      // Has to be a multiple of 3
+      byte[] bytes = new byte[1024 * 3];
+      int count = 0;
+      try {
+        BufferedInputStream in = new BufferedInputStream(socket.getInputStream());
+        synchronized(image) {
+          for(Rectangle rectangle: area) {
+            for(int x=0; x<rectangle.width; x++) {
+              for(int y=0; y<rectangle.height; y++) {
+                if(count == 0) {
+                  in.read(bytes);
+                }
+                image.setRGB(rectangle.x + x, rectangle.y + y, 0xFF000000 | (0xFF & bytes[count]) << 16 | (0xFF & bytes[count + 1]) << 8 | (0xFF & bytes[count + 2]));
+                count += 3;
+                if(count == bytes.length) {
+                  count = 0;
+                }
               }
             }
           }
         }
+        in.close();
+        socket.close();
+      } catch(Exception e) {
+        e.printStackTrace();
       }
-      in.close();
+      serverSocket.close();
     } catch(Exception e) {
       e.printStackTrace();
     }
-    dataFile.delete();
+    if(nativeComponentProxy != null) {
+      nativeComponentProxy.stopCapture();
+    }
   }
   
   @Override

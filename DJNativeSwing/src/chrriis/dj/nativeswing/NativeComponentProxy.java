@@ -207,9 +207,8 @@ abstract class NativeComponentProxy extends JComponent {
     // We need to adjust the shape of the frames that go to the back as well.
     for(Canvas canvas: NativeInterface.getCanvas()) {
       if(canvas instanceof NativeComponent) {
-        Component componentProxy = ((NativeComponent)canvas).getNativeComponentProxy();
-        if(componentProxy instanceof NativeComponentProxy) {
-          NativeComponentProxy nativeComponentProxy = (NativeComponentProxy)componentProxy;
+        NativeComponentProxy nativeComponentProxy = ((NativeComponent)canvas).getNativeComponentProxy();
+        if(nativeComponentProxy != null) {
           if(nativeComponentProxy.isVisibilityConstrained) {
             nativeComponentProxy.adjustPeerShape();
           }
