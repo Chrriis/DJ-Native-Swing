@@ -21,7 +21,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ContainerEvent;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
-import java.awt.image.BufferedImage;
 
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
@@ -37,9 +36,10 @@ import chrriis.dj.nativeswing.NativeComponentProxyWindow.EmbeddedWindow;
  */
 abstract class NativeComponentProxy extends JComponent {
 
-  NativeComponent nativeComponent;
-  boolean isDestructionOnFinalization;
-  boolean isVisibilityConstrained;
+  private BackBufferManager backBufferManager;
+  protected NativeComponent nativeComponent;
+  protected boolean isDestructionOnFinalization;
+  protected boolean isVisibilityConstrained;
 
   private AWTEventListener shapeAdjustmentEventListener;
 
@@ -50,6 +50,7 @@ abstract class NativeComponentProxy extends JComponent {
     isVisibilityConstrained = options.getVisibilityConstraint() != VisibilityConstraint.NONE;
     setFocusable(true);
     this.nativeComponent = nativeComponent;
+    backBufferManager = new BackBufferManager(nativeComponent, this);
     if(isVisibilityConstrained) {
       hierarchyListener = new HierarchyListener() {
         public void hierarchyChanged(HierarchyEvent e) {
@@ -254,94 +255,19 @@ abstract class NativeComponentProxy extends JComponent {
     return shape;
   }
 
-  private final Object backBufferLock = new Object();
-  private BufferedImage backBuffer;
-  
-  public void updateBackBufferOnVisibleTranslucentAreas() {
-    int width = getWidth();
-    int height = getHeight();
-    if(width <= 0 || height <= 0) {
-      if(backBuffer != null) {
-        backBuffer.flush();
-      }
-      backBuffer = null;
-      return;
-    }
-    updateBackBuffer(getTranslucentOverlays());
-  }
-  
-  protected Rectangle[] getTranslucentOverlays() {
-    Rectangle[] boundsArea = new Rectangle[] {new Rectangle(0, 0, getWidth(), getHeight())};
-    Rectangle[] nonOpaqueAreas = UIUtils.subtract(boundsArea, UIUtils.getComponentVisibleArea(this, new Filter<Component>() {
-      public boolean accept(Component c) {
-        return !c.isOpaque();
-      }
-    }, false));
-    return UIUtils.subtract(nonOpaqueAreas, UIUtils.subtract(boundsArea, UIUtils.getComponentVisibleArea(this, new Filter<Component>() {
-      public boolean accept(Component c) {
-        return c.isOpaque();
-      }
-    }, true)));
-  }
-
-  public void createBackgroundBuffer() {
-    updateBackBuffer(new Rectangle[] {new Rectangle(getWidth(), getHeight())});
-  }
-  
-  private void updateBackBuffer(Rectangle[] area) {
-    if(area == null || area.length == 0) {
-      return;
-    }
-    int width = getWidth();
-    int height = getHeight();
-    if(width <= 0 || height <= 0) {
-      if(backBuffer != null) {
-        backBuffer.flush();
-      }
-      backBuffer = null;
-      return;
-    }
-    BufferedImage image;
-    if(backBuffer != null && backBuffer.getWidth() == width && backBuffer.getHeight() == height) {
-      image = backBuffer;
-    } else {
-      image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-    }
-    nativeComponent.paintComponent(image, area);
-    synchronized(backBufferLock) {
-      if(backBuffer != null && backBuffer != image) {
-        backBuffer.flush();
-      }
-      this.backBuffer = image;
-    }
-    repaint();
-  }
-  
-  public void releaseBackBuffer() {
-    synchronized(backBufferLock) {
-      if(backBuffer != null) {
-        backBuffer.flush();
-      }
-      backBuffer = null;
-    }
-  }
-  
   @Override
   protected void printComponent(Graphics g) {
-    BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
-    nativeComponent.paintComponent(image);
-    g.drawImage(image, 0, 0, null);
+    nativeComponent.print(g);
   }
   
   @Override
   protected void paintComponent(Graphics g) {
-    synchronized(backBufferLock) {
-      if(backBuffer != null) {
-        synchronized(backBuffer) {
-          g.drawImage(backBuffer, 0, 0, this);
-        }
-      }
-    }
+    super.paintComponent(g);
+    backBufferManager.paintBackBuffer(g);
+  }
+  
+  public BackBufferManager getBackBufferManager() {
+    return backBufferManager;
   }
   
   abstract void startCapture();

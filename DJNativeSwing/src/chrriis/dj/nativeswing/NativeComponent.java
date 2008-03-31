@@ -309,10 +309,14 @@ public abstract class NativeComponent extends Canvas {
         if(type == KeyEvent.KEY_PRESSED) {
           if((e_stateMask & SWT.CONTROL) != 0) {
             boolean isBackward = (e_stateMask & SWT.SHIFT) != 0;
+            Component c = nativeComponent.getNativeComponentProxy();
+            if(c == null) {
+              c = nativeComponent;
+            }
             if(isBackward) {
-              nativeComponent.transferFocusBackward();
+              c.transferFocusBackward();
             } else {
-              nativeComponent.transferFocus();
+              c.transferFocus();
             }
           }
         }
@@ -459,11 +463,11 @@ public abstract class NativeComponent extends Canvas {
   @Override
   public void paint(Graphics g) {
     super.paint(g);
-    String text = invalidNativePeerText;
-    if(text == null) {
-      text = "Invalid " + getClass().getName() + "[" + hashCode() + "]";
-    }
     if(!isNativePeerValid()) {
+      String text = invalidNativePeerText;
+      if(text == null) {
+        text = "Invalid " + getClass().getName() + "[" + hashCode() + "]";
+      }
       FontMetrics fm = g.getFontMetrics();
       BufferedReader r = new BufferedReader(new StringReader(text));
       int lineHeight = fm.getHeight();
@@ -475,7 +479,18 @@ public abstract class NativeComponent extends Canvas {
         }
       } catch(Exception e) {
       }
+    } else {
+      if(backBufferManager != null) {
+        backBufferManager.paintBackBuffer(g);
+      }
     }
+  }
+  
+  @Override
+  public void print(Graphics g) {
+    BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
+    paintComponent(image);
+    g.drawImage(image, 0, 0, null);
   }
   
   @Override
@@ -1011,12 +1026,19 @@ public abstract class NativeComponent extends Canvas {
     return new Dimension(0, 0);
   }
   
+  private BackBufferManager backBufferManager;
+  
   /**
    * Create an image as a back buffer, which can be used for example to simulate alpha blending. Note that this is only possible for proxied components (cf component options). 
    */
   public void createBackBuffer() {
     if(nativeComponentProxy != null) {
-      nativeComponentProxy.createBackgroundBuffer();
+      nativeComponentProxy.getBackBufferManager().createBackBuffer();
+    } else {
+      if(backBufferManager == null) {
+        backBufferManager = new BackBufferManager(this, this);
+      }
+      backBufferManager.createBackBuffer();
     }
   }
   
@@ -1025,7 +1047,12 @@ public abstract class NativeComponent extends Canvas {
    */
   public void updateBackBufferOnVisibleTranslucentAreas() {
     if(nativeComponentProxy != null) {
-      nativeComponentProxy.updateBackBufferOnVisibleTranslucentAreas();
+      nativeComponentProxy.getBackBufferManager().updateBackBufferOnVisibleTranslucentAreas();
+    } else {
+      if(backBufferManager == null) {
+        backBufferManager = new BackBufferManager(this, this);
+      }
+      backBufferManager.updateBackBufferOnVisibleTranslucentAreas();
     }
   }
   
@@ -1034,7 +1061,11 @@ public abstract class NativeComponent extends Canvas {
    */
   public void releaseBackBuffer() {
     if(nativeComponentProxy != null) {
-      nativeComponentProxy.releaseBackBuffer();
+      nativeComponentProxy.getBackBufferManager().releaseBackBuffer();
+    } else {
+      if(backBufferManager != null) {
+        backBufferManager.releaseBackBuffer();
+      }
     }
   }
   
