@@ -17,12 +17,12 @@ import chrriis.common.Utils;
  * The options for the Flash player to better configure the initialization of the Flash plugin.
  * @author Christopher Deckers
  */
-public class FlashOptions {
+public class FlashPluginOptions {
   
   /**
-   * Construct new Flash options.
+   * Construct new Flash plugin options.
    */
-  public FlashOptions() {
+  public FlashPluginOptions() {
   }
   
   private Map<String, String> keyToValueVariableMap = new HashMap<String, String>();

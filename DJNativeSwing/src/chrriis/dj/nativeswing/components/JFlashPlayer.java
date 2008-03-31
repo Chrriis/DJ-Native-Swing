@@ -153,7 +153,7 @@ public class JFlashPlayer extends NSPanelComponent {
    * @param resourcePath the path to the file.
    * @param options the options to better configure the initialization of the flash plugin.
    */
-  public void load(Class<?> clazz, String resourcePath, FlashOptions options) {
+  public void load(Class<?> clazz, String resourcePath, FlashPluginOptions options) {
     load(WebServer.getDefaultWebServer().getClassPathResourceURL(clazz.getName(), resourcePath), options);
   }
   
@@ -165,19 +165,19 @@ public class JFlashPlayer extends NSPanelComponent {
     load(resourcePath, null);
   }
   
-  private FlashOptions options;
+  private FlashPluginOptions options;
   
   /**
    * Load a file.
    * @param resourcePath the path or URL to the file.
    * @param options the options to better configure the initialization of the flash plugin.
    */
-  public void load(String resourcePath, FlashOptions options) {
+  public void load(String resourcePath, FlashPluginOptions options) {
     if("".equals(resourcePath)) {
       resourcePath = null;
     }
     if(options == null) {
-      options = new FlashOptions();
+      options = new FlashPluginOptions();
     }
     this.options = options;
     webBrowserObject.load(resourcePath);

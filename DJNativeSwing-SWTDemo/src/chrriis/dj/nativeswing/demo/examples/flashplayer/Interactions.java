@@ -26,7 +26,7 @@ import javax.swing.text.PlainDocument;
 
 import chrriis.dj.nativeswing.NativeInterface;
 import chrriis.dj.nativeswing.NativeInterfaceOptions;
-import chrriis.dj.nativeswing.components.FlashOptions;
+import chrriis.dj.nativeswing.components.FlashPluginOptions;
 import chrriis.dj.nativeswing.components.JFlashPlayer;
 
 /**
@@ -40,7 +40,7 @@ public class Interactions extends JPanel {
     flashPlayerPanel.setBorder(BorderFactory.createTitledBorder("Native Flash Player component"));
     final JFlashPlayer flashPlayer = new JFlashPlayer();
     flashPlayer.setControlBarVisible(true);
-    FlashOptions flashLoadingOptions = new FlashOptions();
+    FlashPluginOptions flashLoadingOptions = new FlashPluginOptions();
     flashLoadingOptions.setVariables(new HashMap<String, String>() {{put("mytext", "My Text");}});
     flashPlayer.load(getClass(), "resource/dyn_text_moving.swf", flashLoadingOptions);
     flashPlayerPanel.add(flashPlayer, BorderLayout.CENTER);

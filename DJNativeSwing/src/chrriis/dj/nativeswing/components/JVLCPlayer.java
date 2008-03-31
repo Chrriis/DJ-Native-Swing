@@ -310,7 +310,7 @@ public class JVLCPlayer extends NSPanelComponent {
    * Load the player, with no content.
    */
   public void load() {
-    load((VLCOptions)null);
+    load((VLCPluginOptions)null);
   }
   
   /**
@@ -325,7 +325,7 @@ public class JVLCPlayer extends NSPanelComponent {
    * Load the player, with no content.
    * @param options the options to better configure the initialization of the VLC plugin.
    */
-  public void load(VLCOptions options) {
+  public void load(VLCPluginOptions options) {
     load("", options);
   }
   
@@ -344,27 +344,27 @@ public class JVLCPlayer extends NSPanelComponent {
    * @param resourcePath the path to the file.
    * @param options the options to better configure the initialization of the VLC plugin.
    */
-  public void load(Class<?> clazz, String resourcePath, VLCOptions options) {
+  public void load(Class<?> clazz, String resourcePath, VLCPluginOptions options) {
     load(WebServer.getDefaultWebServer().getClassPathResourceURL(clazz.getName(), resourcePath), options);
   }
   
-  private VLCOptions options;
+  private VLCPluginOptions options;
   
   /**
    * Load a file.
    * @param resourcePath the path or URL to the file.
    * @param options the options to better configure the initialization of the VLC plugin.
    */
-  public void load(String resourcePath, VLCOptions options) {
+  public void load(String resourcePath, VLCPluginOptions options) {
     if("".equals(resourcePath)) {
       resourcePath = null;
     }
     load_(resourcePath, options);
   }
   
-  private void load_(String resourcePath, VLCOptions options) {
+  private void load_(String resourcePath, VLCPluginOptions options) {
     if(options == null) {
-      options = new VLCOptions();
+      options = new VLCPluginOptions();
     }
     this.options = options;
     webBrowserObject.load(resourcePath);
