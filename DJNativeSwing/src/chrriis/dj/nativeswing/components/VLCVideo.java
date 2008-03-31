@@ -67,7 +67,7 @@ public class VLCVideo {
    * Set the aspect ration of the video.
    * @param aspectRatio the aspect ratio.
    */
-  public void setAspectRatio(VLCVideo.VLCAspectRatio aspectRatio) {
+  public void setAspectRatio(VLCAspectRatio aspectRatio) {
     String value;
     switch(aspectRatio) {
       case _1x1: value = "1:1"; break;
@@ -85,7 +85,7 @@ public class VLCVideo {
    * Get the aspect ratio of the video media.
    * @return the aspect ratio.
    */
-  public VLCVideo.VLCAspectRatio getAspectRatio() {
+  public VLCAspectRatio getAspectRatio() {
     String value = (String)webBrowserObject.getObjectProperty("video.aspectRatio");
     if("1:1".equals(value)) return VLCAspectRatio._1x1;
     if("4:3".equals(value)) return VLCAspectRatio._4x3;

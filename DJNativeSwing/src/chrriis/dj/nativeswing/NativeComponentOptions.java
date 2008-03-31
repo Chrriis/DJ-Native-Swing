@@ -54,19 +54,19 @@ public class NativeComponentOptions implements Cloneable {
     WINDOW_PROXYING,
   }
   
-  private NativeComponentOptions.FiliationType filiationType = FiliationType.AUTO;
+  private FiliationType filiationType = FiliationType.AUTO;
   
   /**
    * Proxied filiation allows re-parenting and change of component Z-order.
    */
-  public void setFiliationType(NativeComponentOptions.FiliationType filiationType) {
+  public void setFiliationType(FiliationType filiationType) {
     if(filiationType == null) {
       filiationType = FiliationType.AUTO;
     }
     this.filiationType = filiationType;
   }
 
-  public NativeComponentOptions.FiliationType getFiliationType() {
+  public FiliationType getFiliationType() {
     return filiationType;
   }
   
@@ -76,19 +76,19 @@ public class NativeComponentOptions implements Cloneable {
     ON_FINALIZATION,
   }
   
-  private NativeComponentOptions.DestructionTime destructionTime = DestructionTime.AUTO;
+  private DestructionTime destructionTime = DestructionTime.AUTO;
   
   /**
    * Destruction on finalization allows removal and later re-addition to the user interface. It requires a proxied filiation, and will select one automatically if it is set to default. It is also possible to explicitely dispose the component rather than waiting until finalization.
    */
-  public void setDestructionTime(NativeComponentOptions.DestructionTime destructionTime) {
+  public void setDestructionTime(DestructionTime destructionTime) {
     if(destructionTime == null) {
       destructionTime = DestructionTime.AUTO;
     }
     this.destructionTime = destructionTime;
   }
   
-  public NativeComponentOptions.DestructionTime getDestructionTime() {
+  public DestructionTime getDestructionTime() {
     return destructionTime;
   }
   
@@ -98,19 +98,19 @@ public class NativeComponentOptions implements Cloneable {
     FULL_COMPONENT_TREE,
   }
   
-  private NativeComponentOptions.VisibilityConstraint visibilityConstraint = VisibilityConstraint.AUTO;
+  private VisibilityConstraint visibilityConstraint = VisibilityConstraint.AUTO;
   
   /**
    * Visibility constraints allow to superimpose native components and Swing components.
    */
-  public void setVisibilityConstraint(NativeComponentOptions.VisibilityConstraint visibilityConstraint) {
+  public void setVisibilityConstraint(VisibilityConstraint visibilityConstraint) {
     if(visibilityConstraint == null) {
       visibilityConstraint = VisibilityConstraint.AUTO;
     }
     this.visibilityConstraint = visibilityConstraint;
   }
   
-  public NativeComponentOptions.VisibilityConstraint getVisibilityConstraint() {
+  public VisibilityConstraint getVisibilityConstraint() {
     return visibilityConstraint;
   }
   

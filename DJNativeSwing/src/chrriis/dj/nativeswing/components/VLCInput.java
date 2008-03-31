@@ -97,7 +97,7 @@ public class VLCInput {
    * Get the state.
    * @return the state.
    */
-  public VLCInput.VLCMediaState getMediaState() {
+  public VLCMediaState getMediaState() {
     Object value = webBrowserObject.getObjectProperty("input.state");
     if(value == null) {
       return null;

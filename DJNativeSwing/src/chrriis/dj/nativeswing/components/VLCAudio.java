@@ -90,7 +90,7 @@ public class VLCAudio {
    * Set the audio channel to use.
    * @param channel the audio channel to use.
    */
-  public void setChannel(VLCAudio.VLCChannel channel) {
+  public void setChannel(VLCChannel channel) {
     int value;
     switch(channel) {
       case STEREO: value = 1; break;
@@ -107,7 +107,7 @@ public class VLCAudio {
    * Get the audio channel.
    * @return the audio channel.
    */
-  public VLCAudio.VLCChannel getChannel() {
+  public VLCChannel getChannel() {
     Object value = webBrowserObject.getObjectProperty("audio.channel");
     if(value == null) {
       return null;
