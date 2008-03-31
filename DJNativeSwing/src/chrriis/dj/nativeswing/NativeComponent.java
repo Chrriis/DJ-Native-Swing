@@ -843,7 +843,9 @@ public abstract class NativeComponent extends Canvas {
       gc.setClipping(region);
       control.print(gc);
       gc.dispose();
-      return image.getImageData();
+      ImageData imageData = image.getImageData();
+      image.dispose();
+      return imageData;
     }
     @Override
     public Object run() throws Exception {

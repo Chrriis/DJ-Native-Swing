@@ -261,6 +261,9 @@ abstract class NativeComponentProxy extends JComponent {
     int width = getWidth();
     int height = getHeight();
     if(width <= 0 || height <= 0) {
+      if(backBuffer != null) {
+        backBuffer.flush();
+      }
       backBuffer = null;
       return;
     }
@@ -292,6 +295,9 @@ abstract class NativeComponentProxy extends JComponent {
     int width = getWidth();
     int height = getHeight();
     if(width <= 0 || height <= 0) {
+      if(backBuffer != null) {
+        backBuffer.flush();
+      }
       backBuffer = null;
       return;
     }
@@ -303,6 +309,9 @@ abstract class NativeComponentProxy extends JComponent {
     }
     nativeComponent.paintComponent(image, area);
     synchronized(backBufferLock) {
+      if(backBuffer != null && backBuffer != image) {
+        backBuffer.flush();
+      }
       this.backBuffer = image;
     }
     repaint();
@@ -310,6 +319,9 @@ abstract class NativeComponentProxy extends JComponent {
   
   public void releaseBackBuffer() {
     synchronized(backBufferLock) {
+      if(backBuffer != null) {
+        backBuffer.flush();
+      }
       backBuffer = null;
     }
   }
