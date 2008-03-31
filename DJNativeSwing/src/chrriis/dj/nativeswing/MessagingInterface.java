@@ -311,7 +311,7 @@ abstract class MessagingInterface {
     System.err.println("Failed messaging: " + message);
   }
   
-  private Object LOCK = new Object();
+  private final Object LOCK = new Object();
   
   public Object syncSend(Message message) {
     if(!isUIThread()) {
