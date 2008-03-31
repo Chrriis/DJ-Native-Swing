@@ -132,7 +132,7 @@ public class UIUtils {
       resultList.add(new Rectangle(x, r2.y, r1.x + r1.width - x, r2.height));
     } else if(right) {
       // r2 crosses right edge only, dividing r1 into 3 rectangles
-//      results.add(new Rectangle(r1.x, r1.y, r1.width, r2.y - r1.y));
+      resultList.add(new Rectangle(r1.x, r1.y, r1.width, r2.y - r1.y));
       int y = r2.y + r2.height;
       resultList.add(new Rectangle(r1.x, y, r1.width, r1.y + r1.height - y));
       resultList.add(new Rectangle(r1.x, r2.y, r2.x - r1.x, r2.height));
@@ -146,7 +146,7 @@ public class UIUtils {
     } else if(bottom) {
       // r2 crosses bottom edge only, dividing r1 into 3 rectangles
       resultList.add(new Rectangle(r1.x, r1.y, r1.width, r2.y - r1.y));
-      int height = r1.y + r1.width - r2.y;
+      int height = r1.y + r1.height - r2.y;
       resultList.add(new Rectangle(r1.x, r2.y, r2.x - r1.x, height));
       int x = r2.x + r2.width;
       resultList.add(new Rectangle(x, r2.y, r1.x + r1.width - x, height));
@@ -225,7 +225,8 @@ public class UIUtils {
     if(parent instanceof JLayeredPane) {
       JLayeredPane layeredPane = (JLayeredPane)parent;
       List<Component> childList = new ArrayList<Component>(layeredPane.getComponentCount() - 1);
-      for(int i=layeredPane.highestLayer(); i>=layeredPane.getLayer(c); i--) {
+      int layer = c == null? Integer.MIN_VALUE: layeredPane.getLayer(c);
+      for(int i=layeredPane.highestLayer(); i>=layer; i--) {
         Component[] components = layeredPane.getComponentsInLayer(i);
         for(Component child: components) {
           if(child == c) {
@@ -252,7 +253,7 @@ public class UIUtils {
                 tempRectangle.setBounds(child2.getX(), child2.getY(), child2.getWidth(), child2.getHeight());
                 shape = UIUtils.subtract(shape, SwingUtilities.convertRectangle(child, tempRectangle, component));
               } else if(traverseChildren && child2 instanceof Container) {
-                shape = getChildrenVisibleArea(component, filter, shape, (Container)child2, c, traverseChildren);
+                shape = getChildrenVisibleArea(component, filter, shape, (Container)child2, null, traverseChildren);
               }
             }
           }
@@ -261,7 +262,7 @@ public class UIUtils {
             tempRectangle.setBounds(child.getX(), child.getY(), child.getWidth(), child.getHeight());
             shape = UIUtils.subtract(shape, SwingUtilities.convertRectangle(parent, tempRectangle, component));
           } else if(traverseChildren && child instanceof Container) {
-            shape = getChildrenVisibleArea(component, filter, shape, (Container)child, c, traverseChildren);
+            shape = getChildrenVisibleArea(component, filter, shape, (Container)child, null, traverseChildren);
           }
         }
       }
