@@ -51,7 +51,7 @@ class NativeWebBrowser extends NativeComponent {
   
   private static class CMJ_closeWindow extends ControlCommandMessage {
     @Override
-    public Object run() throws Exception {
+    public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
       JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
@@ -77,7 +77,7 @@ class NativeWebBrowser extends NativeComponent {
   
   private static class CMJ_createWindow extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
       JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
@@ -113,7 +113,7 @@ class NativeWebBrowser extends NativeComponent {
 
   private static class CMJ_showWindow extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
       final JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
@@ -160,7 +160,7 @@ class NativeWebBrowser extends NativeComponent {
   
   private static class CMJ_urlChanged extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
       JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
@@ -184,7 +184,7 @@ class NativeWebBrowser extends NativeComponent {
 
   private static class CMJ_commandReceived extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
       JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
@@ -208,7 +208,7 @@ class NativeWebBrowser extends NativeComponent {
 
   private static class CMJ_urlChanging extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
       JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
@@ -234,7 +234,7 @@ class NativeWebBrowser extends NativeComponent {
       
   private static class CMJ_urlChangeCanceled extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
       JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
@@ -258,7 +258,7 @@ class NativeWebBrowser extends NativeComponent {
 
   private static class CMJ_updateTitle extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
       JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
@@ -281,7 +281,7 @@ class NativeWebBrowser extends NativeComponent {
   
   private static class CMJ_updateStatus extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
       JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
@@ -304,7 +304,7 @@ class NativeWebBrowser extends NativeComponent {
   
   private static class CMJ_updateProgress extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
       JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
@@ -445,7 +445,7 @@ class NativeWebBrowser extends NativeComponent {
 
   private static class CMN_clearSessionCookies extends CommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       Browser.clearSessions();
       return null;
     }
@@ -457,7 +457,7 @@ class NativeWebBrowser extends NativeComponent {
 
   private static class CMN_getURL extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       return ((Browser)getControl()).getUrl();
     }
   }
@@ -468,7 +468,7 @@ class NativeWebBrowser extends NativeComponent {
   
   private static class CMN_setURL extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       return ((Browser)getControl()).setUrl((String)args[0]);
     }
   }
@@ -479,7 +479,7 @@ class NativeWebBrowser extends NativeComponent {
   
   private static class CMN_getHTMLContent extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       return ((Browser)getControl()).getText();
     }
   }
@@ -490,7 +490,7 @@ class NativeWebBrowser extends NativeComponent {
   
   private static class CMN_setHTMLContent extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       return ((Browser)getControl()).setText((String)args[0]);
     }
   }
@@ -502,7 +502,7 @@ class NativeWebBrowser extends NativeComponent {
   private static class CMN_executeJavascript extends ControlCommandMessage {
     private static Pattern JAVASCRIPT_LINE_COMMENT_PATTERN = Pattern.compile("^\\s*//.*$", Pattern.MULTILINE);
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       String script = (String)args[0];
       // Remove line comments, because it does not work properly on Mozilla.
       script = JAVASCRIPT_LINE_COMMENT_PATTERN.matcher(script).replaceAll("");
@@ -520,7 +520,7 @@ class NativeWebBrowser extends NativeComponent {
   
   private static class CMN_stop extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       ((Browser)getControl()).stop();
       return null;
     }
@@ -532,7 +532,7 @@ class NativeWebBrowser extends NativeComponent {
   
   private static class CMN_refresh extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       ((Browser)getControl()).refresh();
       return null;
     }
@@ -544,7 +544,7 @@ class NativeWebBrowser extends NativeComponent {
   
   private static class CMN_isGoBackEnabled extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       return ((Browser)getControl()).isBackEnabled();
     }
   }
@@ -555,7 +555,7 @@ class NativeWebBrowser extends NativeComponent {
   
   private static class CMN_goBack extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       return ((Browser)getControl()).back();
     }
   }
@@ -566,7 +566,7 @@ class NativeWebBrowser extends NativeComponent {
   
   private static class CMN_isGoForwardEnabled extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       return ((Browser)getControl()).isForwardEnabled();
     }
   }
@@ -577,7 +577,7 @@ class NativeWebBrowser extends NativeComponent {
   
   private static class CMN_goForward extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       return ((Browser)getControl()).forward();
     }
   }

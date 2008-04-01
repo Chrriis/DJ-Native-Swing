@@ -19,10 +19,7 @@ public abstract class CommandMessage extends Message {
   public CommandMessage() {
   }
   
-  /**
-   * The arguments, which are accessed directly from within the run method.
-   */
-  protected Object[] args;
+  private Object[] args;
   
   /**
    * Set the arguments that will be used when the message is run.
@@ -54,12 +51,19 @@ public abstract class CommandMessage extends Message {
     return syncSend();
   }
   
+  private static final Object[] EMPTY_ARGS = new Object[0];
+  
+  Object runCommand() throws Exception {
+    return run(args == null? EMPTY_ARGS: args);
+  }
+  
   /**
    * Run the message.
+   * @param args the arguments that were specified for that command, or an empty array if none were specified.
    * @return the result that may be passed back to the caller.
    * @throws Exception any exception that may happen, and which would be passed back if it is a synchronous execution.
    */
-  public abstract Object run() throws Exception;
+  public abstract Object run(Object[] args) throws Exception;
   
   @Override
   public String toString() {

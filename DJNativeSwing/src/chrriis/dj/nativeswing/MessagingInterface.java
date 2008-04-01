@@ -210,7 +210,7 @@ abstract class MessagingInterface {
       Throwable throwable = null;
       if(message.isValid()) {
         try {
-          result = commandMessage.run();
+          result = commandMessage.runCommand();
         } catch(Throwable t) {
           throwable = t;
         }
@@ -257,7 +257,7 @@ abstract class MessagingInterface {
   
   private static class CM_asyncExecResponse extends CommandMessage {
     @Override
-    public Object run() throws Exception {
+    public Object run(Object[] args) {
       MessagingInterface messagingInterface = NativeInterface.getMessagingInterface();
       int instanceID = (Integer)args[0];
       Thread thread = (Thread)messagingInterface.syncThreadRegistry.get(instanceID);
@@ -275,7 +275,7 @@ abstract class MessagingInterface {
   
   private static class CM_asyncExec extends CommandMessage {
     @Override
-    public Object run() throws Exception {
+    public Object run(Object[] args) {
       Message message = (Message)args[1];
       message.setSyncExec(false);
       new CM_asyncExecResponse().asyncExec(args[0], NativeInterface.getMessagingInterface().runMessage(message));

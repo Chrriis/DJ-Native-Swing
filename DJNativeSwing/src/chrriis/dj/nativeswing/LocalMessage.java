@@ -19,10 +19,22 @@ public abstract class LocalMessage extends CommandMessage {
   public LocalMessage() {
   }
   
+  @Override
+  Object runCommand() {
+    try {
+      return super.runCommand();
+    } catch(RuntimeException e) {
+      throw e;
+    } catch(Exception e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
   /**
    * Run the message.
    * @return the result.
    */
-  public abstract Object run();
+  public abstract Object run(Object[] args);
 
 }

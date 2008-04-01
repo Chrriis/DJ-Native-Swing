@@ -211,7 +211,7 @@ public class NativeInterface {
   
   private static class CMN_setProperties extends CommandMessage {
     @Override
-    public Object run() throws Exception {
+    public Object run(Object[] args) {
       Properties systemProperties = System.getProperties();
       Properties properties = (Properties)args[0];
       for(Object o: properties.keySet()) {
@@ -601,7 +601,8 @@ public class NativeInterface {
   static Object syncSend(final Message message) {
     checkInitialized();
     if(message instanceof LocalMessage) {
-      return ((LocalMessage)message).run();
+      LocalMessage localMessage = (LocalMessage)message;
+      return localMessage.runCommand();
     }
     return messagingInterface.syncSend(message);
   }
@@ -609,7 +610,8 @@ public class NativeInterface {
   static void asyncSend(final Message message) {
     checkInitialized();
     if(message instanceof LocalMessage) {
-      ((LocalMessage)message).run();
+      LocalMessage localMessage = (LocalMessage)message;
+      localMessage.runCommand();
       return;
     }
     messagingInterface.asyncSend(message);

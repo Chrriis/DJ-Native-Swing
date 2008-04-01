@@ -130,5 +130,5 @@ public abstract class ControlCommandMessage extends CommandMessage {
     }
     return getNativeComponent() != null;
   }
-
+  
 }

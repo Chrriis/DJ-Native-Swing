@@ -104,7 +104,7 @@ public class FileTypeLauncher {
   
   private static class CMN_initializeLaunchers extends CommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       for(Program program: Program.getPrograms()) {
         if(!programToFileTypeLauncherInfoMap.containsKey(program) && isProgramValid(program) && program.getImageData() != null) {
           programToFileTypeLauncherInfoMap.put(program, new FileTypeLauncherInfo(program));
@@ -126,7 +126,7 @@ public class FileTypeLauncher {
 
   private static class CMN_initializeExtensions extends CommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       for(String extension: Program.getExtensions()) {
         Program program = Program.findProgram(extension);
         if(program != null) {
@@ -157,7 +157,7 @@ public class FileTypeLauncher {
   
   private static class CMN_getAllRegisteredExtensions extends CommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       List<String> extensionList = new ArrayList<String>();
       for(FileTypeLauncherInfo launcherInfo: programToFileTypeLauncherInfoMap.values()) {
         for(String registeredExtension: launcherInfo.getRegisteredExtensions()) {
@@ -186,7 +186,7 @@ public class FileTypeLauncher {
 
   private static class CMN_getRegisteredExtensions extends CommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       return idToFileTypeLauncherInfoMap.get(args[0]).getRegisteredExtensions();
     }
   }
@@ -210,7 +210,7 @@ public class FileTypeLauncher {
   
   private static class CMN_getName extends CommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       return idToFileTypeLauncherInfoMap.get(args[0]).getProgram().getName();
     }
   }
@@ -231,7 +231,7 @@ public class FileTypeLauncher {
   
   private static class CMN_getIcon extends CommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       return idToFileTypeLauncherInfoMap.get(args[0]).getIcon();
     }
   }
@@ -257,7 +257,7 @@ public class FileTypeLauncher {
   
   private static class CMN_hashCode extends CommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       return idToFileTypeLauncherInfoMap.get(args[0]).getProgram().hashCode();
     }
   }
@@ -271,7 +271,7 @@ public class FileTypeLauncher {
   
   private static class CMN_launch extends CommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       idToFileTypeLauncherInfoMap.get(args[0]).getProgram().execute((String)args[1]);
       return null;
     }
@@ -289,7 +289,7 @@ public class FileTypeLauncher {
   
   private static class CMN_getLauncherID extends CommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       String extension = (String)args[0];
       Program program = Program.findProgram(extension);
       if(program == null) {
@@ -334,7 +334,7 @@ public class FileTypeLauncher {
   
   private static class CMN_getLauncherIDs extends CommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       initNative();
       FileTypeLauncherInfo[] fileTypeLaunchers = programToFileTypeLauncherInfoMap.values().toArray(new FileTypeLauncherInfo[0]);
       Arrays.sort(fileTypeLaunchers, new Comparator<FileTypeLauncherInfo>() {

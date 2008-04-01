@@ -42,10 +42,13 @@ import javax.swing.event.EventListenerList;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.MouseWheelListener;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
@@ -71,7 +74,7 @@ public abstract class NativeComponent extends Canvas {
 
   private class CMLocal_runInSequence extends LocalMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       ((Runnable)args[0]).run();
       return null;
     }
@@ -153,7 +156,7 @@ public abstract class NativeComponent extends Canvas {
   
   private static class CMN_reshape extends ControlCommandMessage {
     @Override
-    public Object run() throws Exception {
+    public Object run(Object[] args) {
       getControl().getShell().setSize((Integer)args[0], (Integer)args[1]);
       return null;
     }
@@ -171,7 +174,7 @@ public abstract class NativeComponent extends Canvas {
 
   private static class CMN_transferFocus extends ControlCommandMessage {
     @Override
-    public Object run() throws Exception {
+    public Object run(Object[] args) {
       getControl().traverse(SWT.TRAVERSE_TAB_NEXT);
       return null;
     }
@@ -235,7 +238,7 @@ public abstract class NativeComponent extends Canvas {
   private static class CMJ_dispatchMouseEvent extends ControlCommandMessage {
     private static int buttonPressedCount;
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       NativeComponent nativeComponent = getNativeComponent();
       if(!nativeComponent.isShowing()) {
         return null;
@@ -296,7 +299,7 @@ public abstract class NativeComponent extends Canvas {
   
   private static class CMJ_dispatchKeyEvent extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       NativeComponent nativeComponent = getNativeComponent();
       if(!nativeComponent.isShowing()) {
         return null;
@@ -377,7 +380,7 @@ public abstract class NativeComponent extends Canvas {
       throw new IllegalStateException("Failed to create a Shell!");
     }
     @Override
-    public Object run() throws Exception {
+    public Object run(Object[] args) throws Exception {
       Shell shell = createShell(args[2]);
       shell.setVisible (true);
       shell.setLayout(new FillLayout());
@@ -460,6 +463,10 @@ public abstract class NativeComponent extends Canvas {
     });
   }
 
+  /**
+   * Paint the component, which also paints the back buffer if any.
+   * @param g the graphics to paint to.
+   */
   @Override
   public void paint(Graphics g) {
     super.paint(g);
@@ -486,11 +493,16 @@ public abstract class NativeComponent extends Canvas {
     }
   }
   
+  /**
+   * Print the component, which also prints the native peer.
+   * @param g the graphics to paint to.
+   */
   @Override
   public void print(Graphics g) {
     BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
     paintComponent(image);
     g.drawImage(image, 0, 0, null);
+    image.flush();
   }
   
   @Override
@@ -583,7 +595,7 @@ public abstract class NativeComponent extends Canvas {
   
   private static class CMN_destroyControl extends ControlCommandMessage {
     @Override
-    public Object run() throws Exception {
+    public Object run(Object[] args) {
       Control control = getControl();
       NativeComponent.registry.remove(getComponentID());
       if(!control.isDisposed()) {
@@ -773,7 +785,7 @@ public abstract class NativeComponent extends Canvas {
   
   private static class CMN_setShellEnabled extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       getControl().getShell().setEnabled((Boolean)args[0]);
       return null;
     }
@@ -791,7 +803,7 @@ public abstract class NativeComponent extends Canvas {
 
   private static class CMN_setEnabled extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       getControl().setEnabled((Boolean)args[0]);
       return null;
     }
@@ -809,7 +821,7 @@ public abstract class NativeComponent extends Canvas {
   
   private static class CMN_hasFocus extends ControlCommandMessage {
     @Override
-    public Object run() throws Exception {
+    public Object run(Object[] args) {
       return getControl().isFocusControl();
     }
   }
@@ -825,7 +837,7 @@ public abstract class NativeComponent extends Canvas {
   
   private static class CMN_getPreferredSize extends ControlCommandMessage {
     @Override
-    public Object run() throws Exception {
+    public Object run(Object[] args) {
       Control control = getControl();
       Point cSize = control.computeSize(SWT.DEFAULT, SWT.DEFAULT);
       return new Dimension(cSize.x, cSize.y);
@@ -845,6 +857,50 @@ public abstract class NativeComponent extends Canvas {
   }
   
   private static class CMN_getComponentImage extends ControlCommandMessage {
+    
+    private void printRemoveClip(Control control, GC gc) {
+      Point size = control.getSize();
+      Display display = control.getDisplay();
+      Shell shell = control.getShell();
+      Shell tmpShell = new Shell();
+      Shell tmpShell1 = new Shell(tmpShell, SWT.NO_TRIM | SWT.NO_FOCUS | SWT.NO_BACKGROUND);
+      Point location = display.map(control, null, control.getLocation());
+      tmpShell1.setLocation(location);
+      tmpShell1.setSize(size);
+      org.eclipse.swt.widgets.Canvas canvas1 = new org.eclipse.swt.widgets.Canvas(tmpShell1, SWT.NO_BACKGROUND);
+      canvas1.setSize(size);
+      GC displayGC = new GC(display);
+      final Image screenshot = new Image(display, size.x, size.y);
+      displayGC.copyArea(screenshot, location.x, location.y);
+      displayGC.dispose();
+      PaintListener paintListener = new PaintListener() {
+        public void paintControl(PaintEvent e) {
+          e.gc.drawImage(screenshot, 0, 0);
+        }
+      };
+      tmpShell1.addPaintListener(paintListener);
+      canvas1.addPaintListener(paintListener);
+      shell.addPaintListener(paintListener);
+      org.eclipse.swt.widgets.Canvas canvas2 = new org.eclipse.swt.widgets.Canvas(shell, SWT.NO_BACKGROUND);
+      canvas2.setSize(size);
+      canvas2.addPaintListener(paintListener);
+      control.setRedraw(false);
+      shell.setRedraw(false);
+      control.setParent(tmpShell1);
+      control.moveBelow(canvas1);
+      tmpShell1.setVisible(true);
+      control.print(gc);
+      control.setParent(shell);
+      control.moveAbove(canvas2);
+      canvas2.dispose();
+      shell.removePaintListener(paintListener);
+      tmpShell1.dispose();
+      tmpShell.dispose();
+      shell.setRedraw(true);
+      control.setRedraw(true);
+      screenshot.dispose();
+    }
+    
     private ImageData getImageData(Control control, Region region) {
       if(control.isDisposed()) {
         return null;
@@ -853,23 +909,31 @@ public abstract class NativeComponent extends Canvas {
       if(size.x <= 0 || size.y <= 0) {
         return null;
       }
-      final Image image = new Image(NativeInterface.getDisplay(), size.x, size.y);
+      org.eclipse.swt.graphics.Rectangle bounds = region.getBounds();
+      Display display = control.getDisplay();
+      final Image image = new Image(display, bounds.x + bounds.width, bounds.y + bounds.height);
       GC gc = new GC(image);
       gc.setClipping(region);
-      control.print(gc);
+      if("win32".equals(SWT.getPlatform()) && control instanceof Browser) {
+        // TODO: remove this hack once it is fixed in SWT (https://bugs.eclipse.org/bugs/show_bug.cgi?id=223590)
+        printRemoveClip(control, gc);
+      } else {
+        control.print(gc);
+      }
       gc.dispose();
       ImageData imageData = image.getImageData();
       image.dispose();
       return imageData;
     }
+    
     @Override
-    public Object run() throws Exception {
+    public Object run(Object[] args) throws Exception {
       int port = (Integer)args[0];
-      Rectangle[] area = (Rectangle[])args[1];
+      Rectangle[] rectangles = (Rectangle[])args[1];
       final Control control = getControl();
       ImageData imageData;
       final Region region = new Region();
-      for(Rectangle rectangle: area) {
+      for(Rectangle rectangle: rectangles) {
         region.add(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
       }
       if(!NativeInterface.isUIThread()) {
@@ -891,6 +955,7 @@ public abstract class NativeComponent extends Canvas {
       } else {
         imageData = getImageData(control, region);
       }
+      region.dispose();
       if(imageData == null) {
         return null;
       }
@@ -904,8 +969,7 @@ public abstract class NativeComponent extends Canvas {
         int width = imageData.width;
         int height = imageData.height;
         try {
-          for(Rectangle rectangle: area) {
-            // TODO: check that imageData.width/height are large enough
+          for(Rectangle rectangle: rectangles) {
             for(int i=0; i<rectangle.width; i++) {
               for(int j=0; j<rectangle.height; j++) {
                 int x = rectangle.x + i;
@@ -929,8 +993,9 @@ public abstract class NativeComponent extends Canvas {
             }
           }
           out.write(bytes, 0, cursor);
+          out.flush();
         } catch(Exception e) {
-          // swallow the exception, in case the socket gets closed for example.
+          e.printStackTrace();
         }
         out.close();
         socket.close();
@@ -938,19 +1003,23 @@ public abstract class NativeComponent extends Canvas {
       }
       throw new IllegalStateException("Not implemented");
     }
+    
   }
   
   /**
-   * Can be called from a non-UI thread.
+   * Paint the native component including its native peer in an image. This method can be called from a non-UI thread.
+   * @param image the image to paint to.
    */
   public void paintComponent(BufferedImage image) {
     paintComponent(image, null);
   }
   
   /**
-   * Can be called from a non-UI thread.
+   * Paint the native component including its native peer in an image, in the areas that are specified. This method can be called from a non-UI thread.
+   * @param image the image to paint to.
+   * @param rectangles the area in which the component should be painted.
    */
-  public void paintComponent(BufferedImage image, Rectangle[] area) {
+  public void paintComponent(BufferedImage image, Rectangle[] rectangles) {
     if(image == null || !isNativePeerValid() || isNativePeerDisposed) {
       return;
     }
@@ -959,12 +1028,12 @@ public abstract class NativeComponent extends Canvas {
     if(width <= 0 || height <= 0) {
       return;
     }
-    if(area == null) {
-      area = new Rectangle[] {new Rectangle(width, height)};
+    if(rectangles == null) {
+      rectangles = new Rectangle[] {new Rectangle(width, height)};
     }
     Rectangle bounds = new Rectangle(width, height);
     List<Rectangle> rectangleList = new ArrayList<Rectangle>();
-    for(Rectangle rectangle: area) {
+    for(Rectangle rectangle: rectangles) {
       if(rectangle.intersects(bounds)) {
         rectangleList.add(rectangle.intersection(bounds));
       }
@@ -972,36 +1041,34 @@ public abstract class NativeComponent extends Canvas {
     if(rectangleList.isEmpty()) {
       return;
     }
-    area = rectangleList.toArray(new Rectangle[0]);
-    if(nativeComponentProxy != null) {
-      try {
-        nativeComponentProxy.startCapture();
-      } catch(Exception e) {
-        e.printStackTrace();
-      }
-    }
+    rectangles = rectangleList.toArray(new Rectangle[0]);
     try {
       ServerSocket serverSocket = new ServerSocket(0);
       CMN_getComponentImage getComponentImage = new CMN_getComponentImage();
       getComponentImage.setNativeComponent(this);
-      getComponentImage.asyncExec(serverSocket.getLocalPort(), area);
+      getComponentImage.asyncExec(serverSocket.getLocalPort(), rectangles);
       Socket socket = serverSocket.accept();
       // Has to be a multiple of 3
       byte[] bytes = new byte[1024 * 3];
       int count = 0;
+      int readCount = 0;
       try {
         BufferedInputStream in = new BufferedInputStream(socket.getInputStream());
         synchronized(image) {
-          for(Rectangle rectangle: area) {
+          for(Rectangle rectangle: rectangles) {
             for(int x=0; x<rectangle.width; x++) {
               for(int y=0; y<rectangle.height; y++) {
-                if(count == 0) {
-                  in.read(bytes);
+                if(readCount == 0) {
+                  readCount = in.read(bytes);
+                  if((readCount % 3) != 0) {
+                    readCount += in.read(bytes, readCount, bytes.length - readCount);
+                  }
                 }
                 image.setRGB(rectangle.x + x, rectangle.y + y, 0xFF000000 | (0xFF & bytes[count]) << 16 | (0xFF & bytes[count + 1]) << 8 | (0xFF & bytes[count + 2]));
                 count += 3;
-                if(count == bytes.length) {
+                if(count == readCount) {
                   count = 0;
+                  readCount = 0;
                 }
               }
             }
@@ -1016,9 +1083,6 @@ public abstract class NativeComponent extends Canvas {
     } catch(Exception e) {
       e.printStackTrace();
     }
-    if(nativeComponentProxy != null) {
-      nativeComponentProxy.stopCapture();
-    }
   }
   
   @Override
@@ -1028,45 +1092,43 @@ public abstract class NativeComponent extends Canvas {
   
   private BackBufferManager backBufferManager;
   
+  private BackBufferManager getBackBufferManager() {
+    if(nativeComponentProxy != null) {
+      return nativeComponentProxy.getBackBufferManager();
+    }
+    if(backBufferManager == null) {
+      backBufferManager = new BackBufferManager(this, this);
+    }
+    return backBufferManager;
+  }
+  
   /**
-   * Create an image as a back buffer, which can be used for example to simulate alpha blending. Note that this is only possible for proxied components (cf component options). 
+   * Create an image of the native peer as a back buffer, which can be used when painting the component, or to simulate alpha blending. 
    */
   public void createBackBuffer() {
-    if(nativeComponentProxy != null) {
-      nativeComponentProxy.getBackBufferManager().createBackBuffer();
-    } else {
-      if(backBufferManager == null) {
-        backBufferManager = new BackBufferManager(this, this);
-      }
-      backBufferManager.createBackBuffer();
-    }
+    getBackBufferManager().createBackBuffer();
   }
   
   /**
    * Update the back buffer on the areas that have non opaque overlays and that are not covered by opaque components.
    */
   public void updateBackBufferOnVisibleTranslucentAreas() {
-    if(nativeComponentProxy != null) {
-      nativeComponentProxy.getBackBufferManager().updateBackBufferOnVisibleTranslucentAreas();
-    } else {
-      if(backBufferManager == null) {
-        backBufferManager = new BackBufferManager(this, this);
-      }
-      backBufferManager.updateBackBufferOnVisibleTranslucentAreas();
-    }
+    getBackBufferManager().updateBackBufferOnVisibleTranslucentAreas();
   }
   
   /**
-   * Releases the resources held by the back buffer.
+   * Update (eventually creating an empty one if it does not exist) the back buffer on the area specified by the rectangles.
+   * @param rectangles the area to update.
    */
-  public void releaseBackBuffer() {
-    if(nativeComponentProxy != null) {
-      nativeComponentProxy.getBackBufferManager().releaseBackBuffer();
-    } else {
-      if(backBufferManager != null) {
-        backBufferManager.releaseBackBuffer();
-      }
-    }
+  public void updateBackBuffer(Rectangle[] rectangles) {
+    getBackBufferManager().updateBackBuffer(rectangles);
+  }
+  
+  /**
+   * Destroy the back buffer.
+   */
+  public void destroyBackBuffer() {
+    getBackBufferManager().destroyBackBuffer();
   }
   
   protected EventListenerList listenerList = new EventListenerList();

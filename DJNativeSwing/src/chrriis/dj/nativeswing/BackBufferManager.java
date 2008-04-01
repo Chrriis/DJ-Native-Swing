@@ -62,8 +62,8 @@ class BackBufferManager {
     updateBackBuffer(new Rectangle[] {new Rectangle(paintingComponent.getWidth(), paintingComponent.getHeight())});
   }
   
-  private void updateBackBuffer(Rectangle[] area) {
-    if(area == null || area.length == 0) {
+  public void updateBackBuffer(Rectangle[] rectangles) {
+    if(rectangles == null || rectangles.length == 0) {
       return;
     }
     int width = paintingComponent.getWidth();
@@ -81,19 +81,25 @@ class BackBufferManager {
     } else {
       image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
     }
-    nativeComponent.paintComponent(image, area);
+    nativeComponent.paintComponent(image, rectangles);
     synchronized(backBufferLock) {
       if(backBuffer != null && backBuffer != image) {
+        synchronized(backBuffer) {
+          Graphics g = image.getGraphics();
+          g.drawImage(backBuffer, 0, 0, null);
+          g.dispose();
+        }
         backBuffer.flush();
       }
       this.backBuffer = image;
     }
     if(paintingComponent != nativeComponent) {
-      paintingComponent.repaint();
+      Rectangle bounds = UIUtils.getBounds(rectangles);
+      paintingComponent.repaint(bounds.x, bounds.y, bounds.width, bounds.height);
     }
   }
   
-  public void releaseBackBuffer() {
+  public void destroyBackBuffer() {
     synchronized(backBufferLock) {
       if(backBuffer != null) {
         backBuffer.flush();

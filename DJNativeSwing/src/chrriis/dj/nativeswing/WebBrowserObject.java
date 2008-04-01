@@ -79,7 +79,7 @@ public abstract class WebBrowserObject {
   
   private class CMLocal_waitForInitialization extends LocalMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       InitializationListener initializationListener = (InitializationListener)args[0];
       Boolean[] resultArray = (Boolean[])args[1];
       for(long time = System.currentTimeMillis(); !resultArray[0].booleanValue() && System.currentTimeMillis() - time < 4000; ) {

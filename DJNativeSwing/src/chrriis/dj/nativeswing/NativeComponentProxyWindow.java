@@ -265,14 +265,4 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
     return super.getPeerSize();
   }
   
-  @Override
-  void startCapture() {
-    // TODO: not implemented
-  }
-  
-  @Override
-  void stopCapture() {
-    // TODO: not implemented
-  }
-  
 }

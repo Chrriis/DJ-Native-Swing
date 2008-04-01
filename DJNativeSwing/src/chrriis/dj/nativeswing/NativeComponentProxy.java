@@ -270,8 +270,4 @@ abstract class NativeComponentProxy extends JComponent {
     return backBufferManager;
   }
   
-  abstract void startCapture();
-  
-  abstract void stopCapture();
-  
 }

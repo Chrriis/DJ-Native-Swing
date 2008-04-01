@@ -47,7 +47,7 @@ public abstract class OleNativeComponent extends NativeComponent {
   
   private static class CMN_invokeOleFunction extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       String[] propertyPath = (String[])args[1];
       OleAutomation automation = new OleAutomation(getSite((OleFrame)getControl()));
       int[] ids;
@@ -100,7 +100,7 @@ public abstract class OleNativeComponent extends NativeComponent {
   
   private static class CMN_setOleProperty extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       String[] propertyPath = (String[])args[0];
       OleAutomation automation = new OleAutomation(getSite((OleFrame)getControl()));
       int[] ids;
@@ -139,7 +139,7 @@ public abstract class OleNativeComponent extends NativeComponent {
   
   private static class CMN_getOleProperty extends ControlCommandMessage {
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       String[] propertyPath = (String[])args[0];
       OleAutomation automation = new OleAutomation(getSite((OleFrame)getControl()));
       int[] ids;
@@ -269,7 +269,7 @@ public abstract class OleNativeComponent extends NativeComponent {
       }
     }
     @Override
-    public Object run() {
+    public Object run(Object[] args) {
       OleAutomation automation = new OleAutomation(getSite((OleFrame)getControl()));
       dumpProperties(automation, 0);
       automation.dispose();
