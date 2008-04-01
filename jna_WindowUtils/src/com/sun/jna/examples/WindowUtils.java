@@ -454,7 +454,7 @@ public class WindowUtils {
       if (w.isLightweight())
         throw new IllegalArgumentException("Component must be heavyweight: " + w);
       if(rectangles == null) {
-        setWindowMask(w, (Shape)null);
+        rectangles = new Rectangle[] {new Rectangle(0, 0, w.getWidth(), w.getHeight())};
       }
       setMask(w, rectangles);
     }
