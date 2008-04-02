@@ -8,25 +8,21 @@
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
+ * Lesser General Public License for more details.
  */
 package com.sun.jna.examples.win32;
 
-import com.sun.jna.FromNativeContext;
-import com.sun.jna.IntegerType;
 import com.sun.jna.Native;
-import com.sun.jna.NativeMapped;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 import com.sun.jna.examples.win32.GDI32.RECT;
 import com.sun.jna.ptr.ByteByReference;
 import com.sun.jna.ptr.IntByReference;
 
-/**
- * Provides access to the w32 user32 library. Incomplete implementation to
- * support demos.
- * 
- * @author Todd Fast, todd.fast@sun.com
+/** Provides access to the w32 user32 library.
+ * Incomplete implementation to support demos.
+ *
+ * @author  Todd Fast, todd.fast@sun.com
  * @author twall@users.sf.net
  */
 public interface User32 extends W32API {
@@ -49,7 +45,7 @@ public interface User32 extends W32API {
 
   int FLASHW_TIMERNOFG = 12;
 
-  public static class FLASHWINFO extends Structure {
+  class FLASHWINFO extends Structure {
     public int cbSize;
 
     public HANDLE hWnd;
@@ -99,29 +95,29 @@ public interface User32 extends W32API {
 
   int GetClassName(HWND hWnd, byte[] lpClassName, int nMaxCount);
 
-  public static class GUITHREADINFO extends Structure {
+  class GUITHREADINFO extends Structure {
     public int cbSize = size();
 
     public int flags;
 
-    HWND hwndActive;
+    public HWND hwndActive;
 
-    HWND hwndFocus;
+    public HWND hwndFocus;
 
-    HWND hwndCapture;
+    public HWND hwndCapture;
 
-    HWND hwndMenuOwner;
+    public HWND hwndMenuOwner;
 
-    HWND hwndMoveSize;
+    public HWND hwndMoveSize;
 
-    HWND hwndCaret;
+    public HWND hwndCaret;
 
-    RECT rcCaret;
+    public RECT rcCaret;
   }
 
   boolean GetGUIThreadInfo(int idThread, GUITHREADINFO lpgui);
 
-  public static class WINDOWINFO extends Structure {
+  class WINDOWINFO extends Structure {
     public int cbSize = size();
 
     public RECT rcWindow;
@@ -230,13 +226,29 @@ public interface User32 extends W32API {
   boolean GetLayeredWindowAttributes(HWND hwnd, IntByReference pcrKey, ByteByReference pbAlpha, IntByReference pdwFlags);
 
   /** Defines the x- and y-coordinates of a point. */
-  public static class POINT extends Structure {
+  class POINT extends Structure {
     public int x, y;
+
+    public POINT() {
+    }
+
+    public POINT(int x, int y) {
+      this.x = x;
+      this.y = y;
+    }
   }
 
   /** Specifies the width and height of a rectangle. */
-  public static class SIZE extends Structure {
+  class SIZE extends Structure {
     public int cx, cy;
+
+    public SIZE() {
+    }
+
+    public SIZE(int w, int h) {
+      this.cx = w;
+      this.cy = h;
+    }
   }
 
   int AC_SRC_OVER = 0x00;
@@ -247,7 +259,7 @@ public interface User32 extends W32API {
 
   int AC_SRC_NO_ALPHA = 0x02;
 
-  public static class BLENDFUNCTION extends Structure {
+  class BLENDFUNCTION extends Structure {
     public byte BlendOp = AC_SRC_OVER; // only valid value
 
     public byte BlendFlags = 0; // only valid value
@@ -291,10 +303,10 @@ public interface User32 extends W32API {
 
   int WH_MOUSE_LL = 14;
 
-  public static class HHOOK extends HANDLE {
+  class HHOOK extends HANDLE {
   }
 
-  public static interface HOOKPROC extends StdCallCallback {
+  interface HOOKPROC extends StdCallCallback {
   }
 
   int WM_KEYDOWN = 256;
@@ -305,7 +317,7 @@ public interface User32 extends W32API {
 
   int WM_SYSKEYUP = 261;
 
-  public static class KBDLLHOOKSTRUCT extends Structure {
+  class KBDLLHOOKSTRUCT extends Structure {
     public int vkCode;
 
     public int scanCode;
@@ -317,7 +329,7 @@ public interface User32 extends W32API {
     public ULONG_PTR dwExtraInfo;
   }
 
-  public static interface LowLevelKeyboardProc extends HOOKPROC {
+  interface LowLevelKeyboardProc extends HOOKPROC {
     LRESULT callback(int nCode, WPARAM wParam, KBDLLHOOKSTRUCT lParam);
   }
 
@@ -329,7 +341,7 @@ public interface User32 extends W32API {
 
   boolean UnhookWindowsHookEx(HHOOK hhk);
 
-  public static class MSG extends Structure {
+  class MSG extends Structure {
     public HWND hWnd;
 
     public int message;

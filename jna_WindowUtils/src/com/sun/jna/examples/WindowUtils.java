@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2007-2008 Timothy Wall, All Rights Reserved 
- * Parts Copyright (c) 2007 Olivier Chafik 
- * 
+ * Copyright (c) 2007-2008 Timothy Wall, All Rights Reserved
+ * Parts Copyright (c) 2007 Olivier Chafik
+ *
  * This library is free software; you can
  * redistribute it and/or modify it under the terms of the GNU Lesser
  * General Public License as published by the Free Software Foundation;
@@ -37,6 +37,7 @@ import java.awt.event.HierarchyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Area;
+import java.awt.geom.PathIterator;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.util.ArrayList;
@@ -82,28 +83,31 @@ import com.sun.jna.ptr.PointerByReference;
  * Provides additional features on a Java {@link Window}.
  * <ul>
  * <li>Non-rectangular shape (bitmap mask, no antialiasing)
- * <li>Transparency (constant alpha applied to window contents or transparent
- * background)
+ * <li>Transparency (constant alpha applied to window contents or
+ * transparent background)
  * <li>Fully transparent window (the transparency of all painted pixels is
  * applied to the window).
  * </ul>
  * NOTE: since there is no explicit way to force PopupFactory to use a
- * heavyweight popup, and anything but a heavyweight popup will be clipped by a
- * window mask, an additional subwindow is added to all masked windows to
- * implicitly force PopupFactory to use a heavyweight window and avoid clipping.
+ * heavyweight popup, and anything but a heavyweight popup will be
+ * clipped by a window mask, an additional subwindow is added to all
+ * masked windows to implicitly force PopupFactory to use a heavyweight
+ * window and avoid clipping.
  * <p>
- * NOTE: Neither shaped windows nor transparency currently works with Java 1.4
- * under X11. This is at least partly due to 1.4 using multiple X11 windows for
- * a single given Java window. It *might* be possible to remedy by applying the
- * window region/transparency to all descendants, but I haven't tried it. In
- * addition, windows must be both displayable <em>and</em> visible before the
- * corresponding native Drawable may be obtained; in later Java versions, the
- * window need only be displayable.
+ * NOTE: Neither shaped windows nor transparency
+ * currently works with Java 1.4 under X11. This is at least partly due
+ * to 1.4 using multiple X11 windows for a single given Java window. It
+ * *might* be possible to remedy by applying the window
+ * region/transparency to all descendants, but I haven't tried it. In
+ * addition, windows must be both displayable <em>and</em> visible
+ * before the corresponding native Drawable may be obtained; in later
+ * Java versions, the window need only be displayable.
  * <p>
  * NOTE: If you use {@link #setWindowMask(Window,Shape)} and override {@link
- * Window#paint(Graphics)} on OS X, you'll need to explicitly set the clip mask
- * on the <code>Graphics</code> object with the window mask; only the content
- * pane of the window and below have the window mask automatically applied.
+ * Window#paint(Graphics)} on OS X, you'll need to explicitly set the clip
+ * mask on the <code>Graphics</code> object with the window mask; only the
+ * content pane of the window and below have the window mask automatically
+ * applied.
  */
 // TODO: setWindowMask() should accept a threshold; some cases want a
 // 50% threshold, some might want zero/non-zero
@@ -119,21 +123,22 @@ public class WindowUtils {
   public static final Shape MASK_NONE = null;
 
   /**
-   * This class forces a heavyweight popup on the parent {@link Window}. See
-   * the implementation of {@link PopupFactory}; a heavyweight is forced if
-   * there is an occluding subwindow on the target window.
+   * This class forces a heavyweight popup on the parent
+   * {@link Window}. See the implementation of {@link PopupFactory};
+   * a heavyweight is forced if there is an occluding subwindow on the
+   * target window.
    * <p>
-   * Ideally we'd have more control over {@link PopupFactory} but this is a
-   * fairly simple, lightweight workaround. Note that, at least as of JDK 1.6,
-   * the following do not have the desired effect:<br>
+   * Ideally we'd have more control over {@link PopupFactory} but this
+   * is a fairly simple, lightweight workaround.  Note that, at least as of
+   * JDK 1.6, the following do not have the desired effect:<br>
    * <code><pre>
    * ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
    * JPopupMenu.setDefaultLightWeightPopupEnabled(false);
-   * System.setProperty(&quot;JPopupMenu.defaultLWPopupEnabledKey&quot;, &quot;false&quot;);
+   * System.setProperty("JPopupMenu.defaultLWPopupEnabledKey", "false");
    * </pre></code>
    */
   private static class HeavyweightForcer extends Window {
-    private boolean packed;
+    private final boolean packed;
 
     public HeavyweightForcer(Window parent) {
       super(parent);
@@ -154,9 +159,9 @@ public class WindowUtils {
   }
 
   /**
-   * This can be installed over a {@link JLayeredPane} in order to listen for
-   * repaint requests. The content's repaint method will be invoked whenever any
-   * part of the ancestor window is repainted.
+   * This can be installed over a {@link JLayeredPane} in order to
+   * listen for repaint requests. The content's repaint method will be
+   * invoked whenever any part of the ancestor window is repainted.
    */
   protected static class RepaintTrigger extends JComponent {
 
@@ -185,9 +190,9 @@ public class WindowUtils {
       }
     }
 
-    private Listener listener = createListener();
+    private final Listener listener = createListener();
 
-    private JComponent content;
+    private final JComponent content;
 
     public RepaintTrigger(JComponent content) {
       this.content = content;
@@ -275,9 +280,8 @@ public class WindowUtils {
         }
       }
 
-      /**
-       * Use the contents of the given BufferedImage to paint directly on this
-       * component's ancestor window.
+      /** Use the contents of the given BufferedImage to paint directly
+       * on this component's ancestor window.
        */
       protected abstract void paintDirect(BufferedImage buf, Rectangle bounds);
     }
@@ -287,7 +291,8 @@ public class WindowUtils {
     }
 
     /**
-     * Execute the given action when the given window becomes displayable.
+     * Execute the given action when the given window becomes
+     * displayable.
      */
     protected void whenDisplayable(Component w, final Runnable action) {
       if (w.isDisplayable() && (!Holder.requiresVisible || w.isVisible())) {
@@ -322,14 +327,13 @@ public class WindowUtils {
       if (mask != MASK_NONE) {
         Rectangle bounds = mask.getBounds();
         if (bounds.width > 0 && bounds.height > 0) {
-          BufferedImage clip = new BufferedImage(bounds.x + bounds.width, bounds.y + bounds.height, BufferedImage.TYPE_INT_ARGB);
+          BufferedImage clip = new BufferedImage(bounds.x + bounds.width, bounds.y + bounds.height, BufferedImage.TYPE_BYTE_BINARY);
           Graphics2D g = clip.createGraphics();
-          g.setComposite(AlphaComposite.Clear);
+          g.setColor(Color.black);
           g.fillRect(0, 0, bounds.x + bounds.width, bounds.y + bounds.height);
-          g.setComposite(AlphaComposite.SrcOver);
           g.setColor(Color.white);
           g.fill(mask);
-          raster = clip.getAlphaRaster();
+          raster = clip.getRaster();
         }
       }
       return raster;
@@ -362,8 +366,8 @@ public class WindowUtils {
     }
 
     /**
-     * Set the overall alpha transparency of the window. An alpha of 1.0 is
-     * fully opaque, 0.0 is fully transparent.
+     * Set the overall alpha transparency of the window. An alpha of
+     * 1.0 is fully opaque, 0.0 is fully transparent.
      */
     public void setWindowAlpha(Window w, float alpha) {
       // do nothing
@@ -382,9 +386,9 @@ public class WindowUtils {
     }
 
     /**
-     * Set the window to be transparent. Only explicitly painted pixels will be
-     * non-transparent. All pixels will be composited with whatever is under the
-     * window using their alpha values.
+     * Set the window to be transparent. Only explicitly painted
+     * pixels will be non-transparent. All pixels will be composited
+     * with whatever is under the window using their alpha values.
      */
     public void setWindowTransparent(Window w, boolean transparent) {
       // do nothing
@@ -434,14 +438,26 @@ public class WindowUtils {
       w.setBackground(bg);
     }
 
+    /** Override this method to provide bitmap masking of the given
+     * heavyweight component.
+     */
+    protected void setMask(Component c, Raster raster) {
+      throw new UnsupportedOperationException("Window masking is not available");
+    }
+
     /**
      * Override this method to provide bitmap masking of the given heavyweight
      * component.
      */
     protected void setMask(Component c, Rectangle[] rectangles) {
-      Area area = new Area();
-      for(int i=0; i<rectangles.length; i++) {
-        area.add(new Area(rectangles[i]));
+      Area area;
+      if(rectangles == null) {
+        area = null;
+      } else {
+        area = new Area();
+        for(int i=0; i<rectangles.length; i++) {
+          area.add(new Area(rectangles[i]));
+        }
       }
       setWindowMask(c, area);
     }
@@ -460,17 +476,9 @@ public class WindowUtils {
     }
     
     /**
-     * Override this method to provide bitmap masking of the given heavyweight
-     * component.
-     */
-    protected void setMask(Component c, Raster raster) {
-      throw new UnsupportedOperationException("Window masking is not available");
-    }
-
-    /**
-     * Set the window mask based on the given Raster, which should be treated as
-     * a bitmap (zero/nonzero values only). A value of <code>null</code> means
-     * to remove the mask.
+     * Set the window mask based on the given Raster, which should
+     * be treated as a bitmap (zero/nonzero values only). A value of
+     * <code>null</code> means to remove the mask.
      */
     protected void setWindowMask(Component w, Raster raster) {
       if (w.isLightweight())
@@ -484,17 +492,17 @@ public class WindowUtils {
     }
 
     /**
-     * Set the window mask based on an Icon. All non-transparent pixels will be
-     * included in the mask.
+     * Set the window mask based on an Icon. All non-transparent
+     * pixels will be included in the mask.
      */
     public void setWindowMask(Component w, Icon mask) {
       setWindowMask(w, toRaster(w, mask));
     }
 
     /**
-     * Use this method to ensure heavyweight popups are used in conjunction with
-     * a given window. This prevents the window's alpha setting or mask region
-     * from being applied to the popup.
+     * Use this method to ensure heavyweight popups are used in
+     * conjunction with a given window. This prevents the window's
+     * alpha setting or mask region from being applied to the popup.
      */
     protected void setForceHeavyweightPopups(Window w, boolean force) {
       if (!(w instanceof HeavyweightForcer)) {
@@ -517,8 +525,9 @@ public class WindowUtils {
   /** Canonical lazy loading of a singleton. */
   private static class Holder {
     /**
-     * Indicates whether a window must be visible before its native handle can
-     * be obtained. This wart is caused by the Java 1.4/X11 implementation.
+     * Indicates whether a window must be visible before its native
+     * handle can be obtained. This wart is caused by the Java
+     * 1.4/X11 implementation.
      */
     public static boolean requiresVisible;
 
@@ -550,7 +559,8 @@ public class WindowUtils {
     }
 
     /**
-     * W32 alpha will only work if <code>sun.java2d.noddraw</code> is set
+     * W32 alpha will only work if <code>sun.java2d.noddraw</code>
+     * is set
      */
     public boolean isWindowAlphaSupported() {
       return Boolean.getBoolean("sun.java2d.noddraw");
@@ -565,9 +575,8 @@ public class WindowUtils {
       return false;
     }
 
-    /**
-     * Keep track of the alpha level, since we can't read it from the window
-     * itself.
+    /** Keep track of the alpha level, since we can't read it from
+     * the window itself.
      */
     private void storeAlpha(Window w, byte alpha) {
       if (w instanceof RootPaneContainer) {
@@ -620,10 +629,9 @@ public class WindowUtils {
       });
     }
 
-    /**
-     * W32 makes the client responsible for repainting the <em>entire</em>
-     * window on any change. It also does not paint window decorations when the
-     * window is transparent.
+    /** W32 makes the client responsible for repainting the <em>entire</em>
+     * window on any change.  It also does not paint window decorations
+     * when the window is transparent.
      */
     private class W32TransparentContent extends TransparentContent {
       private HDC memDC;
@@ -741,9 +749,8 @@ public class WindowUtils {
       }
     }
 
-    /**
-     * Note that w32 does <em>not</em> paint window decorations when the
-     * window is transparent.
+    /** Note that w32 does <em>not</em> paint window decorations when
+     * the window is transparent.
      */
     public void setWindowTransparent(final Window w, final boolean transparent) {
       if (!(w instanceof RootPaneContainer)) {
@@ -784,37 +791,87 @@ public class WindowUtils {
       });
     }
 
-    protected void setMask(final Component w, final Raster raster) {
+    public void setWindowMask(final Component w, final Shape mask) {
+      if (mask instanceof Area && ((Area) mask).isPolygonal()) {
+        setMask(w, (Area) mask);
+      } else {
+        super.setWindowMask(w, mask);
+      }
+    }
+
+    // NOTE: Deletes hrgn after setting the window region
+    private void setWindowRegion(final Component w, final HRGN hrgn) {
       whenDisplayable(w, new Runnable() {
         public void run() {
           GDI32 gdi = GDI32.INSTANCE;
           User32 user = User32.INSTANCE;
           HWND hWnd = getHWnd(w);
-          final HRGN result = gdi.CreateRectRgn(0, 0, 0, 0);
           try {
-            if (raster == null) {
-              gdi.SetRectRgn(result, 0, 0, w.getWidth(), w.getHeight());
-            } else {
-              final HRGN tempRgn = gdi.CreateRectRgn(0, 0, 0, 0);
-              try {
-                RasterRangesUtils.outputOccupiedRanges(raster, new RasterRangesUtils.RangesOutput() {
-                  public boolean outputRange(int x, int y, int w, int h) {
-                    GDI32 gdi = GDI32.INSTANCE;
-                    gdi.SetRectRgn(tempRgn, x, y, x + w, y + h);
-                    return gdi.CombineRgn(result, result, tempRgn, GDI32.RGN_OR) != GDI32.ERROR;
-                  }
-                });
-              } finally {
-                gdi.DeleteObject(tempRgn);
-              }
-            }
-            user.SetWindowRgn(hWnd, result, true);
+            user.SetWindowRgn(hWnd, hrgn, true);
+            setForceHeavyweightPopups(getWindow(w), hrgn != null);
           } finally {
-            gdi.DeleteObject(result);
+            gdi.DeleteObject(hrgn);
           }
-          setForceHeavyweightPopups(getWindow(w), raster != null);
         }
       });
+    }
+
+    // Take advantage of CreatePolyPolygonalRgn on w32
+    private void setMask(final Component w, final Area area) {
+      GDI32 gdi = GDI32.INSTANCE;
+      PathIterator pi = area.getPathIterator(null);
+      int mode = pi.getWindingRule() == PathIterator.WIND_NON_ZERO ? GDI32.WINDING : GDI32.ALTERNATE;
+      float[] coords = new float[6];
+      List points = new ArrayList();
+      int size = 0;
+      List sizes = new ArrayList();
+      while (!pi.isDone()) {
+        int type = pi.currentSegment(coords);
+        if (type == PathIterator.SEG_MOVETO) {
+          size = 1;
+          points.add(new POINT((int) coords[0], (int) coords[1]));
+        } else if (type == PathIterator.SEG_LINETO) {
+          ++size;
+          points.add(new POINT((int) coords[0], (int) coords[1]));
+        } else if (type == PathIterator.SEG_CLOSE) {
+          sizes.add(new Integer(size));
+        } else {
+          throw new RuntimeException("Area is not polygonal: " + area);
+        }
+        pi.next();
+      }
+      POINT[] lppt = (POINT[]) new POINT().toArray(points.size());
+      POINT[] pts = (POINT[]) points.toArray(new POINT[points.size()]);
+      for (int i = 0; i < lppt.length; i++) {
+        lppt[i].x = pts[i].x;
+        lppt[i].y = pts[i].y;
+      }
+      int[] counts = new int[sizes.size()];
+      for (int i = 0; i < counts.length; i++) {
+        counts[i] = ((Integer) sizes.get(i)).intValue();
+      }
+      HRGN hrgn = gdi.CreatePolyPolygonRgn(lppt, counts, counts.length, mode);
+      setWindowRegion(w, hrgn);
+    }
+
+    protected void setMask(final Component w, final Raster raster) {
+      GDI32 gdi = GDI32.INSTANCE;
+      final HRGN region = raster != null ? gdi.CreateRectRgn(0, 0, 0, 0) : null;
+      if (region != null) {
+        final HRGN tempRgn = gdi.CreateRectRgn(0, 0, 0, 0);
+        try {
+          RasterRangesUtils.outputOccupiedRanges(raster, new RasterRangesUtils.RangesOutput() {
+            public boolean outputRange(int x, int y, int w, int h) {
+              GDI32 gdi = GDI32.INSTANCE;
+              gdi.SetRectRgn(tempRgn, x, y, x + w, y + h);
+              return gdi.CombineRgn(region, region, tempRgn, GDI32.RGN_OR) != GDI32.ERROR;
+            }
+          });
+        } finally {
+          gdi.DeleteObject(tempRgn);
+        }
+      }
+      setWindowRegion(w, region);
     }
 
     protected void setMask(final Component w, final Rectangle[] rectangles) {
@@ -847,7 +904,6 @@ public class WindowUtils {
         }
       });
     }
-    
   }
 
   private static class MacWindowUtils extends NativeWindowUtils {
@@ -928,9 +984,7 @@ public class WindowUtils {
       }
     }
 
-    /**
-     * Mask out unwanted pixels and ensure background gets cleared.
-     * 
+    /** Mask out unwanted pixels and ensure background gets cleared.
      * @author Olivier Chafik
      */
     private static class OSXTransparentContent extends JPanel {
@@ -1084,7 +1138,8 @@ public class WindowUtils {
     }
 
     /**
-     * Return the visual ID of the visual which supports an alpha channel.
+     * Return the visual ID of the visual which supports an alpha
+     * channel.
      */
     private synchronized long[] getAlphaVisualIDs() {
       if (didCheck) {
@@ -1204,11 +1259,11 @@ public class WindowUtils {
 
       private int[] pixels;
 
-      private int[] pixel = new int[4];
+      private final int[] pixel = new int[4];
 
       // Painting directly to the original Graphics
       // fails to properly composite unless the destination
-      // is pure black. Too bad.
+      // is pure black.  Too bad.
       protected void paintDirect(BufferedImage buf, Rectangle bounds) {
         Window window = SwingUtilities.getWindowAncestor(this);
         X11 x11 = X11.INSTANCE;
@@ -1283,34 +1338,6 @@ public class WindowUtils {
       });
     }
 
-    protected void setMask(final Component w, final Rectangle[] rectangles) {
-      Runnable action = new Runnable() {
-        public void run() {
-          X11 x11 = X11.INSTANCE;
-          Xext ext = Xext.INSTANCE;
-          Display dpy = x11.XOpenDisplay(null);
-          if (dpy == null)
-            return;
-          Pixmap pm = null;
-          try {
-            X11.Window win = getDrawable(w);
-            if (rectangles == null || ((pm = createBitmap(dpy, win, rectangles)) == null)) {
-              ext.XShapeCombineMask(dpy, win, X11.Xext.ShapeBounding, 0, 0, Pixmap.None, X11.Xext.ShapeSet);
-            } else {
-              ext.XShapeCombineMask(dpy, win, X11.Xext.ShapeBounding, 0, 0, pm, X11.Xext.ShapeSet);
-            }
-          } finally {
-            if (pm != null) {
-              x11.XFreePixmap(dpy, pm);
-            }
-            x11.XCloseDisplay(dpy);
-          }
-          setForceHeavyweightPopups(getWindow(w), rectangles != null);
-        }
-      };
-      whenDisplayable(w, action);
-    }
-    
     protected void setMask(final Component w, final Raster raster) {
       Runnable action = new Runnable() {
         public void run() {
@@ -1338,6 +1365,34 @@ public class WindowUtils {
       };
       whenDisplayable(w, action);
     }
+    
+    protected void setMask(final Component w, final Rectangle[] rectangles) {
+      Runnable action = new Runnable() {
+        public void run() {
+          X11 x11 = X11.INSTANCE;
+          Xext ext = Xext.INSTANCE;
+          Display dpy = x11.XOpenDisplay(null);
+          if (dpy == null)
+            return;
+          Pixmap pm = null;
+          try {
+            X11.Window win = getDrawable(w);
+            if (rectangles == null || ((pm = createBitmap(dpy, win, rectangles)) == null)) {
+              ext.XShapeCombineMask(dpy, win, X11.Xext.ShapeBounding, 0, 0, Pixmap.None, X11.Xext.ShapeSet);
+            } else {
+              ext.XShapeCombineMask(dpy, win, X11.Xext.ShapeBounding, 0, 0, pm, X11.Xext.ShapeSet);
+            }
+          } finally {
+            if (pm != null) {
+              x11.XFreePixmap(dpy, pm);
+            }
+            x11.XCloseDisplay(dpy);
+          }
+          setForceHeavyweightPopups(getWindow(w), rectangles != null);
+        }
+      };
+      whenDisplayable(w, action);
+    }
   }
 
   /**
@@ -1349,8 +1404,9 @@ public class WindowUtils {
   }
   
   /**
-   * Applies the given mask to the given window. Does nothing if the operation
-   * is not supported. The mask is treated as a bitmap and ignores transparency.
+   * Applies the given mask to the given window. Does nothing if the
+   * operation is not supported.  The mask is treated as a bitmap and
+   * ignores transparency.
    */
   public static void setWindowMask(Window w, Shape mask) {
     getInstance().setWindowMask(w, mask);
@@ -1360,22 +1416,23 @@ public class WindowUtils {
    * Set the window mask based on the given Rectangles. A value of <code>null</code> means
    * to remove the mask.
    */
-  public static void setWindowMask(Component w, Rectangle[] rectangles) {
+  public static void setWindowMask(Window w, Rectangle[] rectangles) {
     getInstance().setWindowMask(w, rectangles);
   }
   
   /**
-   * Applies the given mask to the given heavyweight component. Does nothing if
-   * the operation is not supported. The mask is treated as a bitmap and ignores
-   * transparency.
+   * Applies the given mask to the given heavyweight component. Does nothing
+   * if the operation is not supported.  The mask is treated as a bitmap and
+   * ignores transparency.
    */
   public static void setComponentMask(Component c, Shape mask) {
     getInstance().setWindowMask(c, mask);
   }
 
   /**
-   * Applies the given mask to the given window. Does nothing if the operation
-   * is not supported. The mask is treated as a bitmap and ignores transparency.
+   * Applies the given mask to the given window. Does nothing if the
+   * operation is not supported.  The mask is treated as a bitmap and
+   * ignores transparency.
    */
   public static void setWindowMask(Window w, Icon mask) {
     getInstance().setWindowMask(w, mask);
@@ -1387,27 +1444,28 @@ public class WindowUtils {
   }
 
   /**
-   * Returns a {@link GraphicsConfiguration} comptible with alpha compositing.
+   * Returns a {@link GraphicsConfiguration} comptible with alpha
+   * compositing.
    */
   public static GraphicsConfiguration getAlphaCompatibleGraphicsConfiguration() {
     return getInstance().getAlphaCompatibleGraphicsConfiguration();
   }
 
   /**
-   * Set the overall window transparency. An alpha of 1.0 is fully opaque, 0.0
-   * fully transparent. The alpha level is applied equally to all window pixels.
-   * <p>
-   * NOTE: Windows requires that <code>sun.java2d.noddraw=true</code> in order
-   * for alpha to work.
+   * Set the overall window transparency. An alpha of 1.0 is fully
+   * opaque, 0.0 fully transparent. The alpha level is applied equally
+   * to all window pixels.<p>
+   * NOTE: Windows requires that <code>sun.java2d.noddraw=true</code>
+   * in order for alpha to work.
    */
   public static void setWindowAlpha(Window w, float alpha) {
     getInstance().setWindowAlpha(w, Math.max(0f, Math.min(alpha, 1f)));
   }
 
   /**
-   * Set the window to be transparent. Only explicitly painted pixels will be
-   * non-transparent. All pixels will be composited with whatever is under the
-   * window using their alpha values.
+   * Set the window to be transparent. Only explicitly painted pixels
+   * will be non-transparent. All pixels will be composited with
+   * whatever is under the window using their alpha values.
    */
   public static void setWindowTransparent(Window w, boolean transparent) {
     getInstance().setWindowTransparent(w, transparent);

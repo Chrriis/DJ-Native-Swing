@@ -8,7 +8,7 @@
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
+ * Lesser General Public License for more details.
  */
 package com.sun.jna.examples.win32;
 
@@ -17,6 +17,7 @@ import java.awt.Rectangle;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
+import com.sun.jna.examples.win32.User32.POINT;
 import com.sun.jna.ptr.PointerByReference;
 
 /** Definition (incomplete) of <code>gdi32.dll</code>. */
@@ -24,7 +25,7 @@ public interface GDI32 extends W32API {
 
   GDI32 INSTANCE = (GDI32) Native.loadLibrary("gdi32", GDI32.class, DEFAULT_OPTIONS);
 
-  public static class RECT extends Structure {
+  class RECT extends Structure {
     public int left;
 
     public int top;
@@ -44,7 +45,7 @@ public interface GDI32 extends W32API {
 
   int RDH_RECTANGLES = 1;
 
-  public static class RGNDATAHEADER extends Structure {
+  class RGNDATAHEADER extends Structure {
     public int dwSize = size();
 
     public int iType = RDH_RECTANGLES; // required
@@ -56,7 +57,7 @@ public interface GDI32 extends W32API {
     public RECT rcBound;
   }
 
-  public static class RGNDATA extends Structure {
+  class RGNDATA extends Structure {
     public RGNDATAHEADER rdh;
 
     public byte[] Buffer;
@@ -93,6 +94,12 @@ public interface GDI32 extends W32API {
 
   HRGN CreateRoundRectRgn(int nLeftRect, int nTopRect, int nRightRect, int nBottomRect, int nWidthEllipse, int nHeightEllipse);
 
+  int ALTERNATE = 1;
+
+  int WINDING = 2;
+
+  HRGN CreatePolyPolygonRgn(POINT[] lppt, int[] lpPolyCounts, int nCount, int fnPolyFillMode);
+
   boolean SetRectRgn(HRGN hrgn, int nLeftRect, int nTopRect, int nRightRect, int nBottomRect);
 
   int SetPixel(HDC hDC, int x, int y, int crColor);
@@ -113,7 +120,7 @@ public interface GDI32 extends W32API {
 
   int BI_PNG = 5;
 
-  public static class BITMAPINFOHEADER extends Structure {
+  class BITMAPINFOHEADER extends Structure {
     public int biSize = size();
 
     public int biWidth;
@@ -137,7 +144,7 @@ public interface GDI32 extends W32API {
     public int biClrImportant;
   }
 
-  public static class RGBQUAD extends Structure {
+  class RGBQUAD extends Structure {
     public byte rgbBlue;
 
     public byte rgbGreen;
@@ -147,14 +154,14 @@ public interface GDI32 extends W32API {
     public byte rgbReserved = 0;
   }
 
-  public static class BITMAPINFO extends Structure {
+  class BITMAPINFO extends Structure {
     public BITMAPINFOHEADER bmiHeader = new BITMAPINFOHEADER();
 
-    // RGBQUAD:
-    // byte rgbBlue;
-    // byte rgbGreen;
-    // byte rgbRed;
-    // byte rgbReserved = 0;
+    //RGBQUAD:
+    //byte rgbBlue;
+    //byte rgbGreen;
+    //byte rgbRed;
+    //byte rgbReserved = 0;
     int[] bmiColors = new int[1];
 
     public BITMAPINFO() {
