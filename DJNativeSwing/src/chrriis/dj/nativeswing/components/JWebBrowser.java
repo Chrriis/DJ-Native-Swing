@@ -43,6 +43,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.AbstractBorder;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.Message;
@@ -104,13 +106,8 @@ public class JWebBrowser extends NSPanelComponent {
       }
       webBrowser.stopButton.setEnabled(false);
       webBrowser.stopMenuItem.setEnabled(false);
-      webBrowser.addressField.setText(webBrowser.nativeComponent.getURL());
-      boolean isBackEnabled = webBrowser.nativeComponent.isGoBackEnabled();
-      webBrowser.backButton.setEnabled(isBackEnabled);
-      webBrowser.backMenuItem.setEnabled(isBackEnabled);
-      boolean isForwardEnabled = webBrowser.nativeComponent.isGoForwardEnabled();
-      webBrowser.forwardButton.setEnabled(isForwardEnabled);
-      webBrowser.forwardMenuItem.setEnabled(isForwardEnabled);
+      webBrowser.updateAddressBar();
+      webBrowser.updateNavigationButtons();
     }
     @Override
     public void urlChanging(WebBrowserNavigationEvent e) {
@@ -130,13 +127,8 @@ public class JWebBrowser extends NSPanelComponent {
       }
       webBrowser.stopButton.setEnabled(false);
       webBrowser.stopMenuItem.setEnabled(false);
-      webBrowser.addressField.setText(webBrowser.nativeComponent.getURL());
-      boolean isBackEnabled = webBrowser.nativeComponent.isGoBackEnabled();
-      webBrowser.backButton.setEnabled(isBackEnabled);
-      webBrowser.backMenuItem.setEnabled(isBackEnabled);
-      boolean isForwardEnabled = webBrowser.nativeComponent.isGoForwardEnabled();
-      webBrowser.forwardButton.setEnabled(isForwardEnabled);
-      webBrowser.forwardMenuItem.setEnabled(isForwardEnabled);
+      webBrowser.updateAddressBar();
+      webBrowser.updateNavigationButtons();
     }
     @Override
     public void statusChanged(WebBrowserEvent e) {
@@ -159,6 +151,25 @@ public class JWebBrowser extends NSPanelComponent {
     }
   }
 
+  private void updateAddressBar() {
+    if(isAddressBarVisible()) {
+      addressField.setText(nativeComponent.getURL());
+    }
+  }
+  
+  private boolean isViewMenuVisible;
+  
+  private void updateNavigationButtons() {
+    if(isViewMenuVisible || isButtonBarVisible()) {
+      boolean isBackEnabled = nativeComponent.isGoBackEnabled();
+      backButton.setEnabled(isBackEnabled);
+      backMenuItem.setEnabled(isBackEnabled);
+      boolean isForwardEnabled = nativeComponent.isGoForwardEnabled();
+      forwardButton.setEnabled(isForwardEnabled);
+      forwardMenuItem.setEnabled(isForwardEnabled);
+    }
+  }
+  
   /**
    * Copy the appearance, the visibility of the various bars, from one web browser to another.
    * @param fromWebBrowser the web browser to copy the appearance from.
@@ -383,6 +394,19 @@ public class JWebBrowser extends NSPanelComponent {
     stopMenuItem.setEnabled(stopButton.isEnabled());
     viewMenu.add(stopMenuItem);
     menuBar.add(viewMenu);
+    viewMenu.getPopupMenu().addPopupMenuListener(new PopupMenuListener() {
+      public void popupMenuCanceled(PopupMenuEvent e) {
+      }
+      public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+        isViewMenuVisible = false;
+      }
+      public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+        isViewMenuVisible = true;
+        if(!isButtonBarVisible()) {
+          updateNavigationButtons();
+        }
+      }
+    });
   }
   
   /**
@@ -390,6 +414,9 @@ public class JWebBrowser extends NSPanelComponent {
    * @param isStatusBarVisible true if the status bar should be visible, false otherwise.
    */
   public void setStatusBarVisible(boolean isStatusBarVisible) {
+    if(isStatusBarVisible == isStatusBarVisible()) {
+      return;
+    }
     statusBarPanel.setVisible(isStatusBarVisible);
     statusBarCheckBoxMenuItem.setSelected(isStatusBarVisible);
     adjustBorder();
@@ -408,6 +435,9 @@ public class JWebBrowser extends NSPanelComponent {
    * @param isMenuBarVisible true if the menu bar should be visible, false otherwise.
    */
   public void setMenuBarVisible(boolean isMenuBarVisible) {
+    if(isMenuBarVisible == isMenuBarVisible()) {
+      return;
+    }
     menuBar.setVisible(isMenuBarVisible);
     adjustBorder();
   }
@@ -425,9 +455,15 @@ public class JWebBrowser extends NSPanelComponent {
    * @param isButtonBarVisible true if the button bar should be visible, false otherwise.
    */
   public void setButtonBarVisible(boolean isButtonBarVisible) {
+    if(isButtonBarVisible == isButtonBarVisible()) {
+      return;
+    }
     buttonBarPanel.setVisible(isButtonBarVisible);
     buttonBarCheckBoxMenuItem.setSelected(isButtonBarVisible);
     adjustBorder();
+    if(isButtonBarVisible && !isViewMenuVisible) {
+      updateNavigationButtons();
+    }
   }
   
   /**
@@ -443,9 +479,13 @@ public class JWebBrowser extends NSPanelComponent {
    * @param isAddressBarVisible true if the address bar should be visible, false otherwise.
    */
   public void setAddressBarVisible(boolean isAddressBarVisible) {
+    if(isAddressBarVisible == isAddressBarVisible()) {
+      return;
+    }
     addressBarPanel.setVisible(isAddressBarVisible);
     addressBarCheckBoxMenuItem.setSelected(isAddressBarVisible);
     adjustBorder();
+    updateAddressBar();
   }
   
   /**

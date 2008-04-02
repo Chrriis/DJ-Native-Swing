@@ -22,6 +22,7 @@ import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
@@ -258,6 +259,9 @@ public abstract class NativeComponent extends Canvas {
           break;
         case MouseEvent.MOUSE_RELEASED:
           buttonPressedCount--;
+          if(buttonPressedCount < 0) {
+            buttonPressedCount = 0;
+          }
           break;
         case MouseEvent.MOUSE_DRAGGED:
         case MouseEvent.MOUSE_MOVED:
@@ -418,6 +422,7 @@ public abstract class NativeComponent extends Canvas {
   
   private static void configureControl(final Control control, int componentID) {
     control.setData("NS_ID", componentID);
+    control.setData("NS_EnabledEventsMask", 0L);
     control.addMouseListener(new MouseAdapter() {
       @Override
       public void mouseDown(org.eclipse.swt.events.MouseEvent e) {
@@ -436,9 +441,11 @@ public abstract class NativeComponent extends Canvas {
     });
     control.addMouseMoveListener(new MouseMoveListener() {
       public void mouseMove(org.eclipse.swt.events.MouseEvent e) {
-        Object[] mouseEventArgs = getMouseEventArgs(control, e, MouseEvent.MOUSE_MOVED);
-        if(mouseEventArgs != null) {
-          new CMJ_dispatchMouseEvent().asyncExec(control, mouseEventArgs);
+        if(((Long)e.widget.getData("NS_EnabledEventsMask") & MouseEvent.MOUSE_MOTION_EVENT_MASK) != 0) {
+          Object[] mouseEventArgs = getMouseEventArgs(control, e, MouseEvent.MOUSE_MOVED);
+          if(mouseEventArgs != null) {
+            new CMJ_dispatchMouseEvent().asyncExec(control, mouseEventArgs);
+          }
         }
       }
     });
@@ -465,6 +472,38 @@ public abstract class NativeComponent extends Canvas {
     });
   }
 
+  private static class CMN_setEventsEnabled extends ControlCommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      long eventMask = (Long)args[0];
+      boolean isEnabled = (Boolean)args[1];
+      long events = (Long)getControl().getData("NS_EnabledEventsMask");
+      if(isEnabled) {
+        events |= eventMask;
+      } else {
+        events &= ~eventMask;
+      }
+      getControl().setData("NS_EnabledEventsMask", events);
+      return null;
+    }
+  }
+
+  @Override
+  public synchronized void addMouseMotionListener(MouseMotionListener listener) {
+    if(getMouseMotionListeners().length == 0 && listener != null) {
+      new CMN_setEventsEnabled().asyncExec(this, MouseEvent.MOUSE_MOTION_EVENT_MASK, true);
+    }
+    super.addMouseMotionListener(listener);
+  }
+  
+  @Override
+  public synchronized void removeMouseMotionListener(MouseMotionListener listener) {
+    super.removeMouseMotionListener(listener);
+    if(getMouseMotionListeners().length == 0) {
+      new CMN_setEventsEnabled().asyncExec(this, MouseEvent.MOUSE_MOTION_EVENT_MASK, false);
+    }
+  }
+  
   /**
    * Paint the component, which also paints the back buffer if any.
    * @param g the graphics to paint to.

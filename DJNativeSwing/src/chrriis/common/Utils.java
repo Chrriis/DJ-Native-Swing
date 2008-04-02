@@ -164,6 +164,10 @@ public class Utils {
     return null;
   }
   
+  /**
+   * Delete the file, or delete the directtory and all its children recursively.
+   * @param fileOrDir a file or a directory to delete.
+   */
   public static void deleteAll(File fileOrDir) {
     if(!fileOrDir.delete()) {
       if(fileOrDir.isDirectory()) {
@@ -173,6 +177,16 @@ public class Utils {
         fileOrDir.delete();
       }
     }
+  }
+  
+  /**
+   * Test the equality of 2 objects, with a check on nullity.
+   * @param o1 the first object.
+   * @param o2 the second object.
+   * @return true if both object are equal, which includes the case where both are null.
+   */
+  public static boolean equals(Object o1, Object o2) {
+    return o1 == null? o2 == null: o1.equals(o2);
   }
   
 }
