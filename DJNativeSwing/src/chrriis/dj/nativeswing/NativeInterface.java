@@ -44,7 +44,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.swing.event.EventListenerList;
 
 import org.eclipse.swt.widgets.Display;
@@ -186,27 +185,20 @@ public class NativeInterface {
   }
   
   static boolean isAlive() {
-    return isInitialized() && messagingInterface.isAlive();
+    return isStarted() && messagingInterface.isAlive();
   }
   
-  private static boolean isFirstStart = true;
   private static boolean isInitialized;
+  private static boolean isStarted;
   
-  private static boolean isInitialized() {
-    return isInitialized;
+  private static boolean isStarted() {
+    return isStarted;
   }
   
-  private static void checkInitialized() {
-    if(!isInitialized()) {
-      throw new IllegalStateException("The native interface is not initialized! Please refer to the instructions to set it up properly.");
+  private static void checkStarted() {
+    if(!isStarted()) {
+      throw new IllegalStateException("The native interface is not started! Please refer to the instructions to set it up properly.");
     }
-  }
-  
-  /**
-   * Initialize the native interface, which creates the peer VM handling the native side of the native integration.
-   */
-  public static void initialize() {
-    initialize(new NativeInterfaceOptions());
   }
   
   private static class CMN_setProperties extends CommandMessage {
@@ -227,16 +219,23 @@ public class NativeInterface {
   }
   
   /**
-   * Destroy the native interface, which closes the native side (peer VM). The native interface can be re-created later using the initialize() method.
+   * Stop the native interface, which closes the native side (peer VM). Note that the native interface can be re-started.
    */
-  public static void destroy() {
-    isInitialized = false;
+  public static void stop() {
+    isStarted = false;
     messagingInterface.destroy();
     messagingInterface = null;
-    nativeInterfaceOptions = null;
   }
 
   private static NativeInterfaceOptions nativeInterfaceOptions;
+  
+  /**
+   * Set the options that are used when creating the native peer VM.
+   * @param nativeInterfaceOptions the options.
+   */
+  public static void setOptions(NativeInterfaceOptions nativeInterfaceOptions) {
+    NativeInterface.nativeInterfaceOptions = nativeInterfaceOptions;
+  }
   
   private static void loadClipboardProperties() {
     try {
@@ -260,113 +259,117 @@ public class NativeInterface {
   }
   
   /**
-   * Initialize the native interface, which creates the peer VM handling the native side of the native integration.
-   * @param nativeInterfaceOptions the options to configure the native interface.
+   * Start the native interface, which creates the peer VM handling the native side of the native integration. This automatically initialize the interface if it was not already done.
    */
-  public static void initialize(NativeInterfaceOptions nativeInterfaceOptions) {
-    if(isInitialized()) {
+  public static void initialize() {
+    if(isInitialized) {
       return;
     }
-    loadClipboardProperties();
-    NativeInterface.nativeInterfaceOptions = nativeInterfaceOptions;
-    isInitialized = true;
-    boolean isFullInitialization = isFirstStart;
-    isFirstStart = false;
-    if(isFullInitialization) {
-      if(nativeInterfaceOptions.isPreferredLookAndFeelApplied()) {
-        setPreferredLookAndFeel();
-      }
-      // Specific Sun property to prevent heavyweight components from erasing their background.
-      System.setProperty("sun.awt.noerasebackground", "true");
-      // It seems on Linux this is required to get the component visible.
-      System.setProperty("sun.awt.xembedserver", "true");
-      // We use our own HW forcing, so we disable the one from JNA
-      System.setProperty("jna.force_hw_popups", "false");
-      // Create window monitor
-      Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
-        protected Set<Dialog> dialogSet = new HashSet<Dialog>();
-        protected volatile Set<Window> blockedWindowSet = new HashSet<Window>();
-        protected void adjustNativeComponents() {
-          if(canvasList == null) {
-            return;
+    if(nativeInterfaceOptions == null) {
+      nativeInterfaceOptions = new NativeInterfaceOptions();
+    }
+    // Specific Sun property to prevent heavyweight components from erasing their background.
+    System.setProperty("sun.awt.noerasebackground", "true");
+    // It seems on Linux this is required to get the component visible.
+    System.setProperty("sun.awt.xembedserver", "true");
+    // We use our own HW forcing, so we disable the one from JNA
+    System.setProperty("jna.force_hw_popups", "false");
+    // Create window monitor
+    Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
+      protected Set<Dialog> dialogSet = new HashSet<Dialog>();
+      protected volatile Set<Window> blockedWindowSet = new HashSet<Window>();
+      protected void adjustNativeComponents() {
+        if(canvasList == null) {
+          return;
+        }
+        for(int i=canvasList.size()-1; i>=0; i--) {
+          final Canvas canvas = canvasList.get(i);
+          Component c = canvas;
+          if(canvas instanceof NativeComponent) {
+            Component componentProxy = ((NativeComponent)canvas).getNativeComponentProxy();
+            if(componentProxy != null) {
+              c = componentProxy;
+            }
           }
-          for(int i=canvasList.size()-1; i>=0; i--) {
-            final Canvas canvas = canvasList.get(i);
-            Component c = canvas;
-            if(canvas instanceof NativeComponent) {
-              Component componentProxy = ((NativeComponent)canvas).getNativeComponentProxy();
-              if(componentProxy != null) {
-                c = componentProxy;
-              }
-            }
-            Window embedderWindowAncestor = SwingUtilities.getWindowAncestor(c);
-            boolean isBlocked = blockedWindowSet.contains(embedderWindowAncestor);
-            final boolean isShowing = c.isShowing();
-            if(canvas instanceof NativeComponent) {
-              ((NativeComponent)canvas).setShellEnabled(!isBlocked && isShowing);
-            }
-            boolean hasFocus = canvas.hasFocus();
-            if(!isShowing && hasFocus) {
-              canvas.transferFocus();
-            }
+          Window embedderWindowAncestor = SwingUtilities.getWindowAncestor(c);
+          boolean isBlocked = blockedWindowSet.contains(embedderWindowAncestor);
+          final boolean isShowing = c.isShowing();
+          if(canvas instanceof NativeComponent) {
+            ((NativeComponent)canvas).setShellEnabled(!isBlocked && isShowing);
+          }
+          boolean hasFocus = canvas.hasFocus();
+          if(!isShowing && hasFocus) {
+            canvas.transferFocus();
           }
         }
-        public void eventDispatched(AWTEvent e) {
-          boolean isAdjusting = false;
+      }
+      public void eventDispatched(AWTEvent e) {
+        boolean isAdjusting = false;
+        switch(e.getID()) {
+          case ComponentEvent.COMPONENT_SHOWN:
+          case ComponentEvent.COMPONENT_HIDDEN:
+            isAdjusting = true;
+            break;
+        }
+        if(!Utils.IS_JAVA_6_OR_GREATER && e.getSource() instanceof Window) {
+          if(windowSet == null) {
+            windowSet = new HashSet<Window>();
+          }
           switch(e.getID()) {
+            case WindowEvent.WINDOW_OPENED:
+            case ComponentEvent.COMPONENT_SHOWN:
+              windowSet.add((Window)e.getSource());
+              break;
+            case WindowEvent.WINDOW_CLOSED:
+            case ComponentEvent.COMPONENT_HIDDEN:
+              windowSet.remove(e.getSource());
+              break;
+          }
+        }
+        if(e.getSource() instanceof Dialog) {
+          switch(e.getID()) {
+            case WindowEvent.WINDOW_OPENED:
+            case ComponentEvent.COMPONENT_SHOWN:
+              dialogSet.add((Dialog)e.getSource());
+              break;
+            case WindowEvent.WINDOW_CLOSED:
+            case ComponentEvent.COMPONENT_HIDDEN:
+              dialogSet.remove(e.getSource());
+              break;
+          }
+          switch(e.getID()) {
+            case WindowEvent.WINDOW_OPENED:
+            case WindowEvent.WINDOW_CLOSED:
             case ComponentEvent.COMPONENT_SHOWN:
             case ComponentEvent.COMPONENT_HIDDEN:
+              blockedWindowSet.clear();
+              for(Dialog dialog: dialogSet) {
+                // TODO: consider modal excluded and other modality types than simple parent blocking.
+                if(dialog.isVisible() && dialog.isModal()) {
+                  blockedWindowSet.add(dialog.getOwner());
+                }
+              }
               isAdjusting = true;
               break;
           }
-          if(!Utils.IS_JAVA_6_OR_GREATER && e.getSource() instanceof Window) {
-            if(windowSet == null) {
-              windowSet = new HashSet<Window>();
-            }
-            switch(e.getID()) {
-              case WindowEvent.WINDOW_OPENED:
-              case ComponentEvent.COMPONENT_SHOWN:
-                windowSet.add((Window)e.getSource());
-                break;
-              case WindowEvent.WINDOW_CLOSED:
-              case ComponentEvent.COMPONENT_HIDDEN:
-                windowSet.remove(e.getSource());
-                break;
-            }
-          }
-          if(e.getSource() instanceof Dialog) {
-            switch(e.getID()) {
-              case WindowEvent.WINDOW_OPENED:
-              case ComponentEvent.COMPONENT_SHOWN:
-                dialogSet.add((Dialog)e.getSource());
-                break;
-              case WindowEvent.WINDOW_CLOSED:
-              case ComponentEvent.COMPONENT_HIDDEN:
-                dialogSet.remove(e.getSource());
-                break;
-            }
-            switch(e.getID()) {
-              case WindowEvent.WINDOW_OPENED:
-              case WindowEvent.WINDOW_CLOSED:
-              case ComponentEvent.COMPONENT_SHOWN:
-              case ComponentEvent.COMPONENT_HIDDEN:
-                blockedWindowSet.clear();
-                for(Dialog dialog: dialogSet) {
-                  // TODO: consider modal excluded and other modality types than simple parent blocking.
-                  if(dialog.isVisible() && dialog.isModal()) {
-                    blockedWindowSet.add(dialog.getOwner());
-                  }
-                }
-                isAdjusting = true;
-                break;
-            }
-          }
-          if(isAdjusting) {
-            adjustNativeComponents();
-          }
         }
-      }, WindowEvent.WINDOW_EVENT_MASK | ComponentEvent.COMPONENT_EVENT_MASK);
+        if(isAdjusting) {
+          adjustNativeComponents();
+        }
+      }
+    }, WindowEvent.WINDOW_EVENT_MASK | ComponentEvent.COMPONENT_EVENT_MASK);
+    isInitialized = true;
+  }
+  
+  /**
+   * Start the native interface, which creates the peer VM handling the native side of the native integration. This automatically initialize the interface if it was not already done.
+   */
+  public static void start() {
+    if(isStarted()) {
+      return;
     }
+    initialize();
+    loadClipboardProperties();
     createCommunicationChannel();
   }
   
@@ -376,6 +379,7 @@ public class NativeInterface {
     }
     // Create the interface to communicate with the process handling the native side
     messagingInterface = createMessagingInterface(nativeInterfaceOptions);
+    isStarted = true;
     // Set the system properties
     new CMN_setProperties().syncExec(System.getProperties());
   }
@@ -599,7 +603,7 @@ public class NativeInterface {
   }
   
   static Object syncSend(final Message message) {
-    checkInitialized();
+    checkStarted();
     if(message instanceof LocalMessage) {
       LocalMessage localMessage = (LocalMessage)message;
       return localMessage.runCommand();
@@ -608,24 +612,13 @@ public class NativeInterface {
   }
   
   static void asyncSend(final Message message) {
-    checkInitialized();
+    checkStarted();
     if(message instanceof LocalMessage) {
       LocalMessage localMessage = (LocalMessage)message;
       localMessage.runCommand();
       return;
     }
     messagingInterface.asyncSend(message);
-  }
-  
-  private static void setPreferredLookAndFeel() {
-    try {
-      String systemLookAndFeelClassName = UIManager.getSystemLookAndFeelClassName();
-      if(!"com.sun.java.swing.plaf.gtk.GTKLookAndFeel".equals(systemLookAndFeelClassName)) {
-        UIManager.setLookAndFeel(systemLookAndFeelClassName);
-      }
-    } catch(Exception e) {
-      e.printStackTrace();
-    }
   }
   
   private static Display display;
@@ -669,7 +662,7 @@ public class NativeInterface {
     if(Boolean.parseBoolean(System.getProperty("dj.nativeswing.native.initmessage"))) {
       System.err.println("Starting spawned VM");
     }
-    isInitialized = true;
+    isStarted = true;
     int port = Integer.parseInt(args[0]);
     ServerSocket serverSocket = null;
     for(int i=19; i>=0; i--) {

@@ -18,10 +18,10 @@ import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 import chrriis.dj.nativeswing.NativeComponentOptions;
 import chrriis.dj.nativeswing.NativeInterface;
-import chrriis.dj.nativeswing.NativeInterfaceOptions;
 import chrriis.dj.nativeswing.NativeComponentOptions.VisibilityConstraint;
 import chrriis.dj.nativeswing.components.JFlashPlayer;
 import chrriis.dj.nativeswing.components.JWebBrowser;
@@ -85,9 +85,10 @@ public class VisibilityConstraintOption extends JPanel {
   
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    NativeInterfaceOptions options = new NativeInterfaceOptions();
-    options.setPreferredLookAndFeelApplied(true);
-    NativeInterface.initialize(options);
+    try {
+      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    } catch(Exception e) {}
+    NativeInterface.start();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");

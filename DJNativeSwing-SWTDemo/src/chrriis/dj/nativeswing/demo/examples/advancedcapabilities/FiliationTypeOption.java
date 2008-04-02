@@ -17,11 +17,11 @@ import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 import chrriis.common.Disposable;
 import chrriis.dj.nativeswing.NativeComponentOptions;
 import chrriis.dj.nativeswing.NativeInterface;
-import chrriis.dj.nativeswing.NativeInterfaceOptions;
 import chrriis.dj.nativeswing.NativeComponentOptions.DestructionTime;
 import chrriis.dj.nativeswing.NativeComponentOptions.FiliationType;
 import chrriis.dj.nativeswing.components.JFlashPlayer;
@@ -105,9 +105,10 @@ public class FiliationTypeOption extends JPanel implements Disposable {
   
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    NativeInterfaceOptions options = new NativeInterfaceOptions();
-    options.setPreferredLookAndFeelApplied(true);
-    NativeInterface.initialize(options);
+    try {
+      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    } catch(Exception e) {}
+    NativeInterface.start();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");

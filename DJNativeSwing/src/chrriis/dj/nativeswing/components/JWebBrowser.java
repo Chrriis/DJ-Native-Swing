@@ -20,6 +20,7 @@ import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -237,6 +238,8 @@ public class JWebBrowser extends NSPanelComponent {
     menuToolAndAddressBarPanel.add(buttonBarPanel, BorderLayout.WEST);
     addressBarPanel = new JPanel(new BorderLayout(0, 0));
     JToolBar addressToolBar = new JToolBar();
+    // We have to force the layout manager because in Synth L&F the text field does not take the full available width.
+    addressToolBar.setLayout(new BoxLayout(addressToolBar, BoxLayout.LINE_AXIS));
     JPanel addressToolBarInnerPanel = new JPanel(new BorderLayout(0, 0));
     addressToolBarInnerPanel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
     addressToolBarInnerPanel.setOpaque(false);

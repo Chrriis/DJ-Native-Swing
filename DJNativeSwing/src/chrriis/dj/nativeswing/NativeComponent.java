@@ -600,8 +600,8 @@ public abstract class NativeComponent extends Canvas {
       NativeComponent.registry.remove(getComponentID());
       if(!control.isDisposed()) {
         control.getShell().dispose();
+        control.dispose();
       }
-      control.dispose();
       return null;
     }
   }

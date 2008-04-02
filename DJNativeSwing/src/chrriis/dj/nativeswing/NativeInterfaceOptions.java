@@ -20,7 +20,6 @@ public class NativeInterfaceOptions {
   }
   
   private boolean isNativeSideRespawnedOnError = true;
-  private boolean isPreferredLookAndFeelApplied;
   private Class<?>[] nativeClassPathReferenceClasses;
   private String[] nativeClassPathReferenceResources;
   private String[] peerVMParams;
@@ -39,21 +38,6 @@ public class NativeInterfaceOptions {
    */
   public boolean isNativeSideRespawnedOnError() {
     return isNativeSideRespawnedOnError;
-  }
-  
-  /**
-   * Set whether the preferred look and feel is applied.
-   * @param isPreferredLookAndFeelApplied true if the preferred look and feel should be applied, false otherwise.
-   */
-  public void setPreferredLookAndFeelApplied(boolean isPreferredLookAndFeelApplied) {
-    this.isPreferredLookAndFeelApplied = isPreferredLookAndFeelApplied;
-  }
-  
-  /**
-   * Indicate if the preferred look and feel is applied.
-   */
-  public boolean isPreferredLookAndFeelApplied() {
-    return isPreferredLookAndFeelApplied;
   }
   
   /**
