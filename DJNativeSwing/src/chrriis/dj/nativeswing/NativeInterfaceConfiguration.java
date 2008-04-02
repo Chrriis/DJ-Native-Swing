@@ -7,6 +7,10 @@
  */
 package chrriis.dj.nativeswing;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Configuration of the native interface. It is not constructed directly but obtained from the native interface.
  * @author Christopher Deckers
@@ -17,8 +21,8 @@ public class NativeInterfaceConfiguration {
   }
   
   private boolean isNativeSideRespawnedOnError = true;
-  private Class<?>[] nativeClassPathReferenceClasses;
-  private String[] nativeClassPathReferenceResources;
+  private List<Class<?>> nativeClassPathReferenceClassList = new ArrayList<Class<?>>();
+  private List<String> nativeClassPathReferenceResourceList = new ArrayList<String>();
   private String[] peerVMParams;
   
   /**
@@ -41,32 +45,32 @@ public class NativeInterfaceConfiguration {
    * Set the reference classes that are considered to compute the classpath of the native side.
    * @param nativeClassPathReferenceClasses the classes to use as references when computing the classpath of the native side.
    */
-  public void setNativeClassPathReferenceClasses(Class<?>... nativeClassPathReferenceClasses) {
-    this.nativeClassPathReferenceClasses = nativeClassPathReferenceClasses;
+  public void addNativeClassPathReferenceClasses(Class<?>... nativeClassPathReferenceClasses) {
+    nativeClassPathReferenceClassList.addAll(Arrays.asList(nativeClassPathReferenceClasses));
   }
   
   /**
    * Get the reference classes that are considered to compute the classpath of the native side.
    * @return the classes used as references when computing the classpath of the native side.
    */
-  public Class<?>[] getNativeClassPathReferenceClasses() {
-    return nativeClassPathReferenceClasses;
+  Class<?>[] getNativeClassPathReferenceClasses() {
+    return nativeClassPathReferenceClassList.toArray(new Class<?>[0]);
   }
   
   /**
    * Set the reference resources that are considered to compute the classpath of the native side.
    * @param nativeClassPathReferenceResources the resources to use as references when computing the classpath of the native side.
    */
-  public void setNativeClassPathReferenceResources(String... nativeClassPathReferenceResources) {
-    this.nativeClassPathReferenceResources = nativeClassPathReferenceResources;
+  public void addNativeClassPathReferenceResources(String... nativeClassPathReferenceResources) {
+    nativeClassPathReferenceResourceList.addAll(Arrays.asList(nativeClassPathReferenceResources));
   }
   
   /**
    * Get the reference resources that are considered to compute the classpath of the native side.
    * @return the resources used as references when computing the classpath of the native side.
    */
-  public String[] getNativeClassPathReferenceResources() {
-    return nativeClassPathReferenceResources;
+  String[] getNativeClassPathReferenceResources() {
+    return nativeClassPathReferenceResourceList.toArray(new String[0]);
   }
   
   /**
@@ -81,7 +85,7 @@ public class NativeInterfaceConfiguration {
    * Get the parameters added when creating the virtual machine for the native side.
    * @return the parameters added when creating the virtual machine for the native side.
    */
-  public String[] getPeerVMParams() {
+  String[] getPeerVMParams() {
     return peerVMParams;
   }
   
