@@ -9,6 +9,7 @@ package chrriis.dj.nativeswing.components;
 
 
 /**
+ * An abstract adapter class for receiving web browser events.
  * @author Christopher Deckers
  */
 public abstract class WebBrowserAdapter implements WebBrowserListener {
