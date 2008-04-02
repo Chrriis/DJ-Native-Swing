@@ -146,7 +146,7 @@ public abstract class NativeComponent extends Canvas {
     System.err.println("Invalid " + getClass().getName() + "[" + hashCode() + "]: " + message);
   }
   
-  static ObjectRegistry registry = new ObjectRegistry();
+  private static ObjectRegistry registry = new ObjectRegistry();
   
   /**
    * Get the registry of the components, which references created components/controls using the component ID.
@@ -625,8 +625,13 @@ public abstract class NativeComponent extends Canvas {
     public Object run(Object[] args) {
       Control control = getControl();
       NativeComponent.registry.remove(getComponentID());
-      if(!control.isDisposed()) {
-        control.getShell().dispose();
+      if(control != null) {
+        if(!control.isDisposed()) {
+          Shell shell = control.getShell();
+          if(shell != null) {
+            shell.dispose();
+          }
+        }
         control.dispose();
       }
       return null;
