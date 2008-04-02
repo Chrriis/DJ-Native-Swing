@@ -34,7 +34,6 @@ import java.io.StringReader;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -370,8 +369,12 @@ public class NativeInterface {
       }
     }, WindowEvent.WINDOW_EVENT_MASK | ComponentEvent.COMPONENT_EVENT_MASK);
     isInitialized = true;
-    for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
-      listener.nativeInterfaceInitialized();
+    try {
+      for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
+        listener.nativeInterfaceInitialized();
+      }
+    } catch(Exception e) {
+      e.printStackTrace();
     }
   }
   
@@ -386,36 +389,51 @@ public class NativeInterface {
     initialize();
     loadClipboardDebuggingProperties();
     createCommunicationChannel();
-    for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
-      listener.nativeInterfaceOpened();
+    try {
+      for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
+        listener.nativeInterfaceOpened();
+      }
+    } catch(Exception e) {
+      e.printStackTrace();
     }
   }
   
-  static void notifyKilled() {
-    for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
-      listener.nativeInterfaceClosed();
+  static boolean notifyKilled() {
+    isOpen = false;
+    messagingInterface = null;
+    try {
+      for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
+        listener.nativeInterfaceClosed();
+      }
+    } catch(Exception e) {
+      e.printStackTrace();
     }
+    if(!NativeInterface.isNativeSide() && nativeInterfaceConfiguration.isNativeSideRespawnedOnError()) {
+      createCommunicationChannel();
+      return true;
+    }
+    return false;
   }
   
   static void notifyRespawned() {
-    for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
-      listener.nativeInterfaceOpened();
+    try {
+      for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
+        listener.nativeInterfaceOpened();
+      }
+//      for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
+//        listener.nativeInterfaceRestarted();
+//      }
+    } catch(Exception e) {
+      e.printStackTrace();
     }
-//    for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
-//      listener.nativeInterfaceRestarted();
-//    }
   }
   
-  static boolean createCommunicationChannel() {
-    if(messagingInterface != null && !nativeInterfaceConfiguration.isNativeSideRespawnedOnError()) {
-      return false;
-    }
+  private static void createCommunicationChannel() {
     // Create the interface to communicate with the process handling the native side
     messagingInterface = createMessagingInterface();
     isOpen = true;
     // Set the system properties
     new CMN_setProperties().syncExec(System.getProperties());
-    return true;
   }
   
   private static Process createProcess(int port) {
@@ -735,34 +753,33 @@ public class NativeInterface {
       shutdownThread.setDaemon(true);
       shutdownThread.start();
     }
-    // We set up a new security manager to track exit calls.
-    // When this happens, we dispose native resources to avoid freezes.
-    try {
-      System.setSecurityManager(new SecurityManager() {
-        protected SecurityManager securityManager = System.getSecurityManager();
-        @Override
-        public void checkExit(int status) {
-          super.checkExit(status);
-          for(StackTraceElement stackTraceElement: Thread.currentThread().getStackTrace()) {
-            String className = stackTraceElement.getClassName();
-            String methodName = stackTraceElement.getMethodName();
-            if("java.lang.Runtime".equals(className) && ("exit".equals(methodName) || "halt".equals(methodName)) || "java.lang.System".equals(className) && "exit".equals(methodName)) {
-              System.err.println("cleanup");
-              //TODO: perform cleanup
-              break;
-            }
-          }
-        }
-        @Override
-        public void checkPermission(Permission perm) {
-          if(securityManager != null) {
-            securityManager.checkPermission(perm);
-          }
-        }
-      });
-    } catch(Exception e) {
-      e.printStackTrace();
-    }
+//    // We set up a new security manager to track exit calls.
+//    // When this happens, we dispose native resources.
+//    try {
+//      System.setSecurityManager(new SecurityManager() {
+//        protected SecurityManager securityManager = System.getSecurityManager();
+//        @Override
+//        public void checkExit(int status) {
+//          super.checkExit(status);
+//          for(StackTraceElement stackTraceElement: Thread.currentThread().getStackTrace()) {
+//            String className = stackTraceElement.getClassName();
+//            String methodName = stackTraceElement.getMethodName();
+//            if("java.lang.Runtime".equals(className) && ("exit".equals(methodName) || "halt".equals(methodName)) || "java.lang.System".equals(className) && "exit".equals(methodName)) {
+//              //TODO: perform cleanup
+//              break;
+//            }
+//          }
+//        }
+//        @Override
+//        public void checkPermission(Permission perm) {
+//          if(securityManager != null) {
+//            securityManager.checkPermission(perm);
+//          }
+//        }
+//      });
+//    } catch(Exception e) {
+//      e.printStackTrace();
+//    }
     Socket socket;
     try {
       socket = serverSocket.accept();

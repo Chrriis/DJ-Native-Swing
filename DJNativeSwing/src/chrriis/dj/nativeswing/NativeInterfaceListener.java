@@ -16,17 +16,17 @@ import java.util.EventListener;
 public interface NativeInterfaceListener extends EventListener {
   
   /**
-   * Invoked when the native interface is initialized, which can happen only once.
+   * Invoked when the native interface is initialized, which can happen only once. This event is not necessarily received in the UI thread.
    */
   public void nativeInterfaceInitialized();
   
   /**
-   * Invoked when the native interface is opened, which can happen because of a user action or when the framework automatically re-opens the interface after an error closed it.
+   * Invoked when the native interface is opened, which can happen because of a user action or when the framework automatically re-opens the interface after an error closed it. This event is not necessarily received in the UI thread.
    */
   public void nativeInterfaceOpened();
   
   /**
-   * Invoked when the native interface is closed, which can happen because of a user action or if the interface gets closed because of an error.
+   * Invoked when the native interface is closed, which can happen because of a user action or if the interface gets closed because of an error. Note that an error usually means that the user killed the process or that one of the native components crashed the process, which should be a rare condition. This event is not necessarily received in the UI thread.
    */
   public void nativeInterfaceClosed();
   

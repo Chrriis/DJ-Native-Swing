@@ -17,8 +17,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.swing.SwingUtilities;
-
 import org.eclipse.swt.SWT;
 
 import chrriis.common.ObjectRegistry;
@@ -104,7 +102,7 @@ abstract class MessagingInterface {
               }
               e.printStackTrace();
               try {
-                isRespawned = NativeInterface.createCommunicationChannel();
+                isRespawned = NativeInterface.notifyKilled();
               } catch(Exception ex) {
                 ex.printStackTrace();
               }
@@ -122,16 +120,8 @@ abstract class MessagingInterface {
                 }
               }
             }
-            if(!NativeInterface.isNativeSide()) {
-              final boolean isRespawned_ = isRespawned;
-              SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                  NativeInterface.notifyKilled();
-                  if(isRespawned_) {
-                    NativeInterface.notifyRespawned();
-                  }
-                }
-              });
+            if(isRespawned) {
+              NativeInterface.notifyRespawned();
             }
           }
           if(message != null) {

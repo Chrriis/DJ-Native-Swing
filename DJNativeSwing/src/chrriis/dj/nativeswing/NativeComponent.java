@@ -564,12 +564,16 @@ public abstract class NativeComponent extends Canvas {
     @Override
     public void nativeInterfaceClosed() {
       NativeInterface.removeNativeInterfaceListener(this);
-      NativeComponent nativeComponent = this.nativeComponent.get();
-      if(nativeComponent == null) {
-        return;
-      }
-      nativeComponent.invalidateNativePeer("The native peer died unexpectedly.");
-      nativeComponent.repaint();
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          NativeComponent nativeComponent = NNativeInterfaceListener.this.nativeComponent.get();
+          if(nativeComponent == null) {
+            return;
+          }
+          nativeComponent.invalidateNativePeer("The native peer died unexpectedly.");
+          nativeComponent.repaint();
+        }
+      });
     }
   }
   
@@ -605,7 +609,7 @@ public abstract class NativeComponent extends Canvas {
       new CMN_reshape().asyncExec(this, getWidth(), getHeight());
     } else {
       isNativePeerValid = false;
-      invalidNativePeerText = "Failed to create " + NativeComponent.this.getClass().getName() + "[" + NativeComponent.this.hashCode() + "]\n\nReason:\nThe native interface is not alive! It may not have been initialized.";
+      invalidNativePeerText = "Failed to create " + NativeComponent.this.getClass().getName() + "[" + NativeComponent.this.hashCode() + "]\n\nReason:\nThe native interface is not open!";
     }
     for(CommandMessage initCommandMessage: initializationCommandMessageList_) {
       if(!isNativePeerValid()) {
@@ -685,10 +689,10 @@ public abstract class NativeComponent extends Canvas {
     return isNativePeerValid && NativeInterface.isAlive();
   }
   
-  void invalidateNativePeer(String invalidNativePeerText) {
+  private void invalidateNativePeer(String invalidNativePeerText) {
     if(isNativePeerValid) {
       isNativePeerValid = false;
-      this.invalidNativePeerText = "Invalid " + getClass().getName() + "[" + hashCode() + "]\n\n" + invalidNativePeerText;
+      this.invalidNativePeerText = "Invalid " + getClass().getName() + "[" + hashCode() + "]\n\nReason:\n" + invalidNativePeerText;
       repaint();
     }
   }
