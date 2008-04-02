@@ -8,7 +8,11 @@
 package chrriis.dj.nativeswing.components;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -36,7 +40,9 @@ import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
+import javax.swing.border.AbstractBorder;
 import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
 
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.Message;
@@ -179,6 +185,22 @@ public class JWebBrowser extends NSPanelComponent {
     }
   }
   
+  private static final Border STATUS_BAR_BORDER = new AbstractBorder() {
+    @Override
+    public Insets getBorderInsets(Component c) {
+      return new Insets(1, 1, 1, 1);
+    }
+    @Override
+    public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+      Color background = c.getBackground();
+      g.setColor(background == null? Color.LIGHT_GRAY: background.darker());
+      g.drawLine(0, 0, width-1, 0);
+      g.drawLine(width-1, 0, width-1, height-1);
+      g.drawLine(0, height-1, width-1, height-1);
+      g.drawLine(0, 0, 0, height-1);
+    }
+  };
+  
   /**
    * Construct a new web browser.
    */
@@ -265,7 +287,7 @@ public class JWebBrowser extends NSPanelComponent {
     webBrowserPanel.add(nativeComponent.createEmbeddableComponent(), BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);
     statusBarPanel = new JPanel(new BorderLayout(0, 0));
-    statusBarPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, statusBarPanel.getBackground().darker()), BorderFactory.createEmptyBorder(2, 2, 2, 2)));
+    statusBarPanel.setBorder(BorderFactory.createCompoundBorder(STATUS_BAR_BORDER, BorderFactory.createEmptyBorder(2, 2, 2, 2)));
     statusLabel = new JLabel(" ");
     statusBarPanel.add(statusLabel, BorderLayout.CENTER);
     progressBar = new JProgressBar() {
