@@ -19,6 +19,7 @@ import javax.swing.JComponent;
 import javax.swing.JLayeredPane;
 import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 /**
  * @author Christopher Deckers
@@ -284,6 +285,17 @@ public class UIUtils {
       }
     }
     return bounds;
+  }
+  
+  public static void setPreferredLookAndFeel() {
+    try {
+      String systemLookAndFeelClassName = UIManager.getSystemLookAndFeelClassName();
+      if(!"com.sun.java.swing.plaf.gtk.GTKLookAndFeel".equals(systemLookAndFeelClassName)) {
+        UIManager.setLookAndFeel(systemLookAndFeelClassName);
+      }
+    } catch(Exception e) {
+      e.printStackTrace();
+    }
   }
   
 }

@@ -20,8 +20,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 
+import chrriis.common.UIUtils;
 import chrriis.dj.nativeswing.NativeInterface;
 import chrriis.dj.nativeswing.components.JWebBrowser;
 
@@ -72,9 +72,7 @@ public class JavascriptExecution extends JPanel {
   
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    try {
-      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-    } catch(Exception e) {}
+    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {

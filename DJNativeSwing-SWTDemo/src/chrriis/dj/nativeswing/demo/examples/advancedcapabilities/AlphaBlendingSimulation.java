@@ -17,10 +17,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.swing.event.MouseInputAdapter;
 
 import chrriis.common.Disposable;
+import chrriis.common.UIUtils;
 import chrriis.dj.nativeswing.NativeComponentOptions;
 import chrriis.dj.nativeswing.NativeInterface;
 import chrriis.dj.nativeswing.NativeComponentOptions.VisibilityConstraint;
@@ -112,9 +112,7 @@ public class AlphaBlendingSimulation extends JPanel implements Disposable {
   
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    try {
-      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-    } catch(Exception e) {}
+    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {

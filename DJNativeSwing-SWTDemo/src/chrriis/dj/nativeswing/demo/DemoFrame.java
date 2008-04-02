@@ -30,7 +30,6 @@ import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeSelectionEvent;
@@ -44,6 +43,7 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import chrriis.common.Disposable;
+import chrriis.common.UIUtils;
 import chrriis.common.ui.source.SourcePane;
 import chrriis.dj.nativeswing.NativeInterface;
 
@@ -194,9 +194,7 @@ public class DemoFrame extends JFrame {
   }
   
   public static void main(String[] args) {
-    try {
-      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-    } catch(Exception e) {}
+    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
     Toolkit.getDefaultToolkit().setDynamicLayout(true);
     SwingUtilities.invokeLater(new Runnable() {
