@@ -326,7 +326,7 @@ public class JVLCPlayer extends NSPanelComponent {
    * @param options the options to better configure the initialization of the VLC plugin.
    */
   public void load(VLCPluginOptions options) {
-    load("", options);
+    load_("", options);
   }
   
   /**
