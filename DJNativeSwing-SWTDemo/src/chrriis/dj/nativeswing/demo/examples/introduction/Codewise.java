@@ -29,8 +29,8 @@ public class Codewise extends JPanel {
         "    <p>There is only one mandatory call to add to the main method, and the rest is just using the API exposed by the components:<br/>" + LS +
         "    <pre>" + LS +
         "      public static void main(String[] args) {" + LS +
-        "        NativeInterface.initialize(/*options*/);" + LS +
-        "        // Here goes the rest of the initialization" + LS +
+        "        NativeInterface.open();" + LS +
+        "        // Here goes the rest of the program initialization" + LS +
         "      }</pre>" + LS +
         "    </p>" + LS +
         "    <h1>Native components are Swing-like</h1>" + LS +

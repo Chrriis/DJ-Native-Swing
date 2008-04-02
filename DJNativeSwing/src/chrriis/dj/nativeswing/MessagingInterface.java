@@ -97,6 +97,7 @@ abstract class MessagingInterface {
           try {
             message = readMessage();
           } catch(Exception e) {
+            boolean isRespawned = false;
             if(isAlive) {
               isAlive = false;
               if(exitOnEndOfStream) {
@@ -104,7 +105,7 @@ abstract class MessagingInterface {
               }
               e.printStackTrace();
               try {
-                NativeInterface.createCommunicationChannel();
+                isRespawned = NativeInterface.createCommunicationChannel();
               } catch(Exception ex) {
                 ex.printStackTrace();
               }
@@ -123,16 +124,18 @@ abstract class MessagingInterface {
               }
             }
             if(!NativeInterface.isNativeSide()) {
+              final boolean isRespawned_ = isRespawned;
               SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                   for(Canvas c: NativeInterface.getCanvas()) {
                     if(c instanceof NativeComponent) {
-                      ((NativeComponent)c).invalidateNativePeer("The native peer died unexpectantly.");
+                      ((NativeComponent)c).invalidateNativePeer("The native peer died unexpectedly.");
                     }
                     c.repaint();
                   }
-                  for(NativeInterfaceListener listener: NativeInterface.getNativeInterfaceListeners()) {
-                    listener.nativeInterfaceRestarted();
+                  NativeInterface.notifyKilled();
+                  if(isRespawned_) {
+                    NativeInterface.notifyRespawned();
                   }
                 }
               });

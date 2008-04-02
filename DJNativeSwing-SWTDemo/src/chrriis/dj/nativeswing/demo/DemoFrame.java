@@ -197,7 +197,7 @@ public class DemoFrame extends JFrame {
     try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     } catch(Exception e) {}
-    NativeInterface.start();
+    NativeInterface.open();
     Toolkit.getDefaultToolkit().setDynamicLayout(true);
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {

@@ -20,7 +20,6 @@ The key components are a rich native web browser and a flash player.
 
 Simply place the NativeSwing.jar library in your classpath, as well as the SWT
 3.4 library corresponding to your platform (visit http://www.eclipse.org/swt).
-You also need jna.jar in your classpath.
 You may need to refer to the SWT FAQ (http://www.eclipse.org/swt/faq.php) to get
 it working on certain platforms (like the need to install XULRunner on Linux).
 Java 5.0 or later is required.
@@ -28,12 +27,12 @@ Java 5.0 or later is required.
 Then, you need to add the following to your main method:
 
 public static void main(String[] args) {
-  NativeInterface.initialize();
-  // Here goes the rest of the initialization
+  NativeInterface.open();
+  // Here goes the rest of the program initialization
 }
 
 If you want to use the shaping mode for native components (cf the demo), you
-need "jna_WindowUtils.jar" in your classpath.
+need "jna.jar" and "jna_WindowUtils.jar" in your classpath.
 
 If you want to use the HTML editor, you need the zip of the FCK editor in your
 classpath.

@@ -16,6 +16,21 @@ import java.util.EventListener;
 public interface NativeInterfaceListener extends EventListener {
   
   /**
+   * Invoked when the native interface is initialized.
+   */
+  public void nativeInterfaceInitialized();
+  
+  /**
+   * Invoked when the native interface is started.
+   */
+  public void nativeInterfaceOpened();
+  
+  /**
+   * Invoked when the native interface is stopped.
+   */
+  public void nativeInterfaceClosed();
+  
+  /**
    * Invoked when the native interface is restarted after an error happening on the native side (peer VM).
    */
   public void nativeInterfaceRestarted();

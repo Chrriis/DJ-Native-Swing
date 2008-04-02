@@ -67,7 +67,7 @@ public class DestructionTimeOption extends JPanel implements Disposable {
     try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     } catch(Exception e) {}
-    NativeInterface.start();
+    NativeInterface.open();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");

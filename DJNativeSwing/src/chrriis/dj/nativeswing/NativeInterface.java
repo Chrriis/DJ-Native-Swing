@@ -185,19 +185,24 @@ public class NativeInterface {
   }
   
   static boolean isAlive() {
-    return isStarted() && messagingInterface.isAlive();
+    return isOpen() && messagingInterface.isAlive();
   }
   
   private static boolean isInitialized;
-  private static boolean isStarted;
   
-  private static boolean isStarted() {
-    return isStarted;
+  private static boolean isInitialized() {
+    return isInitialized;
   }
   
-  private static void checkStarted() {
-    if(!isStarted()) {
-      throw new IllegalStateException("The native interface is not started! Please refer to the instructions to set it up properly.");
+  private static boolean isOpen;
+  
+  private static boolean isOpen() {
+    return isOpen;
+  }
+  
+  private static void checkOpen() {
+    if(!isOpen()) {
+      throw new IllegalStateException("The native interface is not open! Please refer to the instructions to set it up properly.");
     }
   }
   
@@ -219,25 +224,30 @@ public class NativeInterface {
   }
   
   /**
-   * Stop the native interface, which closes the native side (peer VM). Note that the native interface can be re-started.
+   * Close the native interface, which destroys the native side (peer VM). Note that the native interface can be re-opened later.
    */
-  public static void stop() {
-    isStarted = false;
+  public static void close() {
+    isOpen = false;
     messagingInterface.destroy();
     messagingInterface = null;
+    for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
+      listener.nativeInterfaceClosed();
+    }
   }
 
-  private static NativeInterfaceOptions nativeInterfaceOptions;
+  private static NativeInterfaceConfiguration nativeInterfaceConfiguration;
   
   /**
-   * Set the options that are used when creating the native peer VM.
-   * @param nativeInterfaceOptions the options.
+   * Get the configuration, which allows to modify some parameters.
    */
-  public static void setOptions(NativeInterfaceOptions nativeInterfaceOptions) {
-    NativeInterface.nativeInterfaceOptions = nativeInterfaceOptions;
+  public static NativeInterfaceConfiguration getConfiguration() {
+    if(nativeInterfaceConfiguration == null) {
+      nativeInterfaceConfiguration = new NativeInterfaceConfiguration();
+    }
+    return nativeInterfaceConfiguration;
   }
   
-  private static void loadClipboardProperties() {
+  private static void loadClipboardDebuggingProperties() {
     try {
       Clipboard systemClipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
       if(!systemClipboard.isDataFlavorAvailable(DataFlavor.stringFlavor)) {
@@ -259,14 +269,15 @@ public class NativeInterface {
   }
   
   /**
-   * Start the native interface, which creates the peer VM handling the native side of the native integration. This automatically initialize the interface if it was not already done.
+   * Initialize the native interface, but do not open it. This method sets some properties and registers a few listeners to keep track of certain states necessary for the good functioning of the framework.<br/>
+   * This method is automatically called if open() is used. It should be called early in the program, the best place being as the first call in the main method.
    */
   public static void initialize() {
-    if(isInitialized) {
+    if(isInitialized()) {
       return;
     }
-    if(nativeInterfaceOptions == null) {
-      nativeInterfaceOptions = new NativeInterfaceOptions();
+    if(nativeInterfaceConfiguration == null) {
+      nativeInterfaceConfiguration = new NativeInterfaceConfiguration();
     }
     // Specific Sun property to prevent heavyweight components from erasing their background.
     System.setProperty("sun.awt.noerasebackground", "true");
@@ -359,42 +370,65 @@ public class NativeInterface {
       }
     }, WindowEvent.WINDOW_EVENT_MASK | ComponentEvent.COMPONENT_EVENT_MASK);
     isInitialized = true;
+    for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
+      listener.nativeInterfaceInitialized();
+    }
   }
   
   /**
-   * Start the native interface, which creates the peer VM handling the native side of the native integration. This automatically initialize the interface if it was not already done.
+   * Open the native interface, which creates the peer VM that handles the native side of the native integration.<br/>
+   * Initialization takes place if the interface was not already initialized. If initialization was not explicitely performed, this method should be called early in the program, the best place being as the first call in the main method.
    */
-  public static void start() {
-    if(isStarted()) {
+  public static void open() {
+    if(isOpen()) {
       return;
     }
     initialize();
-    loadClipboardProperties();
+    loadClipboardDebuggingProperties();
     createCommunicationChannel();
+    for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
+      listener.nativeInterfaceOpened();
+    }
   }
   
-  static void createCommunicationChannel() {
-    if(messagingInterface != null && !nativeInterfaceOptions.isNativeSideRespawnedOnError()) {
-      return;
+  static void notifyKilled() {
+    for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
+      listener.nativeInterfaceClosed();
+    }
+  }
+  
+  static void notifyRespawned() {
+    for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
+      listener.nativeInterfaceOpened();
+    }
+    for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
+      listener.nativeInterfaceRestarted();
+    }
+  }
+  
+  static boolean createCommunicationChannel() {
+    if(messagingInterface != null && !nativeInterfaceConfiguration.isNativeSideRespawnedOnError()) {
+      return false;
     }
     // Create the interface to communicate with the process handling the native side
-    messagingInterface = createMessagingInterface(nativeInterfaceOptions);
-    isStarted = true;
+    messagingInterface = createMessagingInterface();
+    isOpen = true;
     // Set the system properties
     new CMN_setProperties().syncExec(System.getProperties());
+    return true;
   }
   
-  private static Process createProcess(NativeInterfaceOptions nativeInterfaceOptions, int port) {
+  private static Process createProcess(int port) {
     List<String> classPathList = new ArrayList<String>();
     String pathSeparator = System.getProperty("path.separator");
     List<Object> referenceList = new ArrayList<Object>();
     referenceList.add(NativeInterface.class);
     referenceList.add("org/eclipse/swt/widgets/Display.class");
-    Class<?>[] nativeClassPathReferenceClasses = nativeInterfaceOptions.getNativeClassPathReferenceClasses();
+    Class<?>[] nativeClassPathReferenceClasses = nativeInterfaceConfiguration.getNativeClassPathReferenceClasses();
     if(nativeClassPathReferenceClasses != null) {
       referenceList.addAll(Arrays.asList(nativeClassPathReferenceClasses));
     }
-    String[] nativeClassPathReferenceResources = nativeInterfaceOptions.getNativeClassPathReferenceResources();
+    String[] nativeClassPathReferenceResources = nativeInterfaceConfiguration.getNativeClassPathReferenceResources();
     if(nativeClassPathReferenceResources != null) {
       referenceList.addAll(Arrays.asList(nativeClassPathReferenceResources));
     }
@@ -459,7 +493,7 @@ public class NativeInterface {
     // Create the argument list for the Java process that will be created
     List<String> argList = new ArrayList<String>();
     argList.add(null);
-    String[] peerVMParams = nativeInterfaceOptions.getPeerVMParams();
+    String[] peerVMParams = nativeInterfaceConfiguration.getPeerVMParams();
     if(peerVMParams != null) {
       for(String param: peerVMParams) {
         argList.add(param);
@@ -495,7 +529,7 @@ public class NativeInterface {
     return p;
   }
   
-  private static MessagingInterface createMessagingInterface(NativeInterfaceOptions nativeInterfaceOptions) {
+  private static MessagingInterface createMessagingInterface() {
     int port = Integer.parseInt(System.getProperty("dj.nativeswing.messaging.port", "-1"));
     if(port <= 0) {
       ServerSocket serverSocket;
@@ -516,7 +550,7 @@ public class NativeInterface {
     if(Boolean.parseBoolean(System.getProperty("dj.nativeswing.messaging.nocreateprocess"))) {
       p = null;
     } else {
-      p = createProcess(nativeInterfaceOptions, port);
+      p = createProcess(port);
     }
     Socket socket = null;
     for(int i=99; i>=0; i--) {
@@ -603,7 +637,7 @@ public class NativeInterface {
   }
   
   static Object syncSend(final Message message) {
-    checkStarted();
+    checkOpen();
     if(message instanceof LocalMessage) {
       LocalMessage localMessage = (LocalMessage)message;
       return localMessage.runCommand();
@@ -612,7 +646,7 @@ public class NativeInterface {
   }
   
   static void asyncSend(final Message message) {
-    checkStarted();
+    checkOpen();
     if(message instanceof LocalMessage) {
       LocalMessage localMessage = (LocalMessage)message;
       localMessage.runCommand();
@@ -662,7 +696,7 @@ public class NativeInterface {
     if(Boolean.parseBoolean(System.getProperty("dj.nativeswing.native.initmessage"))) {
       System.err.println("Starting spawned VM");
     }
-    isStarted = true;
+    isOpen = true;
     int port = Integer.parseInt(args[0]);
     ServerSocket serverSocket = null;
     for(int i=19; i>=0; i--) {

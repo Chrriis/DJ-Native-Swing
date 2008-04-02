@@ -8,15 +8,12 @@
 package chrriis.dj.nativeswing;
 
 /**
- * Options to configure the native interface.
+ * Configuration of the native interface. It is not constructed directly but obtained from the native interface.
  * @author Christopher Deckers
  */
-public class NativeInterfaceOptions {
+public class NativeInterfaceConfiguration {
   
-  /**
-   * Construct native interface options.
-   */
-  public NativeInterfaceOptions() {
+  NativeInterfaceConfiguration() {
   }
   
   private boolean isNativeSideRespawnedOnError = true;
