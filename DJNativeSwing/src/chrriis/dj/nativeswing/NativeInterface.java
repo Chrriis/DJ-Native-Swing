@@ -401,9 +401,9 @@ public class NativeInterface {
     for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
       listener.nativeInterfaceOpened();
     }
-    for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
-      listener.nativeInterfaceRestarted();
-    }
+//    for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
+//      listener.nativeInterfaceRestarted();
+//    }
   }
   
   static boolean createCommunicationChannel() {

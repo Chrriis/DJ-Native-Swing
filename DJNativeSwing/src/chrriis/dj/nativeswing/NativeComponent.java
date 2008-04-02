@@ -28,6 +28,8 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.StringReader;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
@@ -552,6 +554,25 @@ public abstract class NativeComponent extends Canvas {
     return 0;
   }
   
+  private NativeInterfaceListener nativeInterfaceListener;
+  
+  private static class NNativeInterfaceListener extends NativeInterfaceAdapter {
+    protected Reference<NativeComponent> nativeComponent;
+    protected NNativeInterfaceListener(NativeComponent nativeComponent) {
+      this.nativeComponent = new WeakReference<NativeComponent>(nativeComponent);
+    }
+    @Override
+    public void nativeInterfaceClosed() {
+      NativeInterface.removeNativeInterfaceListener(this);
+      NativeComponent nativeComponent = this.nativeComponent.get();
+      if(nativeComponent == null) {
+        return;
+      }
+      nativeComponent.invalidateNativePeer("The native peer died unexpectedly.");
+      nativeComponent.repaint();
+    }
+  }
+  
   private void createNativePeer() {
     boolean isInterfaceAlive = NativeInterface.isAlive();
     if(isInterfaceAlive) {
@@ -568,6 +589,8 @@ public abstract class NativeComponent extends Canvas {
     isNativePeerInitialized = true;
     isNativePeerValid = true;
     if(isInterfaceAlive) {
+      nativeInterfaceListener = new NNativeInterfaceListener(this);
+      NativeInterface.addNativeInterfaceListener(nativeInterfaceListener);
       try {
         runSync(new CMN_createControl(), componentID, NativeComponent.this.getClass().getName(), getHandle());
       } catch(Exception e) {
@@ -624,6 +647,7 @@ public abstract class NativeComponent extends Canvas {
     if(!isNativePeerDisposed) {
       isNativePeerDisposed = true;
       if(isNativePeerInitialized) {
+        NativeInterface.removeNativeInterfaceListener(nativeInterfaceListener);
         NativeInterface.removeCanvas(this);
         if(isNativePeerValid()) {
           runSync(new CMN_destroyControl());

@@ -22,7 +22,4 @@ public abstract class NativeInterfaceAdapter implements NativeInterfaceListener 
   public void nativeInterfaceOpened() {
   }
 
-  public void nativeInterfaceRestarted() {
-  }
-
 }

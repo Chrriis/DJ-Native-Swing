@@ -7,7 +7,6 @@
  */
 package chrriis.dj.nativeswing;
 
-import java.awt.Canvas;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -127,12 +126,6 @@ abstract class MessagingInterface {
               final boolean isRespawned_ = isRespawned;
               SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                  for(Canvas c: NativeInterface.getCanvas()) {
-                    if(c instanceof NativeComponent) {
-                      ((NativeComponent)c).invalidateNativePeer("The native peer died unexpectedly.");
-                    }
-                    c.repaint();
-                  }
                   NativeInterface.notifyKilled();
                   if(isRespawned_) {
                     NativeInterface.notifyRespawned();
