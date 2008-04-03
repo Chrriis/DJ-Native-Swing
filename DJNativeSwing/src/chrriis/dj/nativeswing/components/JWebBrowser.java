@@ -87,10 +87,6 @@ public class JWebBrowser extends NSPanelComponent {
   private JMenuItem backMenuItem;
   private JMenuItem forwardMenuItem;
   private JMenuItem refreshMenuItem;
-  private JButton backButton;
-  private JButton forwardButton;
-  private JButton refreshButton;
-  private JButton stopButton;
   private JMenuItem stopMenuItem;
 
   private static class NWebBrowserListener extends WebBrowserAdapter {
@@ -104,8 +100,8 @@ public class JWebBrowser extends NSPanelComponent {
       if(webBrowser == null) {
         return;
       }
-      if(webBrowser.isButtonBarVisible()) {
-        webBrowser.stopButton.setEnabled(false);
+      if(webBrowser.buttonBarPane != null) {
+        webBrowser.buttonBarPane.stopButton.setEnabled(false);
       }
       webBrowser.stopMenuItem.setEnabled(false);
       if(e.isTopFrame()) {
@@ -126,8 +122,8 @@ public class JWebBrowser extends NSPanelComponent {
           webBrowser.addressBarPane.updateAddress(e.getNewURL());
         }
       }
-      if(webBrowser.isButtonBarVisible()) {
-        webBrowser.stopButton.setEnabled(true);
+      if(webBrowser.buttonBarPane != null) {
+        webBrowser.buttonBarPane.stopButton.setEnabled(true);
       }
       webBrowser.stopMenuItem.setEnabled(true);
     }
@@ -137,8 +133,8 @@ public class JWebBrowser extends NSPanelComponent {
       if(webBrowser == null) {
         return;
       }
-      if(webBrowser.isButtonBarVisible()) {
-        webBrowser.stopButton.setEnabled(false);
+      if(webBrowser.buttonBarPane != null) {
+        webBrowser.buttonBarPane.stopButton.setEnabled(false);
       }
       webBrowser.stopMenuItem.setEnabled(false);
       if(e.isTopFrame()) {
@@ -175,13 +171,13 @@ public class JWebBrowser extends NSPanelComponent {
   private void updateNavigationButtons() {
     if(isViewMenuVisible || isButtonBarVisible()) {
       boolean isBackEnabled = nativeComponent.isNativePeerInitialized()? nativeComponent.isGoBackEnabled(): false;
-      if(isButtonBarVisible()) {
-        backButton.setEnabled(isBackEnabled);
+      if(buttonBarPane != null) {
+        buttonBarPane.backButton.setEnabled(isBackEnabled);
       }
       backMenuItem.setEnabled(isBackEnabled);
       boolean isForwardEnabled = nativeComponent.isNativePeerInitialized()? nativeComponent.isGoForwardEnabled(): false;
-      if(isButtonBarVisible()) {
-        forwardButton.setEnabled(isForwardEnabled);
+      if(buttonBarPane != null) {
+        buttonBarPane.forwardButton.setEnabled(isForwardEnabled);
       }
       forwardMenuItem.setEnabled(isForwardEnabled);
     }
@@ -231,6 +227,11 @@ public class JWebBrowser extends NSPanelComponent {
   
   private class ButtonBarPane extends JPanel {
     
+    private JButton backButton;
+    private JButton forwardButton;
+    private JButton refreshButton;
+    private JButton stopButton;
+
     public ButtonBarPane() {
       super(new BorderLayout(0, 0));
       JToolBar buttonToolBar = new JToolBar();
@@ -275,13 +276,6 @@ public class JWebBrowser extends NSPanelComponent {
       });
       buttonToolBar.add(stopButton);
       add(buttonToolBar, BorderLayout.CENTER);
-    }
-    
-    public void dispose() {
-      backButton = null;
-      forwardButton = null;
-      refreshButton = null;
-      stopButton = null;
     }
     
   }
@@ -333,10 +327,6 @@ public class JWebBrowser extends NSPanelComponent {
       addressField.setText(nativeComponent.isNativePeerInitialized()? nativeComponent.getURL(): "");
     }
     
-    public void dispose() {
-      addressField = null;
-    }
-    
   }
   
   private class StatusBarPane extends JPanel {
@@ -369,11 +359,6 @@ public class JWebBrowser extends NSPanelComponent {
     public void updateStatus() {
       String status = nativeComponent.isNativePeerInitialized()? nativeComponent.getStatusText(): "";
       statusLabel.setText(status.length() == 0? " ": status);
-    }
-    
-    public void dispose() {
-      statusLabel = null;
-      progressBar = null;
     }
     
   }
@@ -525,7 +510,6 @@ public class JWebBrowser extends NSPanelComponent {
       add(statusBarPane, BorderLayout.SOUTH);
     } else {
       remove(statusBarPane);
-      statusBarPane.dispose();
       statusBarPane = null;
     }
     revalidate();
@@ -575,7 +559,6 @@ public class JWebBrowser extends NSPanelComponent {
       menuToolAndAddressBarPanel.add(buttonBarPane, BorderLayout.WEST);
     } else {
       menuToolAndAddressBarPanel.remove(buttonBarPane);
-      buttonBarPane.dispose();
       buttonBarPane = null;
     }
     menuToolAndAddressBarPanel.revalidate();
@@ -608,7 +591,6 @@ public class JWebBrowser extends NSPanelComponent {
       menuToolAndAddressBarPanel.add(addressBarPane, BorderLayout.CENTER);
     } else {
       menuToolAndAddressBarPanel.remove(addressBarPane);
-      addressBarPane.dispose();
       addressBarPane = null;
     }
     menuToolAndAddressBarPanel.revalidate();
