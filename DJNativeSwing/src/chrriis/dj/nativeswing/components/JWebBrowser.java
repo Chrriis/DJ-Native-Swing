@@ -18,6 +18,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.ResourceBundle;
@@ -78,19 +80,16 @@ public class JWebBrowser extends NSPanelComponent {
   private JCheckBoxMenuItem buttonBarCheckBoxMenuItem;
   private AddressBarPane addressBarPane;
   private JCheckBoxMenuItem addressBarCheckBoxMenuItem;
-  private JPanel statusBarPanel;
+  private StatusBarPane statusBarPane;
   private JCheckBoxMenuItem statusBarCheckBoxMenuItem;
   private JPanel webBrowserPanel;
   
-  private JTextField addressField;
-  private JLabel statusLabel;
-  private JProgressBar progressBar;
-  private JButton backButton;
   private JMenuItem backMenuItem;
-  private JButton forwardButton;
   private JMenuItem forwardMenuItem;
-  private JButton refreshButton;
   private JMenuItem refreshMenuItem;
+  private JButton backButton;
+  private JButton forwardButton;
+  private JButton refreshButton;
   private JButton stopButton;
   private JMenuItem stopMenuItem;
 
@@ -109,7 +108,11 @@ public class JWebBrowser extends NSPanelComponent {
         webBrowser.stopButton.setEnabled(false);
       }
       webBrowser.stopMenuItem.setEnabled(false);
-      webBrowser.updateAddressBar();
+      if(e.isTopFrame()) {
+        if(webBrowser.addressBarPane != null) {
+          webBrowser.addressBarPane.updateAddress();
+        }
+      }
       webBrowser.updateNavigationButtons();
     }
     @Override
@@ -118,8 +121,10 @@ public class JWebBrowser extends NSPanelComponent {
       if(webBrowser == null) {
         return;
       }
-      if(webBrowser.isAddressBarVisible()) {
-        webBrowser.addressField.setText(e.getNewURL());
+      if(e.isTopFrame()) {
+        if(webBrowser.addressBarPane != null) {
+          webBrowser.addressBarPane.updateAddress(e.getNewURL());
+        }
       }
       if(webBrowser.isButtonBarVisible()) {
         webBrowser.stopButton.setEnabled(true);
@@ -136,7 +141,11 @@ public class JWebBrowser extends NSPanelComponent {
         webBrowser.stopButton.setEnabled(false);
       }
       webBrowser.stopMenuItem.setEnabled(false);
-      webBrowser.updateAddressBar();
+      if(e.isTopFrame()) {
+        if(webBrowser.addressBarPane != null) {
+          webBrowser.addressBarPane.updateAddress();
+        }
+      }
       webBrowser.updateNavigationButtons();
     }
     @Override
@@ -145,8 +154,9 @@ public class JWebBrowser extends NSPanelComponent {
       if(webBrowser == null) {
         return;
       }
-      String status = webBrowser.nativeComponent.getStatusText();
-      webBrowser.statusLabel.setText(status.length() == 0? " ": status);
+      if(webBrowser.statusBarPane != null) {
+        webBrowser.statusBarPane.updateStatus();
+      }
     }
     @Override
     public void loadingProgressChanged(WebBrowserEvent e) {
@@ -154,18 +164,12 @@ public class JWebBrowser extends NSPanelComponent {
       if(webBrowser == null) {
         return;
       }
-      int loadingProgress = webBrowser.getPageLoadingProgressValue();
-      webBrowser.progressBar.setValue(loadingProgress);
-      webBrowser.progressBar.setVisible(loadingProgress < 100);
+      if(webBrowser.statusBarPane != null) {
+        webBrowser.statusBarPane.updateProgressValue();
+      }
     }
   }
 
-  private void updateAddressBar() {
-    if(isAddressBarVisible()) {
-      addressField.setText(nativeComponent.getURL());
-    }
-  }
-  
   private boolean isViewMenuVisible;
   
   private void updateNavigationButtons() {
@@ -284,6 +288,8 @@ public class JWebBrowser extends NSPanelComponent {
   
   private class AddressBarPane extends JPanel {
     
+    private JTextField addressField;
+
     public AddressBarPane() {
       super(new BorderLayout(0, 0));
       JToolBar addressToolBar = new JToolBar();
@@ -294,6 +300,14 @@ public class JWebBrowser extends NSPanelComponent {
       addressToolBarInnerPanel.setOpaque(false);
       addressToolBar.setFloatable(false);
       addressField = new JTextField();
+      addressField.addKeyListener(new KeyAdapter() {
+        @Override
+        public void keyPressed(KeyEvent e) {
+          if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+            updateAddress();
+          }
+        }
+      });
       ActionListener goActionListener = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           setURL(addressField.getText());
@@ -301,6 +315,7 @@ public class JWebBrowser extends NSPanelComponent {
         }
       };
       addressField.addActionListener(goActionListener);
+      updateAddress();
       addressToolBarInnerPanel.add(addressField, BorderLayout.CENTER);
       JButton goButton = new JButton(createIcon("GoIcon"));
       goButton.setToolTipText(RESOURCES.getString("GoText"));
@@ -310,8 +325,55 @@ public class JWebBrowser extends NSPanelComponent {
       add(addressToolBar, BorderLayout.CENTER);
     }
     
+    public void updateAddress(String url) {
+      addressField.setText(url);
+    }
+    
+    public void updateAddress() {
+      addressField.setText(nativeComponent.getURL());
+    }
+    
     public void dispose() {
       addressField = null;
+    }
+    
+  }
+  
+  private class StatusBarPane extends JPanel {
+    
+    private JLabel statusLabel;
+    private JProgressBar progressBar;
+
+    public StatusBarPane() {
+      super(new BorderLayout(0, 0));
+      setBorder(BorderFactory.createCompoundBorder(STATUS_BAR_BORDER, BorderFactory.createEmptyBorder(2, 2, 2, 2)));
+      statusLabel = new JLabel();
+      updateStatus();
+      add(statusLabel, BorderLayout.CENTER);
+      progressBar = new JProgressBar() {
+        @Override
+        public Dimension getPreferredSize() {
+          return new Dimension(getParent().getWidth() / 10, 0);
+        }
+      };
+      updateProgressValue();
+      add(progressBar, BorderLayout.EAST);
+    }
+    
+    public void updateProgressValue() {
+      int loadingProgress = nativeComponent.getPageLoadingProgressValue();
+      progressBar.setValue(loadingProgress);
+      progressBar.setVisible(loadingProgress < 100);
+    }
+    
+    public void updateStatus() {
+      String status = nativeComponent.getStatusText();
+      statusLabel.setText(status.length() == 0? " ": status);
+    }
+    
+    public void dispose() {
+      statusLabel = null;
+      progressBar = null;
     }
     
   }
@@ -329,19 +391,6 @@ public class JWebBrowser extends NSPanelComponent {
     webBrowserPanel = new JPanel(new BorderLayout(0, 0));
     webBrowserPanel.add(nativeComponent.createEmbeddableComponent(), BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);
-    statusBarPanel = new JPanel(new BorderLayout(0, 0));
-    statusBarPanel.setBorder(BorderFactory.createCompoundBorder(STATUS_BAR_BORDER, BorderFactory.createEmptyBorder(2, 2, 2, 2)));
-    statusLabel = new JLabel(" ");
-    statusBarPanel.add(statusLabel, BorderLayout.CENTER);
-    progressBar = new JProgressBar() {
-      @Override
-      public Dimension getPreferredSize() {
-        return new Dimension(getParent().getWidth() / 10, 0);
-      }
-    };
-    progressBar.setVisible(false);
-    statusBarPanel.add(progressBar, BorderLayout.EAST);
-    add(statusBarPanel, BorderLayout.SOUTH);
     nativeComponent.addWebBrowserListener(new NWebBrowserListener(this));
     adjustBorder();
     fileMenu = new JMenu(RESOURCES.getString("FileMenu"));
@@ -460,6 +509,7 @@ public class JWebBrowser extends NSPanelComponent {
     });
     setButtonBarVisible(true);
     setAddressBarVisible(true);
+    setStatusBarVisible(true);
   }
   
   /**
@@ -470,7 +520,16 @@ public class JWebBrowser extends NSPanelComponent {
     if(isStatusBarVisible == isStatusBarVisible()) {
       return;
     }
-    statusBarPanel.setVisible(isStatusBarVisible);
+    if(isStatusBarVisible) {
+      statusBarPane = new StatusBarPane();
+      add(statusBarPane, BorderLayout.SOUTH);
+    } else {
+      remove(statusBarPane);
+      statusBarPane.dispose();
+      statusBarPane = null;
+    }
+    revalidate();
+    repaint();
     statusBarCheckBoxMenuItem.setSelected(isStatusBarVisible);
     adjustBorder();
   }
@@ -480,7 +539,7 @@ public class JWebBrowser extends NSPanelComponent {
    * @return true if the status bar is visible.
    */
   public boolean isStatusBarVisible() {
-    return statusBarPanel.isVisible();
+    return statusBarPane != null;
   }
   
   /**
@@ -556,7 +615,8 @@ public class JWebBrowser extends NSPanelComponent {
     menuToolAndAddressBarPanel.repaint();
     addressBarCheckBoxMenuItem.setSelected(isAddressBarVisible);
     adjustBorder();
-    updateAddressBar();
+    if(addressBarPane != null) {
+    }
   }
   
   /**
