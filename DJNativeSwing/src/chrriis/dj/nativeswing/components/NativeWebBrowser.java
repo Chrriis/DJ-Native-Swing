@@ -409,6 +409,8 @@ class NativeWebBrowser extends NativeComponent {
         if(location.startsWith("javascript:")) {
           return;
         }
+        browser.setData("CMJ_updateStatus.status", null);
+        browser.setData("CMJ_updateProgress.progress", null);
         e.doit = (Boolean)new CMJ_urlChanging().syncExec(browser, location, e.top);
         if(!e.doit) {
           new CMJ_urlChangeCanceled().asyncExec(browser, location, e.top);
@@ -422,13 +424,22 @@ class NativeWebBrowser extends NativeComponent {
     });
     browser.addStatusTextListener(new StatusTextListener() {
       public void changed(StatusTextEvent e) {
-        new CMJ_updateStatus().asyncExec(browser, e.text);
+        String oldStatus = (String)browser.getData("CMJ_updateStatus.status");
+        String newStatus = e.text;
+        if(!Utils.equals(oldStatus, newStatus)) {
+          browser.setData("CMJ_updateStatus.status", newStatus);
+          new CMJ_updateStatus().asyncExec(browser, newStatus);
+        }
       }
     });
     browser.addProgressListener(new ProgressListener() {
       public void changed(ProgressEvent e) {
         int loadingProgressValue = e.total == 0? 100: e.current * 100 / e.total;
-        new CMJ_updateProgress().asyncExec(browser, loadingProgressValue);
+        Integer oldProgressValue = (Integer)browser.getData("CMJ_updateProgress.progress");
+        if(!Utils.equals(oldProgressValue, loadingProgressValue)) {
+          browser.setData("CMJ_updateProgress.progress", loadingProgressValue);
+          new CMJ_updateProgress().asyncExec(browser, loadingProgressValue);
+        }
       }
       public void completed(ProgressEvent progressevent) {
         new CMJ_updateProgress().asyncExec(browser, 100);

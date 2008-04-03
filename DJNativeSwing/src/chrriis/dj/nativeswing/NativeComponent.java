@@ -441,7 +441,7 @@ public abstract class NativeComponent extends Canvas {
     });
     control.addMouseMoveListener(new MouseMoveListener() {
       public void mouseMove(org.eclipse.swt.events.MouseEvent e) {
-        if(((Long)e.widget.getData("NS_EnabledEventsMask") & MouseEvent.MOUSE_MOTION_EVENT_MASK) != 0) {
+        if((((Long)e.widget.getData("NS_EnabledEventsMask")) & MouseEvent.MOUSE_MOTION_EVENT_MASK) != 0) {
           Object[] mouseEventArgs = getMouseEventArgs(control, e, MouseEvent.MOUSE_MOVED);
           if(mouseEventArgs != null) {
             new CMJ_dispatchMouseEvent().asyncExec(control, mouseEventArgs);
@@ -491,7 +491,7 @@ public abstract class NativeComponent extends Canvas {
   @Override
   public synchronized void addMouseMotionListener(MouseMotionListener listener) {
     if(getMouseMotionListeners().length == 0 && listener != null) {
-      new CMN_setEventsEnabled().asyncExec(this, MouseEvent.MOUSE_MOTION_EVENT_MASK, true);
+      runAsync(new CMN_setEventsEnabled(), MouseEvent.MOUSE_MOTION_EVENT_MASK, true);
     }
     super.addMouseMotionListener(listener);
   }
@@ -500,7 +500,7 @@ public abstract class NativeComponent extends Canvas {
   public synchronized void removeMouseMotionListener(MouseMotionListener listener) {
     super.removeMouseMotionListener(listener);
     if(getMouseMotionListeners().length == 0) {
-      new CMN_setEventsEnabled().asyncExec(this, MouseEvent.MOUSE_MOTION_EVENT_MASK, false);
+      runAsync(new CMN_setEventsEnabled(), MouseEvent.MOUSE_MOTION_EVENT_MASK, false);
     }
   }
   
