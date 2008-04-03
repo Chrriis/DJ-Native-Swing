@@ -70,12 +70,13 @@ public class JWebBrowser extends NSPanelComponent {
 
   private NativeWebBrowser nativeComponent;
 
+  private JPanel menuToolAndAddressBarPanel;
   private JMenuBar menuBar;
   private JMenu fileMenu;
   private JMenu viewMenu;
-  private JPanel buttonBarPanel;
+  private ButtonBarPane buttonBarPane;
   private JCheckBoxMenuItem buttonBarCheckBoxMenuItem;
-  private JPanel addressBarPanel;
+  private AddressBarPane addressBarPane;
   private JCheckBoxMenuItem addressBarCheckBoxMenuItem;
   private JPanel statusBarPanel;
   private JCheckBoxMenuItem statusBarCheckBoxMenuItem;
@@ -104,7 +105,9 @@ public class JWebBrowser extends NSPanelComponent {
       if(webBrowser == null) {
         return;
       }
-      webBrowser.stopButton.setEnabled(false);
+      if(webBrowser.isButtonBarVisible()) {
+        webBrowser.stopButton.setEnabled(false);
+      }
       webBrowser.stopMenuItem.setEnabled(false);
       webBrowser.updateAddressBar();
       webBrowser.updateNavigationButtons();
@@ -115,8 +118,12 @@ public class JWebBrowser extends NSPanelComponent {
       if(webBrowser == null) {
         return;
       }
-      webBrowser.addressField.setText(e.getNewURL());
-      webBrowser.stopButton.setEnabled(true);
+      if(webBrowser.isAddressBarVisible()) {
+        webBrowser.addressField.setText(e.getNewURL());
+      }
+      if(webBrowser.isButtonBarVisible()) {
+        webBrowser.stopButton.setEnabled(true);
+      }
       webBrowser.stopMenuItem.setEnabled(true);
     }
     @Override
@@ -125,7 +132,9 @@ public class JWebBrowser extends NSPanelComponent {
       if(webBrowser == null) {
         return;
       }
-      webBrowser.stopButton.setEnabled(false);
+      if(webBrowser.isButtonBarVisible()) {
+        webBrowser.stopButton.setEnabled(false);
+      }
       webBrowser.stopMenuItem.setEnabled(false);
       webBrowser.updateAddressBar();
       webBrowser.updateNavigationButtons();
@@ -162,10 +171,14 @@ public class JWebBrowser extends NSPanelComponent {
   private void updateNavigationButtons() {
     if(isViewMenuVisible || isButtonBarVisible()) {
       boolean isBackEnabled = nativeComponent.isGoBackEnabled();
-      backButton.setEnabled(isBackEnabled);
+      if(isButtonBarVisible()) {
+        backButton.setEnabled(isBackEnabled);
+      }
       backMenuItem.setEnabled(isBackEnabled);
       boolean isForwardEnabled = nativeComponent.isGoForwardEnabled();
-      forwardButton.setEnabled(isForwardEnabled);
+      if(isButtonBarVisible()) {
+        forwardButton.setEnabled(isForwardEnabled);
+      }
       forwardMenuItem.setEnabled(isForwardEnabled);
     }
   }
@@ -212,87 +225,106 @@ public class JWebBrowser extends NSPanelComponent {
     }
   };
   
+  private class ButtonBarPane extends JPanel {
+    
+    public ButtonBarPane() {
+      super(new BorderLayout(0, 0));
+      JToolBar buttonToolBar = new JToolBar();
+      buttonToolBar.add(Box.createHorizontalStrut(2));
+      buttonToolBar.setFloatable(false);
+      backButton = new JButton(createIcon("BackIcon"));
+      backButton.setEnabled(backMenuItem.isEnabled());
+      backButton.setToolTipText(RESOURCES.getString("BackText"));
+      backButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          goBack();
+          nativeComponent.requestFocus();
+        }
+      });
+      buttonToolBar.add(backButton);
+      forwardButton = new JButton(createIcon("ForwardIcon"));
+      forwardButton.setToolTipText(RESOURCES.getString("ForwardText"));
+      forwardButton.setEnabled(forwardMenuItem.isEnabled());
+      forwardButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          goForward();
+          nativeComponent.requestFocus();
+        }
+      });
+      buttonToolBar.add(forwardButton);
+      refreshButton = new JButton(createIcon("RefreshIcon"));
+      refreshButton.setToolTipText(RESOURCES.getString("RefreshText"));
+      refreshButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          refresh();
+          nativeComponent.requestFocus();
+        }
+      });
+      buttonToolBar.add(refreshButton);
+      stopButton = new JButton(createIcon("StopIcon"));
+      stopButton.setToolTipText(RESOURCES.getString("StopText"));
+      stopButton.setEnabled(stopMenuItem.isEnabled());
+      stopButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          stop();
+        }
+      });
+      buttonToolBar.add(stopButton);
+      add(buttonToolBar, BorderLayout.CENTER);
+    }
+    
+    public void dispose() {
+      backButton = null;
+      forwardButton = null;
+      refreshButton = null;
+      stopButton = null;
+    }
+    
+  }
+  
+  private class AddressBarPane extends JPanel {
+    
+    public AddressBarPane() {
+      super(new BorderLayout(0, 0));
+      JToolBar addressToolBar = new JToolBar();
+      // We have to force the layout manager because in Synth L&F the text field does not take the full available width.
+      addressToolBar.setLayout(new BoxLayout(addressToolBar, BoxLayout.LINE_AXIS));
+      JPanel addressToolBarInnerPanel = new JPanel(new BorderLayout(0, 0));
+      addressToolBarInnerPanel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+      addressToolBarInnerPanel.setOpaque(false);
+      addressToolBar.setFloatable(false);
+      addressField = new JTextField();
+      ActionListener goActionListener = new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          setURL(addressField.getText());
+          nativeComponent.requestFocus();
+        }
+      };
+      addressField.addActionListener(goActionListener);
+      addressToolBarInnerPanel.add(addressField, BorderLayout.CENTER);
+      JButton goButton = new JButton(createIcon("GoIcon"));
+      goButton.setToolTipText(RESOURCES.getString("GoText"));
+      goButton.addActionListener(goActionListener);
+      addressToolBar.add(addressToolBarInnerPanel);
+      addressToolBar.add(goButton);
+      add(addressToolBar, BorderLayout.CENTER);
+    }
+    
+    public void dispose() {
+      addressField = null;
+    }
+    
+  }
+  
   /**
    * Construct a new web browser.
    */
   public JWebBrowser() {
     nativeComponent = new NativeWebBrowser(this);
     initialize(nativeComponent);
-    JPanel menuToolAndAddressBarPanel = new JPanel(new BorderLayout(0, 0));
+    menuToolAndAddressBarPanel = new JPanel(new BorderLayout(0, 0));
     menuBar = new JMenuBar();
     menuToolAndAddressBarPanel.add(menuBar, BorderLayout.NORTH);
-    buttonBarPanel = new JPanel(new BorderLayout(0, 0));
-    JToolBar buttonToolBar = new JToolBar();
-    buttonToolBar.add(Box.createHorizontalStrut(2));
-    buttonToolBar.setFloatable(false);
-    backButton = new JButton(createIcon("BackIcon"));
-    backButton.setEnabled(false);
-    backButton.setToolTipText(RESOURCES.getString("BackText"));
-    ActionListener backActionListener = new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        goBack();
-        nativeComponent.requestFocus();
-      }
-    };
-    backButton.addActionListener(backActionListener);
-    buttonToolBar.add(backButton);
-    forwardButton = new JButton(createIcon("ForwardIcon"));
-    forwardButton.setToolTipText(RESOURCES.getString("ForwardText"));
-    forwardButton.setEnabled(false);
-    ActionListener forwardActionListener = new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        goForward();
-        nativeComponent.requestFocus();
-      }
-    };
-    forwardButton.addActionListener(forwardActionListener);
-    buttonToolBar.add(forwardButton);
-    refreshButton = new JButton(createIcon("RefreshIcon"));
-    refreshButton.setToolTipText(RESOURCES.getString("RefreshText"));
-    ActionListener refreshActionListener = new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        refresh();
-        nativeComponent.requestFocus();
-      }
-    };
-    refreshButton.addActionListener(refreshActionListener);
-    buttonToolBar.add(refreshButton);
-    stopButton = new JButton(createIcon("StopIcon"));
-    stopButton.setToolTipText(RESOURCES.getString("StopText"));
-    stopButton.setEnabled(false);
-    ActionListener stopActionListener = new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        stop();
-      }
-    };
-    stopButton.addActionListener(stopActionListener);
-    buttonToolBar.add(stopButton);
-    buttonBarPanel.add(buttonToolBar, BorderLayout.CENTER);
-    menuToolAndAddressBarPanel.add(buttonBarPanel, BorderLayout.WEST);
-    addressBarPanel = new JPanel(new BorderLayout(0, 0));
-    JToolBar addressToolBar = new JToolBar();
-    // We have to force the layout manager because in Synth L&F the text field does not take the full available width.
-    addressToolBar.setLayout(new BoxLayout(addressToolBar, BoxLayout.LINE_AXIS));
-    JPanel addressToolBarInnerPanel = new JPanel(new BorderLayout(0, 0));
-    addressToolBarInnerPanel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-    addressToolBarInnerPanel.setOpaque(false);
-    addressToolBar.setFloatable(false);
-    addressField = new JTextField();
-    ActionListener goActionListener = new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        setURL(addressField.getText());
-        nativeComponent.requestFocus();
-      }
-    };
-    addressField.addActionListener(goActionListener);
-    addressToolBarInnerPanel.add(addressField, BorderLayout.CENTER);
-    JButton goButton = new JButton(createIcon("GoIcon"));
-    goButton.setToolTipText(RESOURCES.getString("GoText"));
-    goButton.addActionListener(goActionListener);
-    addressToolBar.add(addressToolBarInnerPanel);
-    addressToolBar.add(goButton);
-    addressBarPanel.add(addressToolBar, BorderLayout.CENTER);
-    menuToolAndAddressBarPanel.add(addressBarPanel, BorderLayout.CENTER);
     add(menuToolAndAddressBarPanel, BorderLayout.NORTH);
     webBrowserPanel = new JPanel(new BorderLayout(0, 0));
     webBrowserPanel.add(nativeComponent.createEmbeddableComponent(), BorderLayout.CENTER);
@@ -378,20 +410,39 @@ public class JWebBrowser extends NSPanelComponent {
     viewMenu.add(statusBarCheckBoxMenuItem);
     viewMenu.addSeparator();
     backMenuItem = new JMenuItem(RESOURCES.getString("ViewBackMenu"), createIcon("BackMenuIcon"));
-    backMenuItem.addActionListener(backActionListener);
-    backMenuItem.setEnabled(backButton.isEnabled());
+    backMenuItem.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        goBack();
+        nativeComponent.requestFocus();
+      }
+    });
+    backMenuItem.setEnabled(false);
     viewMenu.add(backMenuItem);
     forwardMenuItem = new JMenuItem(RESOURCES.getString("ViewForwardMenu"), createIcon("ForwardMenuIcon"));
-    forwardMenuItem.addActionListener(forwardActionListener);
-    forwardMenuItem.setEnabled(forwardButton.isEnabled());
+    forwardMenuItem.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        goForward();
+        nativeComponent.requestFocus();
+      }
+    });
+    forwardMenuItem.setEnabled(false);
     viewMenu.add(forwardMenuItem);
     refreshMenuItem = new JMenuItem(RESOURCES.getString("ViewRefreshMenu"), createIcon("RefreshMenuIcon"));
-    refreshMenuItem.addActionListener(refreshActionListener);
-    refreshMenuItem.setEnabled(refreshButton.isEnabled());
+    refreshMenuItem.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        refresh();
+        nativeComponent.requestFocus();
+      }
+    });
+    refreshMenuItem.setEnabled(false);
     viewMenu.add(refreshMenuItem);
     stopMenuItem = new JMenuItem(RESOURCES.getString("ViewStopMenu"), createIcon("StopMenuIcon"));
-    stopMenuItem.addActionListener(stopActionListener);
-    stopMenuItem.setEnabled(stopButton.isEnabled());
+    stopMenuItem.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        stop();
+      }
+    });
+    stopMenuItem.setEnabled(false);
     viewMenu.add(stopMenuItem);
     menuBar.add(viewMenu);
     viewMenu.getPopupMenu().addPopupMenuListener(new PopupMenuListener() {
@@ -407,6 +458,8 @@ public class JWebBrowser extends NSPanelComponent {
         }
       }
     });
+    setButtonBarVisible(true);
+    setAddressBarVisible(true);
   }
   
   /**
@@ -458,7 +511,16 @@ public class JWebBrowser extends NSPanelComponent {
     if(isButtonBarVisible == isButtonBarVisible()) {
       return;
     }
-    buttonBarPanel.setVisible(isButtonBarVisible);
+    if(isButtonBarVisible) {
+      buttonBarPane = new ButtonBarPane();
+      menuToolAndAddressBarPanel.add(buttonBarPane, BorderLayout.WEST);
+    } else {
+      menuToolAndAddressBarPanel.remove(buttonBarPane);
+      buttonBarPane.dispose();
+      buttonBarPane = null;
+    }
+    menuToolAndAddressBarPanel.revalidate();
+    menuToolAndAddressBarPanel.repaint();
     buttonBarCheckBoxMenuItem.setSelected(isButtonBarVisible);
     adjustBorder();
     if(isButtonBarVisible && !isViewMenuVisible) {
@@ -471,7 +533,7 @@ public class JWebBrowser extends NSPanelComponent {
    * @return true if the button bar is visible.
    */
   public boolean isButtonBarVisible() {
-    return buttonBarPanel.isVisible();
+    return buttonBarPane != null;
   }
   
   /**
@@ -482,7 +544,16 @@ public class JWebBrowser extends NSPanelComponent {
     if(isAddressBarVisible == isAddressBarVisible()) {
       return;
     }
-    addressBarPanel.setVisible(isAddressBarVisible);
+    if(isAddressBarVisible) {
+      addressBarPane = new AddressBarPane();
+      menuToolAndAddressBarPanel.add(addressBarPane, BorderLayout.CENTER);
+    } else {
+      menuToolAndAddressBarPanel.remove(addressBarPane);
+      addressBarPane.dispose();
+      addressBarPane = null;
+    }
+    menuToolAndAddressBarPanel.revalidate();
+    menuToolAndAddressBarPanel.repaint();
     addressBarCheckBoxMenuItem.setSelected(isAddressBarVisible);
     adjustBorder();
     updateAddressBar();
@@ -493,7 +564,7 @@ public class JWebBrowser extends NSPanelComponent {
    * @return true if the address bar is visible.
    */
   public boolean isAddressBarVisible() {
-    return addressBarPanel.isVisible();
+    return addressBarPane != null;
   }
   
   /**
