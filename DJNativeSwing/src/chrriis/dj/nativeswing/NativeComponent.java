@@ -1042,12 +1042,13 @@ public abstract class NativeComponent extends Canvas {
         int height = imageData.height;
         try {
           for(Rectangle rectangle: rectangles) {
-            for(int i=0; i<rectangle.width; i++) {
-              for(int j=0; j<rectangle.height; j++) {
+            for(int j=0; j<rectangle.height; j++) {
+              int y = rectangle.y + j;
+              for(int i=0; i<rectangle.width; i++) {
                 int x = rectangle.x + i;
-                int y = rectangle.y + j;
                 if(x < width && y < height) {
                   int pixel = imageData.getPixel(x, y);
+                  // We cannot use palette.getRGB() because all the creations of RGB objects make it too slow.
                   int red = pixel & palette.redMask;
                   bytes[cursor++] = (byte)(palette.redShift < 0? red >>> -palette.redShift: red << palette.redShift);
                   int green = pixel & palette.greenMask;
