@@ -174,12 +174,12 @@ public class JWebBrowser extends NSPanelComponent {
   
   private void updateNavigationButtons() {
     if(isViewMenuVisible || isButtonBarVisible()) {
-      boolean isBackEnabled = nativeComponent.isGoBackEnabled();
+      boolean isBackEnabled = isCreated? nativeComponent.isGoBackEnabled(): false;
       if(isButtonBarVisible()) {
         backButton.setEnabled(isBackEnabled);
       }
       backMenuItem.setEnabled(isBackEnabled);
-      boolean isForwardEnabled = nativeComponent.isGoForwardEnabled();
+      boolean isForwardEnabled = isCreated? nativeComponent.isGoForwardEnabled(): false;
       if(isButtonBarVisible()) {
         forwardButton.setEnabled(isForwardEnabled);
       }
@@ -330,7 +330,7 @@ public class JWebBrowser extends NSPanelComponent {
     }
     
     public void updateAddress() {
-      addressField.setText(nativeComponent.getURL());
+      addressField.setText(isCreated? nativeComponent.getURL(): "");
     }
     
     public void dispose() {
@@ -361,13 +361,13 @@ public class JWebBrowser extends NSPanelComponent {
     }
     
     public void updateProgressValue() {
-      int loadingProgress = nativeComponent.getPageLoadingProgressValue();
+      int loadingProgress = isCreated? nativeComponent.getPageLoadingProgressValue(): 100;
       progressBar.setValue(loadingProgress);
       progressBar.setVisible(loadingProgress < 100);
     }
     
     public void updateStatus() {
-      String status = nativeComponent.getStatusText();
+      String status = isCreated? nativeComponent.getStatusText(): "";
       statusLabel.setText(status.length() == 0? " ": status);
     }
     
@@ -377,6 +377,8 @@ public class JWebBrowser extends NSPanelComponent {
     }
     
   }
+  
+  private boolean isCreated;
   
   /**
    * Construct a new web browser.
@@ -510,6 +512,7 @@ public class JWebBrowser extends NSPanelComponent {
     setButtonBarVisible(true);
     setAddressBarVisible(true);
     setStatusBarVisible(true);
+    isCreated = true;
   }
   
   /**
