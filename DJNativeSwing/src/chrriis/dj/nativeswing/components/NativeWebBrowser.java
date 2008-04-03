@@ -493,8 +493,8 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
   
-  public boolean setURL(String url) {
-    return Boolean.TRUE.equals(runSync(new CMN_setURL(), url));
+  public boolean setURL(String urlOrPath) {
+    return Boolean.TRUE.equals(runSync(new CMN_setURL(), urlOrPath));
   }
   
   private static class CMN_getHTMLContent extends ControlCommandMessage {

@@ -650,11 +650,11 @@ public class JWebBrowser extends NSPanelComponent {
   }
   
   /**
-   * Set the URL.
-   * @param url the URL.
+   * Set the URL or path.
+   * @param urlOrPath the URL or path.
    */
-  public boolean setURL(String url) {
-    return nativeComponent.setURL(url);
+  public boolean setURL(String urlOrPath) {
+    return nativeComponent.setURL(urlOrPath);
   }
   
   /**
