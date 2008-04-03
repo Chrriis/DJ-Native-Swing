@@ -146,14 +146,23 @@ class NativeWebBrowser extends NativeComponent {
           ((WebBrowserListener)listeners[i + 1]).windowOpening(e);
         }
       }
-      SwingUtilities.invokeLater(new Runnable() {
+      new Thread() {
+        @Override
         public void run() {
-          JWebBrowserWindow browserWindow = newWebBrowser.getWebBrowserWindow();
-          if(browserWindow != null && !newWebBrowser.getNativeComponent().isNativePeerDisposed()) {
-            browserWindow.setVisible(true);
+          try {
+            sleep(200);
+          } catch(Exception e) {
           }
+          SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+              JWebBrowserWindow browserWindow = newWebBrowser.getWebBrowserWindow();
+              if(browserWindow != null && !newWebBrowser.getNativeComponent().isNativePeerDisposed()) {
+                browserWindow.setVisible(true);
+              }
+            }
+          });
         }
-      });
+      }.start();
       return null;
     }
   }

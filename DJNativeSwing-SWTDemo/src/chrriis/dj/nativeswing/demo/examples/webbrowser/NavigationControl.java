@@ -39,9 +39,10 @@ public class NavigationControl extends JPanel {
     webBrowser.setHTMLContent(
         "<html>" + LS +
         "  <body>" + LS +
-        "    <a href=\"http://java.sun.com\">http://java.sun.com</a>: create a new tab.<br/>" + LS +
-        "    <a href=\"http://www.google.com\">http://www.google.com</a>: open in a new window.<br/>" + LS +
-        "    <a href=\"http://www.eclipse.org\">http://www.eclipse.org</a>: link is blocked. Context menu \"Open in new Window\" creates a new tab.<br/>" + LS +
+        "    <a href=\"http://java.sun.com\">http://java.sun.com</a>: force link to open in a new tab.<br/>" + LS +
+        "    <a href=\"http://www.google.com\">http://www.google.com</a>: force link to open in a new window.<br/>" + LS +
+        "    <a href=\"http://www.eclipse.org\">http://www.eclipse.org</a>: block link. Context menu \"Open in new Window\" creates a new tab.<br/>" + LS +
+        "    <a href=\"http://www.yahoo.com\" target=\"_blank\">http://www.yahoo.com</a>: link normally opens in a new window but creates a new tab.<br/>" + LS +
         "    <a href=\"http://www.microsoft.com\">http://www.microsoft.com</a>: link and \"Open in new Window\" are blocked.<br/>" + LS +
         "  </body>" + LS +
         "</html>");
@@ -91,6 +92,12 @@ public class NavigationControl extends JPanel {
               JWebBrowser.copyAppearance(webBrowser, newWebBrowser);
               newWebBrowser.setURL(newURL);
               tabbedPane.addTab("www.eclipse.org", newWebBrowser);
+            } else if(newURL.startsWith("http://www.yahoo.com/")) {
+              isBlocked = true;
+              JWebBrowser newWebBrowser = new JWebBrowser();
+              JWebBrowser.copyAppearance(webBrowser, newWebBrowser);
+              newWebBrowser.setURL(newURL);
+              tabbedPane.addTab("www.yahoo.com", newWebBrowser);
             }
             if(isBlocked) {
               e.consume();
