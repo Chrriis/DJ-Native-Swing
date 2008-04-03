@@ -174,12 +174,12 @@ public class JWebBrowser extends NSPanelComponent {
   
   private void updateNavigationButtons() {
     if(isViewMenuVisible || isButtonBarVisible()) {
-      boolean isBackEnabled = isCreated? nativeComponent.isGoBackEnabled(): false;
+      boolean isBackEnabled = nativeComponent.isNativePeerInitialized()? nativeComponent.isGoBackEnabled(): false;
       if(isButtonBarVisible()) {
         backButton.setEnabled(isBackEnabled);
       }
       backMenuItem.setEnabled(isBackEnabled);
-      boolean isForwardEnabled = isCreated? nativeComponent.isGoForwardEnabled(): false;
+      boolean isForwardEnabled = nativeComponent.isNativePeerInitialized()? nativeComponent.isGoForwardEnabled(): false;
       if(isButtonBarVisible()) {
         forwardButton.setEnabled(isForwardEnabled);
       }
@@ -330,7 +330,7 @@ public class JWebBrowser extends NSPanelComponent {
     }
     
     public void updateAddress() {
-      addressField.setText(isCreated? nativeComponent.getURL(): "");
+      addressField.setText(nativeComponent.isNativePeerInitialized()? nativeComponent.getURL(): "");
     }
     
     public void dispose() {
@@ -361,13 +361,13 @@ public class JWebBrowser extends NSPanelComponent {
     }
     
     public void updateProgressValue() {
-      int loadingProgress = isCreated? nativeComponent.getPageLoadingProgressValue(): 100;
+      int loadingProgress = nativeComponent.isNativePeerInitialized()? nativeComponent.getPageLoadingProgressValue(): 100;
       progressBar.setValue(loadingProgress);
       progressBar.setVisible(loadingProgress < 100);
     }
     
     public void updateStatus() {
-      String status = isCreated? nativeComponent.getStatusText(): "";
+      String status = nativeComponent.isNativePeerInitialized()? nativeComponent.getStatusText(): "";
       statusLabel.setText(status.length() == 0? " ": status);
     }
     
@@ -377,8 +377,6 @@ public class JWebBrowser extends NSPanelComponent {
     }
     
   }
-  
-  private boolean isCreated;
   
   /**
    * Construct a new web browser.
@@ -512,7 +510,6 @@ public class JWebBrowser extends NSPanelComponent {
     setButtonBarVisible(true);
     setAddressBarVisible(true);
     setStatusBarVisible(true);
-    isCreated = true;
   }
   
   /**
