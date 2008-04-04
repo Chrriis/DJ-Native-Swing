@@ -22,6 +22,7 @@ import javax.swing.tree.DefaultTreeModel;
 import chrriis.dj.nativeswing.demo.examples.advancedcapabilities.AlphaBlendingSimulation;
 import chrriis.dj.nativeswing.demo.examples.advancedcapabilities.DestructionTimeOption;
 import chrriis.dj.nativeswing.demo.examples.advancedcapabilities.FiliationTypeOption;
+import chrriis.dj.nativeswing.demo.examples.advancedcapabilities.ThumbnailCreation;
 import chrriis.dj.nativeswing.demo.examples.advancedcapabilities.VisibilityConstraintOption;
 import chrriis.dj.nativeswing.demo.examples.evolutions.WorkInProgress;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.Interactions;
@@ -77,6 +78,7 @@ public class DemoTree extends JTree {
         new Example("Visibility Constraint", VisibilityConstraintOption.class, "Constrain the visibility to superimpose Swing and native components.", true),
         new Example("Destruction Time", DestructionTimeOption.class, "Defer destruction until finalization to add/remove the same component. It is not destroyed when removed but on explicit dispose() or during garbage collection.", true),
         new Example("Filiation Type", FiliationTypeOption.class, "Use a proxied filiation of native components to allow re-parenting and change of component Z-order. By default, the visibility gets automatically constrained.", true),
+        new Example("Thumbnail Creation", ThumbnailCreation.class, "Create a thumbnail by painting the native component in an image. The full JWebBrowser with its decorations can be painted as well using the print(Graphics) method.", true),
         new Example("Alpha Blending Simulation", AlphaBlendingSimulation.class, "Simulate alpha blending of a Swing component over a native component. This works rather well over static content.", true),
     }));
     exampleGroupList.add(new ExampleGroup("JMultiMediaPlayer (win32)", new Example[] {
