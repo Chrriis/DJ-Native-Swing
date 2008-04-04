@@ -1042,10 +1042,10 @@ public abstract class NativeComponent extends Canvas {
         int height = imageData.height;
         try {
           for(Rectangle rectangle: rectangles) {
-            for(int i=0; i<rectangle.width; i++) {
-              int x = rectangle.x + i;
-              for(int j=0; j<rectangle.height; j++) {
-                int y = rectangle.y + j;
+            for(int j=0; j<rectangle.height; j++) {
+              int y = rectangle.y + j;
+              for(int i=0; i<rectangle.width; i++) {
+                int x = rectangle.x + i;
                 if(x < width && y < height) {
                   int pixel = imageData.getPixel(x, y);
                   // We cannot use palette.getRGB() because all the creations of RGB objects make it too slow.
@@ -1118,8 +1118,7 @@ public abstract class NativeComponent extends Canvas {
     try {
       ServerSocket serverSocket = new ServerSocket(0);
       CMN_getComponentImage getComponentImage = new CMN_getComponentImage();
-      getComponentImage.setNativeComponent(this);
-      getComponentImage.asyncExec(serverSocket.getLocalPort(), rectangles);
+      getComponentImage.asyncExec(this, serverSocket.getLocalPort(), rectangles);
       Socket socket = serverSocket.accept();
       // Has to be a multiple of 3
       byte[] bytes = new byte[1024 * 3];
@@ -1129,21 +1128,23 @@ public abstract class NativeComponent extends Canvas {
         BufferedInputStream in = new BufferedInputStream(socket.getInputStream());
         synchronized(image) {
           for(Rectangle rectangle: rectangles) {
-            for(int x=0; x<rectangle.width; x++) {
-              for(int y=0; y<rectangle.height; y++) {
+            int[] pixels = new int[rectangle.width];
+            for(int y=0; y<rectangle.height; y++) {
+              for(int x=0; x<rectangle.width; x++) {
                 if(readCount == 0) {
                   readCount = in.read(bytes);
                   if((readCount % 3) != 0) {
                     readCount += in.read(bytes, readCount, bytes.length - readCount);
                   }
                 }
-                image.setRGB(rectangle.x + x, rectangle.y + y, 0xFF000000 | (0xFF & bytes[count]) << 16 | (0xFF & bytes[count + 1]) << 8 | (0xFF & bytes[count + 2]));
+                pixels[x] = 0xFF000000 | (0xFF & bytes[count]) << 16 | (0xFF & bytes[count + 1]) << 8 | (0xFF & bytes[count + 2]);
                 count += 3;
                 if(count == readCount) {
                   count = 0;
                   readCount = 0;
                 }
               }
+              image.setRGB(rectangle.x, rectangle.y + y, rectangle.width, 1, pixels, 0, rectangle.width);
             }
           }
         }
