@@ -56,7 +56,7 @@ import chrriis.dj.nativeswing.NativeComponent;
 /**
  * A native web browser, using Internet Explorer or Mozilla on Windows, and Mozilla on other platforms.<br/>
  * Methods execute when this component is initialized. If the component is not initialized, methods will be executed as soon as it gets initialized.
- * If the initialization fail, the methods will not have any effect. The results from methods have relevant values only when the component is valid. 
+ * If the initialization fails, the methods will not have any effect. The results from methods have relevant values only when the component is valid. 
  * @author Christopher Deckers
  */
 public class JWebBrowser extends NSPanelComponent {
@@ -701,14 +701,14 @@ public class JWebBrowser extends NSPanelComponent {
     nativeComponent.stop();
   }
   
-  /**
-   * Execute some javascript, and wait for the indication of success.
-   * @param javascript the javascript to execute.
-   * @return true if the execution succeeded. 
-   */
-  public boolean executeJavascriptAndWait(String javascript) {
-    return nativeComponent.executeJavascriptAndWait(javascript);
-  }
+//  /**
+//   * Execute some javascript, and wait for the indication of success.
+//   * @param javascript the javascript to execute.
+//   * @return true if the execution succeeded. 
+//   */
+//  public boolean executeJavascriptAndWait(String javascript) {
+//    return nativeComponent.executeJavascriptAndWait(javascript);
+//  }
   
   /**
    * Execute some javascript.

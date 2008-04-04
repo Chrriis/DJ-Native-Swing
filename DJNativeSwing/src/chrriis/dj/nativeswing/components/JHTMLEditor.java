@@ -33,7 +33,7 @@ import chrriis.dj.nativeswing.NSPanelComponent;
 /**
  * An HTML editor. It is a browser-based component, which relies on the FCKeditor.<br/>
  * Methods execute when this component is initialized. If the component is not initialized, methods will be executed as soon as it gets initialized.
- * If the initialization fail, the methods will not have any effect. The results from methods have relevant values only when the component is valid. 
+ * If the initialization fails, the methods will not have any effect. The results from methods have relevant values only when the component is valid. 
  * @author Christopher Deckers
  */
 public class JHTMLEditor extends NSPanelComponent {
