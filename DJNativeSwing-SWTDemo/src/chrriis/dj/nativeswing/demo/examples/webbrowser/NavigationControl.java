@@ -48,14 +48,14 @@ public class NavigationControl extends JPanel {
         "</html>");
     webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
       @Override
-      public void urlChanging(WebBrowserNavigationEvent e) {
-        final String newURL = e.getNewURL();
+      public void locationChanging(WebBrowserNavigationEvent e) {
+        final String newURL = e.getNewLocation();
         if(newURL.startsWith("http://www.google.com/")) {
           e.consume();
           SwingUtilities.invokeLater(new Runnable() {
             public void run() {
               JWebBrowserWindow webBrowserWindow = new JWebBrowserWindow();
-              webBrowserWindow.getWebBrowser().setURL(newURL);
+              webBrowserWindow.getWebBrowser().navigate(newURL);
               webBrowserWindow.setVisible(true);
             }
           });
@@ -64,7 +64,7 @@ public class NavigationControl extends JPanel {
           SwingUtilities.invokeLater(new Runnable() {
             public void run() {
               JWebBrowser webBrowser = new JWebBrowser();
-              webBrowser.setURL(newURL);
+              webBrowser.navigate(newURL);
               tabbedPane.addTab("java.sun.com", webBrowser);
             }
           });
@@ -79,10 +79,10 @@ public class NavigationControl extends JPanel {
         // We let the window to be created, but we will check the first URL that is set on it.
         e.getNewWebBrowser().addWebBrowserListener(new WebBrowserAdapter() {
           @Override
-          public void urlChanging(WebBrowserNavigationEvent e) {
+          public void locationChanging(WebBrowserNavigationEvent e) {
             final JWebBrowser webBrowser = e.getWebBrowser();
             webBrowser.removeWebBrowserListener(this);
-            String newURL = e.getNewURL();
+            String newURL = e.getNewLocation();
             boolean isBlocked = false;
             if(newURL.startsWith("http://www.microsoft.com/")) {
               isBlocked = true;
@@ -90,13 +90,13 @@ public class NavigationControl extends JPanel {
               isBlocked = true;
               JWebBrowser newWebBrowser = new JWebBrowser();
               JWebBrowser.copyAppearance(webBrowser, newWebBrowser);
-              newWebBrowser.setURL(newURL);
+              newWebBrowser.navigate(newURL);
               tabbedPane.addTab("www.eclipse.org", newWebBrowser);
             } else if(newURL.startsWith("http://www.yahoo.com/")) {
               isBlocked = true;
               JWebBrowser newWebBrowser = new JWebBrowser();
               JWebBrowser.copyAppearance(webBrowser, newWebBrowser);
-              newWebBrowser.setURL(newURL);
+              newWebBrowser.navigate(newURL);
               tabbedPane.addTab("www.yahoo.com", newWebBrowser);
             }
             if(isBlocked) {

@@ -57,7 +57,7 @@ public class SimpleWebBrowserExample extends JPanel {
         statusBarCheckBox.setSelected(isStatusBarVisible);
       }
     };
-    webBrowser.setURL("http://www.google.com");
+    webBrowser.navigate("http://www.google.com");
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);
     // Create the check boxes, to show/hide the various bars

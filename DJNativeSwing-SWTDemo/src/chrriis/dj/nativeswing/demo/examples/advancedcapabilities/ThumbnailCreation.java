@@ -42,7 +42,7 @@ public class ThumbnailCreation extends JPanel {
     super(new BorderLayout(0, 0));
     webBrowser = new JWebBrowser();
     webBrowser.setBorder(BorderFactory.createTitledBorder("Web Browser component"));
-    webBrowser.setURL("http://www.google.com");
+    webBrowser.navigate("http://www.google.com");
     add(webBrowser, BorderLayout.CENTER);
     JPanel eastPanel = new JPanel(new GridBagLayout());
     JPanel thumbnailPanel = new JPanel(new BorderLayout(0, 0));

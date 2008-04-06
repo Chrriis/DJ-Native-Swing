@@ -44,7 +44,7 @@ public class AlphaBlendingSimulation extends JPanel implements Disposable {
     NativeComponentOptions.getNextInstanceOptions().setVisibilityConstraint(VisibilityConstraint.FULL_COMPONENT_TREE);
     webBrowser = new JWebBrowser();
     webBrowser.setBarsVisible(false);
-    webBrowser.setURL("http://www.google.com");
+    webBrowser.navigate("http://www.google.com");
     webBrowser.setBounds(50, 50, 500, 400);
     add(webBrowser);
     JLabel descriptionLabel = new JLabel("Grab and move that image over the native component: ");

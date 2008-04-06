@@ -315,10 +315,10 @@ public class JVLCPlayer extends NSPanelComponent {
   
   /**
    * Load a file.
-   * @param resourcePath the path or URL to the file.
+   * @param resourceLocation the path or URL to the file.
    */
-  public void load(String resourcePath) {
-    load(resourcePath, null);
+  public void load(String resourceLocation) {
+    load(resourceLocation, null);
   }
   
   /**
@@ -352,22 +352,22 @@ public class JVLCPlayer extends NSPanelComponent {
   
   /**
    * Load a file.
-   * @param resourcePath the path or URL to the file.
+   * @param resourceLocation the path or URL to the file.
    * @param options the options to better configure the initialization of the VLC plugin.
    */
-  public void load(String resourcePath, VLCPluginOptions options) {
-    if("".equals(resourcePath)) {
-      resourcePath = null;
+  public void load(String resourceLocation, VLCPluginOptions options) {
+    if("".equals(resourceLocation)) {
+      resourceLocation = null;
     }
-    load_(resourcePath, options);
+    load_(resourceLocation, options);
   }
   
-  private void load_(String resourcePath, VLCPluginOptions options) {
+  private void load_(String resourceLocation, VLCPluginOptions options) {
     if(options == null) {
       options = new VLCPluginOptions();
     }
     this.options = options;
-    webBrowserObject.load(resourcePath);
+    webBrowserObject.load(resourceLocation);
     boolean hasContent = webBrowserObject.hasContent();
     playButton.setEnabled(hasContent);
     pauseButton.setEnabled(hasContent);

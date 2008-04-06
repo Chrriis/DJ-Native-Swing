@@ -13,17 +13,17 @@ package chrriis.dj.nativeswing.components;
  */
 public class WebBrowserNavigationEvent extends WebBrowserEvent {
 
-  private String url;
+  private String location;
   private boolean isTopFrame;
 
-  public WebBrowserNavigationEvent(JWebBrowser webBrowser, String newURL, boolean isTopFrame) {
+  public WebBrowserNavigationEvent(JWebBrowser webBrowser, String newLocation, boolean isTopFrame) {
     super(webBrowser);
-    this.url = newURL;
+    this.location = newLocation;
     this.isTopFrame = isTopFrame;
   }
   
-  public String getNewURL() {
-    return url;
+  public String getNewLocation() {
+    return location;
   }
   
   public boolean isTopFrame() {

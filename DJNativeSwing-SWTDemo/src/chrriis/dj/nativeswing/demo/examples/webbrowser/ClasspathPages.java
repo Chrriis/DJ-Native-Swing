@@ -26,7 +26,7 @@ public class ClasspathPages extends JPanel {
   public ClasspathPages() {
     super(new BorderLayout(0, 0));
     JWebBrowser webBrowser = new JWebBrowser();
-    webBrowser.setURL(WebServer.getDefaultWebServer().getClassPathResourceURL(getClass().getName(), "resource/page1.html"));
+    webBrowser.navigate(WebServer.getDefaultWebServer().getClassPathResourceURL(getClass().getName(), "resource/page1.html"));
     webBrowser.setBarsVisible(false);
     add(webBrowser, BorderLayout.CENTER);
   }

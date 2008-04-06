@@ -15,6 +15,7 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
@@ -34,7 +35,14 @@ import org.eclipse.swt.browser.TitleEvent;
 import org.eclipse.swt.browser.TitleListener;
 import org.eclipse.swt.browser.VisibilityWindowAdapter;
 import org.eclipse.swt.browser.WindowEvent;
+import org.eclipse.swt.events.MenuAdapter;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 
 import chrriis.common.Utils;
@@ -167,7 +175,7 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
   
-  private static class CMJ_urlChanged extends ControlCommandMessage {
+  private static class CMJ_locationChanged extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
@@ -184,7 +192,7 @@ class NativeWebBrowser extends NativeComponent {
           if(e == null) {
             e = new WebBrowserNavigationEvent(webBrowser, location, isTopFrame);
           }
-          ((WebBrowserListener)listeners[i + 1]).urlChanged(e);
+          ((WebBrowserListener)listeners[i + 1]).locationChanged(e);
         }
       }
       return null;
@@ -215,7 +223,7 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
 
-  private static class CMJ_urlChanging extends ControlCommandMessage {
+  private static class CMJ_locationChanging extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
@@ -233,7 +241,7 @@ class NativeWebBrowser extends NativeComponent {
           if(e == null) {
             e = new WebBrowserNavigationEvent(webBrowser, location, isTopFrame);
           }
-          ((WebBrowserListener)listeners[i + 1]).urlChanging(e);
+          ((WebBrowserListener)listeners[i + 1]).locationChanging(e);
           isNavigating &= !e.isConsumed();
         }
       }
@@ -241,7 +249,7 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
       
-  private static class CMJ_urlChangeCanceled extends ControlCommandMessage {
+  private static class CMJ_locationChangeCanceled extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
@@ -258,7 +266,7 @@ class NativeWebBrowser extends NativeComponent {
           if(e == null) {
             e = new WebBrowserNavigationEvent(webBrowser, location, isTopFrame);
           }
-          ((WebBrowserListener)listeners[i + 1]).urlChangeCanceled(e);
+          ((WebBrowserListener)listeners[i + 1]).locationChangeCanceled(e);
         }
       }
       return null;
@@ -311,7 +319,7 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
   
-  private static class CMJ_updateProgress extends ControlCommandMessage {
+  private static class CMJ_updateLoadingProgress extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
@@ -319,7 +327,7 @@ class NativeWebBrowser extends NativeComponent {
       if(webBrowser == null) {
         return null;
       }
-      nativeWebBrowser.pageLoadingProgressValue = (Integer)args[0];
+      nativeWebBrowser.loadingProgress = (Integer)args[0];
       Object[] listeners = nativeWebBrowser.listenerList.getListenerList();
       WebBrowserEvent e = null;
       for(int i=listeners.length-2; i>=0; i-=2) {
@@ -382,7 +390,8 @@ class NativeWebBrowser extends NativeComponent {
     });
     browser.addLocationListener(new LocationListener() {
       public void changed(LocationEvent e) {
-        new CMJ_urlChanged().asyncExec(browser, e.location, e.top);
+        browser.setData("Browser.loading", false);
+        new CMJ_locationChanged().asyncExec(browser, e.location, e.top);
       }
       public void changing(LocationEvent e) {
         final String location = e.location;
@@ -420,9 +429,11 @@ class NativeWebBrowser extends NativeComponent {
         }
         browser.setData("CMJ_updateStatus.status", null);
         browser.setData("CMJ_updateProgress.progress", null);
-        e.doit = (Boolean)new CMJ_urlChanging().syncExec(browser, location, e.top);
+        browser.setData("Browser.loading", true);
+        e.doit = (Boolean)new CMJ_locationChanging().syncExec(browser, location, e.top);
         if(!e.doit) {
-          new CMJ_urlChangeCanceled().asyncExec(browser, location, e.top);
+          browser.setData("Browser.loading", false);
+          new CMJ_locationChangeCanceled().asyncExec(browser, location, e.top);
         }
       }
     });
@@ -442,18 +453,23 @@ class NativeWebBrowser extends NativeComponent {
       }
     });
     browser.addProgressListener(new ProgressListener() {
-      public void changed(ProgressEvent e) {
-        int loadingProgressValue = e.total == 0? 100: e.current * 100 / e.total;
-        Integer oldProgressValue = (Integer)browser.getData("CMJ_updateProgress.progress");
-        if(!Utils.equals(oldProgressValue, loadingProgressValue)) {
-          browser.setData("CMJ_updateProgress.progress", loadingProgressValue);
-          new CMJ_updateProgress().asyncExec(browser, loadingProgressValue);
+      private void updateProgress(int loadingProgress) {
+        Integer oldLoadingProgress = (Integer)browser.getData("CMJ_updateProgress.progress");
+        if(!Utils.equals(oldLoadingProgress, loadingProgress)) {
+          browser.setData("CMJ_updateProgress.progress", loadingProgress);
+          new CMJ_updateLoadingProgress().asyncExec(browser, loadingProgress);
         }
       }
+      public void changed(ProgressEvent e) {
+        browser.setData("Browser.loading", true);
+        updateProgress(e.total <= 0 || e.total < e.current? 99: Math.min(e.current * 100 / e.total, 99));
+      }
       public void completed(ProgressEvent progressevent) {
-        new CMJ_updateProgress().asyncExec(browser, 100);
+        browser.setData("Browser.loading", false);
+        updateProgress(100);
       }
     });
+    registerDefaultPopupMenu(browser);
     return browser;
   }
 
@@ -475,26 +491,26 @@ class NativeWebBrowser extends NativeComponent {
     new CMN_clearSessionCookies().asyncExec();
   }
 
-  private static class CMN_getURL extends ControlCommandMessage {
+  private static class CMN_getResourceLocation extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       return ((Browser)getControl()).getUrl();
     }
   }
   
-  public String getURL() {
-    return (String)runSync(new CMN_getURL());
+  public String getResourceLocation() {
+    return (String)runSync(new CMN_getResourceLocation());
   }
   
-  private static class CMN_setURL extends ControlCommandMessage {
+  private static class CMN_navigate extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       return ((Browser)getControl()).setUrl((String)args[0]);
     }
   }
   
-  public boolean setURL(String urlOrPath) {
-    return Boolean.TRUE.equals(runSync(new CMN_setURL(), urlOrPath));
+  public boolean navigate(String resourceLocation) {
+    return Boolean.TRUE.equals(runSync(new CMN_navigate(), resourceLocation));
   }
   
   private static class CMN_getHTMLContent extends ControlCommandMessage {
@@ -558,7 +574,7 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
   
-  public void refresh() {
+  public void reload() {
     runAsync(new CMN_refresh());
   }
   
@@ -606,6 +622,93 @@ class NativeWebBrowser extends NativeComponent {
     runAsync(new CMN_goForward());
   }
   
+  private static void registerDefaultPopupMenu(final Browser browser) {
+    Menu oldMenu = browser.getMenu();
+    if(oldMenu != null) {
+      oldMenu.dispose();
+    }
+    if((browser.getStyle() & SWT.MOZILLA) == 0) {
+      browser.setMenu(null);
+      return;
+    }
+    Menu menu = new Menu(browser.getShell(), SWT.POP_UP);
+    ResourceBundle bundle = ResourceBundle.getBundle(NativeWebBrowser.class.getPackage().getName().replace('.', '/') + "/resource/WebBrowser");
+    final MenuItem backMenuItem = new MenuItem(menu, SWT.PUSH);
+    backMenuItem.setText(bundle.getString("SystemMenuBack"));
+    backMenuItem.setImage(new Image(browser.getDisplay(), NativeWebBrowser.class.getResourceAsStream(bundle.getString("SystemMenuBackIcon"))));
+    backMenuItem.addSelectionListener(new SelectionAdapter() {
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        browser.back();
+      }
+    });
+    final MenuItem forwardMenuItem = new MenuItem(menu, SWT.PUSH);
+    forwardMenuItem.setText(bundle.getString("SystemMenuForward"));
+    forwardMenuItem.setImage(new Image(browser.getDisplay(), NativeWebBrowser.class.getResourceAsStream(bundle.getString("SystemMenuForwardIcon"))));
+    forwardMenuItem.addSelectionListener(new SelectionAdapter() {
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        browser.forward();
+      }
+    });
+    final MenuItem reloadMenuItem = new MenuItem(menu, SWT.PUSH);
+    reloadMenuItem.setText(bundle.getString("SystemMenuReload"));
+    reloadMenuItem.setImage(new Image(browser.getDisplay(), NativeWebBrowser.class.getResourceAsStream(bundle.getString("SystemMenuReloadIcon"))));
+    reloadMenuItem.addSelectionListener(new SelectionAdapter() {
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        browser.refresh();
+      }
+    });
+    final MenuItem stopMenuItem = new MenuItem(menu, SWT.PUSH);
+    stopMenuItem.setText(bundle.getString("SystemMenuStop"));
+    stopMenuItem.setImage(new Image(browser.getDisplay(), NativeWebBrowser.class.getResourceAsStream(bundle.getString("SystemMenuStopIcon"))));
+    stopMenuItem.addSelectionListener(new SelectionAdapter() {
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        browser.stop();
+      }
+    });
+    menu.addMenuListener(new MenuAdapter() {
+      @Override
+      public void menuShown(MenuEvent e) {
+        backMenuItem.setEnabled(browser.isBackEnabled());
+        forwardMenuItem.setEnabled(browser.isForwardEnabled());
+        stopMenuItem.setEnabled(Boolean.TRUE.equals(browser.getData("Browser.loading")));
+      }
+    });
+    browser.setMenu(menu);
+  }
+  
+  private static class CMN_setDefaultPopupMenuRegistered extends ControlCommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      Browser browser = (Browser)getControl();
+      boolean isDefaultPopupMenuRegistered = (Boolean)args[0];
+      if(isDefaultPopupMenuRegistered) {
+        registerDefaultPopupMenu(browser);
+      } else {
+        Menu oldMenu = browser.getMenu();
+        if(oldMenu != null) {
+          oldMenu.dispose();
+        }
+        final Menu menu = new Menu(browser.getShell(), SWT.POP_UP);
+        menu.addMenuListener(new MenuAdapter() {
+          @Override
+          public void menuShown(MenuEvent e) {
+            menu.setVisible(false);
+          }
+        });
+        browser.setMenu(menu);
+      }
+      return null;
+    }
+  }
+  
+  public void setDefaultPopupMenuRegistered(boolean isDefaultPopupMenuRegistered) {
+    runAsync(new CMN_setDefaultPopupMenuRegistered(), isDefaultPopupMenuRegistered);
+  }
+  
   private String status;
 
   public String getStatusText() {
@@ -618,13 +721,13 @@ class NativeWebBrowser extends NativeComponent {
     return title == null? "": title;
   }
   
-  private int pageLoadingProgressValue = 100;
+  private int loadingProgress = 100;
   
   /**
    * @return a value between 0 and 100 indicating the current loading progress.
    */
-  public int getPageLoadingProgressValue() {
-    return pageLoadingProgressValue;
+  public int getLoadingProgress() {
+    return loadingProgress;
   }
   
   public void addWebBrowserListener(WebBrowserListener listener) {

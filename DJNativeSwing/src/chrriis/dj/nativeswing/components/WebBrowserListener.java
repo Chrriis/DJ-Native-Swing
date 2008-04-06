@@ -33,12 +33,12 @@ public interface WebBrowserListener extends EventListener {
   /**
    * The event can be consumed.
    */
-  public void urlChanging(WebBrowserNavigationEvent e);
-  public void urlChanged(WebBrowserNavigationEvent e);
+  public void locationChanging(WebBrowserNavigationEvent e);
+  public void locationChanged(WebBrowserNavigationEvent e);
   /**
-   * Invoked when the url was changing but one of the listener returned false to block the change.
+   * Invoked when the location was changing but one of the listener returned false to block the change.
    */
-  public void urlChangeCanceled(WebBrowserNavigationEvent e);
+  public void locationChangeCanceled(WebBrowserNavigationEvent e);
   
   public void loadingProgressChanged(WebBrowserEvent e);
   

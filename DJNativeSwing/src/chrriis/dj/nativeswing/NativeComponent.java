@@ -387,15 +387,18 @@ public abstract class NativeComponent extends Canvas {
     }
     @Override
     public Object run(Object[] args) throws Exception {
-      Shell shell = createShell(args[2]);
-      shell.setVisible (true);
-      shell.setLayout(new FillLayout());
-      int componentID = (Integer)args[0];
-      Method createControlMethod = Class.forName((String)args[1]).getDeclaredMethod("createControl", Shell.class);
-      createControlMethod.setAccessible(true);
-      Control control = (Control)createControlMethod.invoke(null, shell);
-      NativeComponent.registry.add(control, componentID);
-      configureControl(control, componentID);
+      // We need to synchronize: a non-UI thread may send a message thinking the component is valid, but the message would be invalid as the control is not yet in the registry.
+      synchronized(NativeComponent.registry) {
+        Shell shell = createShell(args[2]);
+        shell.setLayout(new FillLayout());
+        int componentID = (Integer)args[0];
+        Method createControlMethod = Class.forName((String)args[1]).getDeclaredMethod("createControl", Shell.class);
+        createControlMethod.setAccessible(true);
+        Control control = (Control)createControlMethod.invoke(null, shell);
+        NativeComponent.registry.add(control, componentID);
+        configureControl(control, componentID);
+        shell.setVisible (true);
+      }
       return null;
     }
   }
@@ -630,12 +633,12 @@ public abstract class NativeComponent extends Canvas {
     List<CommandMessage> initializationCommandMessageList_ = initializationCommandMessageList;
     initializationCommandMessageList = null;
     isNativePeerInitialized = true;
-    isNativePeerValid = true;
     if(isInterfaceAlive) {
       nativeInterfaceListener = new NNativeInterfaceListener(this);
       NativeInterface.addNativeInterfaceListener(nativeInterfaceListener);
+      isNativePeerValid = true;
       try {
-        runSync(new CMN_createControl(), componentID, NativeComponent.this.getClass().getName(), getHandle());
+        runSync(new CMN_createControl(), componentID, NativeComponent.this.getClass().getName(), getHandle(), getWidth(), getHeight());
       } catch(Exception e) {
         isNativePeerValid = false;
         StringBuilder sb = new StringBuilder();
@@ -647,7 +650,6 @@ public abstract class NativeComponent extends Canvas {
       }
       new CMN_reshape().asyncExec(this, getWidth(), getHeight());
     } else {
-      isNativePeerValid = false;
       invalidNativePeerText = "Failed to create " + NativeComponent.this.getClass().getName() + "[" + NativeComponent.this.hashCode() + "]\n\nReason:\nThe native interface is not open!";
     }
     for(CommandMessage initCommandMessage: initializationCommandMessageList_) {
@@ -1021,6 +1023,7 @@ public abstract class NativeComponent extends Canvas {
           }
         });
         if(eArray[0] != null) {
+          new Socket("127.0.0.1", port).close();
           throw eArray[0];
         }
         imageData = resultArray[0];
@@ -1029,6 +1032,7 @@ public abstract class NativeComponent extends Canvas {
       }
       region.dispose();
       if(imageData == null) {
+        new Socket("127.0.0.1", port).close();
         return null;
       }
       int cursor = 0;
@@ -1116,8 +1120,19 @@ public abstract class NativeComponent extends Canvas {
     }
     rectangles = rectangleList.toArray(new Rectangle[0]);
     try {
-      ServerSocket serverSocket = new ServerSocket(0);
+      final ServerSocket serverSocket = new ServerSocket(0);
+      NativeInterfaceListener nativeInterfaceListener = new NativeInterfaceAdapter() {
+        @Override
+        public void nativeInterfaceClosed() {
+          NativeInterface.removeNativeInterfaceListener(this);
+          try {
+            serverSocket.close();
+          } catch(Exception e) {
+          }
+        }
+      };
       CMN_getComponentImage getComponentImage = new CMN_getComponentImage();
+      NativeInterface.addNativeInterfaceListener(nativeInterfaceListener);
       getComponentImage.asyncExec(this, serverSocket.getLocalPort(), rectangles);
       Socket socket = serverSocket.accept();
       // Has to be a multiple of 3
@@ -1129,13 +1144,21 @@ public abstract class NativeComponent extends Canvas {
         synchronized(image) {
           for(Rectangle rectangle: rectangles) {
             int[] pixels = new int[rectangle.width];
-            for(int y=0; y<rectangle.height; y++) {
-              for(int x=0; x<rectangle.width; x++) {
+            for(int y=0; y<rectangle.height && readCount != -1; y++) {
+              for(int x=0; x<rectangle.width && readCount != -1; x++) {
                 if(readCount == 0) {
                   readCount = in.read(bytes);
-                  if((readCount % 3) != 0) {
-                    readCount += in.read(bytes, readCount, bytes.length - readCount);
+                  if(readCount != -1 && (readCount % 3) != 0) {
+                    int c = in.read(bytes, readCount, bytes.length - readCount);
+                    if(c == -1) {
+                      readCount = -1;
+                    } else {
+                      readCount += c;
+                    }
                   }
+                }
+                if(readCount == -1) {
+                  break;
                 }
                 pixels[x] = 0xFF000000 | (0xFF & bytes[count]) << 16 | (0xFF & bytes[count + 1]) << 8 | (0xFF & bytes[count + 2]);
                 count += 3;
@@ -1144,10 +1167,16 @@ public abstract class NativeComponent extends Canvas {
                   readCount = 0;
                 }
               }
-              image.setRGB(rectangle.x, rectangle.y + y, rectangle.width, 1, pixels, 0, rectangle.width);
+              if(readCount != -1) {
+                image.setRGB(rectangle.x, rectangle.y + y, rectangle.width, 1, pixels, 0, rectangle.width);
+              }
+            }
+            if(readCount == -1) {
+              break;
             }
           }
         }
+        NativeInterface.removeNativeInterfaceListener(nativeInterfaceListener);
         in.close();
         socket.close();
       } catch(Exception e) {

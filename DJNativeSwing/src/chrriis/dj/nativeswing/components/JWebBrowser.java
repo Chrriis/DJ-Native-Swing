@@ -20,8 +20,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -86,24 +84,14 @@ public class JWebBrowser extends NSPanelComponent {
   
   private JMenuItem backMenuItem;
   private JMenuItem forwardMenuItem;
-  private JMenuItem refreshMenuItem;
+  private JMenuItem reloadMenuItem;
   private JMenuItem stopMenuItem;
 
   private static class NWebBrowserListener extends WebBrowserAdapter {
-    protected Reference<JWebBrowser> webBrowser;
-    protected NWebBrowserListener(JWebBrowser webBrowser) {
-      this.webBrowser = new WeakReference<JWebBrowser>(webBrowser);
-    }
     @Override
-    public void urlChanged(WebBrowserNavigationEvent e) {
-      JWebBrowser webBrowser = this.webBrowser.get();
-      if(webBrowser == null) {
-        return;
-      }
-      if(webBrowser.buttonBarPane != null) {
-        webBrowser.buttonBarPane.stopButton.setEnabled(false);
-      }
-      webBrowser.stopMenuItem.setEnabled(false);
+    public void locationChanged(WebBrowserNavigationEvent e) {
+      JWebBrowser webBrowser = e.getWebBrowser();
+      updateStopButton(webBrowser, false);
       if(e.isTopFrame()) {
         if(webBrowser.addressBarPane != null) {
           webBrowser.addressBarPane.updateAddress();
@@ -112,31 +100,19 @@ public class JWebBrowser extends NSPanelComponent {
       webBrowser.updateNavigationButtons();
     }
     @Override
-    public void urlChanging(WebBrowserNavigationEvent e) {
-      JWebBrowser webBrowser = this.webBrowser.get();
-      if(webBrowser == null) {
-        return;
-      }
+    public void locationChanging(WebBrowserNavigationEvent e) {
+      JWebBrowser webBrowser = e.getWebBrowser();
       if(e.isTopFrame()) {
         if(webBrowser.addressBarPane != null) {
-          webBrowser.addressBarPane.updateAddress(e.getNewURL());
+          webBrowser.addressBarPane.updateAddress(e.getNewLocation());
         }
       }
-      if(webBrowser.buttonBarPane != null) {
-        webBrowser.buttonBarPane.stopButton.setEnabled(true);
-      }
-      webBrowser.stopMenuItem.setEnabled(true);
+      updateStopButton(webBrowser, true);
     }
     @Override
-    public void urlChangeCanceled(WebBrowserNavigationEvent e) {
-      JWebBrowser webBrowser = this.webBrowser.get();
-      if(webBrowser == null) {
-        return;
-      }
-      if(webBrowser.buttonBarPane != null) {
-        webBrowser.buttonBarPane.stopButton.setEnabled(false);
-      }
-      webBrowser.stopMenuItem.setEnabled(false);
+    public void locationChangeCanceled(WebBrowserNavigationEvent e) {
+      JWebBrowser webBrowser = e.getWebBrowser();
+      updateStopButton(webBrowser, false);
       if(e.isTopFrame()) {
         if(webBrowser.addressBarPane != null) {
           webBrowser.addressBarPane.updateAddress();
@@ -146,23 +122,25 @@ public class JWebBrowser extends NSPanelComponent {
     }
     @Override
     public void statusChanged(WebBrowserEvent e) {
-      JWebBrowser webBrowser = this.webBrowser.get();
-      if(webBrowser == null) {
-        return;
-      }
+      JWebBrowser webBrowser = e.getWebBrowser();
       if(webBrowser.statusBarPane != null) {
         webBrowser.statusBarPane.updateStatus();
       }
     }
     @Override
     public void loadingProgressChanged(WebBrowserEvent e) {
-      JWebBrowser webBrowser = this.webBrowser.get();
-      if(webBrowser == null) {
-        return;
-      }
+      JWebBrowser webBrowser = e.getWebBrowser();
       if(webBrowser.statusBarPane != null) {
         webBrowser.statusBarPane.updateProgressValue();
       }
+      updateStopButton(webBrowser, false);
+    }
+    private void updateStopButton(JWebBrowser webBrowser, boolean isForcedOn) {
+      boolean isStopEnabled = isForcedOn || webBrowser.getLoadingProgress() != 100;
+      if(webBrowser.buttonBarPane != null) {
+        webBrowser.buttonBarPane.stopButton.setEnabled(isStopEnabled);
+      }
+      webBrowser.stopMenuItem.setEnabled(isStopEnabled);
     }
   }
 
@@ -201,11 +179,11 @@ public class JWebBrowser extends NSPanelComponent {
    * @param toWebBrowser the web browser to copy the content to.
    */
   public static void copyContent(JWebBrowser fromWebBrowser, JWebBrowser toWebBrowser) {
-    String url = fromWebBrowser.getURL();
-    if("about:blank".equals(url)) {
+    String location = fromWebBrowser.getResourceLocation();
+    if("about:blank".equals(location)) {
       toWebBrowser.setHTMLContent(fromWebBrowser.getHTMLContent());
     } else {
-      toWebBrowser.setURL(url);
+      toWebBrowser.navigate(location);
     }
   }
   
@@ -229,7 +207,7 @@ public class JWebBrowser extends NSPanelComponent {
     
     private JButton backButton;
     private JButton forwardButton;
-    private JButton refreshButton;
+    private JButton reloadButton;
     private JButton stopButton;
 
     public ButtonBarPane() {
@@ -257,15 +235,15 @@ public class JWebBrowser extends NSPanelComponent {
         }
       });
       buttonToolBar.add(forwardButton);
-      refreshButton = new JButton(createIcon("RefreshIcon"));
-      refreshButton.setToolTipText(RESOURCES.getString("RefreshText"));
-      refreshButton.addActionListener(new ActionListener() {
+      reloadButton = new JButton(createIcon("ReloadIcon"));
+      reloadButton.setToolTipText(RESOURCES.getString("ReloadText"));
+      reloadButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          refresh();
+          reload();
           nativeComponent.requestFocus();
         }
       });
-      buttonToolBar.add(refreshButton);
+      buttonToolBar.add(reloadButton);
       stopButton = new JButton(createIcon("StopIcon"));
       stopButton.setToolTipText(RESOURCES.getString("StopText"));
       stopButton.setEnabled(stopMenuItem.isEnabled());
@@ -304,7 +282,7 @@ public class JWebBrowser extends NSPanelComponent {
       });
       ActionListener goActionListener = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          setURL(addressField.getText());
+          navigate(addressField.getText());
           nativeComponent.requestFocus();
         }
       };
@@ -319,12 +297,12 @@ public class JWebBrowser extends NSPanelComponent {
       add(addressToolBar, BorderLayout.CENTER);
     }
     
-    public void updateAddress(String url) {
-      addressField.setText(url);
+    public void updateAddress(String location) {
+      addressField.setText(location);
     }
     
     public void updateAddress() {
-      addressField.setText(nativeComponent.isNativePeerInitialized()? nativeComponent.getURL(): "");
+      addressField.setText(nativeComponent.isNativePeerInitialized()? nativeComponent.getResourceLocation(): "");
     }
     
   }
@@ -351,7 +329,7 @@ public class JWebBrowser extends NSPanelComponent {
     }
     
     public void updateProgressValue() {
-      int loadingProgress = nativeComponent.isNativePeerInitialized()? nativeComponent.getPageLoadingProgressValue(): 100;
+      int loadingProgress = nativeComponent.isNativePeerInitialized()? nativeComponent.getLoadingProgress(): 100;
       progressBar.setValue(loadingProgress);
       progressBar.setVisible(loadingProgress < 100);
     }
@@ -376,7 +354,7 @@ public class JWebBrowser extends NSPanelComponent {
     webBrowserPanel = new JPanel(new BorderLayout(0, 0));
     webBrowserPanel.add(nativeComponent.createEmbeddableComponent(), BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);
-    nativeComponent.addWebBrowserListener(new NWebBrowserListener(this));
+    nativeComponent.addWebBrowserListener(new NWebBrowserListener());
     adjustBorder();
     fileMenu = new JMenu(RESOURCES.getString("FileMenu"));
     JMenuItem fileNewWindowMenuItem = new JMenuItem(RESOURCES.getString("FileNewWindowMenu"));
@@ -395,7 +373,7 @@ public class JWebBrowser extends NSPanelComponent {
       public void actionPerformed(ActionEvent e) {
         String path = JOptionPane.showInputDialog(JWebBrowser.this, RESOURCES.getString("FileOpenLocationDialogMessage"), RESOURCES.getString("FileOpenLocationDialogTitle"), JOptionPane.QUESTION_MESSAGE);
         if(path != null) {
-          setURL(path);
+          navigate(path);
         }
       }
     });
@@ -406,7 +384,7 @@ public class JWebBrowser extends NSPanelComponent {
         JFileChooser fileChooser = new JFileChooser();
         if(fileChooser.showOpenDialog(JWebBrowser.this) == JFileChooser.APPROVE_OPTION) {
           try {
-            setURL(fileChooser.getSelectedFile().getAbsolutePath());
+            navigate(fileChooser.getSelectedFile().getAbsolutePath());
           } catch(Exception ex) {
             ex.printStackTrace();
           }
@@ -443,7 +421,7 @@ public class JWebBrowser extends NSPanelComponent {
     });
     viewMenu.add(statusBarCheckBoxMenuItem);
     viewMenu.addSeparator();
-    backMenuItem = new JMenuItem(RESOURCES.getString("ViewBackMenu"), createIcon("BackMenuIcon"));
+    backMenuItem = new JMenuItem(RESOURCES.getString("ViewMenuBack"), createIcon("ViewMenuBackIcon"));
     backMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         goBack();
@@ -452,7 +430,7 @@ public class JWebBrowser extends NSPanelComponent {
     });
     backMenuItem.setEnabled(false);
     viewMenu.add(backMenuItem);
-    forwardMenuItem = new JMenuItem(RESOURCES.getString("ViewForwardMenu"), createIcon("ForwardMenuIcon"));
+    forwardMenuItem = new JMenuItem(RESOURCES.getString("ViewMenuForward"), createIcon("ViewMenuForwardIcon"));
     forwardMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         goForward();
@@ -461,16 +439,16 @@ public class JWebBrowser extends NSPanelComponent {
     });
     forwardMenuItem.setEnabled(false);
     viewMenu.add(forwardMenuItem);
-    refreshMenuItem = new JMenuItem(RESOURCES.getString("ViewRefreshMenu"), createIcon("RefreshMenuIcon"));
-    refreshMenuItem.addActionListener(new ActionListener() {
+    reloadMenuItem = new JMenuItem(RESOURCES.getString("ViewMenuReload"), createIcon("ViewMenuReloadIcon"));
+    reloadMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        refresh();
+        reload();
         nativeComponent.requestFocus();
       }
     });
-    refreshMenuItem.setEnabled(false);
-    viewMenu.add(refreshMenuItem);
-    stopMenuItem = new JMenuItem(RESOURCES.getString("ViewStopMenu"), createIcon("StopMenuIcon"));
+    reloadMenuItem.setEnabled(false);
+    viewMenu.add(reloadMenuItem);
+    stopMenuItem = new JMenuItem(RESOURCES.getString("ViewMenuStop"), createIcon("ViewMenuStopIcon"));
     stopMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         stop();
@@ -642,19 +620,19 @@ public class JWebBrowser extends NSPanelComponent {
   }
   
   /**
-   * Get the URL.
-   * @return the URL.
+   * Get the location of the resource currently displayed.
+   * @return the location.
    */
-  public String getURL() {
-    return nativeComponent.getURL();
+  public String getResourceLocation() {
+    return nativeComponent.getResourceLocation();
   }
   
   /**
-   * Set the URL or path.
-   * @param urlOrPath the URL or path.
+   * Navigate to a resource, with its location specified as a URL or path.
+   * @param resourceLocation the URL or path.
    */
-  public boolean setURL(String urlOrPath) {
-    return nativeComponent.setURL(urlOrPath);
+  public boolean navigate(String resourceLocation) {
+    return nativeComponent.navigate(resourceLocation);
   }
   
   /**
@@ -688,10 +666,10 @@ public class JWebBrowser extends NSPanelComponent {
   }
   
   /**
-   * Invoke the web browser Refresh functionality.
+   * Invoke the web browser Reload functionality.
    */
-  public void refresh() {
-    nativeComponent.refresh();
+  public void reload() {
+    nativeComponent.reload();
   }
   
   /**
@@ -773,11 +751,9 @@ public class JWebBrowser extends NSPanelComponent {
   }
   
   private static class NCommandListener extends WebBrowserAdapter {
-    private NativeWebBrowser nativeComponent;
     private String command;
     private Object[] resultArray;
-    private NCommandListener(NativeWebBrowser nativeComponent, String command, Object[] resultArray) {
-      this.nativeComponent = nativeComponent;
+    private NCommandListener(String command, Object[] resultArray) {
       this.command = command;
       this.resultArray = resultArray;
     }
@@ -785,7 +761,7 @@ public class JWebBrowser extends NSPanelComponent {
     public void commandReceived(WebBrowserEvent e, String command, String[] args) {
       if(this.command.equals(command)) {
         resultArray[0] = args;
-        nativeComponent.removeWebBrowserListener(this);
+        ((NativeWebBrowser)e.getWebBrowser().getNativeComponent()).removeWebBrowserListener(this);
       }
     }
   }
@@ -795,7 +771,7 @@ public class JWebBrowser extends NSPanelComponent {
       return null;
     }
     final Object[] resultArray = new Object[] {null};
-    WebBrowserAdapter webBrowserListener = new NCommandListener(nativeComponent, command, resultArray);
+    WebBrowserAdapter webBrowserListener = new NCommandListener(command, resultArray);
     nativeComponent.addWebBrowserListener(webBrowserListener);
     if(nativeComponent.executeJavascriptAndWait(script)) {
       for(int i=0; i<20; i++) {
@@ -816,11 +792,11 @@ public class JWebBrowser extends NSPanelComponent {
   }
   
   /**
-   * Get the page loading progress, a value between 0 and 100, where 100 means it is fully loaded.
+   * Get the loading progress, a value between 0 and 100, where 100 means it is fully loaded.
    * @return a value between 0 and 100 indicating the current loading progress.
    */
-  public int getPageLoadingProgressValue() {
-    return nativeComponent.getPageLoadingProgressValue();
+  public int getLoadingProgress() {
+    return nativeComponent.getLoadingProgress();
   }
   
   /**
@@ -907,6 +883,14 @@ public class JWebBrowser extends NSPanelComponent {
       return (JWebBrowserWindow)window;
     }
     return null;
+  }
+  
+  /**
+   * Set whether this component is able to detect a popup menu gesture to show its default popup menu.
+   * @param isDefaultPopupMenuRegistered true if the default popup menu is registered.
+   */
+  public void setDefaultPopupMenuRegistered(boolean isDefaultPopupMenuRegistered) {
+    nativeComponent.setDefaultPopupMenuRegistered(isDefaultPopupMenuRegistered);
   }
   
 }

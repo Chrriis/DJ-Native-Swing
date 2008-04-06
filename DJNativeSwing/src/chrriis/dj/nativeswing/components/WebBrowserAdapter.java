@@ -18,9 +18,9 @@ public abstract class WebBrowserAdapter implements WebBrowserListener {
   public void windowOpening(WebBrowserWindowOpeningEvent e) {}
   public void windowClosing(WebBrowserEvent e) {}
   
-  public void urlChanging(WebBrowserNavigationEvent e) {}
-  public void urlChanged(WebBrowserNavigationEvent e) {}
-  public void urlChangeCanceled(WebBrowserNavigationEvent e) {}
+  public void locationChanging(WebBrowserNavigationEvent e) {}
+  public void locationChanged(WebBrowserNavigationEvent e) {}
+  public void locationChangeCanceled(WebBrowserNavigationEvent e) {}
   
   public void loadingProgressChanged(WebBrowserEvent e) {}
   public void titleChanged(WebBrowserEvent e) {}

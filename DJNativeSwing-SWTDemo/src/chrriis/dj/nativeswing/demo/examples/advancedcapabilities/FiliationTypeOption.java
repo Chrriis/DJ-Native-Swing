@@ -45,7 +45,7 @@ public class FiliationTypeOption extends JPanel implements Disposable {
     webBrowser1InternalFrame.setVisible(true);
     NativeComponentOptions.getNextInstanceOptions().setFiliationType(FiliationType.COMPONENT_PROXYING);
     JWebBrowser webBrowser1 = new JWebBrowser();
-    webBrowser1.setURL("http://djproject.sf.net");
+    webBrowser1.navigate("http://djproject.sf.net");
     webBrowser1InternalFrame.add(webBrowser1, BorderLayout.CENTER);
     desktopPane.add(webBrowser1InternalFrame);
     // Flash Player internal frame
@@ -79,7 +79,7 @@ public class FiliationTypeOption extends JPanel implements Disposable {
     // When a frame is iconified, components are destroyed. To avoid this, we use the option to destroy on finalization.
     NativeComponentOptions.getNextInstanceOptions().setDestructionTime(DestructionTime.ON_FINALIZATION);
     webBrowser2 = new JWebBrowser();
-    webBrowser2.setURL("http://www.google.com");
+    webBrowser2.navigate("http://www.google.com");
     cons.weightx = 1;
     cons.weighty = 1;
     gridBag.setConstraints(webBrowser2, cons);

@@ -21,6 +21,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
+import chrriis.common.Utils;
 import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.NSPanelComponent;
 import chrriis.dj.nativeswing.WebBrowserObject;
@@ -59,9 +60,15 @@ public class JFlashPlayer extends NSPanelComponent {
       return objectHTMLConfiguration;
     }
     
+    private final String LS = Utils.LINE_SEPARATOR;
+    
     @Override
     protected String getJavascriptDefinitions() {
-      return JFlashPlayer.this.getJavascriptDefinitions();
+      return
+        "function " + getEmbeddedObjectJavascriptName() + "_DoFScommand(command, args) {" + LS +
+        "  sendCommand(command, args);" + LS +
+        "}" + LS +
+        JFlashPlayer.this.getJavascriptDefinitions();
     }
     
     @Override
@@ -77,6 +84,14 @@ public class JFlashPlayer extends NSPanelComponent {
    */
   public JFlashPlayer() {
     initialize(webBrowser.getNativeComponent());
+    webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
+      @Override
+      public void commandReceived(WebBrowserEvent e, String command, String[] args) {
+        for(FlashPlayerListener listener: getFlashPlayerListeners()) {
+          listener.commandReceived(command, args);
+        }
+      }
+    });
     webBrowserPanel = new JPanel(new BorderLayout(0, 0));
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);
@@ -159,29 +174,29 @@ public class JFlashPlayer extends NSPanelComponent {
   
   /**
    * Load a file.
-   * @param resourcePath the path or URL to the file.
+   * @param resourceLocation the path or URL to the file.
    */
-  public void load(String resourcePath) {
-    load(resourcePath, null);
+  public void load(String resourceLocation) {
+    load(resourceLocation, null);
   }
   
   private FlashPluginOptions options;
   
   /**
    * Load a file.
-   * @param resourcePath the path or URL to the file.
+   * @param resourceLocation the path or URL to the file.
    * @param options the options to better configure the initialization of the flash plugin.
    */
-  public void load(String resourcePath, FlashPluginOptions options) {
-    if("".equals(resourcePath)) {
-      resourcePath = null;
+  public void load(String resourceLocation, FlashPluginOptions options) {
+    if("".equals(resourceLocation)) {
+      resourceLocation = null;
     }
     if(options == null) {
       options = new FlashPluginOptions();
     }
     this.options = options;
-    webBrowserObject.load(resourcePath);
-    boolean isEnabled = resourcePath != null;
+    webBrowserObject.load(resourceLocation);
+    boolean isEnabled = resourceLocation != null;
     playButton.setEnabled(isEnabled);
     pauseButton.setEnabled(isEnabled);
     stopButton.setEnabled(isEnabled);
@@ -282,6 +297,30 @@ public class JFlashPlayer extends NSPanelComponent {
   public void setControlBarVisible(boolean isControlBarVisible) {
     controlBarPane.setVisible(isControlBarVisible);
     adjustBorder();
+  }
+  
+  /**
+   * Add a flash player listener.
+   * @param listener The flash player listener to add.
+   */
+  public void addFlashPlayerListener(FlashPlayerListener listener) {
+    listenerList.add(FlashPlayerListener.class, listener);
+  }
+  
+  /**
+   * Remove a flash player listener.
+   * @param listener the flash player listener to remove.
+   */
+  public void removeFlashPlayerListener(FlashPlayerListener listener) {
+    listenerList.remove(FlashPlayerListener.class, listener);
+  }
+
+  /**
+   * Get the flash player listeners.
+   * @return the flash player listeners.
+   */
+  public FlashPlayerListener[] getFlashPlayerListeners() {
+    return listenerList.getListeners(FlashPlayerListener.class);
   }
   
 }

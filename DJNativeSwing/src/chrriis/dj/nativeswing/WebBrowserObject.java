@@ -112,7 +112,7 @@ public abstract class WebBrowserObject {
       }
     };
     addInitializationListener(initializationListener);
-    webBrowser.setURL(resourcePath);
+    webBrowser.navigate(resourcePath);
     webBrowser.getNativeComponent().runSync(new CMLocal_waitForInitialization(), initializationListener, resultArray);
   }
   
@@ -124,6 +124,10 @@ public abstract class WebBrowserObject {
     return WebServer.getDefaultWebServer().getResourcePathURL(localFile.getParent(), localFile.getName());
   }
 
+  public static String getEmbeddedObjectJavascriptName() {
+    return "myEmbeddedObject";
+  }
+  
   private static final String LS = Utils.LINE_SEPARATOR;
 
   protected static WebServerContent getWebServerContent(HTTPRequest httpRequest) {
@@ -170,7 +174,7 @@ public abstract class WebBrowserObject {
             "        }" + LS +
             "      }" + LS +
             "      function getEmbeddedObject() {" + LS +
-            "        var movieName = \"myEmbeddedObject\";" + LS +
+            "        var movieName = \"" + getEmbeddedObjectJavascriptName() + "\";" + LS +
             "        if(window.document[movieName]) {" + LS +
             "          return window.document[movieName];" + LS +
             "        }" + LS +
@@ -241,12 +245,13 @@ public abstract class WebBrowserObject {
           }
           String version = objectHtmlConfiguration.getVersion();
           String versionParameter = version != null? " version=\"" + version + "\"": "";
+          String embeddedObjectJavascriptName = getEmbeddedObjectJavascriptName();
           String content =
             "<!--" + LS +
-            "window.document.write('<object classid=\"clsid:" + objectHtmlConfiguration.getWindowsClassID() + "\" id=\"myEmbeddedObject\" codebase=\"" + objectHtmlConfiguration.getWindowsInstallationURL() + "\" events=\"true\">');" + LS +
+            "window.document.write('<object classid=\"clsid:" + objectHtmlConfiguration.getWindowsClassID() + "\" id=\"" + embeddedObjectJavascriptName + "\" codebase=\"" + objectHtmlConfiguration.getWindowsInstallationURL() + "\" events=\"true\">');" + LS +
             "window.document.write('  <param name=\"" + objectHtmlConfiguration.getWindowsParamName() + "\" value=\"' + decodeURIComponent('" + escapedURL + "') + '\";\"/>');" + LS +
             objectParameters +
-            "window.document.write('  <embed" + embedParameters + " name=\"myEmbeddedObject\" " + objectHtmlConfiguration.getParamName() + "=\"" + escapedURL + "\" type=\"" + objectHtmlConfiguration.getMimeType() + "\" pluginspage=\"" + objectHtmlConfiguration.getInstallationURL() + "\"" + versionParameter+ ">');" + LS +
+            "window.document.write('  <embed" + embedParameters + " name=\"" + embeddedObjectJavascriptName + "\" " + objectHtmlConfiguration.getParamName() + "=\"" + escapedURL + "\" type=\"" + objectHtmlConfiguration.getMimeType() + "\" pluginspage=\"" + objectHtmlConfiguration.getInstallationURL() + "\"" + versionParameter+ ">');" + LS +
             "window.document.write('  </embed>');" + LS +
             "window.document.write('</object>');" + LS +
             "window.document.write('<div></div>');" + LS +
