@@ -491,7 +491,7 @@ class NativeWebBrowser extends NativeComponent {
     new CMN_clearSessionCookies().asyncExec();
   }
 
-  private static class CMN_getResourceLocation extends ControlCommandMessage {
+  private static class CMN_getPageLocation extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       return ((Browser)getControl()).getUrl();
@@ -499,7 +499,7 @@ class NativeWebBrowser extends NativeComponent {
   }
   
   public String getPageLocation() {
-    return (String)runSync(new CMN_getResourceLocation());
+    return (String)runSync(new CMN_getPageLocation());
   }
   
   private static class CMN_navigate extends ControlCommandMessage {
@@ -554,7 +554,7 @@ class NativeWebBrowser extends NativeComponent {
     runAsync(new CMN_executeJavascript(), script);
   }
   
-  private static class CMN_stop extends ControlCommandMessage {
+  private static class CMN_stopLoading extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       ((Browser)getControl()).stop();
@@ -562,11 +562,11 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
   
-  public void stopPageLoading() {
-    runAsync(new CMN_stop());
+  public void stopLoading() {
+    runAsync(new CMN_stopLoading());
   }
   
-  private static class CMN_refresh extends ControlCommandMessage {
+  private static class CMN_reloadPage extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       ((Browser)getControl()).refresh();
@@ -575,7 +575,7 @@ class NativeWebBrowser extends NativeComponent {
   }
   
   public void reloadPage() {
-    runAsync(new CMN_refresh());
+    runAsync(new CMN_reloadPage());
   }
   
   private static class CMN_isBackNavigationEnabled extends ControlCommandMessage {

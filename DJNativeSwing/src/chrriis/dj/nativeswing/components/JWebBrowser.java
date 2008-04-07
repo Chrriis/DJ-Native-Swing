@@ -249,7 +249,7 @@ public class JWebBrowser extends NSPanelComponent {
       stopButton.setEnabled(stopMenuItem.isEnabled());
       stopButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          stopPageLoading();
+          stopLoading();
         }
       });
       buttonToolBar.add(stopButton);
@@ -451,7 +451,7 @@ public class JWebBrowser extends NSPanelComponent {
     stopMenuItem = new JMenuItem(RESOURCES.getString("ViewMenuStop"), createIcon("ViewMenuStopIcon"));
     stopMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        stopPageLoading();
+        stopLoading();
       }
     });
     stopMenuItem.setEnabled(false);
@@ -676,8 +676,8 @@ public class JWebBrowser extends NSPanelComponent {
   /**
    * Invoke the web browser Stop functionality, to stop all current loading operations.
    */
-  public void stopPageLoading() {
-    nativeComponent.stopPageLoading();
+  public void stopLoading() {
+    nativeComponent.stopLoading();
   }
   
 //  /**
