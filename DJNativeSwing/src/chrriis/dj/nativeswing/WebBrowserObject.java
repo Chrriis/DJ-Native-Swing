@@ -63,6 +63,7 @@ public abstract class WebBrowserObject {
   
   public WebBrowserObject(JWebBrowser webBrowser) {
     this.webBrowser = webBrowser;
+    webBrowser.setDefaultPopupMenuRegistered(false);
     webBrowser.setBarsVisible(false);
     webBrowser.addWebBrowserListener(new NWebBrowserListener(this));
   }
