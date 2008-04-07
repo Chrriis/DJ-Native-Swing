@@ -146,19 +146,19 @@ public class JWebBrowserWindow extends JFrame {
   }
   
   /**
-   * Set whether the address bar is visible.
-   * @param isAddressBarVisible true if the address bar should be visible, false otherwise.
+   * Set whether the location bar is visible.
+   * @param isLocationBarVisible true if the location bar should be visible, false otherwise.
    */
-  public void setAddressBarVisible(boolean isAddressBarVisible) {
-    webBrowser.setAddressBarVisible(isAddressBarVisible);
+  public void setLocationBarVisible(boolean isLocationBarVisible) {
+    webBrowser.setLocationBarVisible(isLocationBarVisible);
   }
   
   /**
-   * Indicate whether the address bar is visible.
-   * @return true if the address bar is visible.
+   * Indicate whether the location bar is visible.
+   * @return true if the location bar is visible.
    */
-  public boolean isAddressBarVisisble() {
-    return webBrowser.isAddressBarVisible();
+  public boolean isLocationBarVisisble() {
+    return webBrowser.isLocationBarVisible();
   }
   
 }

@@ -131,7 +131,7 @@ class NativeWebBrowser extends NativeComponent {
       final JWebBrowser newWebBrowser = ((NativeWebBrowser)getRegistry().get(componentID)).webBrowser.get();
       newWebBrowser.setMenuBarVisible((Boolean)args[1]);
       newWebBrowser.setButtonBarVisible((Boolean)args[2]);
-      newWebBrowser.setAddressBarVisible((Boolean)args[3]);
+      newWebBrowser.setLocationBarVisible((Boolean)args[3]);
       newWebBrowser.setStatusBarVisible((Boolean)args[4]);
       Point location = (Point)args[5];
       Dimension size = (Dimension)args[6];
@@ -498,7 +498,7 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
   
-  public String getResourceLocation() {
+  public String getPageLocation() {
     return (String)runSync(new CMN_getResourceLocation());
   }
   
@@ -562,7 +562,7 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
   
-  public void stop() {
+  public void stopPageLoading() {
     runAsync(new CMN_stop());
   }
   
@@ -574,52 +574,52 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
   
-  public void reload() {
+  public void reloadPage() {
     runAsync(new CMN_refresh());
   }
   
-  private static class CMN_isGoBackEnabled extends ControlCommandMessage {
+  private static class CMN_isBackNavigationEnabled extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       return ((Browser)getControl()).isBackEnabled();
     }
   }
   
-  public boolean isGoBackEnabled() {
-    return Boolean.TRUE.equals(runSync(new CMN_isGoBackEnabled()));
+  public boolean isBackNavigationEnabled() {
+    return Boolean.TRUE.equals(runSync(new CMN_isBackNavigationEnabled()));
   }
   
-  private static class CMN_goBack extends ControlCommandMessage {
+  private static class CMN_navigateBack extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       return ((Browser)getControl()).back();
     }
   }
   
-  public void goBack() {
-    runAsync(new CMN_goBack());
+  public void navigateBack() {
+    runAsync(new CMN_navigateBack());
   }
   
-  private static class CMN_isGoForwardEnabled extends ControlCommandMessage {
+  private static class CMN_isForwardNavigationEnabled extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       return ((Browser)getControl()).isForwardEnabled();
     }
   }
   
-  public boolean isGoForwardEnabled() {
-    return Boolean.TRUE.equals(runSync(new CMN_isGoForwardEnabled()));
+  public boolean isForwardNavigationEnabled() {
+    return Boolean.TRUE.equals(runSync(new CMN_isForwardNavigationEnabled()));
   }
   
-  private static class CMN_goForward extends ControlCommandMessage {
+  private static class CMN_navigateForward extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       return ((Browser)getControl()).forward();
     }
   }
   
-  public void goForward() {
-    runAsync(new CMN_goForward());
+  public void navigateForward() {
+    runAsync(new CMN_navigateForward());
   }
   
   private static void registerDefaultPopupMenu(final Browser browser) {
