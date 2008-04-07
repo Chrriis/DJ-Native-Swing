@@ -31,7 +31,7 @@ public class SimpleWebBrowserExample extends JPanel {
     super(new BorderLayout(0, 0));
     final JCheckBox menuBarCheckBox = new JCheckBox("Menu Bar");
     final JCheckBox buttonBarCheckBox = new JCheckBox("Button Bar");
-    final JCheckBox addressBarCheckBox = new JCheckBox("Address Bar");
+    final JCheckBox locationBarCheckBox = new JCheckBox("Location Bar");
     final JCheckBox statusBarCheckBox = new JCheckBox("Status Bar");
     JPanel webBrowserPanel = new JPanel(new BorderLayout(0, 0));
     webBrowserPanel.setBorder(BorderFactory.createTitledBorder("Native Web Browser component"));
@@ -47,9 +47,9 @@ public class SimpleWebBrowserExample extends JPanel {
         buttonBarCheckBox.setSelected(isButtonBarVisible);
       }
       @Override
-      public void setAddressBarVisible(boolean isAddressBarVisible) {
-        super.setAddressBarVisible(isAddressBarVisible);
-        addressBarCheckBox.setSelected(isAddressBarVisible);
+      public void setLocationBarVisible(boolean isLocationBarVisible) {
+        super.setLocationBarVisible(isLocationBarVisible);
+        locationBarCheckBox.setSelected(isLocationBarVisible);
       }
       @Override
       public void setStatusBarVisible(boolean isStatusBarVisible) {
@@ -76,13 +76,13 @@ public class SimpleWebBrowserExample extends JPanel {
       }
     });
     buttonPanel.add(buttonBarCheckBox);
-    addressBarCheckBox.setSelected(webBrowser.isAddressBarVisible());
-    addressBarCheckBox.addItemListener(new ItemListener() {
+    locationBarCheckBox.setSelected(webBrowser.isLocationBarVisible());
+    locationBarCheckBox.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
-        webBrowser.setAddressBarVisible(e.getStateChange() == ItemEvent.SELECTED);
+        webBrowser.setLocationBarVisible(e.getStateChange() == ItemEvent.SELECTED);
       }
     });
-    buttonPanel.add(addressBarCheckBox);
+    buttonPanel.add(locationBarCheckBox);
     statusBarCheckBox.setSelected(webBrowser.isStatusBarVisible());
     statusBarCheckBox.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
