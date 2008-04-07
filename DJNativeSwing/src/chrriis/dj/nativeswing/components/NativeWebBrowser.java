@@ -627,7 +627,7 @@ class NativeWebBrowser extends NativeComponent {
     if(oldMenu != null) {
       oldMenu.dispose();
     }
-    if((browser.getStyle() & SWT.MOZILLA) == 0) {
+    if("win32".equals(SWT.getPlatform()) && (browser.getStyle() & SWT.MOZILLA) == 0) {
       browser.setMenu(null);
       return;
     }
