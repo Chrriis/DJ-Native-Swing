@@ -546,6 +546,7 @@ public abstract class NativeComponent extends Canvas {
     BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
     paintComponent(image);
     g.drawImage(image, 0, 0, null);
+    g.dispose();
     image.flush();
   }
   
@@ -776,11 +777,12 @@ public abstract class NativeComponent extends Canvas {
     }
     
     @Override
-    public void print(Graphics g) {
+    protected void printComponent(Graphics g) {
       BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
       nativeComponent.paintComponent(image);
       g.drawImage(image, 0, 0, null);
-      super.print(g);
+      g.dispose();
+      image.flush();
     }
     
   }
