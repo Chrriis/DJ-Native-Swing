@@ -8,8 +8,11 @@
 package chrriis.dj.nativeswing.demo.examples.advancedcapabilities;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Graphics;
+import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -35,57 +38,100 @@ public class ThumbnailCreation extends JPanel {
 
   private static final Dimension THUMBNAIL_SIZE = new Dimension(200, 150);
   
+  private static abstract class ThumbnailPane extends JPanel {
+    
+    private JLabel thumbnailLabel;
+    
+    public ThumbnailPane(String title) {
+      super(new BorderLayout(0, 0));
+      setBorder(BorderFactory.createTitledBorder(title));
+      JPanel thumbnailPanel = new JPanel(new GridBagLayout());
+      JPanel thumbnailImagePanel = new JPanel(new BorderLayout(0, 0));
+      thumbnailImagePanel.setBorder(BorderFactory.createEtchedBorder());
+      thumbnailLabel = new JLabel();
+      thumbnailLabel.setHorizontalAlignment(JLabel.CENTER);
+      thumbnailLabel.setVerticalAlignment(JLabel.CENTER);
+      thumbnailImagePanel.add(thumbnailLabel, BorderLayout.CENTER);
+      thumbnailPanel.add(thumbnailImagePanel);
+      add(thumbnailPanel, BorderLayout.CENTER);
+      JPanel thumbnailButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+      JButton createThumbnailButton = new JButton("Create");
+      createThumbnailButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          createThumbnail();
+        }
+      });
+      thumbnailButtonPanel.add(createThumbnailButton);
+      add(thumbnailButtonPanel, BorderLayout.SOUTH);
+      setThumbnail(null);
+      thumbnailLabel.setPreferredSize(THUMBNAIL_SIZE);
+      setPreferredSize(getPreferredSize());
+      thumbnailLabel.setPreferredSize(null);
+    }
+    
+    public abstract void createThumbnail();
+    
+    public void setThumbnail(ImageIcon thumbnailIcon) {
+      if(thumbnailIcon == null) {
+        thumbnailLabel.setText(" No thumbnail ");
+        thumbnailLabel.setIcon(null);
+      } else {
+        thumbnailLabel.setText(null);
+        thumbnailLabel.setIcon(thumbnailIcon);
+      }
+    }
+    
+  }
+  
   private JWebBrowser webBrowser;
-  private JLabel thumbnailLabel;
   
   public ThumbnailCreation() {
     super(new BorderLayout(0, 0));
+    JPanel webBrowserPanel = new JPanel(new BorderLayout(0, 0));
+    webBrowserPanel.setBorder(BorderFactory.createTitledBorder("Web Browser component"));
     webBrowser = new JWebBrowser();
-    webBrowser.setBorder(BorderFactory.createTitledBorder("Web Browser component"));
     webBrowser.navigate("http://www.google.com");
-    add(webBrowser, BorderLayout.CENTER);
+    webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
+    add(webBrowserPanel, BorderLayout.CENTER);
     JPanel eastPanel = new JPanel(new GridBagLayout());
-    JPanel thumbnailPanel = new JPanel(new BorderLayout(0, 0));
-    JPanel thumbnailBorderPanel = new JPanel(new GridBagLayout());
-    thumbnailBorderPanel.setBorder(BorderFactory.createTitledBorder("Thumbnail"));
-    JPanel thumbnailImagePanel = new JPanel(new BorderLayout(0, 0));
-    thumbnailImagePanel.setBorder(BorderFactory.createEtchedBorder());
-    thumbnailLabel = new JLabel(" No thumbnail ");
-    thumbnailLabel.setHorizontalAlignment(JLabel.CENTER);
-    thumbnailLabel.setVerticalAlignment(JLabel.CENTER);
-    thumbnailImagePanel.add(thumbnailLabel, BorderLayout.CENTER);
-    thumbnailBorderPanel.add(thumbnailImagePanel);
-    thumbnailPanel.add(thumbnailBorderPanel, BorderLayout.CENTER);
-    JPanel thumbnailButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
-    JButton createThumbnailButton = new JButton("Create");
-    createThumbnailButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        createThumbnail();
+    GridBagConstraints cons = new GridBagConstraints();
+    cons.gridx = 0;
+    cons.gridy = 0;
+    eastPanel.add(new ThumbnailPane("Full Web Browser") {
+      @Override
+      public void createThumbnail() {
+        ThumbnailCreation.this.createThumbnail(this, webBrowser);
       }
-    });
-    thumbnailButtonPanel.add(createThumbnailButton);
-    thumbnailPanel.add(thumbnailButtonPanel, BorderLayout.SOUTH);
-    eastPanel.add(thumbnailPanel);
-    thumbnailLabel.setPreferredSize(THUMBNAIL_SIZE);
-    thumbnailPanel.setPreferredSize(thumbnailPanel.getPreferredSize());
-    thumbnailLabel.setPreferredSize(null);
+    }, cons);
+    cons.gridy++;
+    eastPanel.add(new ThumbnailPane("Native Area Only") {
+      @Override
+      public void createThumbnail() {
+        ThumbnailCreation.this.createThumbnail(this, webBrowser.getNativeComponent());
+      }
+    }, cons);
     add(eastPanel, BorderLayout.EAST);
   }
   
-  private void createThumbnail() {
-    final NativeComponent nativeComponent = webBrowser.getNativeComponent();
-    final int cWidth = nativeComponent.getWidth();
-    final int cHeight = nativeComponent.getHeight();
+  private void createThumbnail(final ThumbnailPane thumbnailPane, final Component component) {
+    final int cWidth = component.getWidth();
+    final int cHeight = component.getHeight();
     if(cWidth <= 0 || cHeight <= 0) {
-      thumbnailLabel.setText(" No thumbnail ");
-      thumbnailLabel.setIcon(null);
+      thumbnailPane.setThumbnail(null);
       return;
     }
     new Thread() {
       @Override
       public void run() {
         BufferedImage image = new BufferedImage(cWidth, cHeight, BufferedImage.TYPE_INT_ARGB);
-        nativeComponent.paintComponent(image);
+        if(component instanceof NativeComponent) {
+          ((NativeComponent)component).paintComponent(image);
+        } else {
+          // In fact, print can also be used with NativeComponent.
+          Graphics g = image.getGraphics();
+          component.print(g);
+          g.dispose();
+        }
         int tWidth = THUMBNAIL_SIZE.width;
         int tHeight = THUMBNAIL_SIZE.height;
         final ImageIcon imageIcon;
@@ -100,8 +146,7 @@ public class ThumbnailCreation extends JPanel {
         }
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
-            thumbnailLabel.setText(null);
-            thumbnailLabel.setIcon(imageIcon);
+            thumbnailPane.setThumbnail(imageIcon);
           }
         });
       }

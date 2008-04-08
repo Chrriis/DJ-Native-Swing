@@ -778,11 +778,7 @@ public abstract class NativeComponent extends Canvas {
     
     @Override
     protected void printComponent(Graphics g) {
-      BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
-      nativeComponent.paintComponent(image);
-      g.drawImage(image, 0, 0, null);
-      g.dispose();
-      image.flush();
+      nativeComponent.print(g);
     }
     
   }
