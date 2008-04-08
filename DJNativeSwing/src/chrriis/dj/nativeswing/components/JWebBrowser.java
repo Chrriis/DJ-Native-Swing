@@ -20,6 +20,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.lang.reflect.Array;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -724,12 +725,44 @@ public class JWebBrowser extends NSPanelComponent {
       return null;
     }
     if(result.length == 1) {
-      return convertJSObject("string", result[0]);
+      return convertJavascriptToJava("string", result[0]);
     }
-    return convertJSObject(result[0], result[1]);
+    return convertJavascriptToJava(result[0], result[1]);
+  }
+
+  /**
+   * Convert a Java object to Javascript, to simplify the task of executing scripts. Conversion adds quotes around Strings (with Java escaping and Javascript unescaping around), add brackets to arrays, treats arrays of arrays, and can handle null values.
+   * @param o the object to convert, which can be a String, number, boolean, or array.
+   */
+  public static String convertJavaToJavascript(Object o) {
+    if(o == null) {
+      return "null";
+    }
+    if(o instanceof Boolean || o instanceof Number) {
+      return o.toString();
+    }
+    if(o.getClass().isArray()) {
+      StringBuilder sb = new StringBuilder();
+      sb.append('[');
+      int length = Array.getLength(o);
+      for(int i=0; i<length; i++) {
+        if(i > 0) {
+          sb.append(", ");
+        }
+        sb.append(convertJavaToJavascript(Array.get(o, i)));
+      }
+      sb.append(']');
+      return sb.toString();
+    }
+    o = o.toString();
+    String encodedArg = Utils.encodeURL((String)o);
+    if(o.equals(encodedArg)) {
+      return '\'' + (String)o + '\'';
+    }
+    return "decodeURIComponent('" + encodedArg + "')";
   }
   
-  private Object convertJSObject(String type, String value) {
+  private static Object convertJavascriptToJava(String type, String value) {
     if(type.length() == 0) {
       return null;
     }

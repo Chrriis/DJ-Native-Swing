@@ -429,10 +429,10 @@ public abstract class WebBrowserObject {
 //  }
 
   /**
-   * Set the value of a property of the object (a String, number, boolean).
+   * Set the value of a property of the object (a String, number, boolean, or array).
    */
   public void setObjectProperty(String property, Object value) {
-    webBrowser.executeJavascript("try {getEmbeddedObject()." + property + " = " + getObjectArgument(value) + ";} catch(exxxxx) {}");
+    webBrowser.executeJavascript("try {getEmbeddedObject()." + property + " = " + JWebBrowser.convertJavaToJavascript(value) + ";} catch(exxxxx) {}");
   }
   
   /**
@@ -443,14 +443,14 @@ public abstract class WebBrowserObject {
   }
   
   /**
-   * Invoke a function on the object, with optional arguments (Strings, numbers, booleans).
+   * Invoke a function on the object, with optional arguments (Strings, numbers, booleans, or array).
    */
   public void invokeObjectFunction(String functionName, Object... args) {
     webBrowser.executeJavascript("try {" + getObjectFunctionCall(functionName, args) + ";} catch(exxxxx) {}");
   }
   
   /**
-   * Invoke a function on the object and waits for a result, with optional arguments (Strings, numbers, booleans).
+   * Invoke a function on the object and waits for a result, with optional arguments (Strings, numbers, booleans, or array).
    * @return The value, potentially a String, Number, boolean.
    */
   public Object invokeObjectFunctionWithResult(String functionName, Object... args) {
@@ -464,25 +464,10 @@ public abstract class WebBrowserObject {
       if(i > 0) {
         sb.append(", ");
       }
-      sb.append(getObjectArgument(args[i]));
+      sb.append(JWebBrowser.convertJavaToJavascript(args[i]));
     }
     sb.append(")");
     return sb.toString();
-  }
-  
-  private String getObjectArgument(Object arg) {
-    if(arg == null) {
-      return "null";
-    }
-    if(arg instanceof Boolean || arg instanceof Number) {
-      return arg.toString();
-    }
-    arg = arg.toString();
-    String encodedArg = Utils.encodeURL((String)arg);
-    if(arg.equals(encodedArg)) {
-      return '\'' + (String)arg + '\'';
-    }
-    return "decodeURIComponent('" + encodedArg + "')";
   }
   
 }
