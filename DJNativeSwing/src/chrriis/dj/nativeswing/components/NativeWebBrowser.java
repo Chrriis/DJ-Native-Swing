@@ -461,8 +461,11 @@ class NativeWebBrowser extends NativeComponent {
         }
       }
       public void changed(ProgressEvent e) {
+        if(e.total <= 0 || e.total < e.current) {
+          return;
+        }
         browser.setData("Browser.loading", true);
-        updateProgress(e.total <= 0 || e.total < e.current? 99: Math.min(e.current * 100 / e.total, 99));
+        updateProgress(e.current == e.total? 100: Math.min(e.current * 100 / e.total, 99));
       }
       public void completed(ProgressEvent progressevent) {
         browser.setData("Browser.loading", false);
