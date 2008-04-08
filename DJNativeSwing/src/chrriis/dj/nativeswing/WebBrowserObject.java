@@ -432,7 +432,7 @@ public abstract class WebBrowserObject {
    * Set the value of a property of the object (a String, number, boolean, or array).
    */
   public void setObjectProperty(String property, Object value) {
-    webBrowser.executeJavascript("try {getEmbeddedObject()." + property + " = " + JWebBrowser.convertJavaToJavascript(value) + ";} catch(exxxxx) {}");
+    webBrowser.executeJavascript("try {getEmbeddedObject()." + property + " = " + JWebBrowser.convertJavaObjectToJavascript(value) + ";} catch(exxxxx) {}");
   }
   
   /**
@@ -464,7 +464,7 @@ public abstract class WebBrowserObject {
       if(i > 0) {
         sb.append(", ");
       }
-      sb.append(JWebBrowser.convertJavaToJavascript(args[i]));
+      sb.append(JWebBrowser.convertJavaObjectToJavascript(args[i]));
     }
     sb.append(")");
     return sb.toString();

@@ -725,16 +725,16 @@ public class JWebBrowser extends NSPanelComponent {
       return null;
     }
     if(result.length == 1) {
-      return convertJavascriptToJava("string", result[0]);
+      return convertJavascriptObjectToJava("string", result[0]);
     }
-    return convertJavascriptToJava(result[0], result[1]);
+    return convertJavascriptObjectToJava(result[0], result[1]);
   }
 
   /**
    * Convert a Java object to Javascript, to simplify the task of executing scripts. Conversion adds quotes around Strings (with Java escaping and Javascript unescaping around), add brackets to arrays, treats arrays of arrays, and can handle null values.
    * @param o the object to convert, which can be a String, number, boolean, or array.
    */
-  public static String convertJavaToJavascript(Object o) {
+  public static String convertJavaObjectToJavascript(Object o) {
     if(o == null) {
       return "null";
     }
@@ -749,7 +749,7 @@ public class JWebBrowser extends NSPanelComponent {
         if(i > 0) {
           sb.append(", ");
         }
-        sb.append(convertJavaToJavascript(Array.get(o, i)));
+        sb.append(convertJavaObjectToJavascript(Array.get(o, i)));
       }
       sb.append(']');
       return sb.toString();
@@ -762,7 +762,7 @@ public class JWebBrowser extends NSPanelComponent {
     return "decodeURIComponent('" + encodedArg + "')";
   }
   
-  private static Object convertJavascriptToJava(String type, String value) {
+  private static Object convertJavascriptObjectToJava(String type, String value) {
     if(type.length() == 0) {
       return null;
     }
