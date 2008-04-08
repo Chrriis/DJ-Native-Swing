@@ -731,6 +731,25 @@ public class JWebBrowser extends NSPanelComponent {
   }
 
   /**
+   * Create the Javascript function call using the function name and Java objects as arguments. Note that it does not contain a semi-colon at the end of the statement, to allow call chaining.
+   * @param functionName the name of the Javascript funtion.
+   * @param args the Java objects (String, number, boolean, or array) which will get converted to Javascript arguments.
+   * @return the function call, in the form "functionName(convArg1, convArg2, ...)".
+   */
+  public static String createJavascriptFunctionCall(String functionName, Object... args) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(functionName).append('(');
+    for(int i=0; i<args.length; i++) {
+      if(i > 0) {
+        sb.append(", ");
+      }
+      sb.append(convertJavaObjectToJavascript(args[i]));
+    }
+    sb.append(")");
+    return sb.toString();
+  }
+  
+  /**
    * Convert a Java object to Javascript, to simplify the task of executing scripts. Conversion adds quotes around Strings (with Java escaping and Javascript unescaping around), add brackets to arrays, treats arrays of arrays, and can handle null values.
    * @param o the object to convert, which can be a String, number, boolean, or array.
    */

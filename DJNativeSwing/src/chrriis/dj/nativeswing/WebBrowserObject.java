@@ -446,7 +446,7 @@ public abstract class WebBrowserObject {
    * Invoke a function on the object, with optional arguments (Strings, numbers, booleans, or array).
    */
   public void invokeObjectFunction(String functionName, Object... args) {
-    webBrowser.executeJavascript("try {" + getObjectFunctionCall(functionName, args) + ";} catch(exxxxx) {}");
+    webBrowser.executeJavascript("try {getEmbeddedObject()." + JWebBrowser.createJavascriptFunctionCall(functionName, args) + ";} catch(exxxxx) {}");
   }
   
   /**
@@ -454,20 +454,7 @@ public abstract class WebBrowserObject {
    * @return The value, potentially a String, Number, boolean.
    */
   public Object invokeObjectFunctionWithResult(String functionName, Object... args) {
-    return webBrowser.executeJavascriptWithResult("return " + getObjectFunctionCall(functionName, args));
-  }
-  
-  private String getObjectFunctionCall(String functionName, Object... args) {
-    StringBuilder sb = new StringBuilder();
-    sb.append("getEmbeddedObject().").append(functionName).append('(');
-    for(int i=0; i<args.length; i++) {
-      if(i > 0) {
-        sb.append(", ");
-      }
-      sb.append(JWebBrowser.convertJavaObjectToJavascript(args[i]));
-    }
-    sb.append(")");
-    return sb.toString();
+    return webBrowser.executeJavascriptWithResult("return getEmbeddedObject()." + JWebBrowser.createJavascriptFunctionCall(functionName, args));
   }
   
 }
