@@ -65,15 +65,22 @@ public abstract class OleNativeComponent extends NativeComponent {
           }
           Object result;
           if((Boolean)args[0]) {
-            result = automation.invoke(ids[0], params);
+            Variant resultVariant = automation.invoke(ids[0], params);
+            result = getVariantValue(resultVariant);
+            dispose(resultVariant);
           } else {
             result = null;
             automation.invokeNoReply(ids[0], params);
           }
+          for(Variant param: params) {
+            dispose(param);
+          }
           automation.dispose();
           return result;
         }
-        OleAutomation newAutomation = automation.getProperty(ids[0]).getAutomation();
+        Variant variantProperty = automation.getProperty(ids[0]);
+        OleAutomation newAutomation = variantProperty.getAutomation();
+        variantProperty.dispose();
         automation.dispose();
         automation = newAutomation;
       }
@@ -117,10 +124,15 @@ public abstract class OleNativeComponent extends NativeComponent {
             params[j] = createVariant(vargs[j]);
           }
           boolean result = automation.setProperty(ids[0], params);
+          for(Variant param: params) {
+            dispose(param);
+          }
           automation.dispose();
           return result;
         }
-        OleAutomation newAutomation = automation.getProperty(ids[0]).getAutomation();
+        Variant variantProperty = automation.getProperty(ids[0]);
+        OleAutomation newAutomation = variantProperty.getAutomation();
+        variantProperty.dispose();
         automation.dispose();
         automation = newAutomation;
       }
@@ -155,11 +167,18 @@ public abstract class OleNativeComponent extends NativeComponent {
           for(int j=0; j<vargs.length; j++) {
             params[j] = createVariant(vargs[j]);
           }
-          Object result = getVariantValue(automation.getProperty(ids[0], params));
+          Variant propertyVariant = automation.getProperty(ids[0], params);
+          for(Variant param: params) {
+            dispose(param);
+          }
+          Object result = getVariantValue(propertyVariant);
+          dispose(propertyVariant);
           automation.dispose();
           return result;
         }
-        OleAutomation newAutomation = automation.getProperty(ids[0]).getAutomation();
+        Variant variantProperty = automation.getProperty(ids[0]);
+        OleAutomation newAutomation = variantProperty.getAutomation();
+        variantProperty.dispose();
         automation.dispose();
         automation = newAutomation;
       }
@@ -260,12 +279,13 @@ public abstract class OleNativeComponent extends NativeComponent {
         }
         sb.append(propertyName);
         System.err.println(sb.toString());
-        Variant property = automation.getProperty(automation.getIDsOfNames(new String[] {propertyName})[0]);
-        if(property != null && property.getType() == OLE.VT_DISPATCH) {
-          OleAutomation newAutomation = property.getAutomation();
+        Variant variantProperty = automation.getProperty(automation.getIDsOfNames(new String[] {propertyName})[0]);
+        if(variantProperty != null && variantProperty.getType() == OLE.VT_DISPATCH) {
+          OleAutomation newAutomation = variantProperty.getAutomation();
           dumpProperties(newAutomation, index + 1);
           newAutomation.dispose();
         }
+        dispose(variantProperty);
       }
     }
     @Override
@@ -275,6 +295,13 @@ public abstract class OleNativeComponent extends NativeComponent {
       automation.dispose();
       return null;
     }
+  }
+  
+  private static void dispose(Variant variant) {
+    if(variant == null) {
+      return;
+    }
+    variant.dispose();
   }
       
   public void dumpProperties() {
