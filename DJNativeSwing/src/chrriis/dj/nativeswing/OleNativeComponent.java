@@ -24,6 +24,8 @@ import org.eclipse.swt.ole.win32.OleFunctionDescription;
 import org.eclipse.swt.ole.win32.OleParameterDescription;
 import org.eclipse.swt.ole.win32.Variant;
 
+import chrriis.common.Utils;
+
 
 /**
  * A convenience class for Windows Ole-based native components.
@@ -240,8 +242,8 @@ public abstract class OleNativeComponent extends NativeComponent {
     throw new IllegalArgumentException("The value could not be converted from a Variant: " + variant);
   }
   
-  private static class CMN_dumpOleInterface extends ControlCommandMessage {
-    private void dumpOleInterface(OleAutomation automation, int index) {
+  private static class CMN_dumpOleInterfaceDefinitions extends ControlCommandMessage {
+    private void dumpOleInterfaceDefinitions(StringBuilder sb, OleAutomation automation, int index) {
       List<OleFunctionDescription> functionList = new ArrayList<OleFunctionDescription>();
       for(int i=0; ; i++) {
         OleFunctionDescription functionDescription = automation.getFunctionDescription(i);
@@ -256,7 +258,6 @@ public abstract class OleNativeComponent extends NativeComponent {
         }
       });
       for(OleFunctionDescription functionDescription: functionList) {
-        StringBuilder sb = new StringBuilder();
         for(int j=0; j<index; j++) {
           sb.append("  ");
         }
@@ -268,8 +269,7 @@ public abstract class OleNativeComponent extends NativeComponent {
           }
           sb.append(getTypeDescription(param.type)).append(' ').append(param.name == null? "arg" + i: param.name);
         }
-        sb.append(")");
-        System.err.println(sb.toString());
+        sb.append(")").append(Utils.LINE_SEPARATOR);
       }
       List<String> propertyList = new ArrayList<String>();
       for(int i=1; ; i++) {
@@ -285,16 +285,14 @@ public abstract class OleNativeComponent extends NativeComponent {
         }
       });
       for(String propertyName: propertyList) {
-        StringBuilder sb = new StringBuilder();
         for(int j=0; j<index; j++) {
           sb.append("  ");
         }
-        sb.append(propertyName);
-        System.err.println(sb.toString());
+        sb.append(propertyName).append(Utils.LINE_SEPARATOR);
         Variant variantProperty = automation.getProperty(automation.getIDsOfNames(new String[] {propertyName})[0]);
         if(variantProperty != null && variantProperty.getType() == OLE.VT_DISPATCH) {
           OleAutomation newAutomation = variantProperty.getAutomation();
-          dumpOleInterface(newAutomation, index + 1);
+          dumpOleInterfaceDefinitions(sb, newAutomation, index + 1);
           newAutomation.dispose();
         }
         dispose(variantProperty);
@@ -325,8 +323,10 @@ public abstract class OleNativeComponent extends NativeComponent {
         }
       }
       OleAutomation automation = new OleAutomation(getSite((OleFrame)getControl()));
-      dumpOleInterface(automation, 0);
+      StringBuilder sb = new StringBuilder();
+      dumpOleInterfaceDefinitions(sb, automation, 0);
       automation.dispose();
+      System.out.print(sb.toString());
       return null;
     }
   }
@@ -337,9 +337,12 @@ public abstract class OleNativeComponent extends NativeComponent {
     }
     variant.dispose();
   }
-      
-  public void dumpOleInterface() {
-    runSync(new CMN_dumpOleInterface());
+  
+  /**
+   * Dump the definitions of the OLE interface (properties and functions) to the output stream.
+   */
+  public void dumpOleInterfaceDefinitions() {
+    runSync(new CMN_dumpOleInterfaceDefinitions());
   }
   
 }
