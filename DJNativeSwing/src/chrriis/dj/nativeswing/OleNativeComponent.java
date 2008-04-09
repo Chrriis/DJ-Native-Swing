@@ -260,13 +260,13 @@ public abstract class OleNativeComponent extends NativeComponent {
         for(int j=0; j<index; j++) {
           sb.append("  ");
         }
-        sb.append(oleTypeToDescriptionMap.get(functionDescription.returnType)).append(' ').append(functionDescription.name).append("(");
+        sb.append(getTypeDescription(functionDescription.returnType)).append(' ').append(functionDescription.name).append("(");
         for(int i=0; i<functionDescription.args.length; i++) {
           OleParameterDescription param = functionDescription.args[i];
           if(i > 0) {
             sb.append(", ");
           }
-          sb.append(oleTypeToDescriptionMap.get(param.type)).append(' ').append(param.name == null? "arg" + i: param.name);
+          sb.append(getTypeDescription(param.type)).append(' ').append(param.name == null? "arg" + i: param.name);
         }
         sb.append(")");
         System.err.println(sb.toString());
@@ -301,6 +301,13 @@ public abstract class OleNativeComponent extends NativeComponent {
       }
     }
     private Map<Short, String> oleTypeToDescriptionMap;
+    private String getTypeDescription(short type) {
+      String description = oleTypeToDescriptionMap.get(type);
+      if(description == null) {
+        description = '[' + String.valueOf(type) + ']';
+      }
+      return description;
+    }
     @Override
     public Object run(Object[] args) {
       oleTypeToDescriptionMap = new HashMap<Short, String>();
