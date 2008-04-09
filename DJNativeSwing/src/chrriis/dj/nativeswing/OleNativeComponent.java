@@ -7,17 +7,21 @@
  */
 package chrriis.dj.nativeswing;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.eclipse.swt.ole.win32.OLE;
 import org.eclipse.swt.ole.win32.OleAutomation;
 import org.eclipse.swt.ole.win32.OleClientSite;
 import org.eclipse.swt.ole.win32.OleFrame;
 import org.eclipse.swt.ole.win32.OleFunctionDescription;
+import org.eclipse.swt.ole.win32.OleParameterDescription;
 import org.eclipse.swt.ole.win32.Variant;
 
 
@@ -236,8 +240,8 @@ public abstract class OleNativeComponent extends NativeComponent {
     throw new IllegalArgumentException("The value could not be converted from a Variant: " + variant);
   }
   
-  private static class CMN_dumpOleProperties extends ControlCommandMessage {
-    private void dumpProperties(OleAutomation automation, int index) {
+  private static class CMN_dumpOleInterface extends ControlCommandMessage {
+    private void dumpOleInterface(OleAutomation automation, int index) {
       List<OleFunctionDescription> functionList = new ArrayList<OleFunctionDescription>();
       for(int i=0; ; i++) {
         OleFunctionDescription functionDescription = automation.getFunctionDescription(i);
@@ -256,7 +260,15 @@ public abstract class OleNativeComponent extends NativeComponent {
         for(int j=0; j<index; j++) {
           sb.append("  ");
         }
-        sb.append(functionDescription.name).append("()");
+        sb.append(oleTypeToDescriptionMap.get(functionDescription.returnType)).append(' ').append(functionDescription.name).append("(");
+        for(int i=0; i<functionDescription.args.length; i++) {
+          OleParameterDescription param = functionDescription.args[i];
+          if(i > 0) {
+            sb.append(", ");
+          }
+          sb.append(oleTypeToDescriptionMap.get(param.type)).append(' ').append(param.name == null? "arg" + i: param.name);
+        }
+        sb.append(")");
         System.err.println(sb.toString());
       }
       List<String> propertyList = new ArrayList<String>();
@@ -282,16 +294,31 @@ public abstract class OleNativeComponent extends NativeComponent {
         Variant variantProperty = automation.getProperty(automation.getIDsOfNames(new String[] {propertyName})[0]);
         if(variantProperty != null && variantProperty.getType() == OLE.VT_DISPATCH) {
           OleAutomation newAutomation = variantProperty.getAutomation();
-          dumpProperties(newAutomation, index + 1);
+          dumpOleInterface(newAutomation, index + 1);
           newAutomation.dispose();
         }
         dispose(variantProperty);
       }
     }
+    private Map<Short, String> oleTypeToDescriptionMap;
     @Override
     public Object run(Object[] args) {
+      oleTypeToDescriptionMap = new HashMap<Short, String>();
+      for(Field field: OLE.class.getDeclaredFields()) {
+        String fieldName = field.getName();
+        Short value = null;
+        if(fieldName.startsWith("VT_")) {
+          try {
+            value = (Short)field.get(null);
+          } catch(Exception e) {}
+        }
+        if(value != null) {
+          String fieldDescription = fieldName.substring("VT_".length()).toLowerCase(Locale.ENGLISH);
+          oleTypeToDescriptionMap.put(value, fieldDescription);
+        }
+      }
       OleAutomation automation = new OleAutomation(getSite((OleFrame)getControl()));
-      dumpProperties(automation, 0);
+      dumpOleInterface(automation, 0);
       automation.dispose();
       return null;
     }
@@ -304,8 +331,8 @@ public abstract class OleNativeComponent extends NativeComponent {
     variant.dispose();
   }
       
-  public void dumpProperties() {
-    runSync(new CMN_dumpOleProperties());
+  public void dumpOleInterface() {
+    runSync(new CMN_dumpOleInterface());
   }
   
 }
