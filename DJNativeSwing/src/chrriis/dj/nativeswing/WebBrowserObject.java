@@ -134,6 +134,9 @@ public abstract class WebBrowserObject {
   protected static WebServerContent getWebServerContent(HTTPRequest httpRequest) {
     String resourcePath = httpRequest.getResourcePath();
     int index = resourcePath.indexOf('/');
+    if(index == -1) {
+      return null;
+    }
     String type = resourcePath.substring(0, index);
     resourcePath = resourcePath.substring(index + 1);
     if("html".equals(type)) {
