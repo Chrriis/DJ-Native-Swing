@@ -253,13 +253,15 @@ public class NativeInterface {
         return;
       }
       BufferedReader reader = new BufferedReader(new StringReader((String)systemClipboard.getData(DataFlavor.stringFlavor)));
-      if("[nativeswing debugging]".equals(reader.readLine().toLowerCase(Locale.ENGLISH))) {
+      if("[nativeswing debug]".equals(reader.readLine().toLowerCase(Locale.ENGLISH))) {
         for(String line; ((line = reader.readLine()) != null); ) {
-          int index = line.indexOf('=');
-          if(index <= 0) {
-            break;
+          if(line.length() != 0) {
+            int index = line.indexOf('=');
+            if(index <= 0) {
+              break;
+            }
+            System.setProperty(line.substring(0, index).trim(), line.substring(index + 1).trim());
           }
-          System.setProperty(line.substring(0, index), line.substring(index + 1));
         }
       }
       reader.close();
