@@ -64,11 +64,12 @@ public class JFlashPlayer extends NSPanelComponent {
     
     @Override
     protected String getJavascriptDefinitions() {
+      String javascriptDefinitions = JFlashPlayer.this.getJavascriptDefinitions();
       return
         "function " + getEmbeddedObjectJavascriptName() + "_DoFScommand(command, args) {" + LS +
         "  sendCommand(command, args);" + LS +
         "}" + LS +
-        JFlashPlayer.this.getJavascriptDefinitions();
+        (javascriptDefinitions == null? "": javascriptDefinitions);
     }
     
     @Override
