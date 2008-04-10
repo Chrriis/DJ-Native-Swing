@@ -7,6 +7,8 @@
  */
 package chrriis.dj.nativeswing;
 
+import chrriis.common.Utils;
+
 /**
  * A type of message that executes a command with optional arguments and returns a result.
  * @author Christopher Deckers
@@ -78,7 +80,11 @@ public abstract class CommandMessage extends Message {
       if(i > 0) {
         sb.append(", ");
       }
-      sb.append(arg);
+      if(arg != null && arg.getClass().isArray()) {
+        sb.append(Utils.arrayDeepToString(arg));
+      } else {
+        sb.append(arg);
+      }
     }
     sb.append(')');
     return sb.toString();

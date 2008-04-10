@@ -12,6 +12,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.Arrays;
 
 /**
  * @author Christopher Deckers
@@ -187,6 +188,46 @@ public class Utils {
    */
   public static boolean equals(Object o1, Object o2) {
     return o1 == null? o2 == null: o1.equals(o2);
+  }
+  
+  /**
+   * Produce the deep string value of an array, whatever the actual class type of the array is.
+   * @param array the array to get the deep string value of.
+   * @return the deep string value of the array, or null if invalid.
+   */
+  public static String arrayDeepToString(Object array) {
+    if(array == null) {
+      return null;
+    }
+    Class<?> clazz = array.getClass();
+    if(!clazz.isArray()) {
+      return null;
+    }
+    if(clazz == boolean[].class) {
+      return Arrays.toString((boolean[])array);
+    }
+    if(clazz == byte[].class) {
+      return Arrays.toString((byte[])array);
+    }
+    if(clazz == short[].class) {
+      return Arrays.toString((short[])array);
+    }
+    if(clazz == char[].class) {
+      return Arrays.toString((char[])array);
+    }
+    if(clazz == int[].class) {
+      return Arrays.toString((int[])array);
+    }
+    if(clazz == long[].class) {
+      return Arrays.toString((long[])array);
+    }
+    if(clazz == float[].class) {
+      return Arrays.toString((float[])array);
+    }
+    if(clazz == double[].class) {
+      return Arrays.toString((double[])array);
+    }
+    return Arrays.deepToString((Object[])array);
   }
   
 }

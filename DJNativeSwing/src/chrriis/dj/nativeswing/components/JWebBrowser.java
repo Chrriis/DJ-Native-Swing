@@ -698,8 +698,6 @@ public class JWebBrowser extends NSPanelComponent {
     nativeComponent.executeJavascript(javascript);
   }
   
-  private static final String LS = Utils.LINE_SEPARATOR;
-
   /**
    * Execute some javascript, and wait for the result coming from the return statements.
    * @param javascript the javascript to execute which must contain explicit return statements. 
@@ -710,16 +708,16 @@ public class JWebBrowser extends NSPanelComponent {
       javascript = javascript + ";";
     }
     String[] result = executeJavascriptWithCommandResult("[[getScriptResult]]",
-        "try {" + LS +
-        "  var result = function() {" + javascript + "}();" + LS +
-        "  var type = result? typeof(result): '';" + LS +
-        "  if('string' == type) {" + LS +
-        "    window.location = 'command://' + encodeURIComponent('[[getScriptResult]]') + '&' + encodeURIComponent(result);" + LS +
-        "  } else {" + LS +
-        "    window.location = 'command://' + encodeURIComponent('[[getScriptResult]]') + '&' + encodeURIComponent(type) + '&' + encodeURIComponent(result);" + LS +
-        "  }" + LS +
-        "} catch(exxxxx) {" + LS +
-        "  window.location = 'command://' + encodeURIComponent('[[getScriptResult]]') + '&&'" + LS +
+        "try {" +
+        "  var result = function() {" + javascript + "}();" +
+        "  var type = result? typeof(result): '';" +
+        "  if('string' == type) {" +
+        "    window.location = 'command://' + encodeURIComponent('[[getScriptResult]]') + '&' + encodeURIComponent(result);" +
+        "  } else {" +
+        "    window.location = 'command://' + encodeURIComponent('[[getScriptResult]]') + '&' + encodeURIComponent(type) + '&' + encodeURIComponent(result);" +
+        "  }" +
+        "} catch(exxxxx) {" +
+        "  window.location = 'command://' + encodeURIComponent('[[getScriptResult]]') + '&&'" +
         "}");
     if(result == null) {
       return null;
