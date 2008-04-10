@@ -185,9 +185,7 @@ abstract class MessagingInterface {
   
   private CommandResultMessage runMessage(Message message) {
     if(isDebuggingMessages) {
-      synchronized(System.err) {
-        System.err.println(">RUN: " + message.getID() + ", " + message);
-      }
+      System.err.println(">RUN: " + message.getID() + ", " + message);
     }
     CommandResultMessage commandResultMessage;
     if(message instanceof CommandMessage) {
@@ -217,9 +215,7 @@ abstract class MessagingInterface {
       }
     }
     if(isDebuggingMessages) {
-      synchronized(System.err) {
-        System.err.println("<RUN: " + message.getID());
-      }
+      System.err.println("<RUN: " + message.getID());
     }
     return commandResultMessage;
   }
@@ -359,9 +355,7 @@ abstract class MessagingInterface {
   
   private Object processCommandResult(CommandResultMessage commandResultMessage) {
     if(isDebuggingMessages) {
-      synchronized(System.err) {
-        System.err.println("<USE: " + commandResultMessage.getID());
-      }
+      System.err.println("<USE: " + commandResultMessage.getID());
     }
     Throwable exception = commandResultMessage.getException();
     if(exception != null) {
@@ -389,9 +383,7 @@ abstract class MessagingInterface {
       return;
     }
     if(isDebuggingMessages) {
-      synchronized(System.err) {
-        System.err.println("SEND: " + message.getID() + ", " + message);
-      }
+      System.err.println("SEND: " + message.getID() + ", " + message);
     }
     synchronized(oos) {
       oos.writeUnshared(message);
@@ -404,9 +396,7 @@ abstract class MessagingInterface {
     if(o instanceof Message) {
       Message message = (Message)o;
       if(isDebuggingMessages) {
-        synchronized(System.err) {
-          System.err.println("RECV: " + message.getID() + ", " + message);
-        }
+        System.err.println("RECV: " + message.getID() + ", " + message);
       }
       return message;
     }

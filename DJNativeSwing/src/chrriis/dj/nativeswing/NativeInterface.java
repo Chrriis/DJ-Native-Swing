@@ -624,19 +624,11 @@ public class NativeInterface {
               addMessage = b == lastByte;
               baos.write(b);
             }
-            final byte[] byteArray = baos.toByteArray();
-            // Flushing directly to the out stream freezes in Webstart.
-            SwingUtilities.invokeLater(new Runnable() {
-              public void run() {
-                synchronized (out) {
-                  try {
-                    out.write(byteArray);
-                  } catch(Exception e) {
-                    e.printStackTrace();
-                  }
-                }
-              }
-            });
+            try {
+              out.write(baos.toByteArray());
+            } catch(Exception e) {
+              e.printStackTrace();
+            }
           }
         } catch(Exception e) {
         }
