@@ -787,6 +787,7 @@ public class NativeInterface {
       throw new IllegalStateException("The native side did not receive an incoming connection!");
     }
     display = new Display();
+    Display.setAppName("DJ Native Swing");
     messagingInterface = new MessagingInterface(socket, true) {
       @Override
       protected void asyncUIExec(Runnable runnable) {
