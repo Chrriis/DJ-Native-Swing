@@ -253,7 +253,7 @@ public class NativeInterface {
         return;
       }
       BufferedReader reader = new BufferedReader(new StringReader((String)systemClipboard.getData(DataFlavor.stringFlavor)));
-      if("[nativeswing debug]".equals(reader.readLine().toLowerCase(Locale.ENGLISH))) {
+      if("[nativeswing debug]".equals(reader.readLine().trim().toLowerCase(Locale.ENGLISH))) {
         for(String line; ((line = reader.readLine()) != null); ) {
           if(line.length() != 0) {
             int index = line.indexOf('=');
