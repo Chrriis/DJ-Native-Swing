@@ -26,7 +26,7 @@ import chrriis.common.ObjectRegistry;
  */
 abstract class MessagingInterface {
 
-  private boolean isDebuggingMessages = Boolean.parseBoolean(System.getProperty("dj.nativeswing.messaging.debug"));
+  private boolean isDebuggingMessages = Boolean.parseBoolean(System.getProperty("nativeswing.interface.debug.printmessages"));
   
   private static class CommandResultMessage extends Message {
 

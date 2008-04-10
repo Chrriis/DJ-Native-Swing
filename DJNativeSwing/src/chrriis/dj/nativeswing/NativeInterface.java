@@ -517,8 +517,8 @@ public class NativeInterface {
         argList.add(param);
       }
     }
-    argList.add("-Ddj.nativeswing.messaging.debug=" + Boolean.parseBoolean(System.getProperty("dj.nativeswing.messaging.debug")));
-    argList.add("-Ddj.nativeswing.native.initmessage=" + Boolean.parseBoolean(System.getProperty("dj.nativeswing.native.initmessage")));
+    argList.add("-Dnativeswing.interface.debug.printmessages=" + Boolean.parseBoolean(System.getProperty("nativeswing.interface.debug.printmessages")));
+    argList.add("-Dnativeswing.peervm.debug.printstartmessage=" + Boolean.parseBoolean(System.getProperty("nativeswing.peervm.debug.printstartmessage")));
     argList.add("-classpath");
     argList.add(sb.toString());
     if(isProxyClassLoaderUsed) {
@@ -530,7 +530,7 @@ public class NativeInterface {
     // Try these arguments with the various candidate binaries.
     for(String candidateBinary: candidateBinaries) {
       argList.set(0, candidateBinary);
-      if(Boolean.parseBoolean(System.getProperty("dj.nativeswing.native.commandline"))) {
+      if(Boolean.parseBoolean(System.getProperty("nativeswing.peervm.debug.printcommandline"))) {
         System.err.println("Native Command: " + Arrays.toString(argList.toArray()));
       }
       try {
@@ -548,7 +548,7 @@ public class NativeInterface {
   }
   
   private static MessagingInterface createMessagingInterface() {
-    int port = Integer.parseInt(System.getProperty("dj.nativeswing.messaging.port", "-1"));
+    int port = Integer.parseInt(System.getProperty("nativeswing.interface.port", "-1"));
     if(port <= 0) {
       ServerSocket serverSocket;
       try {
@@ -565,10 +565,10 @@ public class NativeInterface {
       }
     }
     Process p;
-    if(Boolean.parseBoolean(System.getProperty("dj.nativeswing.messaging.nocreateprocess"))) {
-      p = null;
-    } else {
+    if(Boolean.parseBoolean(System.getProperty("nativeswing.peervm.create", "true"))) {
       p = createProcess(port);
+    } else {
+      p = null;
     }
     Socket socket = null;
     for(int i=99; i>=0; i--) {
@@ -711,7 +711,7 @@ public class NativeInterface {
    * @param args the arguments that are passed to the peer VM.
    */
   public static void main(String[] args) throws Exception {
-    if(Boolean.parseBoolean(System.getProperty("dj.nativeswing.native.initmessage"))) {
+    if(Boolean.parseBoolean(System.getProperty("nativeswing.peervm.debug.printstartmessage"))) {
       System.err.println("Starting spawned VM");
     }
     isOpen = true;
@@ -734,7 +734,7 @@ public class NativeInterface {
       }
     }
     final ServerSocket serverSocket_ = serverSocket;
-    if(!Boolean.parseBoolean(System.getProperty("dj.nativeswing.native.keepalive"))) {
+    if(!Boolean.parseBoolean(System.getProperty("nativeswing.peervm.keepalive"))) {
       Thread shutdownThread = new Thread("NativeSwing Shutdown") {
         @Override
         public void run() {
