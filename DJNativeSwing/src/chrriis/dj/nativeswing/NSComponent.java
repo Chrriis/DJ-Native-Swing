@@ -11,7 +11,7 @@ package chrriis.dj.nativeswing;
  * The interface that all Swing wrappers of native components should expose.
  * @author Christopher Deckers
  */
-public interface NSComponent {
+public interface NSComponent extends NSComponentOptions {
 
   /**
    * Force the native peer to initialize. All method calls will then be synchronous instead of being queued waiting for the componant to be initialized.

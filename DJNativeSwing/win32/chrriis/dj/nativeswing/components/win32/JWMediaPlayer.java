@@ -12,6 +12,7 @@ import java.awt.BorderLayout;
 import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.NSPanelComponent;
 import chrriis.dj.nativeswing.NativeComponent;
+import chrriis.dj.nativeswing.NSOption;
 
 /**
  * A multimedia player, based on the Window Media Player (only avaialable on the Windows operating system).<br/>
@@ -26,12 +27,12 @@ public class JWMediaPlayer extends NSPanelComponent {
   /**
    * Construct a Windows Media Player.
    */
-  public JWMediaPlayer() {
+  public JWMediaPlayer(NSOption... options) {
     nativeComponent = new NativeWMediaPlayer();
     initialize(nativeComponent);
     wmpSettings = new WMPSettings(this);
     wmpControls = new WMPControls(this);
-    add(nativeComponent.createEmbeddableComponent(), BorderLayout.CENTER);
+    add(nativeComponent.createEmbeddableComponent(options), BorderLayout.CENTER);
     wmpSettings.setAutoStart(true);
     wmpSettings.setErrorDialogsEnabled(false);
     setControlBarVisible(true);

@@ -49,6 +49,7 @@ import javax.swing.event.PopupMenuListener;
 
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.Message;
+import chrriis.dj.nativeswing.NSOption;
 import chrriis.dj.nativeswing.NSPanelComponent;
 import chrriis.dj.nativeswing.NativeComponent;
 
@@ -345,7 +346,7 @@ public class JWebBrowser extends NSPanelComponent {
   /**
    * Construct a new web browser.
    */
-  public JWebBrowser() {
+  public JWebBrowser(NSOption... options) {
     nativeComponent = new NativeWebBrowser(this);
     initialize(nativeComponent);
     menuToolAndLocationBarPanel = new JPanel(new BorderLayout(0, 0));
@@ -353,7 +354,7 @@ public class JWebBrowser extends NSPanelComponent {
     menuToolAndLocationBarPanel.add(menuBar, BorderLayout.NORTH);
     add(menuToolAndLocationBarPanel, BorderLayout.NORTH);
     webBrowserPanel = new JPanel(new BorderLayout(0, 0));
-    webBrowserPanel.add(nativeComponent.createEmbeddableComponent(), BorderLayout.CENTER);
+    webBrowserPanel.add(nativeComponent.createEmbeddableComponent(options), BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);
     nativeComponent.addWebBrowserListener(new NWebBrowserListener());
     adjustBorder();

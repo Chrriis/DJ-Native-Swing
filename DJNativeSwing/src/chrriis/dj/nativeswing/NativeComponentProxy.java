@@ -27,8 +27,7 @@ import javax.swing.SwingUtilities;
 
 import chrriis.common.Filter;
 import chrriis.common.UIUtils;
-import chrriis.dj.nativeswing.NativeComponentOptions.DestructionTime;
-import chrriis.dj.nativeswing.NativeComponentOptions.VisibilityConstraint;
+import chrriis.dj.nativeswing.NativeComponentProxyPanel.EmbeddedPanel;
 import chrriis.dj.nativeswing.NativeComponentProxyWindow.EmbeddedWindow;
 
 /**
@@ -43,11 +42,9 @@ abstract class NativeComponentProxy extends JComponent {
 
   private AWTEventListener shapeAdjustmentEventListener;
 
-  protected NativeComponentProxy(NativeComponent nativeComponent) {
-    NativeComponentOptions options = nativeComponent.getOptions();
-    DestructionTime destructionTime = options.getDestructionTime();
-    isDestructionOnFinalization = destructionTime == DestructionTime.ON_FINALIZATION;
-    isVisibilityConstrained = options.getVisibilityConstraint() != VisibilityConstraint.NONE;
+  protected NativeComponentProxy(NativeComponent nativeComponent, NSOption visibilityConstraint, NSOption destructionTime) {
+    isDestructionOnFinalization = destructionTime == NSComponentOptions.DESTROY_ON_FINALIZATION;
+    isVisibilityConstrained = visibilityConstraint != null;
     setFocusable(true);
     this.nativeComponent = nativeComponent;
     backBufferManager = new BackBufferManager(nativeComponent, this);
@@ -232,8 +229,8 @@ abstract class NativeComponentProxy extends JComponent {
   
   protected Rectangle[] computePeerShapeArea() {
     Rectangle[] shape = UIUtils.getComponentVisibleArea(this, new Filter<Component>() {
-      public boolean accept(Component element) {
-        return true;
+      public boolean accept(Component c) {
+        return !(c instanceof EmbeddedPanel);
       }
     }, false);
     if(shape.length == 0) {

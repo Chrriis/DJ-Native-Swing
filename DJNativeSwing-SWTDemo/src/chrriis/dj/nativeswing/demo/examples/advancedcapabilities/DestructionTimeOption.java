@@ -19,9 +19,7 @@ import javax.swing.SwingUtilities;
 
 import chrriis.common.Disposable;
 import chrriis.common.UIUtils;
-import chrriis.dj.nativeswing.NativeComponentOptions;
 import chrriis.dj.nativeswing.NativeInterface;
-import chrriis.dj.nativeswing.NativeComponentOptions.DestructionTime;
 import chrriis.dj.nativeswing.components.JFlashPlayer;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
 
@@ -34,8 +32,7 @@ public class DestructionTimeOption extends JPanel implements Disposable {
   
   public DestructionTimeOption() {
     super(new BorderLayout(0, 0));
-    NativeComponentOptions.getNextInstanceOptions().setDestructionTime(DestructionTime.ON_FINALIZATION);
-    flashPlayer = new JFlashPlayer();
+    flashPlayer = new JFlashPlayer(JFlashPlayer.DESTROY_ON_FINALIZATION);
     flashPlayer.setControlBarVisible(false);
     flashPlayer.load(SimpleFlashExample.class, "resource/Movement-pointer_or_click.swf");
     add(flashPlayer, BorderLayout.CENTER);

@@ -17,6 +17,7 @@ import org.eclipse.swt.ole.win32.OleFrame;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import chrriis.dj.nativeswing.NSOption;
 import chrriis.dj.nativeswing.OleNativeComponent;
 
 /**
@@ -39,8 +40,8 @@ class NativeWMediaPlayer extends OleNativeComponent {
     return frame;
   }
   
-  protected Component createEmbeddableComponent() {
-    return super.createEmbeddableComponent();
+  protected Component createEmbeddableComponent(NSOption[] options) {
+    return super.createEmbeddableComponent(options);
   }
   
   @Override

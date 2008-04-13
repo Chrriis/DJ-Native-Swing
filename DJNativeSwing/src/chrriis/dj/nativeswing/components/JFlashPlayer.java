@@ -23,6 +23,7 @@ import javax.swing.border.BevelBorder;
 
 import chrriis.common.Utils;
 import chrriis.common.WebServer;
+import chrriis.dj.nativeswing.NSOption;
 import chrriis.dj.nativeswing.NSPanelComponent;
 import chrriis.dj.nativeswing.WebBrowserObject;
 
@@ -37,26 +38,33 @@ public class JFlashPlayer extends NSPanelComponent {
   private final ResourceBundle RESOURCES = ResourceBundle.getBundle(JFlashPlayer.class.getPackage().getName().replace('.', '/') + "/resource/FlashPlayer");
 
   private JPanel webBrowserPanel;
-  private JWebBrowser webBrowser = new JWebBrowser();
+  private JWebBrowser webBrowser;
   
   private JPanel controlBarPane;
   private JButton playButton;
   private JButton pauseButton;
   private JButton stopButton;
 
-  private WebBrowserObject webBrowserObject = new WebBrowserObject(webBrowser) {
+  private static class NWebBrowserObject extends WebBrowserObject {
+    
+    private JFlashPlayer flashPlayer;
+    
+    NWebBrowserObject(JFlashPlayer flashPlayer) {
+      super(flashPlayer.webBrowser);
+      this.flashPlayer = flashPlayer;
+    }
     
     protected ObjectHTMLConfiguration getObjectHtmlConfiguration() {
       ObjectHTMLConfiguration objectHTMLConfiguration = new ObjectHTMLConfiguration();
-      objectHTMLConfiguration.setHTMLLoadingMessage(RESOURCES.getString("LoadingMessage"));
-      objectHTMLConfiguration.setHTMLParameters(options.getHTMLParameters());
+      objectHTMLConfiguration.setHTMLLoadingMessage(flashPlayer.RESOURCES.getString("LoadingMessage"));
+      objectHTMLConfiguration.setHTMLParameters(flashPlayer.options.getHTMLParameters());
       objectHTMLConfiguration.setWindowsClassID("D27CDB6E-AE6D-11cf-96B8-444553540000");
       objectHTMLConfiguration.setWindowsInstallationURL("http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,0,0");
       objectHTMLConfiguration.setMimeType("application/x-shockwave-flash");
       objectHTMLConfiguration.setInstallationURL("http://www.adobe.com/go/getflashplayer");
       objectHTMLConfiguration.setWindowsParamName("movie");
       objectHTMLConfiguration.setParamName("src");
-      options = null;
+      flashPlayer.options = null;
       return objectHTMLConfiguration;
     }
     
@@ -64,7 +72,7 @@ public class JFlashPlayer extends NSPanelComponent {
     
     @Override
     protected String getJavascriptDefinitions() {
-      String javascriptDefinitions = JFlashPlayer.this.getJavascriptDefinitions();
+      String javascriptDefinitions = flashPlayer.getJavascriptDefinitions();
       return
         "function " + getEmbeddedObjectJavascriptName() + "_DoFScommand(command, args) {" + LS +
         "  sendCommand(command, args);" + LS +
@@ -78,13 +86,17 @@ public class JFlashPlayer extends NSPanelComponent {
       return WebServer.getDefaultWebServer().getResourcePathURL(localFile.getParent(), localFile.getName());
     }
 
-  };
+  }
+  
+  private WebBrowserObject webBrowserObject;
 
   /**
    * Construct a flash player.
    */
-  public JFlashPlayer() {
+  public JFlashPlayer(NSOption... options) {
+    webBrowser = new JWebBrowser(options);
     initialize(webBrowser.getNativeComponent());
+    webBrowserObject = new NWebBrowserObject(this);
     webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
       @Override
       public void commandReceived(WebBrowserEvent e, String command, String[] args) {

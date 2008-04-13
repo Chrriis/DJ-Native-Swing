@@ -20,9 +20,7 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
 import chrriis.common.UIUtils;
-import chrriis.dj.nativeswing.NativeComponentOptions;
 import chrriis.dj.nativeswing.NativeInterface;
-import chrriis.dj.nativeswing.NativeComponentOptions.VisibilityConstraint;
 import chrriis.dj.nativeswing.components.JFlashPlayer;
 import chrriis.dj.nativeswing.components.JWebBrowser;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
@@ -45,8 +43,7 @@ public class VisibilityConstraintOption extends JPanel {
     layeredPane.setBackground(new Color(200, 200, 255));
     int layerIndex = 0;
     // A flash player
-    NativeComponentOptions.getNextInstanceOptions().setVisibilityConstraint(VisibilityConstraint.FULL_COMPONENT_TREE);
-    JFlashPlayer flashPlayer = new JFlashPlayer();
+    JFlashPlayer flashPlayer = new JFlashPlayer(JFlashPlayer.CONSTRAIN_VISIBILITY);
     flashPlayer.setControlBarVisible(false);
     flashPlayer.load(SimpleFlashExample.class, "resource/Movement-pointer_or_click.swf");
     flashPlayer.setBounds(OFFSET_X * layerIndex, OFFSET_Y * layerIndex, WIDTH, HEIGHT);
@@ -60,8 +57,7 @@ public class VisibilityConstraintOption extends JPanel {
     layeredPane.setLayer(swingPanel, layerIndex++);
     layeredPane.add(swingPanel);
     // A web browser
-    NativeComponentOptions.getNextInstanceOptions().setVisibilityConstraint(VisibilityConstraint.FULL_COMPONENT_TREE);
-    JWebBrowser webBrowser = new JWebBrowser();
+    JWebBrowser webBrowser = new JWebBrowser(JWebBrowser.CONSTRAIN_VISIBILITY);
     webBrowser.setBarsVisible(false);
     webBrowser.setStatusBarVisible(true);
     webBrowser.setHTMLContent(

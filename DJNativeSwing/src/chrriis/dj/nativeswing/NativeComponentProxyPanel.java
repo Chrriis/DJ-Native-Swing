@@ -29,7 +29,6 @@ import javax.swing.RootPaneContainer;
 import javax.swing.SwingUtilities;
 
 import chrriis.dj.nativeswing.NativeComponent.NativeComponentHolder;
-import chrriis.dj.nativeswing.NativeComponentOptions.FiliationType;
 
 import com.sun.jna.examples.WindowUtils;
 
@@ -41,9 +40,10 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
 
   private boolean isProxiedFiliation;
 
-  protected NativeComponentProxyPanel(NativeComponent nativeComponent) {
-    super(nativeComponent);
-    isProxiedFiliation = nativeComponent.getOptions().getFiliationType() != FiliationType.DIRECT;
+  protected NativeComponentProxyPanel(NativeComponent nativeComponent, NSOption visibilityConstraint, NSOption destructionTime, NSOption filiationType) {
+    super(nativeComponent, visibilityConstraint, destructionTime);
+    setLayout(new BorderLayout(0, 0));
+    isProxiedFiliation = filiationType != null;
     addFocusListener(new FocusAdapter() {
       @Override
       public void focusGained(FocusEvent e) {
@@ -52,7 +52,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     });
   }
 
-  private static class EmbeddedPanel extends Panel implements NativeComponentHolder {
+  static class EmbeddedPanel extends Panel implements NativeComponentHolder {
     
     public EmbeddedPanel() {
       super(new BorderLayout(0, 0));

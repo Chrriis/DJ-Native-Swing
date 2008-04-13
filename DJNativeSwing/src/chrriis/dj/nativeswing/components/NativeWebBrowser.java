@@ -49,6 +49,7 @@ import chrriis.common.Utils;
 import chrriis.dj.nativeswing.CommandMessage;
 import chrriis.dj.nativeswing.ControlCommandMessage;
 import chrriis.dj.nativeswing.NativeComponent;
+import chrriis.dj.nativeswing.NSOption;
 
 /**
  * @author Christopher Deckers
@@ -746,8 +747,8 @@ class NativeWebBrowser extends NativeComponent {
   }
   
   @Override
-  protected Component createEmbeddableComponent() {
-    return super.createEmbeddableComponent();
+  protected Component createEmbeddableComponent(NSOption[] options) {
+    return super.createEmbeddableComponent(options);
   }
   
   @Override

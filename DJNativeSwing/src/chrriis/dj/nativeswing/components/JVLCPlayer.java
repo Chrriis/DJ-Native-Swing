@@ -31,6 +31,7 @@ import javax.swing.event.ChangeListener;
 
 import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.NSPanelComponent;
+import chrriis.dj.nativeswing.NSOption;
 import chrriis.dj.nativeswing.WebBrowserObject;
 import chrriis.dj.nativeswing.components.VLCInput.VLCMediaState;
 
@@ -45,19 +46,26 @@ public class JVLCPlayer extends NSPanelComponent {
   private final ResourceBundle RESOURCES = ResourceBundle.getBundle(JVLCPlayer.class.getPackage().getName().replace('.', '/') + "/resource/VLCPlayer");
 
   private JPanel webBrowserPanel;
-  private JWebBrowser webBrowser = new JWebBrowser();
+  private JWebBrowser webBrowser;
   
   private JPanel controlBarPane;
   private JButton playButton;
   private JButton pauseButton;
   private JButton stopButton;
 
-  private WebBrowserObject webBrowserObject = new WebBrowserObject(webBrowser) {
+  private static class NWebBrowserObject extends WebBrowserObject {
+    
+    private JVLCPlayer vlcPlayer;
+    
+    public NWebBrowserObject(JVLCPlayer vlcPlayer) {
+      super(vlcPlayer.webBrowser);
+      this.vlcPlayer = vlcPlayer;
+    }
     
     protected ObjectHTMLConfiguration getObjectHtmlConfiguration() {
       ObjectHTMLConfiguration objectHTMLConfiguration = new ObjectHTMLConfiguration();
-      objectHTMLConfiguration.setHTMLLoadingMessage(RESOURCES.getString("LoadingMessage"));
-      objectHTMLConfiguration.setHTMLParameters(options.getParameters());
+      objectHTMLConfiguration.setHTMLLoadingMessage(vlcPlayer.RESOURCES.getString("LoadingMessage"));
+      objectHTMLConfiguration.setHTMLParameters(vlcPlayer.options.getParameters());
       objectHTMLConfiguration.setWindowsClassID("9BE31822-FDAD-461B-AD51-BE1D1C159921");
       objectHTMLConfiguration.setWindowsInstallationURL("http://downloads.videolan.org/pub/videolan/vlc/latest/win32/axvlc.cab");
       objectHTMLConfiguration.setMimeType("application/x-vlc-plugin");
@@ -65,11 +73,13 @@ public class JVLCPlayer extends NSPanelComponent {
       objectHTMLConfiguration.setWindowsParamName("Src");
       objectHTMLConfiguration.setParamName("target");
       objectHTMLConfiguration.setVersion("VideoLAN.VLCPlugin.2");
-      options = null;
+      vlcPlayer.options = null;
       return objectHTMLConfiguration;
     }
     
-  };
+  }
+  
+  private WebBrowserObject webBrowserObject;
   
   WebBrowserObject getWebBrowserObject() {
     return webBrowserObject;
@@ -181,8 +191,10 @@ public class JVLCPlayer extends NSPanelComponent {
   /**
    * Construct a VLC player.
    */
-  public JVLCPlayer() {
+  public JVLCPlayer(NSOption... options) {
+    webBrowser = new JWebBrowser(options);
     initialize(webBrowser.getNativeComponent());
+    webBrowserObject = new NWebBrowserObject(this);
     webBrowserPanel = new JPanel(new BorderLayout(0, 0));
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);

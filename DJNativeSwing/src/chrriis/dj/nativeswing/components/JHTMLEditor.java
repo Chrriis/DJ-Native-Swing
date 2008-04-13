@@ -29,6 +29,7 @@ import chrriis.common.WebServer.WebServerContent;
 import chrriis.dj.nativeswing.LocalMessage;
 import chrriis.dj.nativeswing.Message;
 import chrriis.dj.nativeswing.NSPanelComponent;
+import chrriis.dj.nativeswing.NSOption;
 
 /**
  * An HTML editor. It is a browser-based component, which relies on the FCKeditor.<br/>
@@ -86,11 +87,11 @@ public class JHTMLEditor extends NSPanelComponent {
   /**
    * Construct an HTML editor.
    */
-  public JHTMLEditor() {
+  public JHTMLEditor(NSOption... options) {
     if(getClass().getResource("/fckeditor/fckeditor.js") == null) {
       throw new IllegalStateException("The FCKEditor distribution is missing from the classpath!");
     }
-    webBrowser = new JWebBrowser();
+    webBrowser = new JWebBrowser(options);
     initialize(webBrowser.getNativeComponent());
     webBrowser.addWebBrowserListener(new NWebBrowserListener(this));
     webBrowser.setBarsVisible(false);

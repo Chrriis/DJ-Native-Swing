@@ -59,15 +59,13 @@ import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import chrriis.common.ObjectRegistry;
 import chrriis.common.Utils;
-import chrriis.dj.nativeswing.NativeComponentOptions.DestructionTime;
-import chrriis.dj.nativeswing.NativeComponentOptions.FiliationType;
-import chrriis.dj.nativeswing.NativeComponentOptions.VisibilityConstraint;
 
 /**
  * A native component that gets connected to a native peer.
@@ -744,16 +742,6 @@ public abstract class NativeComponent extends Canvas {
     }
   }
   
-  private NativeComponentOptions options;
-  
-  private void setOptions(NativeComponentOptions options) {
-    this.options = options;
-  }
-  
-  NativeComponentOptions getOptions() {
-    return options;
-  }
-  
   static interface NativeComponentHolder {}
   
   private NativeComponentProxy nativeComponentProxy;
@@ -795,64 +783,43 @@ public abstract class NativeComponent extends Canvas {
   
   /**
    * A native component instance cannot be added directly to a component hierarchy. This method needs to be called to get a component that will add the native component.
+   * @param options the options to adjust the component behavior.
    * @return the component that contains the native component and that can be added to the component hierarchy.
    */
-  protected Component createEmbeddableComponent() {
-    NativeComponentOptions nextInstanceOptions = NativeComponentOptions.getNextInstanceOptions();
-    NativeComponentOptions.setNextInstanceOptions(null);
-    FiliationType filiationType = nextInstanceOptions.getFiliationType();
-    DestructionTime destructionTime = nextInstanceOptions.getDestructionTime();
-    if(destructionTime == DestructionTime.AUTO) {
-      destructionTime = DestructionTime.ON_REMOVAL;
-    }
-    VisibilityConstraint visibilityConstraint = nextInstanceOptions.getVisibilityConstraint();
-    boolean isJNAPresent = isJNAPresent();
-    if(visibilityConstraint == VisibilityConstraint.AUTO) {
-      if(!isJNAPresent) {
-        visibilityConstraint = VisibilityConstraint.NONE;
-      } else {
-        switch(filiationType) {
-          case COMPONENT_PROXYING:
-          case WINDOW_PROXYING:
-            visibilityConstraint = VisibilityConstraint.FULL_COMPONENT_TREE;
-            break;
-          default:
-            visibilityConstraint = VisibilityConstraint.NONE;
-          break;
-        }
+  protected Component createEmbeddableComponent(NSOption[] options) {
+    NSOption filiationType = null;
+    NSOption destructionTime = null;
+    NSOption visibilityConstraint = null;
+    for(NSOption option: options) {
+      if(NSComponentOptions.FILIATION_TYPE_OPTION_GROUP == option.getGroup()) {
+        filiationType = option;
+      } else if(NSComponentOptions.DESTRUCTION_TIME_OPTION_GROUP == option.getGroup()) {
+        destructionTime = option;
+      } else if(NSComponentOptions.VISIBILITY_CONSTRAINT_OPTION_GROUP == option.getGroup()) {
+        visibilityConstraint = option;
       }
     }
-    if(visibilityConstraint != VisibilityConstraint.NONE && !isJNAPresent) {
+    boolean isJNAPresent = isJNAPresent();
+    if(visibilityConstraint == null) {
+      if(isJNAPresent && filiationType != null) {
+        visibilityConstraint = NSComponentOptions.CONSTRAIN_VISIBILITY;
+      }
+    }
+    if(visibilityConstraint != null && !isJNAPresent) {
       throw new IllegalStateException("The JNA libraries are required to use the visibility constraints!");
     }
-    if(destructionTime == DestructionTime.ON_FINALIZATION && filiationType == FiliationType.AUTO) {
-      filiationType = FiliationType.COMPONENT_PROXYING;
+    if(destructionTime == NSComponentOptions.DESTROY_ON_FINALIZATION && filiationType == null) {
+      filiationType = NSComponentOptions.PROXY_COMPONENT_HIERARCHY;
     }
-    NativeComponentOptions options = (NativeComponentOptions)nextInstanceOptions.clone();
-    options.setDestructionTime(destructionTime);
-    options.setFiliationType(filiationType);
-    options.setVisibilityConstraint(visibilityConstraint);
-    setOptions(options);
-    nextInstanceOptions = null;
-    switch(filiationType) {
-      case COMPONENT_PROXYING:
-        return new NativeComponentProxyPanel(this);
-      case WINDOW_PROXYING:
-        return new NativeComponentProxyWindow(this);
-      default:
-        switch(destructionTime) {
-          case ON_REMOVAL:
-            break;
-          default:
-            throw new IllegalStateException("Finalization-time destruction cannot be used without a proxied filiation!");
-        }
-        switch(visibilityConstraint) {
-          case NONE:
-            return new SimpleNativeComponentHolder(this);
-          default:
-            return new NativeComponentProxyPanel(this);
-        }
+    if(filiationType == NSComponentOptions.PROXY_COMPONENT_HIERARCHY) {
+      return new NativeComponentProxyPanel(this, visibilityConstraint, destructionTime, filiationType);
+      // If for some reasons component-based proxying has some issues, consider using the window-based proxying.
+      //return new NativeComponentProxyWindow(this, visibilityConstraint, destructionTime);
     }
+    if(visibilityConstraint == null) {
+      return new SimpleNativeComponentHolder(this);
+    }
+    return new NativeComponentProxyPanel(this, visibilityConstraint, destructionTime, filiationType);
   }
   
   private static class CMN_setShellEnabled extends ControlCommandMessage {
@@ -933,14 +900,14 @@ public abstract class NativeComponent extends Canvas {
     private void printRemoveClip(Control control, GC gc) {
       Point size = control.getSize();
       Display display = control.getDisplay();
-      Shell shell = control.getShell();
-      Shell tmpShell = new Shell();
-      Shell tmpShell1 = new Shell(tmpShell, SWT.NO_TRIM | SWT.NO_FOCUS | SWT.NO_BACKGROUND);
+      Composite oldParent = control.getShell();
+      Shell tmpHiddenParentShell = new Shell();
+      Shell tmpParentShell = new Shell(tmpHiddenParentShell, SWT.NO_TRIM | SWT.NO_FOCUS | SWT.NO_BACKGROUND);
       Point location = display.map(control, null, control.getLocation());
-      tmpShell1.setLocation(location);
-      tmpShell1.setSize(size);
-      org.eclipse.swt.widgets.Canvas canvas1 = new org.eclipse.swt.widgets.Canvas(tmpShell1, SWT.NO_BACKGROUND);
-      canvas1.setSize(size);
+      tmpParentShell.setLocation(location);
+      tmpParentShell.setSize(size);
+      org.eclipse.swt.widgets.Canvas screenshotCanvas = new org.eclipse.swt.widgets.Canvas(tmpParentShell, SWT.NO_BACKGROUND);
+      screenshotCanvas.setSize(size);
       GC displayGC = new GC(display);
       final Image screenshot = new Image(display, size.x, size.y);
       displayGC.copyArea(screenshot, location.x, location.y);
@@ -950,25 +917,25 @@ public abstract class NativeComponent extends Canvas {
           e.gc.drawImage(screenshot, 0, 0);
         }
       };
-      tmpShell1.addPaintListener(paintListener);
-      canvas1.addPaintListener(paintListener);
-      shell.addPaintListener(paintListener);
-      org.eclipse.swt.widgets.Canvas canvas2 = new org.eclipse.swt.widgets.Canvas(shell, SWT.NO_BACKGROUND);
-      canvas2.setSize(size);
-      canvas2.addPaintListener(paintListener);
+      tmpParentShell.addPaintListener(paintListener);
+      screenshotCanvas.addPaintListener(paintListener);
+      oldParent.addPaintListener(paintListener);
+      org.eclipse.swt.widgets.Canvas controlReplacementCanvas = new org.eclipse.swt.widgets.Canvas(oldParent, SWT.NO_BACKGROUND);
+      controlReplacementCanvas.setSize(size);
+      controlReplacementCanvas.addPaintListener(paintListener);
       control.setRedraw(false);
-      shell.setRedraw(false);
-      control.setParent(tmpShell1);
-      control.moveBelow(canvas1);
-      tmpShell1.setVisible(true);
+      oldParent.setRedraw(false);
+      control.setParent(tmpParentShell);
+      control.moveBelow(screenshotCanvas);
+      tmpParentShell.setVisible(true);
       control.print(gc);
-      control.setParent(shell);
-      control.moveAbove(canvas2);
-      canvas2.dispose();
-      shell.removePaintListener(paintListener);
-      tmpShell1.dispose();
-      tmpShell.dispose();
-      shell.setRedraw(true);
+      control.setParent(oldParent);
+      control.moveAbove(controlReplacementCanvas);
+      controlReplacementCanvas.dispose();
+      oldParent.removePaintListener(paintListener);
+      tmpParentShell.dispose();
+      tmpHiddenParentShell.dispose();
+      oldParent.setRedraw(true);
       control.setRedraw(true);
       screenshot.dispose();
     }
