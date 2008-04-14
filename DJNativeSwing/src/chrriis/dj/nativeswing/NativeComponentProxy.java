@@ -48,15 +48,19 @@ abstract class NativeComponentProxy extends JComponent {
     setFocusable(true);
     this.nativeComponent = nativeComponent;
     backBufferManager = new BackBufferManager(nativeComponent, this);
-    if(isVisibilityConstrained) {
-      hierarchyListener = new HierarchyListener() {
-        public void hierarchyChanged(HierarchyEvent e) {
-          long changeFlags = e.getChangeFlags();
-          if((changeFlags & (HierarchyEvent.SHOWING_CHANGED)) != 0) {
+    hierarchyListener = new HierarchyListener() {
+      public void hierarchyChanged(HierarchyEvent e) {
+        long changeFlags = e.getChangeFlags();
+        if((changeFlags & (HierarchyEvent.SHOWING_CHANGED)) != 0) {
+          if(isVisibilityConstrained) {
             adjustPeerShape();
+          } else {
+            adjustPeerBounds();
           }
         }
-      };
+      }
+    };
+    if(isVisibilityConstrained) {
       shapeAdjustmentEventListener = new AWTEventListener() {
         public void eventDispatched(AWTEvent e) {
           boolean isAdjustingShape = false;
