@@ -86,6 +86,7 @@ public class JHTMLEditor extends NSPanelComponent {
   
   /**
    * Construct an HTML editor.
+   * @param options the options to configure the behavior of this component.
    */
   public JHTMLEditor(NSOption... options) {
     if(getClass().getResource("/fckeditor/fckeditor.js") == null) {

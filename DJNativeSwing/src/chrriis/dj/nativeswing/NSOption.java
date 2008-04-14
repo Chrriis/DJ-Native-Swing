@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * An option, which contains a key to identify a group of related options and the value of that option.
  * @author Christopher Deckers
  */
 public class NSOption {

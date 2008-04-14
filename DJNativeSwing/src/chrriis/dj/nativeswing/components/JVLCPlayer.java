@@ -190,6 +190,7 @@ public class JVLCPlayer extends NSPanelComponent {
   
   /**
    * Construct a VLC player.
+   * @param options the options to configure the behavior of this component.
    */
   public JVLCPlayer(NSOption... options) {
     webBrowser = new JWebBrowser(options);

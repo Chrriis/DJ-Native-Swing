@@ -62,6 +62,9 @@ import chrriis.dj.nativeswing.NativeComponent;
  */
 public class JWebBrowser extends NSPanelComponent {
 
+  /**
+   * An option to make the web browser use the Mozilla XULRunner runtime.
+   */
   public static final NSOption USE_XULRUNNER_RUNTIME = new NSOption("Web Browser Runtime");
   
   /**
@@ -348,6 +351,7 @@ public class JWebBrowser extends NSPanelComponent {
   
   /**
    * Construct a new web browser.
+   * @param options the options to configure the behavior of this component.
    */
   public JWebBrowser(NSOption... options) {
     Map<Object, Object> optionMap = NSOption.createOptionMap(options);

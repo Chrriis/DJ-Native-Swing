@@ -792,7 +792,7 @@ public abstract class NativeComponent extends Canvas {
   
   /**
    * A native component instance cannot be added directly to a component hierarchy. This method needs to be called to get a component that will add the native component.
-   * @param optionMap the options to adjust the component behavior.
+   * @param optionMap the options to configure the behavior of this component.
    * @return the component that contains the native component and that can be added to the component hierarchy.
    */
   protected Component createEmbeddableComponent(Map<Object, Object> optionMap) {

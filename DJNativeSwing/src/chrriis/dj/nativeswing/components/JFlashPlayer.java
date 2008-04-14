@@ -92,6 +92,7 @@ public class JFlashPlayer extends NSPanelComponent {
 
   /**
    * Construct a flash player.
+   * @param options the options to configure the behavior of this component.
    */
   public JFlashPlayer(NSOption... options) {
     webBrowser = new JWebBrowser(options);

@@ -26,6 +26,7 @@ public class JWMediaPlayer extends NSPanelComponent {
   
   /**
    * Construct a Windows Media Player.
+   * @param options the options to configure the behavior of this component.
    */
   public JWMediaPlayer(NSOption... options) {
     nativeComponent = new NativeWMediaPlayer();
