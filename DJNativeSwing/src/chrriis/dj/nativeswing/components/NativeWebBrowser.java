@@ -488,10 +488,7 @@ class NativeWebBrowser extends NativeComponent {
   
   public NativeWebBrowser(JWebBrowser webBrowser, boolean isXULRunnerEngine) {
     this.webBrowser = new WeakReference<JWebBrowser>(webBrowser);
-    if("xulrunner".equals(System.getProperty("nativeswing.webbrowser.runtime"))) {
-      isXULRunnerEngine = true;
-    }
-    this.isXULRunnerEngine = isXULRunnerEngine;
+    this.isXULRunnerEngine = isXULRunnerEngine || "xulrunner".equals(System.getProperty("nativeswing.webbrowser.runtime"));
   }
 
   private static class CMN_clearSessionCookies extends CommandMessage {
