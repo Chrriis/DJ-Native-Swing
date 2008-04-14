@@ -76,7 +76,7 @@ public class NavigationControl extends JPanel {
       }
       @Override
       public void windowWillOpen(WebBrowserWindowWillOpenEvent e) {
-        // We let the window to be created, but we will check the first URL that is set on it.
+        // We let the window to be created, but we will check the first location that is set on it.
         e.getNewWebBrowser().addWebBrowserListener(new WebBrowserAdapter() {
           @Override
           public void locationChanging(WebBrowserNavigationEvent e) {
