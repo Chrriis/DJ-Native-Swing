@@ -21,6 +21,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.lang.reflect.Array;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -61,6 +62,8 @@ import chrriis.dj.nativeswing.NativeComponent;
  */
 public class JWebBrowser extends NSPanelComponent {
 
+  public static final NSOption USE_XULRUNNER_RUNTIME = new NSOption("Web Browser Runtime");
+  
   /**
    * Clear all session cookies from all current web browser instances.
    */
@@ -347,14 +350,15 @@ public class JWebBrowser extends NSPanelComponent {
    * Construct a new web browser.
    */
   public JWebBrowser(NSOption... options) {
-    nativeComponent = new NativeWebBrowser(this);
+    Map<Object, Object> optionMap = NSOption.createOptionMap(options);
+    nativeComponent = new NativeWebBrowser(this, optionMap.get(USE_XULRUNNER_RUNTIME.getOptionKey()) == USE_XULRUNNER_RUNTIME);
     initialize(nativeComponent);
     menuToolAndLocationBarPanel = new JPanel(new BorderLayout(0, 0));
     menuBar = new JMenuBar();
     menuToolAndLocationBarPanel.add(menuBar, BorderLayout.NORTH);
     add(menuToolAndLocationBarPanel, BorderLayout.NORTH);
     webBrowserPanel = new JPanel(new BorderLayout(0, 0));
-    webBrowserPanel.add(nativeComponent.createEmbeddableComponent(options), BorderLayout.CENTER);
+    webBrowserPanel.add(nativeComponent.createEmbeddableComponent(optionMap), BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);
     nativeComponent.addWebBrowserListener(new NWebBrowserListener());
     adjustBorder();

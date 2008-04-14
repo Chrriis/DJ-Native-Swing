@@ -7,46 +7,45 @@
  */
 package chrriis.dj.nativeswing;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author Christopher Deckers
  */
 public class NSOption {
 
   /**
-   * A group of options.
-   * @author Christopher Deckers
+   * Create a map from option key to option value. If a key is present several times, the latest value is retained.
+   * @param options the options for which to construct the map.
    */
-  public static class NSOptionGroup {
-    
-    private String groupName;
-    
-    public NSOptionGroup(String groupName) {
-      this.groupName = groupName;
+  public static Map<Object, Object> createOptionMap(NSOption... options) {
+    Map<Object, Object> keyToValueMap = new HashMap<Object, Object>();
+    if(options == null) {
+      return keyToValueMap;
     }
-    
-    @Override
-    public String toString() {
-      return groupName;
+    for(NSOption option: options) {
+      keyToValueMap.put(option.getOptionKey(), option.getOptionValue());
     }
-    
+    return keyToValueMap;
   }
   
-  private NSOptionGroup group;
+  private Object key;
   
   /**
    * Create an option.
-   * @param optionGroup the group to which this option belongs to, which may be null.
+   * @param key the key, or null for a default key to be created.
    */
-  public NSOption(NSOptionGroup group) {
-    this.group = group;
+  public NSOption(Object key) {
+    this.key = key == null? getClass().getName(): key;
   }
   
   /**
-   * Get the group of this option.
-   * @return the group this option belongs to, or null if none is specified.
+   * Get the key of this option.
+   * @return the key of this option.
    */
-  public NSOptionGroup getGroup() {
-    return group;
+  public Object getOptionKey() {
+    return key;
   }
   
   /**
@@ -59,11 +58,7 @@ public class NSOption {
   
   @Override
   public String toString() {
-    NSOptionGroup group = getGroup();
-    if(group == null) {
-      return getClass().getName() + "=" + getOptionValue();
-    }
-    return group + "=" + getOptionValue();
+    return getOptionKey() + "=" + getOptionValue();
   }
   
 }

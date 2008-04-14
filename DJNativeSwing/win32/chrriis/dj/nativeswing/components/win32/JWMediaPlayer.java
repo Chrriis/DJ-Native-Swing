@@ -32,7 +32,7 @@ public class JWMediaPlayer extends NSPanelComponent {
     initialize(nativeComponent);
     wmpSettings = new WMPSettings(this);
     wmpControls = new WMPControls(this);
-    add(nativeComponent.createEmbeddableComponent(options), BorderLayout.CENTER);
+    add(nativeComponent.createEmbeddableComponent(NSOption.createOptionMap(options)), BorderLayout.CENTER);
     wmpSettings.setAutoStart(true);
     wmpSettings.setErrorDialogsEnabled(false);
     setControlBarVisible(true);

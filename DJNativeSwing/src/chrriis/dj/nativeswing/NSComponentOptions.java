@@ -7,20 +7,14 @@
  */
 package chrriis.dj.nativeswing;
 
-import chrriis.dj.nativeswing.NSOption.NSOptionGroup;
 
 /**
  * @author Christopher Deckers
  */
 public interface NSComponentOptions {
 
-  public static final NSOptionGroup DESTRUCTION_TIME_OPTION_GROUP = new NSOptionGroup("Destruction Time");
-  public static final NSOption DESTROY_ON_FINALIZATION = new NSOption(DESTRUCTION_TIME_OPTION_GROUP);
-  
-  public static final NSOptionGroup FILIATION_TYPE_OPTION_GROUP = new NSOptionGroup("Filiation Type");
-  public static final NSOption PROXY_COMPONENT_HIERARCHY = new NSOption(FILIATION_TYPE_OPTION_GROUP);
-  
-  public static final NSOptionGroup VISIBILITY_CONSTRAINT_OPTION_GROUP = new NSOptionGroup("Visibility Constraint");
-  public static final NSOption CONSTRAIN_VISIBILITY = new NSOption(VISIBILITY_CONSTRAINT_OPTION_GROUP);
+  public static final NSOption DESTROY_ON_FINALIZATION = new NSOption("Destruction Time");
+  public static final NSOption PROXY_COMPONENT_HIERARCHY = new NSOption("Filiation Type");
+  public static final NSOption CONSTRAIN_VISIBILITY = new NSOption("Visibility Constraint");
   
 }

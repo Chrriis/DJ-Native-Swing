@@ -8,6 +8,7 @@
 package chrriis.dj.nativeswing.components.win32;
 
 import java.awt.Component;
+import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
@@ -17,7 +18,6 @@ import org.eclipse.swt.ole.win32.OleFrame;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
-import chrriis.dj.nativeswing.NSOption;
 import chrriis.dj.nativeswing.OleNativeComponent;
 
 /**
@@ -25,7 +25,7 @@ import chrriis.dj.nativeswing.OleNativeComponent;
  */
 class NativeWMediaPlayer extends OleNativeComponent {
   
-  protected static Control createControl(Shell shell) {
+  protected static Control createControl(Shell shell, Object[] parameters) {
     OleFrame frame = new OleFrame(shell, SWT.NONE);
     OleClientSite site;
     try {
@@ -40,8 +40,8 @@ class NativeWMediaPlayer extends OleNativeComponent {
     return frame;
   }
   
-  protected Component createEmbeddableComponent(NSOption[] options) {
-    return super.createEmbeddableComponent(options);
+  protected Component createEmbeddableComponent(Map<Object, Object> optionMap) {
+    return super.createEmbeddableComponent(optionMap);
   }
   
   @Override

@@ -38,6 +38,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -390,9 +391,9 @@ public abstract class NativeComponent extends Canvas {
         Shell shell = createShell(args[2]);
         shell.setLayout(new FillLayout());
         int componentID = (Integer)args[0];
-        Method createControlMethod = Class.forName((String)args[1]).getDeclaredMethod("createControl", Shell.class);
+        Method createControlMethod = Class.forName((String)args[1]).getDeclaredMethod("createControl", Shell.class, Object[].class);
         createControlMethod.setAccessible(true);
-        Control control = (Control)createControlMethod.invoke(null, shell);
+        Control control = (Control)createControlMethod.invoke(null, shell, args[3]);
         NativeComponent.registry.add(control, componentID);
         configureControl(control, componentID);
         shell.setVisible (true);
@@ -617,6 +618,14 @@ public abstract class NativeComponent extends Canvas {
       });
     }
   }
+
+  /**
+   * Get the parameters that are passed to the creation method. This method can be overriden by subclasses to pass additional information necessary for the native peer creation.
+   * @return the parameters.
+   */
+  protected Object[] getNativePeerCreationParameters() {
+    return null;
+  }
   
   private void createNativePeer() {
     boolean isInterfaceAlive = NativeInterface.isAlive();
@@ -637,7 +646,7 @@ public abstract class NativeComponent extends Canvas {
       NativeInterface.addNativeInterfaceListener(nativeInterfaceListener);
       isNativePeerValid = true;
       try {
-        runSync(new CMN_createControl(), componentID, NativeComponent.this.getClass().getName(), getHandle(), getWidth(), getHeight());
+        runSync(new CMN_createControl(), componentID, NativeComponent.this.getClass().getName(), getHandle(), getNativePeerCreationParameters());
       } catch(Exception e) {
         isNativePeerValid = false;
         StringBuilder sb = new StringBuilder();
@@ -783,22 +792,13 @@ public abstract class NativeComponent extends Canvas {
   
   /**
    * A native component instance cannot be added directly to a component hierarchy. This method needs to be called to get a component that will add the native component.
-   * @param options the options to adjust the component behavior.
+   * @param optionMap the options to adjust the component behavior.
    * @return the component that contains the native component and that can be added to the component hierarchy.
    */
-  protected Component createEmbeddableComponent(NSOption[] options) {
-    NSOption filiationType = null;
-    NSOption destructionTime = null;
-    NSOption visibilityConstraint = null;
-    for(NSOption option: options) {
-      if(NSComponentOptions.FILIATION_TYPE_OPTION_GROUP == option.getGroup()) {
-        filiationType = option;
-      } else if(NSComponentOptions.DESTRUCTION_TIME_OPTION_GROUP == option.getGroup()) {
-        destructionTime = option;
-      } else if(NSComponentOptions.VISIBILITY_CONSTRAINT_OPTION_GROUP == option.getGroup()) {
-        visibilityConstraint = option;
-      }
-    }
+  protected Component createEmbeddableComponent(Map<Object, Object> optionMap) {
+    NSOption filiationType = (NSOption)optionMap.get(NSComponentOptions.PROXY_COMPONENT_HIERARCHY.getOptionKey());
+    NSOption destructionTime = (NSOption)optionMap.get(NSComponentOptions.DESTROY_ON_FINALIZATION.getOptionKey());
+    NSOption visibilityConstraint = (NSOption)optionMap.get(NSComponentOptions.CONSTRAIN_VISIBILITY.getOptionKey());
     boolean isJNAPresent = isJNAPresent();
     if(visibilityConstraint == null) {
       if(isJNAPresent && filiationType != null) {

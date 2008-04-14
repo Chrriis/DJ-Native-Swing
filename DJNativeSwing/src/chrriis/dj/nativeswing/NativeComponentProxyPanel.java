@@ -139,7 +139,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
       layeredPane.setLayer(panel, Integer.MIN_VALUE);
       layeredPane.add(panel);
     } else {
-      add(panel, BorderLayout.CENTER);
+      add(panel);
     }
   }
   
@@ -171,14 +171,6 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
         adjustPeerShape_();
       }
     });
-  }
-  
-  @Override
-  protected void adjustPeerBounds() {
-    if(!isProxiedFiliation) {
-      return;
-    }
-    super.adjustPeerBounds();
   }
   
   private Rectangle[] lastArea = new Rectangle[] {new Rectangle(getSize())};

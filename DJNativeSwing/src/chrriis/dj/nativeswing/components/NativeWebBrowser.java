@@ -15,6 +15,7 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
@@ -49,7 +50,6 @@ import chrriis.common.Utils;
 import chrriis.dj.nativeswing.CommandMessage;
 import chrriis.dj.nativeswing.ControlCommandMessage;
 import chrriis.dj.nativeswing.NativeComponent;
-import chrriis.dj.nativeswing.NSOption;
 
 /**
  * @author Christopher Deckers
@@ -343,9 +343,16 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
   
-  protected static Control createControl(Shell shell) {
+  private boolean isXULRunnerEngine;
+  
+  @Override
+  protected Object[] getNativePeerCreationParameters() {
+    return new Object[] {isXULRunnerEngine};
+  }
+  
+  protected static Control createControl(Shell shell, Object[] parameters) {
     int style = SWT.NONE;
-    if("xulrunner".equals(System.getProperty("nativeswing.webbrowser.runtime"))) {
+    if(((Boolean)parameters[0])) {
       style |= SWT.MOZILLA;
     }
     final Browser browser = new Browser(shell, style);
@@ -479,8 +486,12 @@ class NativeWebBrowser extends NativeComponent {
 
   private Reference<JWebBrowser> webBrowser;
   
-  public NativeWebBrowser(JWebBrowser webBrowser) {
+  public NativeWebBrowser(JWebBrowser webBrowser, boolean isXULRunnerEngine) {
     this.webBrowser = new WeakReference<JWebBrowser>(webBrowser);
+    if("xulrunner".equals(System.getProperty("nativeswing.webbrowser.runtime"))) {
+      isXULRunnerEngine = true;
+    }
+    this.isXULRunnerEngine = isXULRunnerEngine;
   }
 
   private static class CMN_clearSessionCookies extends CommandMessage {
@@ -747,8 +758,8 @@ class NativeWebBrowser extends NativeComponent {
   }
   
   @Override
-  protected Component createEmbeddableComponent(NSOption[] options) {
-    return super.createEmbeddableComponent(options);
+  protected Component createEmbeddableComponent(Map<Object, Object> optionMap) {
+    return super.createEmbeddableComponent(optionMap);
   }
   
   @Override

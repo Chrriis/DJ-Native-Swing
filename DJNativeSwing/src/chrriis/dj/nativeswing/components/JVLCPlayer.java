@@ -195,6 +195,10 @@ public class JVLCPlayer extends NSPanelComponent {
     webBrowser = new JWebBrowser(options);
     initialize(webBrowser.getNativeComponent());
     webBrowserObject = new NWebBrowserObject(this);
+    vlcAudio = new VLCAudio(this);
+    vlcInput = new VLCInput(this);
+    vlcPlaylist = new VLCPlaylist(this);
+    vlcVideo = new VLCVideo(this);
     webBrowserPanel = new JPanel(new BorderLayout(0, 0));
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);
@@ -409,7 +413,7 @@ public class JVLCPlayer extends NSPanelComponent {
   
   /* ------------------------- VLC API exposed ------------------------- */
   
-  private VLCAudio vlcAudio = new VLCAudio(this);
+  private VLCAudio vlcAudio;
   
   /**
    * Get the VLC object responsible for audio-related actions.
@@ -419,7 +423,7 @@ public class JVLCPlayer extends NSPanelComponent {
     return vlcAudio;
   }
   
-  private VLCInput vlcInput = new VLCInput(this);
+  private VLCInput vlcInput;
   
   /**
    * Get the VLC object responsible for input-related actions.
@@ -429,7 +433,7 @@ public class JVLCPlayer extends NSPanelComponent {
     return vlcInput;
   }
   
-  private VLCPlaylist vlcPlaylist = new VLCPlaylist(this);
+  private VLCPlaylist vlcPlaylist;
   
   /**
    * Get the VLC object responsible for playlist-related actions.
@@ -439,7 +443,7 @@ public class JVLCPlayer extends NSPanelComponent {
     return vlcPlaylist;
   }
   
-  private VLCVideo vlcVideo = new VLCVideo(this);
+  private VLCVideo vlcVideo;
   
   /**
    * Get the VLC object responsible for video-related actions.
