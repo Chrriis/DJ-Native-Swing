@@ -49,28 +49,28 @@ public class NavigationControl extends JPanel {
     webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
       @Override
       public void locationChanging(WebBrowserNavigationEvent e) {
-        final String newPageLocation = e.getNewPageLocation();
-        if(newPageLocation.startsWith("http://www.google.com/")) {
+        final String newResourceLocation = e.getNewResourceLocation();
+        if(newResourceLocation.startsWith("http://www.google.com/")) {
           e.consume();
           SwingUtilities.invokeLater(new Runnable() {
             public void run() {
               JWebBrowserWindow webBrowserWindow = new JWebBrowserWindow();
-              webBrowserWindow.getWebBrowser().navigate(newPageLocation);
+              webBrowserWindow.getWebBrowser().navigate(newResourceLocation);
               webBrowserWindow.setVisible(true);
             }
           });
-        } else if(newPageLocation.startsWith("http://java.sun.com/")) {
+        } else if(newResourceLocation.startsWith("http://java.sun.com/")) {
           e.consume();
           SwingUtilities.invokeLater(new Runnable() {
             public void run() {
               JWebBrowser webBrowser = new JWebBrowser();
-              webBrowser.navigate(newPageLocation);
+              webBrowser.navigate(newResourceLocation);
               tabbedPane.addTab("java.sun.com", webBrowser);
             }
           });
-        } else if(newPageLocation.startsWith("http://www.eclipse.org/")) {
+        } else if(newResourceLocation.startsWith("http://www.eclipse.org/")) {
           e.consume();
-        } else if(newPageLocation.startsWith("http://www.microsoft.com/")) {
+        } else if(newResourceLocation.startsWith("http://www.microsoft.com/")) {
           e.consume();
         }
       }
@@ -82,21 +82,21 @@ public class NavigationControl extends JPanel {
           public void locationChanging(WebBrowserNavigationEvent e) {
             final JWebBrowser webBrowser = e.getWebBrowser();
             webBrowser.removeWebBrowserListener(this);
-            String newPageLocation = e.getNewPageLocation();
+            String newResourceLocation = e.getNewResourceLocation();
             boolean isBlocked = false;
-            if(newPageLocation.startsWith("http://www.microsoft.com/")) {
+            if(newResourceLocation.startsWith("http://www.microsoft.com/")) {
               isBlocked = true;
-            } else if(newPageLocation.startsWith("http://www.eclipse.org/")) {
+            } else if(newResourceLocation.startsWith("http://www.eclipse.org/")) {
               isBlocked = true;
               JWebBrowser newWebBrowser = new JWebBrowser();
               JWebBrowser.copyAppearance(webBrowser, newWebBrowser);
-              newWebBrowser.navigate(newPageLocation);
+              newWebBrowser.navigate(newResourceLocation);
               tabbedPane.addTab("www.eclipse.org", newWebBrowser);
-            } else if(newPageLocation.startsWith("http://www.yahoo.com/")) {
+            } else if(newResourceLocation.startsWith("http://www.yahoo.com/")) {
               isBlocked = true;
               JWebBrowser newWebBrowser = new JWebBrowser();
               JWebBrowser.copyAppearance(webBrowser, newWebBrowser);
-              newWebBrowser.navigate(newPageLocation);
+              newWebBrowser.navigate(newResourceLocation);
               tabbedPane.addTab("www.yahoo.com", newWebBrowser);
             }
             if(isBlocked) {

@@ -503,15 +503,15 @@ class NativeWebBrowser extends NativeComponent {
     new CMN_clearSessionCookies().asyncExec();
   }
 
-  private static class CMN_getPageLocation extends ControlCommandMessage {
+  private static class CMN_getResourceLocation extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       return ((Browser)getControl()).getUrl();
     }
   }
   
-  public String getPageLocation() {
-    return (String)runSync(new CMN_getPageLocation());
+  public String getResourceLocation() {
+    return (String)runSync(new CMN_getResourceLocation());
   }
   
   private static class CMN_navigate extends ControlCommandMessage {

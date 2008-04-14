@@ -109,7 +109,7 @@ public class JWebBrowser extends NSPanelComponent {
       JWebBrowser webBrowser = e.getWebBrowser();
       if(e.isTopFrame()) {
         if(webBrowser.locationBarPane != null) {
-          webBrowser.locationBarPane.updateLocation(e.getNewPageLocation());
+          webBrowser.locationBarPane.updateLocation(e.getNewResourceLocation());
         }
       }
       updateStopButton(webBrowser, true);
@@ -184,7 +184,7 @@ public class JWebBrowser extends NSPanelComponent {
    * @param toWebBrowser the web browser to copy the content to.
    */
   public static void copyContent(JWebBrowser fromWebBrowser, JWebBrowser toWebBrowser) {
-    String location = fromWebBrowser.getPageLocation();
+    String location = fromWebBrowser.getResourceLocation();
     if("about:blank".equals(location)) {
       toWebBrowser.setHTMLContent(fromWebBrowser.getHTMLContent());
     } else {
@@ -307,7 +307,7 @@ public class JWebBrowser extends NSPanelComponent {
     }
     
     public void updateLocation() {
-      locationField.setText(nativeComponent.isNativePeerInitialized()? nativeComponent.getPageLocation(): "");
+      locationField.setText(nativeComponent.isNativePeerInitialized()? nativeComponent.getResourceLocation(): "");
     }
     
   }
@@ -626,11 +626,11 @@ public class JWebBrowser extends NSPanelComponent {
   }
   
   /**
-   * Get the location of the page currently displayed.
+   * Get the location of the resource currently displayed.
    * @return the location.
    */
-  public String getPageLocation() {
-    return nativeComponent.getPageLocation();
+  public String getResourceLocation() {
+    return nativeComponent.getResourceLocation();
   }
   
   /**
