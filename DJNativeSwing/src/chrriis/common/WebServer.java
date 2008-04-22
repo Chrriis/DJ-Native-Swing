@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
@@ -678,7 +679,7 @@ public class WebServer {
   }
   
   public String getURLPrefix() {
-    return "http://" + HOST_ADDRESS + ":" + port;
+    return "http://" + hostAddress + ":" + port;
   }
   
   /**
@@ -825,7 +826,28 @@ public class WebServer {
 
   private static WebServer webServer;
   private static Object LOCK = new Object();
-  private static final String HOST_ADDRESS = "127.0.0.1";
+  private static String hostAddress;
+  
+  static {
+    hostAddress = System.getProperty("nativeswing.webserver.hostaddress");
+    if("<localhost>".equals(hostAddress)) {
+      try {
+        hostAddress = InetAddress.getLocalHost().getHostAddress();
+      } catch(Exception e) {
+      }
+    }
+    if(hostAddress == null) {
+      hostAddress = "127.0.0.1";
+    }
+  }
+  
+  /**
+   * Set the host address which is used when the URL prefix is requested, which by default is "127.0.0.1".
+   * @param hostAddress The new host address.
+   */
+  public static void setHostAddress(String hostAddress) {
+    WebServer.hostAddress = hostAddress;
+  }
   
   public static WebServer getDefaultWebServer() {
     synchronized(LOCK) {
