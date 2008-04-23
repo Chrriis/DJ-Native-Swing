@@ -7,6 +7,8 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.5 (xxxxxxxxxxxxxx):
 
+- JFlashPlayer allows call Flash functions on the object.
+- Flash demo contributed by Paulus Tuerah (www.goldenstudios.or.id)
 - NativeComponent.setEnabled(b) is added.
 - Javadoc is generated and part of the distribution.
 - Calls to get values from browser are now typed (not just Strings).
@@ -17,7 +19,6 @@ Licence terms: LGPL (see licence.txt)
 - JFlashPlayer and JVLCPlayer can load files from the classpath.
 - JFlashPlayer.setURL() and JVLCPlayer.setURL() are changed to load().
 - initializeNativePeer() method is exposed.
-- JFlashPlayer allows call Flash functions on the object.
 - JFlashPlayer allows to add custom JS.
 - Lightweight popups are handled differently.
 - sendCommand supports parameters.
