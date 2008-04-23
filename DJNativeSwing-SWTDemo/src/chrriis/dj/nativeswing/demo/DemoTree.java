@@ -25,7 +25,8 @@ import chrriis.dj.nativeswing.demo.examples.advancedcapabilities.FiliationTypeOp
 import chrriis.dj.nativeswing.demo.examples.advancedcapabilities.ThumbnailCreation;
 import chrriis.dj.nativeswing.demo.examples.advancedcapabilities.VisibilityConstraintOption;
 import chrriis.dj.nativeswing.demo.examples.evolutions.WorkInProgress;
-import chrriis.dj.nativeswing.demo.examples.flashplayer.Interactions;
+import chrriis.dj.nativeswing.demo.examples.flashplayer.FunctionCalls;
+import chrriis.dj.nativeswing.demo.examples.flashplayer.VariablesAndFlow;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
 import chrriis.dj.nativeswing.demo.examples.htmleditor.SimpleHTMLEditorExample;
 import chrriis.dj.nativeswing.demo.examples.introduction.Codewise;
@@ -66,7 +67,8 @@ public class DemoTree extends JTree {
     }));
     exampleGroupList.add(new ExampleGroup("JFlashPlayer", new Example[] {
         new Example("Simple Example", SimpleFlashExample.class, "Display a flash application.", true),
-        new Example("Interactions", Interactions.class, "Control a flash animation, and get/set variables.", true),
+        new Example("Variables and Flow", VariablesAndFlow.class, "Control a flash animation, and get/set variables.", true),
+        new Example("Function Calls", FunctionCalls.class, "Invoke functions with or without results and received commands.", true),
     }));
     exampleGroupList.add(new ExampleGroup("JVLCPlayer", new Example[] {
         new Example("Simple Example", SimpleVLCPlayerExample.class, "Load a movie/sound file to an embedded VLC player.", true),

@@ -32,9 +32,9 @@ import chrriis.dj.nativeswing.components.JFlashPlayer;
 /**
  * @author Christopher Deckers
  */
-public class Interactions extends JPanel {
+public class VariablesAndFlow extends JPanel {
 
-  public Interactions() {
+  public VariablesAndFlow() {
     super(new BorderLayout(0, 0));
     JPanel flashPlayerPanel = new JPanel(new BorderLayout(0, 0));
     flashPlayerPanel.setBorder(BorderFactory.createTitledBorder("Native Flash Player component"));
@@ -80,7 +80,7 @@ public class Interactions extends JPanel {
     });
     getSetSouthPanel.add(getLabel);
     variablePanel.add(getSetSouthPanel, BorderLayout.SOUTH);
-    add(variablePanel, BorderLayout.NORTH);
+    add(variablePanel, BorderLayout.SOUTH);
   }
   
   /* Standard main method to try that test as a standalone application. */
@@ -91,7 +91,7 @@ public class Interactions extends JPanel {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new Interactions(), BorderLayout.CENTER);
+        frame.getContentPane().add(new VariablesAndFlow(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);
