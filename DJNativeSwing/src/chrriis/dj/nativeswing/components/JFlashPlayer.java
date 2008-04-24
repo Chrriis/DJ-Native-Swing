@@ -57,7 +57,10 @@ public class JFlashPlayer extends NSPanelComponent {
     protected ObjectHTMLConfiguration getObjectHtmlConfiguration() {
       ObjectHTMLConfiguration objectHTMLConfiguration = new ObjectHTMLConfiguration();
       objectHTMLConfiguration.setHTMLLoadingMessage(flashPlayer.RESOURCES.getString("LoadingMessage"));
-      objectHTMLConfiguration.setHTMLParameters(flashPlayer.options.getHTMLParameters());
+      if(flashPlayer.options != null) {
+        // Possible when debugging and calling the same URL again. No options but better than nothing.
+        objectHTMLConfiguration.setHTMLParameters(flashPlayer.options.getHTMLParameters());
+      }
       objectHTMLConfiguration.setWindowsClassID("D27CDB6E-AE6D-11cf-96B8-444553540000");
       objectHTMLConfiguration.setWindowsInstallationURL("http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,0,0");
       objectHTMLConfiguration.setMimeType("application/x-shockwave-flash");
