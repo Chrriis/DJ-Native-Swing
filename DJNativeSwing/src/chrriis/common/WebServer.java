@@ -646,6 +646,9 @@ public class WebServer {
     isRunning = true;
     final ServerSocket serverSocket = new ServerSocket(port);
     port = serverSocket.getLocalPort();
+    if(Boolean.parseBoolean(System.getProperty("nativeswing.webserver.debug.printport"))) {
+      System.err.println("Web Server port: " + port);
+    }
     Thread listenerThread = new Thread("WebServer") {
       @Override
       public void run() {
@@ -829,7 +832,7 @@ public class WebServer {
   private static String hostAddress;
   
   static {
-    hostAddress = System.getProperty("nativeswing.webserver.hostaddress");
+    String hostAddress = System.getProperty("nativeswing.webserver.hostaddress");
     if("<localhost>".equals(hostAddress)) {
       try {
         hostAddress = InetAddress.getLocalHost().getHostAddress();
@@ -839,6 +842,7 @@ public class WebServer {
     if(hostAddress == null) {
       hostAddress = "127.0.0.1";
     }
+    setHostAddress(hostAddress);
   }
   
   /**
@@ -847,6 +851,9 @@ public class WebServer {
    */
   public static void setHostAddress(String hostAddress) {
     WebServer.hostAddress = hostAddress;
+    if(Boolean.parseBoolean(System.getProperty("nativeswing.webserver.debug.printhostaddress"))) {
+      System.err.println("Web Server host address: " + hostAddress);
+    }
   }
   
   public static WebServer getDefaultWebServer() {
