@@ -503,6 +503,9 @@ public class WebServer {
             return;
           }
           String resourcePath = request.substring((isPostMethod? "POST ": "GET ").length(), request.length() - " HTTP/1.0".length());
+          if(Boolean.parseBoolean(System.getProperty("nativeswing.webserver.debug.printrequests"))) {
+            System.err.println("Web Server " + (isPostMethod? "POST": "GET") + ": " + resourcePath);
+          }
           HTTPRequest httpRequest = new HTTPRequest(resourcePath);
           httpRequest.setPostMethod(isPostMethod);
           if(isPostMethod) {
@@ -586,7 +589,14 @@ public class WebServer {
             httpRequest.setHTTPPostDataArray(httpDataArray);
           }
           WebServerContent webServerContent = getWebServerContent(httpRequest);
-          InputStream resourceStream_ = webServerContent == null? null: webServerContent.getInputStream();
+          InputStream resourceStream_ = null;
+          if(webServerContent != null) {
+            try {
+              resourceStream_ = webServerContent.getInputStream();
+            } catch(Exception e) {
+              e.printStackTrace();
+            }
+          }
           if(resourceStream_ == null) {
             writeHTTPError(out, 404, "File Not Found.");
             return;
@@ -731,6 +741,9 @@ public class WebServer {
       parameter = parameter.substring(1);
     }
     int index = parameter.indexOf('/');
+    if(index == -1) {
+      return null;
+    }
     String type = parameter.substring(0, index);
     parameter = parameter.substring(index + 1);
     if("class".equals(type)) {
