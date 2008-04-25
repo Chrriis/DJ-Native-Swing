@@ -377,6 +377,8 @@ abstract class MessagingInterface {
     }
   }
   
+  private int sentMessageCount;
+  
   private void writeMessage(Message message) throws IOException {
     if(!isAlive()) {
       printFailedInvocation(message);
@@ -388,6 +390,11 @@ abstract class MessagingInterface {
     synchronized(oos) {
       oos.writeUnshared(message);
       oos.flush();
+      sentMessageCount++;
+      // Messages are cached, so we need to reset to clean the cache from time to time.
+      if((sentMessageCount % 100) == 0) {
+        oos.reset();
+      }
     }
   }
   
