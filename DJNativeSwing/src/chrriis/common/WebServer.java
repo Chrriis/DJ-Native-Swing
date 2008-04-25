@@ -767,12 +767,10 @@ public class WebServer {
       try {
         Class<?> clazz = null;
         for(ClassLoader referenceClassLoader: referenceClassLoaderList) {
-          if(referenceClassLoader != null) {
-            try {
-              clazz = Class.forName(className, true, referenceClassLoader);
-              break;
-            } catch(Exception e) {
-            }
+          try {
+            clazz = Class.forName(className, true, referenceClassLoader);
+            break;
+          } catch(Exception e) {
           }
         }
         if(clazz == null) {
@@ -799,11 +797,9 @@ public class WebServer {
         public InputStream getInputStream() {
           try {
             for(ClassLoader referenceClassLoader: referenceClassLoaderList) {
-              if(referenceClassLoader != null) {
-                InputStream in = referenceClassLoader.getResourceAsStream('/' + resourcePath);
-                if(in != null) {
-                  return in;
-                }
+              InputStream in = referenceClassLoader.getResourceAsStream('/' + resourcePath);
+              if(in != null) {
+                return in;
               }
             }
             return WebServer.class.getResourceAsStream('/' + resourcePath);
