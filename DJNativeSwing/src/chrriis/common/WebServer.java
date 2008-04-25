@@ -735,6 +735,19 @@ public class WebServer {
     }
   }
   
+  private static List<ClassLoader> referenceClassLoaderList = new ArrayList<ClassLoader>();
+  
+  public static void addReferenceClassLoader(ClassLoader referenceClassLoader) {
+    if(referenceClassLoader == null) {
+      return;
+    }
+    referenceClassLoaderList.add(referenceClassLoader);
+  }
+  
+  public static void removeReferenceClassLoader(ClassLoader referenceClassLoader) {
+    referenceClassLoaderList.remove(referenceClassLoader);
+  }
+  
   protected static WebServerContent getWebServerContent(HTTPRequest httpRequest) {
     String parameter = httpRequest.getResourcePath();
     if(parameter.startsWith("/")) {
@@ -752,7 +765,17 @@ public class WebServer {
       parameter = Utils.decodeURL(parameter.substring(index + 1));
       httpRequest = httpRequest.clone();
       try {
-        Class<?> clazz = Class.forName(className);
+        Class<?> clazz = null;
+        for(ClassLoader referenceClassLoader: referenceClassLoaderList) {
+          try {
+            clazz = Class.forName(className, true, referenceClassLoader);
+            break;
+          } catch(Exception e) {
+          }
+        }
+        if(clazz == null) {
+          clazz = Class.forName(className);
+        }
         Method getWebServerContentMethod = clazz.getDeclaredMethod("getWebServerContent", HTTPRequest.class);
         getWebServerContentMethod.setAccessible(true);
         httpRequest.setResourcePath(parameter);
@@ -773,6 +796,12 @@ public class WebServer {
         @Override
         public InputStream getInputStream() {
           try {
+            for(ClassLoader referenceClassLoader: referenceClassLoaderList) {
+              InputStream in = referenceClassLoader.getResourceAsStream('/' + resourcePath);
+              if(in != null) {
+                return in;
+              }
+            }
             return WebServer.class.getResourceAsStream('/' + resourcePath);
           } catch(Exception e) {
             e.printStackTrace();
