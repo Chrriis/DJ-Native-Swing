@@ -9,9 +9,11 @@ package chrriis.dj.nativeswing;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -61,6 +63,7 @@ abstract class MessagingInterface {
 
   private Object RECEIVER_LOCK = new Object();
   
+  private CountingOutputStream cos;
   private ObjectOutputStream oos;
   private ObjectInputStream ois;
 
@@ -78,9 +81,38 @@ abstract class MessagingInterface {
     }
   }
   
+  private static class CountingOutputStream extends FilterOutputStream {
+    public CountingOutputStream(OutputStream out) {
+      super(out);
+    }
+    private int count;
+    @Override
+    public void write(byte[] b) throws IOException {
+      count += b.length;
+      super.write(b);
+    }
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+      count += len;
+      super.write(b, off, len);
+    }
+    @Override
+    public void write(int b) throws IOException {
+      count++;
+      super.write(b);
+    }
+    public int getCount() {
+      return count;
+    }
+    public void resetCount() {
+      count = 0;
+    }
+  }
+  
   public MessagingInterface(final Socket socket, final boolean exitOnEndOfStream) {
     try {
-      oos = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+      cos = new CountingOutputStream(socket.getOutputStream());
+      oos = new ObjectOutputStream(new BufferedOutputStream(cos));
       oos.flush();
       ois = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
     } catch(IOException e) {
@@ -377,7 +409,16 @@ abstract class MessagingInterface {
     }
   }
   
-  private int sentMessageCount;
+  private static final int OOS_RESET_THRESHOLD;
+  
+  static {
+    String maxByteCountProperty = System.getProperty("nativeswing.interface.streamresetthreshold");
+    if(maxByteCountProperty != null) {
+      OOS_RESET_THRESHOLD = Integer.parseInt(maxByteCountProperty);
+    } else {
+      OOS_RESET_THRESHOLD = 500000;
+    }
+  }
   
   private void writeMessage(Message message) throws IOException {
     if(!isAlive()) {
@@ -390,10 +431,10 @@ abstract class MessagingInterface {
     synchronized(oos) {
       oos.writeUnshared(message);
       oos.flush();
-      sentMessageCount++;
-      // Messages are cached, so we need to reset to clean the cache from time to time.
-      if((sentMessageCount % 100) == 0) {
+      // Messages are cached, so we need to reset() from time to time to clean the cache, or else we get an OutOfMemoryError.
+      if(cos.getCount() > OOS_RESET_THRESHOLD) {
         oos.reset();
+        cos.resetCount();
       }
     }
   }
