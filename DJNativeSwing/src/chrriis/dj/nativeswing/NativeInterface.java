@@ -452,25 +452,27 @@ public class NativeInterface {
     if(nativeClassPathReferenceResources != null) {
       referenceList.addAll(Arrays.asList(nativeClassPathReferenceResources));
     }
-    boolean isProxyClassLoaderUsed = false;
-    for(Object o: referenceList) {
-      File clazzClassPath;
-      if(o instanceof Class) {
-        clazzClassPath = Utils.getClassPathFile((Class<?>)o);
-      } else {
-        clazzClassPath = Utils.getClassPathFile((String)o);
-        if(NativeInterface.class.getResource("/" + o) == null) {
-          throw new IllegalStateException("A resource that is needed in the classpath is missing: " + o);
+    boolean isProxyClassLoaderUsed = Boolean.parseBoolean(System.getProperty("nativeswing.peervm.forceproxyclassloader"));
+    if(!isProxyClassLoaderUsed) {
+      for(Object o: referenceList) {
+        File clazzClassPath;
+        if(o instanceof Class) {
+          clazzClassPath = Utils.getClassPathFile((Class<?>)o);
+        } else {
+          clazzClassPath = Utils.getClassPathFile((String)o);
+          if(NativeInterface.class.getResource("/" + o) == null) {
+            throw new IllegalStateException("A resource that is needed in the classpath is missing: " + o);
+          }
         }
-      }
-      clazzClassPath = o instanceof Class? Utils.getClassPathFile((Class<?>)o): Utils.getClassPathFile((String)o);
-      if(clazzClassPath != null) {
-        String path = clazzClassPath.getAbsolutePath();
-        if(!classPathList.contains(path)) {
-          classPathList.add(path);
+        clazzClassPath = o instanceof Class? Utils.getClassPathFile((Class<?>)o): Utils.getClassPathFile((String)o);
+        if(clazzClassPath != null) {
+          String path = clazzClassPath.getAbsolutePath();
+          if(!classPathList.contains(path)) {
+            classPathList.add(path);
+          }
+        } else {
+          isProxyClassLoaderUsed = true;
         }
-      } else {
-        isProxyClassLoaderUsed = true;
       }
     }
     if(isProxyClassLoaderUsed) {
