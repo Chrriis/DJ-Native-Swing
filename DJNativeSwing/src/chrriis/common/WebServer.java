@@ -649,11 +649,14 @@ public class WebServer {
     start(true);
   }
   
+  private int instanceID;
+  
   public void start(boolean isDaemon) throws IOException {
     if(isRunning) {
       return;
     }
     isRunning = true;
+    instanceID = ObjectRegistry.getInstance().add(this);
     final ServerSocket serverSocket = new ServerSocket(port);
     port = serverSocket.getLocalPort();
     if(Boolean.parseBoolean(System.getProperty("nativeswing.webserver.debug.printport"))) {
@@ -681,6 +684,7 @@ public class WebServer {
             e.printStackTrace();
           }
         }
+        ObjectRegistry.getInstance().remove(instanceID);
       }
     };
     listenerThread.setDaemon(isDaemon);
@@ -699,14 +703,14 @@ public class WebServer {
    * @return A URL that when accessed will invoke the method <code>static WebServerContent getWebServerContent(HTTPRequest)</code> of the parameter class (the method visibility does not matter).
    */
   public String getDynamicContentURL(String className, String parameter) {
-    return getURLPrefix() + "/class/" + className + "/" + Utils.encodeURL(parameter);
+    return getURLPrefix() + "/class/" + instanceID + "/" + className + "/" + Utils.encodeURL(parameter);
   }
   
   /**
    * @return A URL that when accessed will invoke the method <code>static WebServerContent getWebServerContent(HTTPRequest)</code> of the parameter class (the method visibility does not matter).
    */
   public String getDynamicContentURL(String className, String codebase, String parameter) {
-    return getURLPrefix() + "/class/" + className + "/" + codebase + "/" + Utils.encodeURL(parameter);
+    return getURLPrefix() + "/class/" + instanceID + "/" + className + "/" + codebase + "/" + Utils.encodeURL(parameter);
   }
   
   public String getClassPathResourceURL(String className, String resourcePath) {
@@ -715,7 +719,7 @@ public class WebServer {
       classPath = classPath.substring(0, classPath.lastIndexOf('/') + 1);
       resourcePath = "/" + classPath + resourcePath;
     }
-    return getURLPrefix() + "/classpath" + resourcePath;
+    return getURLPrefix() + "/classpath/" + instanceID + resourcePath;
   }
   
   public String getResourcePathURL(String codeBase, String resourcePath) {
@@ -735,16 +739,16 @@ public class WebServer {
     }
   }
   
-  private static List<ClassLoader> referenceClassLoaderList = new ArrayList<ClassLoader>();
+  private List<ClassLoader> referenceClassLoaderList = new ArrayList<ClassLoader>();
   
-  public static void addReferenceClassLoader(ClassLoader referenceClassLoader) {
+  public void addReferenceClassLoader(ClassLoader referenceClassLoader) {
     if(referenceClassLoader == null) {
       return;
     }
     referenceClassLoaderList.add(referenceClassLoader);
   }
   
-  public static void removeReferenceClassLoader(ClassLoader referenceClassLoader) {
+  public void removeReferenceClassLoader(ClassLoader referenceClassLoader) {
     referenceClassLoaderList.remove(referenceClassLoader);
   }
   
@@ -761,12 +765,18 @@ public class WebServer {
     parameter = parameter.substring(index + 1);
     if("class".equals(type)) {
       index = parameter.indexOf('/');
+      WebServer webServer = (WebServer)ObjectRegistry.getInstance().get(Integer.parseInt(parameter.substring(0, index)));
+      if(webServer == null) {
+        return null;
+      }
+      parameter = parameter.substring(index + 1);
+      index = parameter.indexOf('/');
       String className = parameter.substring(0, index);
       parameter = Utils.decodeURL(parameter.substring(index + 1));
       httpRequest = httpRequest.clone();
       try {
         Class<?> clazz = null;
-        for(ClassLoader referenceClassLoader: referenceClassLoaderList) {
+        for(ClassLoader referenceClassLoader: webServer.referenceClassLoaderList) {
           try {
             clazz = Class.forName(className, true, referenceClassLoader);
             break;
@@ -786,6 +796,12 @@ public class WebServer {
       }
     }
     if("classpath".equals(type)) {
+      index = parameter.indexOf('/');
+      final WebServer webServer = (WebServer)ObjectRegistry.getInstance().get(Integer.parseInt(parameter.substring(0, index)));
+      if(webServer == null) {
+        return null;
+      }
+      parameter = parameter.substring(index + 1);
       final String resourcePath = parameter;
       return new WebServerContent() {
         @Override
@@ -796,7 +812,7 @@ public class WebServer {
         @Override
         public InputStream getInputStream() {
           try {
-            for(ClassLoader referenceClassLoader: referenceClassLoaderList) {
+            for(ClassLoader referenceClassLoader: webServer.referenceClassLoaderList) {
               InputStream in = referenceClassLoader.getResourceAsStream('/' + resourcePath);
               if(in != null) {
                 return in;
