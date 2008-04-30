@@ -484,6 +484,8 @@ public class WebServer {
       }
     }
     
+    private static final boolean DEBUG_PRINT_REQUESTS = Boolean.parseBoolean(System.getProperty("nativeswing.webserver.debug.printrequests"));
+    
     @Override
     public void run() {
       try {
@@ -503,7 +505,7 @@ public class WebServer {
             return;
           }
           String resourcePath = request.substring((isPostMethod? "POST ": "GET ").length(), request.length() - " HTTP/1.0".length());
-          if(Boolean.parseBoolean(System.getProperty("nativeswing.webserver.debug.printrequests"))) {
+          if(DEBUG_PRINT_REQUESTS) {
             System.err.println("Web Server " + (isPostMethod? "POST": "GET") + ": " + resourcePath);
           }
           HTTPRequest httpRequest = new HTTPRequest(resourcePath);
@@ -745,10 +747,13 @@ public class WebServer {
     if(referenceClassLoader == null) {
       return;
     }
-    referenceClassLoaderList.add(referenceClassLoader);
+    referenceClassLoaderList.add(0, referenceClassLoader);
   }
   
   public void removeReferenceClassLoader(ClassLoader referenceClassLoader) {
+    if(referenceClassLoader == null) {
+      return;
+    }
     referenceClassLoaderList.remove(referenceClassLoader);
   }
   
