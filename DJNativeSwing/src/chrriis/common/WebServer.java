@@ -741,7 +741,7 @@ public class WebServer {
     }
   }
   
-  private List<ClassLoader> referenceClassLoaderList = new ArrayList<ClassLoader>();
+  private List<ClassLoader> referenceClassLoaderList = new ArrayList<ClassLoader>(1);
   
   public void addReferenceClassLoader(ClassLoader referenceClassLoader) {
     if(referenceClassLoader == null || referenceClassLoader == getClass().getClassLoader()) {
