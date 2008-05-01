@@ -12,6 +12,8 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -186,6 +188,7 @@ public class JFlashPlayer extends NSPanelComponent {
    * @param options the options to better configure the initialization of the flash plugin.
    */
   public void load(Class<?> clazz, String resourcePath, FlashPluginOptions options) {
+    addReferenceClassLoader(clazz.getClassLoader());
     load(WebServer.getDefaultWebServer().getClassPathResourceURL(clazz.getName(), resourcePath), options);
   }
   
@@ -338,6 +341,26 @@ public class JFlashPlayer extends NSPanelComponent {
    */
   public FlashPlayerListener[] getFlashPlayerListeners() {
     return listenerList.getListeners(FlashPlayerListener.class);
+  }
+  
+  private List<ClassLoader> referenceClassLoaderList = new ArrayList<ClassLoader>(1);
+  
+  private void addReferenceClassLoader(ClassLoader referenceClassLoader) {
+    if(referenceClassLoader == null || referenceClassLoader == getClass().getClassLoader() || referenceClassLoaderList.contains(referenceClassLoader)) {
+      return;
+    }
+    // If a different class loader is used to locate a resource, we need to allow th web server to find that resource
+    referenceClassLoaderList.add(referenceClassLoader);
+    WebServer.getDefaultWebServer().addReferenceClassLoader(referenceClassLoader);
+  }
+  
+  @Override
+  protected void finalize() throws Throwable {
+    for(ClassLoader referenceClassLoader: referenceClassLoaderList) {
+      WebServer.getDefaultWebServer().removeReferenceClassLoader(referenceClassLoader);
+    }
+    referenceClassLoaderList.clear();
+    super.finalize();
   }
   
 }

@@ -50,6 +50,7 @@ public class VLCPlaylist {
    * @param resourcePath the path to the file.
    */
   public int addItem(Class<?> clazz, String resourcePath) {
+    vlcPlayer.addReferenceClassLoader(clazz.getClassLoader());
     return addItem(WebServer.getDefaultWebServer().getClassPathResourceURL(clazz.getName(), resourcePath));
   }
   

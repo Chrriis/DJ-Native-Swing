@@ -8,6 +8,8 @@
 package chrriis.dj.nativeswing.components.win32;
 
 import java.awt.BorderLayout;
+import java.util.ArrayList;
+import java.util.List;
 
 import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.NSPanelComponent;
@@ -85,6 +87,7 @@ public class JWMediaPlayer extends NSPanelComponent {
    * @param resourcePath the path to the file.
    */
   public void load(Class<?> clazz, String resourcePath) {
+    addReferenceClassLoader(clazz.getClassLoader());
     load(WebServer.getDefaultWebServer().getClassPathResourceURL(clazz.getName(), resourcePath));
   }
   
@@ -136,4 +139,24 @@ public class JWMediaPlayer extends NSPanelComponent {
     return WMPMediaState.UNDEFINED;
   }
 
+  private List<ClassLoader> referenceClassLoaderList = new ArrayList<ClassLoader>(1);
+  
+  private void addReferenceClassLoader(ClassLoader referenceClassLoader) {
+    if(referenceClassLoader == null || referenceClassLoader == getClass().getClassLoader() || referenceClassLoaderList.contains(referenceClassLoader)) {
+      return;
+    }
+    // If a different class loader is used to locate a resource, we need to allow th web server to find that resource
+    referenceClassLoaderList.add(referenceClassLoader);
+    WebServer.getDefaultWebServer().addReferenceClassLoader(referenceClassLoader);
+  }
+  
+  @Override
+  protected void finalize() throws Throwable {
+    for(ClassLoader referenceClassLoader: referenceClassLoaderList) {
+      WebServer.getDefaultWebServer().removeReferenceClassLoader(referenceClassLoader);
+    }
+    referenceClassLoaderList.clear();
+    super.finalize();
+  }
+  
 }

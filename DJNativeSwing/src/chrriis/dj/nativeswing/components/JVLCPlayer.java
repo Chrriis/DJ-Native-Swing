@@ -15,6 +15,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -362,6 +364,7 @@ public class JVLCPlayer extends NSPanelComponent {
    * @param options the options to better configure the initialization of the VLC plugin.
    */
   public void load(Class<?> clazz, String resourcePath, VLCPluginOptions options) {
+    addReferenceClassLoader(clazz.getClassLoader());
     load(WebServer.getDefaultWebServer().getClassPathResourceURL(clazz.getName(), resourcePath), options);
   }
   
@@ -452,6 +455,26 @@ public class JVLCPlayer extends NSPanelComponent {
    */
   public VLCVideo getVLCVideo() {
     return vlcVideo;
+  }
+  
+  private List<ClassLoader> referenceClassLoaderList = new ArrayList<ClassLoader>(1);
+  
+  void addReferenceClassLoader(ClassLoader referenceClassLoader) {
+    if(referenceClassLoader == null || referenceClassLoader == getClass().getClassLoader() || referenceClassLoaderList.contains(referenceClassLoader)) {
+      return;
+    }
+    // If a different class loader is used to locate a resource, we need to allow th web server to find that resource
+    referenceClassLoaderList.add(referenceClassLoader);
+    WebServer.getDefaultWebServer().addReferenceClassLoader(referenceClassLoader);
+  }
+  
+  @Override
+  protected void finalize() throws Throwable {
+    for(ClassLoader referenceClassLoader: referenceClassLoaderList) {
+      WebServer.getDefaultWebServer().removeReferenceClassLoader(referenceClassLoader);
+    }
+    referenceClassLoaderList.clear();
+    super.finalize();
   }
   
 }
