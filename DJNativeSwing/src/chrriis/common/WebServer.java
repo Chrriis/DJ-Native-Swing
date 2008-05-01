@@ -744,14 +744,14 @@ public class WebServer {
   private List<ClassLoader> referenceClassLoaderList = new ArrayList<ClassLoader>();
   
   public void addReferenceClassLoader(ClassLoader referenceClassLoader) {
-    if(referenceClassLoader == null) {
+    if(referenceClassLoader == null || referenceClassLoader == getClass().getClassLoader()) {
       return;
     }
     referenceClassLoaderList.add(0, referenceClassLoader);
   }
   
   public void removeReferenceClassLoader(ClassLoader referenceClassLoader) {
-    if(referenceClassLoader == null) {
+    if(referenceClassLoader == null || referenceClassLoader == getClass().getClassLoader()) {
       return;
     }
     referenceClassLoaderList.remove(referenceClassLoader);
