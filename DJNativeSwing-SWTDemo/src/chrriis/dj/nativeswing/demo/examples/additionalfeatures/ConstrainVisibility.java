@@ -5,7 +5,7 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.dj.nativeswing.demo.examples.advancedcapabilities;
+package chrriis.dj.nativeswing.demo.examples.additionalfeatures;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -28,7 +28,7 @@ import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
 /**
  * @author Christopher Deckers
  */
-public class VisibilityConstraintOption extends JPanel {
+public class ConstrainVisibility extends JPanel {
 
   protected static final String LS = System.getProperty("line.separator");
   protected static final int OFFSET_X = 150;
@@ -36,7 +36,7 @@ public class VisibilityConstraintOption extends JPanel {
   protected static final int WIDTH = 200;
   protected static final int HEIGHT = 200;
 
-  public VisibilityConstraintOption() {
+  public ConstrainVisibility() {
     super(new BorderLayout(0, 0));
     JLayeredPane layeredPane = new JLayeredPane();
     layeredPane.setOpaque(true);
@@ -87,7 +87,7 @@ public class VisibilityConstraintOption extends JPanel {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new VisibilityConstraintOption(), BorderLayout.CENTER);
+        frame.getContentPane().add(new ConstrainVisibility(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

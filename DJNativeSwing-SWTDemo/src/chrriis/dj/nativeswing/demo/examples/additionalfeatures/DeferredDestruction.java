@@ -5,7 +5,7 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.dj.nativeswing.demo.examples.advancedcapabilities;
+package chrriis.dj.nativeswing.demo.examples.additionalfeatures;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -26,11 +26,11 @@ import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
 /**
  * @author Christopher Deckers
  */
-public class DestructionTimeOption extends JPanel implements Disposable {
+public class DeferredDestruction extends JPanel implements Disposable {
 
   protected JFlashPlayer flashPlayer;
   
-  public DestructionTimeOption() {
+  public DeferredDestruction() {
     super(new BorderLayout(0, 0));
     flashPlayer = new JFlashPlayer(JFlashPlayer.DESTROY_ON_FINALIZATION);
     flashPlayer.setControlBarVisible(false);
@@ -67,7 +67,7 @@ public class DestructionTimeOption extends JPanel implements Disposable {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new DestructionTimeOption(), BorderLayout.CENTER);
+        frame.getContentPane().add(new DeferredDestruction(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

@@ -5,7 +5,7 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.dj.nativeswing.demo.examples.advancedcapabilities;
+package chrriis.dj.nativeswing.demo.examples.additionalfeatures;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -28,11 +28,11 @@ import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
 /**
  * @author Christopher Deckers
  */
-public class FiliationTypeOption extends JPanel implements Disposable {
+public class HierarchyProxying extends JPanel implements Disposable {
 
   private JWebBrowser webBrowser2;
   
-  public FiliationTypeOption() {
+  public HierarchyProxying() {
     super(new BorderLayout(0, 0));
     JDesktopPane desktopPane = new JDesktopPane();
     // Web Browser 1 internal frame
@@ -104,7 +104,7 @@ public class FiliationTypeOption extends JPanel implements Disposable {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new FiliationTypeOption(), BorderLayout.CENTER);
+        frame.getContentPane().add(new HierarchyProxying(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);
