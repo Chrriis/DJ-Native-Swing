@@ -29,67 +29,21 @@ public class SimpleWebBrowserExample extends JPanel {
 
   public SimpleWebBrowserExample() {
     super(new BorderLayout(0, 0));
-    final JCheckBox menuBarCheckBox = new JCheckBox("Menu Bar");
-    final JCheckBox buttonBarCheckBox = new JCheckBox("Button Bar");
-    final JCheckBox locationBarCheckBox = new JCheckBox("Location Bar");
-    final JCheckBox statusBarCheckBox = new JCheckBox("Status Bar");
     JPanel webBrowserPanel = new JPanel(new BorderLayout(0, 0));
     webBrowserPanel.setBorder(BorderFactory.createTitledBorder("Native Web Browser component"));
-    final JWebBrowser webBrowser = new JWebBrowser() {
-      @Override
-      public void setMenuBarVisible(boolean isMenuBarVisible) {
-        super.setMenuBarVisible(isMenuBarVisible);
-        menuBarCheckBox.setSelected(isMenuBarVisible);
-      }
-      @Override
-      public void setButtonBarVisible(boolean isButtonBarVisible) {
-        super.setButtonBarVisible(isButtonBarVisible);
-        buttonBarCheckBox.setSelected(isButtonBarVisible);
-      }
-      @Override
-      public void setLocationBarVisible(boolean isLocationBarVisible) {
-        super.setLocationBarVisible(isLocationBarVisible);
-        locationBarCheckBox.setSelected(isLocationBarVisible);
-      }
-      @Override
-      public void setStatusBarVisible(boolean isStatusBarVisible) {
-        super.setStatusBarVisible(isStatusBarVisible);
-        statusBarCheckBox.setSelected(isStatusBarVisible);
-      }
-    };
+    final JWebBrowser webBrowser = new JWebBrowser();
     webBrowser.navigate("http://www.google.com");
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);
-    // Create the check boxes, to show/hide the various bars
+    // Create an additional bar allowing to show/hide the menu bar of the web browser.
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 4));
-    menuBarCheckBox.setSelected(webBrowser.isMenuBarVisible());
+    JCheckBox menuBarCheckBox = new JCheckBox("Menu Bar", webBrowser.isMenuBarVisible());
     menuBarCheckBox.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         webBrowser.setMenuBarVisible(e.getStateChange() == ItemEvent.SELECTED);
       }
     });
     buttonPanel.add(menuBarCheckBox);
-    buttonBarCheckBox.setSelected(webBrowser.isButtonBarVisible());
-    buttonBarCheckBox.addItemListener(new ItemListener() {
-      public void itemStateChanged(ItemEvent e) {
-        webBrowser.setButtonBarVisible(e.getStateChange() == ItemEvent.SELECTED);
-      }
-    });
-    buttonPanel.add(buttonBarCheckBox);
-    locationBarCheckBox.setSelected(webBrowser.isLocationBarVisible());
-    locationBarCheckBox.addItemListener(new ItemListener() {
-      public void itemStateChanged(ItemEvent e) {
-        webBrowser.setLocationBarVisible(e.getStateChange() == ItemEvent.SELECTED);
-      }
-    });
-    buttonPanel.add(locationBarCheckBox);
-    statusBarCheckBox.setSelected(webBrowser.isStatusBarVisible());
-    statusBarCheckBox.addItemListener(new ItemListener() {
-      public void itemStateChanged(ItemEvent e) {
-        webBrowser.setStatusBarVisible(e.getStateChange() == ItemEvent.SELECTED);
-      }
-    });
-    buttonPanel.add(statusBarCheckBox);
     add(buttonPanel, BorderLayout.SOUTH);
   }
   

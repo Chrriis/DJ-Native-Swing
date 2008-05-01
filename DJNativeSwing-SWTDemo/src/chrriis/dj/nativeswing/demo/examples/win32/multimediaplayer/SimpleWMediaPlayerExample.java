@@ -35,14 +35,18 @@ import chrriis.dj.nativeswing.components.win32.JWMediaPlayer;
 /**
  * @author Christopher Deckers
  */
-public class SimpleMultiMediaPlayerExample extends JPanel {
+public class SimpleWMediaPlayerExample extends JPanel {
 
-  public SimpleMultiMediaPlayerExample() {
+  public SimpleWMediaPlayerExample() {
     super(new BorderLayout(0, 0));
     final JCheckBox controlBarCheckBox = new JCheckBox("Control Bar");
+    // Create the player.
     JPanel playerPanel = new JPanel(new BorderLayout(0, 0));
-    playerPanel.setBorder(BorderFactory.createTitledBorder("Native Multi Media Player component"));
+    playerPanel.setBorder(BorderFactory.createTitledBorder("Native Media Player component"));
     final JWMediaPlayer player = new JWMediaPlayer();
+    playerPanel.add(player, BorderLayout.CENTER);
+    add(playerPanel, BorderLayout.CENTER);
+    // Create the components that allow to load a file in the player.
     GridBagLayout gridBag = new GridBagLayout();
     GridBagConstraints cons = new GridBagConstraints();
     JPanel playerFilePanel = new JPanel(gridBag);
@@ -79,7 +83,7 @@ public class SimpleMultiMediaPlayerExample extends JPanel {
         if(fileChooser == null) {
           fileChooser = new JFileChooser();
         }
-        if(fileChooser.showOpenDialog(SimpleMultiMediaPlayerExample.this) == JFileChooser.APPROVE_OPTION) {
+        if(fileChooser.showOpenDialog(SimpleWMediaPlayerExample.this) == JFileChooser.APPROVE_OPTION) {
           File selectedFile = fileChooser.getSelectedFile();
           playerFileTextField.setText(selectedFile.getAbsolutePath());
           loadPlayerFileRunnable.run();
@@ -88,8 +92,6 @@ public class SimpleMultiMediaPlayerExample extends JPanel {
     });
     playerFilePanel.add(playerFileButton);
     add(playerFilePanel, BorderLayout.NORTH);
-    playerPanel.add(player, BorderLayout.CENTER);
-    add(playerPanel, BorderLayout.CENTER);
     // Create the check boxes, to show/hide the various bars
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 4));
     player.setControlBarVisible(false);
@@ -110,7 +112,7 @@ public class SimpleMultiMediaPlayerExample extends JPanel {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new SimpleMultiMediaPlayerExample(), BorderLayout.CENTER);
+        frame.getContentPane().add(new SimpleWMediaPlayerExample(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

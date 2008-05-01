@@ -39,10 +39,13 @@ public class SimpleVLCPlayerExample extends JPanel {
 
   public SimpleVLCPlayerExample() {
     super(new BorderLayout(0, 0));
-    final JCheckBox controlBarCheckBox = new JCheckBox("Control Bar");
+    // Create the player.
     JPanel playerPanel = new JPanel(new BorderLayout(0, 0));
     playerPanel.setBorder(BorderFactory.createTitledBorder("VLC Player component"));
     final JVLCPlayer player = new JVLCPlayer();
+    playerPanel.add(player, BorderLayout.CENTER);
+    add(playerPanel, BorderLayout.CENTER);
+    // Create the components that allow to load a file in the player.
     GridBagLayout gridBag = new GridBagLayout();
     GridBagConstraints cons = new GridBagConstraints();
     JPanel playerFilePanel = new JPanel(gridBag);
@@ -88,11 +91,10 @@ public class SimpleVLCPlayerExample extends JPanel {
     });
     playerFilePanel.add(playerFileButton);
     add(playerFilePanel, BorderLayout.NORTH);
-    playerPanel.add(player, BorderLayout.CENTER);
-    add(playerPanel, BorderLayout.CENTER);
-    // Create the check boxes, to show/hide the various bars
+    // Create an additional bar allowing to show/hide the control bar of the Flash player.
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 4));
     player.setControlBarVisible(false);
+    JCheckBox controlBarCheckBox = new JCheckBox("Control Bar");
     controlBarCheckBox.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         player.setControlBarVisible(e.getStateChange() == ItemEvent.SELECTED);

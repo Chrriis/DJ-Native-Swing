@@ -30,7 +30,7 @@ import chrriis.dj.nativeswing.demo.examples.webbrowser.NavigationControl;
 import chrriis.dj.nativeswing.demo.examples.webbrowser.SendingCommands;
 import chrriis.dj.nativeswing.demo.examples.webbrowser.SettingContent;
 import chrriis.dj.nativeswing.demo.examples.webbrowser.SimpleWebBrowserExample;
-import chrriis.dj.nativeswing.demo.examples.win32.multimediaplayer.SimpleMultiMediaPlayerExample;
+import chrriis.dj.nativeswing.demo.examples.win32.multimediaplayer.SimpleWMediaPlayerExample;
 
 /**
  * @author Christopher Deckers
@@ -64,7 +64,7 @@ public class DemoExampleDefinitionLoader {
         new Example("Simple Example", SimpleHTMLEditorExample.class, "Graphically edit some HTML, get and set the HTML content.", true),
     }));
     exampleGroupList.add(new ExampleGroup("JMultiMediaPlayer (win32)", new Example[] {
-        new Example("Simple Example", SimpleMultiMediaPlayerExample.class, "Load a movie/sound file to an embedded multimedia player.", true, System.getProperty("os.name").startsWith("Windows"), "This example is only available on a Windows operating system."),
+        new Example("Simple Example", SimpleWMediaPlayerExample.class, "Load a movie/sound file to an embedded multimedia player.", true, System.getProperty("os.name").startsWith("Windows"), "This example is only available on a Windows operating system."),
     }));
     exampleGroupList.add(new ExampleGroup("Additional Features", new Example[] {
         new Example("Constrain Visibility", ConstrainVisibility.class, "Constrain the visibility to superimpose Swing and native components.", true),
