@@ -53,8 +53,8 @@ public class DemoExampleDefinitionLoader {
         new Example("Classpath pages", ClasspathPages.class, "Load web pages from the classpath with the help of a simple embedded web server.", true),
     }));
     exampleGroupList.add(new ExampleGroup("JFlashPlayer", new Example[] {
-        new Example("Simple Example", SimpleFlashExample.class, "Display a flash application.", true),
-        new Example("Variables and Flow", VariablesAndFlow.class, "Control the flow of a flash animation, and get/set global variables.", true),
+        new Example("Simple Example", SimpleFlashExample.class, "Display a Flash application.", true),
+        new Example("Variables and Flow", VariablesAndFlow.class, "Control the flow of a Flash animation, and get/set global variables.", true),
         new Example("Function Calls", FunctionCalls.class, "Invoke functions, with or without waiting for a result, and listen to Flash commands.", true),
     }));
     exampleGroupList.add(new ExampleGroup("JVLCPlayer", new Example[] {
