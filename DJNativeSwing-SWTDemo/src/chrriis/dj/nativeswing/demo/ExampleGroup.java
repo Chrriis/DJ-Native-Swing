@@ -7,18 +7,30 @@
  */
 package chrriis.dj.nativeswing.demo;
 
-class ExampleGroup {
+/**
+ * @author Christopher Deckers
+ */
+public class ExampleGroup {
+
   protected String name;
   protected Example[] examples;
+  
   public ExampleGroup(String name, Example[] examples) {
     this.name = name;
     this.examples = examples;
   }
+  
+  public String getName() {
+    return name;
+  }
+  
   public Example[] getExamples() {
     return examples;
   }
+  
   @Override
   public String toString() {
     return name;
   }
+  
 }

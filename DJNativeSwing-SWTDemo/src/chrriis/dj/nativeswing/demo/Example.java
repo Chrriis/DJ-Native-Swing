@@ -9,7 +9,10 @@ package chrriis.dj.nativeswing.demo;
 
 import javax.swing.JComponent;
 
-class Example {
+/**
+ * @author Christopher Deckers
+ */
+public class Example {
   
   protected String name;
   protected Class<? extends JComponent> componentClass;
@@ -33,6 +36,10 @@ class Example {
   
   public Class<? extends JComponent> getComponentClass() {
     return componentClass;
+  }
+  
+  public String getName() {
+    return name;
   }
   
   public String getDescription() {
