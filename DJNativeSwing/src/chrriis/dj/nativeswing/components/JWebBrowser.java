@@ -52,7 +52,6 @@ import chrriis.common.Utils;
 import chrriis.dj.nativeswing.Message;
 import chrriis.dj.nativeswing.NSOption;
 import chrriis.dj.nativeswing.NSPanelComponent;
-import chrriis.dj.nativeswing.NativeComponent;
 
 /**
  * A native web browser, using Internet Explorer or Mozilla on Windows, and Mozilla on other platforms.<br/>
@@ -902,14 +901,6 @@ public class JWebBrowser extends NSPanelComponent {
     } else {
       webBrowserPanel.setBorder(null);
     }
-  }
-  
-  /**
-   * Get the native component.
-   * @return the native component.
-   */
-  public NativeComponent getNativeComponent() {
-    return nativeComponent;
   }
   
   /**

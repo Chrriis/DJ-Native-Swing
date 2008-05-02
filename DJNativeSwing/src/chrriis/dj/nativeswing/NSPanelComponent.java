@@ -61,4 +61,12 @@ public abstract class NSPanelComponent extends JPanel implements NSComponent {
     nativeComponent.runInSequence(runnable);
   }
   
+  /**
+   * Get the native component.
+   * @return the native component.
+   */
+  public NativeComponent getNativeComponent() {
+    return nativeComponent;
+  }
+  
 }

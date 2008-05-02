@@ -12,9 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import chrriis.common.WebServer;
-import chrriis.dj.nativeswing.NSPanelComponent;
-import chrriis.dj.nativeswing.NativeComponent;
 import chrriis.dj.nativeswing.NSOption;
+import chrriis.dj.nativeswing.NSPanelComponent;
 
 /**
  * A multimedia player, based on the Window Media Player (only avaialable on the Windows operating system).<br/>
@@ -39,14 +38,6 @@ public class JWMediaPlayer extends NSPanelComponent {
     wmpSettings.setAutoStart(true);
     wmpSettings.setErrorDialogsEnabled(false);
     setControlBarVisible(true);
-  }
-  
-  /**
-   * Get the native component.
-   * @return the native component.
-   */
-  public NativeComponent getNativeComponent() {
-    return nativeComponent;
   }
   
   private WMPSettings wmpSettings;
