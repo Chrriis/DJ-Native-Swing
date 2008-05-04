@@ -201,8 +201,8 @@ public class JHTMLEditor extends NSPanelComponent {
             "  <form name=\"jhtml_form\" method=\"POST\" target=\"j_iframe\">" + LS +
             "    <script type=\"text/javascript\">" + LS +
             "      createEditor();" + LS +
-            "    </script>" + LS +
-            "  </form>" + LS +
+            "    </script>" +
+            "</form>" + LS + // No space at the begining of this line or else a scrollbar appears.
             "  </body>" + LS +
             "</html>" + LS;
           return getInputStream(content);
