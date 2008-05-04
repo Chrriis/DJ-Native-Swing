@@ -5,7 +5,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/jna/jna.jar"/>
 	<classpathentry kind="lib" path="lib_dev/swt-3.4M6-win32-win32-x86-debug.jar" sourcepath="lib_dev/swt-3.4M6-win32-win32-x86-src.zip"/>
+	<classpathentry kind="lib" path="lib/fckeditor/FCKeditor_2.6.zip"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jna_WindowUtils"/>
-	<classpathentry kind="lib" path="lib/fckeditor/FCKeditor_2.5.1.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
