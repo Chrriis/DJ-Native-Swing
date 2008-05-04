@@ -62,7 +62,6 @@ public class FunctionCalls extends JPanel {
     cons.fill = GridBagConstraints.HORIZONTAL;
     cons.weightx = 1;
     FlowLayout flowLayout = new FlowLayout(FlowLayout.LEFT, 2, 0);
-    flowLayout.setAlignOnBaseline(true);
     JPanel getterSetterFunctionPanel = new JPanel(flowLayout);
     JButton getterButton = new JButton("Get");
     getterSetterFunctionPanel.add(getterButton);
