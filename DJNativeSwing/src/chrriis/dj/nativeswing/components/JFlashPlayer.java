@@ -161,7 +161,7 @@ public class JFlashPlayer extends NSPanelComponent {
   }
   
   /**
-   * Get the javascript definitions (functions) that are added to the HTML page that contains the plugin. This method id meant to be overriden by subclasses that want to add custom definitions.
+   * Get the javascript definitions (functions) that are added to the HTML page that contains the plugin. This method is meant to be overriden by subclasses that want to add custom definitions.
    * @return the Javascript definitions to include.
    */
   protected String getJavascriptDefinitions() {
