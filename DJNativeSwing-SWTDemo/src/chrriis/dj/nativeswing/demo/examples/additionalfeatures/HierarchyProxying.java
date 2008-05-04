@@ -40,7 +40,7 @@ public class HierarchyProxying extends JPanel implements Disposable {
     webBrowser1InternalFrame.setBounds(10, 10, 400, 280);
     webBrowser1InternalFrame.setResizable(true);
     webBrowser1InternalFrame.setVisible(true);
-    JWebBrowser webBrowser1 = new JWebBrowser(JWebBrowser.PROXY_COMPONENT_HIERARCHY);
+    JWebBrowser webBrowser1 = new JWebBrowser(JWebBrowser.proxyComponentHierarchy());
     webBrowser1.navigate("http://djproject.sf.net");
     webBrowser1InternalFrame.add(webBrowser1, BorderLayout.CENTER);
     desktopPane.add(webBrowser1InternalFrame);
@@ -49,7 +49,7 @@ public class HierarchyProxying extends JPanel implements Disposable {
     flashPlayerInternalFrame.setBounds(100, 100, 400, 280);
     flashPlayerInternalFrame.setResizable(true);
     flashPlayerInternalFrame.setVisible(true);
-    JFlashPlayer flashPlayer = new JFlashPlayer(JFlashPlayer.PROXY_COMPONENT_HIERARCHY);
+    JFlashPlayer flashPlayer = new JFlashPlayer(JFlashPlayer.proxyComponentHierarchy());
     flashPlayer.setControlBarVisible(false);
     flashPlayer.load(SimpleFlashExample.class, "resource/Movement-pointer_or_click.swf");
     flashPlayerInternalFrame.add(flashPlayer, BorderLayout.CENTER);
@@ -71,7 +71,7 @@ public class HierarchyProxying extends JPanel implements Disposable {
       }
     };
     // When a frame is iconified, components are destroyed. To avoid this, we use the option to destroy on finalization.
-    webBrowser2 = new JWebBrowser(JWebBrowser.PROXY_COMPONENT_HIERARCHY, JWebBrowser.DESTROY_ON_FINALIZATION);
+    webBrowser2 = new JWebBrowser(JWebBrowser.proxyComponentHierarchy(), JWebBrowser.destroyOnFinalization());
     webBrowser2.navigate("http://www.google.com");
     cons.weightx = 1;
     cons.weighty = 1;

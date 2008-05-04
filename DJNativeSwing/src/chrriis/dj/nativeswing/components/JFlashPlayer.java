@@ -14,6 +14,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -37,6 +38,21 @@ import chrriis.dj.nativeswing.WebBrowserObject;
  */
 public class JFlashPlayer extends NSPanelComponent {
 
+  private static final String SET_CUSTOM_JAVASCRIPT_DEFINITIONS_OPTION_KEY = "Flash Player Custom Javascript definitions";
+  
+  /**
+   * Create an option to set some custom Javascript definitions (functions) that are added to the HTML page that contains the plugin.
+   * @return the option to set some custom Javascript definitions.
+   */
+  public static NSOption setCustomJavascriptDefinitions(final String javascript) {
+    return new NSOption(SET_CUSTOM_JAVASCRIPT_DEFINITIONS_OPTION_KEY) {
+      @Override
+      public Object getOptionValue() {
+        return javascript;
+      }
+    };
+  }
+  
   private final ResourceBundle RESOURCES = ResourceBundle.getBundle(JFlashPlayer.class.getPackage().getName().replace('.', '/') + "/resource/FlashPlayer");
 
   private JPanel webBrowserPanel;
@@ -77,7 +93,7 @@ public class JFlashPlayer extends NSPanelComponent {
     
     @Override
     protected String getJavascriptDefinitions() {
-      String javascriptDefinitions = flashPlayer.getJavascriptDefinitions();
+      String javascriptDefinitions = flashPlayer.customJavascriptDefinitions;
       return
         "function " + getEmbeddedObjectJavascriptName() + "_DoFScommand(command, args) {" + LS +
         "  sendCommand(command, args);" + LS +
@@ -100,6 +116,8 @@ public class JFlashPlayer extends NSPanelComponent {
    * @param options the options to configure the behavior of this component.
    */
   public JFlashPlayer(NSOption... options) {
+    Map<Object, Object> optionMap = NSOption.createOptionMap(options);
+    customJavascriptDefinitions = (String)optionMap.get(SET_CUSTOM_JAVASCRIPT_DEFINITIONS_OPTION_KEY);
     webBrowser = new JWebBrowser(options);
     initialize(webBrowser.getNativeComponent());
     webBrowserObject = new NWebBrowserObject(this);
@@ -160,13 +178,7 @@ public class JFlashPlayer extends NSPanelComponent {
     return value.length() == 0? null: new ImageIcon(JWebBrowser.class.getResource(value));
   }
   
-  /**
-   * Get the javascript definitions (functions) that are added to the HTML page that contains the plugin. This method is meant to be overriden by subclasses that want to add custom definitions.
-   * @return the Javascript definitions to include.
-   */
-  protected String getJavascriptDefinitions() {
-    return null;
-  }
+  private String customJavascriptDefinitions;
   
 //  public String getLoadedResource() {
 //    return webBrowserObject.getLoadedResource();

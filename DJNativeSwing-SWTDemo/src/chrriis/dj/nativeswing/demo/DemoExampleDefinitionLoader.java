@@ -18,6 +18,7 @@ import chrriis.dj.nativeswing.demo.examples.additionalfeatures.ThumbnailCreation
 import chrriis.dj.nativeswing.demo.examples.flashplayer.FunctionCalls;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.SimpleFlashExample;
 import chrriis.dj.nativeswing.demo.examples.flashplayer.VariablesAndFlow;
+import chrriis.dj.nativeswing.demo.examples.htmleditor.CustomConfiguration;
 import chrriis.dj.nativeswing.demo.examples.htmleditor.SimpleHTMLEditorExample;
 import chrriis.dj.nativeswing.demo.examples.introduction.Codewise;
 import chrriis.dj.nativeswing.demo.examples.introduction.NativeIntegration;
@@ -62,6 +63,7 @@ public class DemoExampleDefinitionLoader {
     }));
     exampleGroupList.add(new ExampleGroup("JHTMLEditor", new Example[] {
         new Example("Simple Example", SimpleHTMLEditorExample.class, "Graphically edit some HTML, get and set the HTML content.", true),
+        new Example("Custom Configuration", CustomConfiguration.class, "Modify default behaviors with custom configuration script.", true),
     }));
     exampleGroupList.add(new ExampleGroup("JMultiMediaPlayer (win32)", new Example[] {
         new Example("Simple Example", SimpleWMediaPlayerExample.class, "Load a movie/sound file to an embedded multimedia player.", true, System.getProperty("os.name").startsWith("Windows"), "This example is only available on a Windows operating system."),

@@ -43,7 +43,7 @@ public class ConstrainVisibility extends JPanel {
     layeredPane.setBackground(new Color(200, 200, 255));
     int layerIndex = 0;
     // A flash player
-    JFlashPlayer flashPlayer = new JFlashPlayer(JFlashPlayer.CONSTRAIN_VISIBILITY);
+    JFlashPlayer flashPlayer = new JFlashPlayer(JFlashPlayer.constrainVisibility());
     flashPlayer.setControlBarVisible(false);
     flashPlayer.load(SimpleFlashExample.class, "resource/Movement-pointer_or_click.swf");
     flashPlayer.setBounds(OFFSET_X * layerIndex, OFFSET_Y * layerIndex, WIDTH, HEIGHT);
@@ -57,7 +57,7 @@ public class ConstrainVisibility extends JPanel {
     layeredPane.setLayer(swingPanel, layerIndex++);
     layeredPane.add(swingPanel);
     // A web browser
-    JWebBrowser webBrowser = new JWebBrowser(JWebBrowser.CONSTRAIN_VISIBILITY);
+    JWebBrowser webBrowser = new JWebBrowser(JWebBrowser.constrainVisibility());
     webBrowser.setBarsVisible(false);
     webBrowser.setStatusBarVisible(true);
     webBrowser.setHTMLContent(

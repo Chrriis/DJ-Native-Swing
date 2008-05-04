@@ -39,7 +39,7 @@ public class AlphaBlendingSimulation extends JPanel implements Disposable {
   
   public AlphaBlendingSimulation() {
     super(null);
-    webBrowser = new JWebBrowser(JWebBrowser.CONSTRAIN_VISIBILITY);
+    webBrowser = new JWebBrowser(JWebBrowser.constrainVisibility());
     webBrowser.setBarsVisible(false);
     webBrowser.navigate("http://www.google.com");
     webBrowser.setBounds(50, 50, 500, 400);

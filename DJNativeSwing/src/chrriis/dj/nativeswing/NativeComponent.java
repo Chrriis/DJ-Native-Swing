@@ -796,22 +796,22 @@ public abstract class NativeComponent extends Canvas {
    * @return the component that contains the native component and that can be added to the component hierarchy.
    */
   protected Component createEmbeddableComponent(Map<Object, Object> optionMap) {
-    NSOption filiationType = (NSOption)optionMap.get(NSComponentOptions.PROXY_COMPONENT_HIERARCHY.getOptionKey());
-    NSOption destructionTime = (NSOption)optionMap.get(NSComponentOptions.DESTROY_ON_FINALIZATION.getOptionKey());
-    NSOption visibilityConstraint = (NSOption)optionMap.get(NSComponentOptions.CONSTRAIN_VISIBILITY.getOptionKey());
+    NSOption filiationType = (NSOption)optionMap.get(NSComponentOptions.PROXY_COMPONENT_HIERARCHY_OPTION_KEY);
+    NSOption destructionTime = (NSOption)optionMap.get(NSComponentOptions.DESTROY_ON_FINALIZATION_OPTION_KEY);
+    NSOption visibilityConstraint = (NSOption)optionMap.get(NSComponentOptions.CONSTRAIN_VISIBILITY_OPTION_KEY);
     boolean isJNAPresent = isJNAPresent();
     if(visibilityConstraint == null) {
       if(isJNAPresent && filiationType != null) {
-        visibilityConstraint = NSComponentOptions.CONSTRAIN_VISIBILITY;
+        visibilityConstraint = NSComponentOptions.constrainVisibility();
       }
     }
     if(visibilityConstraint != null && !isJNAPresent) {
       throw new IllegalStateException("The JNA libraries are required to use the visibility constraints!");
     }
-    if(destructionTime == NSComponentOptions.DESTROY_ON_FINALIZATION && filiationType == null) {
-      filiationType = NSComponentOptions.PROXY_COMPONENT_HIERARCHY;
+    if(destructionTime != null && filiationType == null) {
+      filiationType = NSComponentOptions.proxyComponentHierarchy();
     }
-    if(filiationType == NSComponentOptions.PROXY_COMPONENT_HIERARCHY) {
+    if(filiationType != null) {
       return new NativeComponentProxyPanel(this, visibilityConstraint, destructionTime, filiationType);
       // If for some reasons component-based proxying has some issues, consider using the window-based proxying.
       //return new NativeComponentProxyWindow(this, visibilityConstraint, destructionTime);

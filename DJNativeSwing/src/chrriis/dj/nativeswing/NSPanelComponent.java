@@ -17,6 +17,30 @@ import javax.swing.JPanel;
  */
 public abstract class NSPanelComponent extends JPanel implements NSComponent {
 
+  /**
+   * Create an option to defer the destruction of the component until finalization or explicit disposal, rather than when the component is removed from its component tree. This options activates the component hierarchy proxying option.
+   * @return the option to destroy on finalization.
+   */
+  public static NSOption destroyOnFinalization() {
+    return NSComponentOptions.destroyOnFinalization();
+  }
+  
+  /**
+   * Create an option to proxy the component hierarchy, which allows to change the component Z-order.
+   * @return the option to proxy the component hierarchy.
+   */
+  public static NSOption proxyComponentHierarchy() {
+    return NSComponentOptions.proxyComponentHierarchy();
+  }
+  
+  /**
+   * Create an option to apply visibility constraints to the component, which allows mixing lightweight and heavyweight components to a certain extent.
+   * @return the option to constrain the visibility.
+   */
+  public static NSOption constrainVisibility() {
+    return NSComponentOptions.constrainVisibility();
+  }
+  
   private NativeComponent nativeComponent;
   
   /**

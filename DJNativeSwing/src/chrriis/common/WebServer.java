@@ -332,6 +332,9 @@ public class WebServer {
     
     public abstract InputStream getInputStream();
     public static InputStream getInputStream(String content) {
+      if(content == null) {
+        return null;
+      }
       try {
         return new ByteArrayInputStream(content.getBytes("UTF-8"));
       } catch(Exception e) {

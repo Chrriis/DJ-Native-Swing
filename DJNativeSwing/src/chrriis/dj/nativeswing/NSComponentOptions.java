@@ -12,21 +12,39 @@ package chrriis.dj.nativeswing;
  * A collection of options that can be used for components.
  * @author Christopher Deckers
  */
-public interface NSComponentOptions {
+public abstract class NSComponentOptions {
+
+  static final String DESTROY_ON_FINALIZATION_OPTION_KEY = "Destroy On Finalization";
+  private static final NSOption DESTROY_ON_FINALIZATION_OPTION = new NSOption(DESTROY_ON_FINALIZATION_OPTION_KEY);
+  
+  /**
+   * Create an option to defer the destruction of the component until finalization or explicit disposal, rather than when the component is removed from its component tree. This options activates the component hierarchy proxying option.
+   * @return the option to destroy on finalization.
+   */
+  public static NSOption destroyOnFinalization() {
+    return DESTROY_ON_FINALIZATION_OPTION;
+  }
+  
+  static final String PROXY_COMPONENT_HIERARCHY_OPTION_KEY = "Proxy Component Hierarchy";
+  private static final NSOption PROXY_COMPONENT_HIERARCHY_OPTION = new NSOption(PROXY_COMPONENT_HIERARCHY_OPTION_KEY);
 
   /**
-   * An option to defer the destruction of the component until finalization or explicit disposal, rather than when the component is removed from its component tree. This options activates the component hierarchy proxying option.
+   * Create an option to proxy the component hierarchy, which allows to change the component Z-order.
+   * @return the option to proxy the component hierarchy.
    */
-  public static final NSOption DESTROY_ON_FINALIZATION = new NSOption("Destruction Time");
+  public static NSOption proxyComponentHierarchy() {
+    return PROXY_COMPONENT_HIERARCHY_OPTION;
+  }
+  
+  static final String CONSTRAIN_VISIBILITY_OPTION_KEY = "Constrain Visibility";
+  private static final NSOption CONSTRAIN_VISIBILITY_OPTION = new NSOption(CONSTRAIN_VISIBILITY_OPTION_KEY);
   
   /**
-   * An option to proxy the component hierarchy, which allows to change the component Z-order.
+   * Create an option to apply visibility constraints to the component, which allows mixing lightweight and heavyweight components to a certain extent.
+   * @return the option to constrain the visibility.
    */
-  public static final NSOption PROXY_COMPONENT_HIERARCHY = new NSOption("Filiation Type");
-  
-  /**
-   * An option to apply visibility constraints to the component, which allows mixing lightweight and heavyweight components to a certain extent.
-   */
-  public static final NSOption CONSTRAIN_VISIBILITY = new NSOption("Visibility Constraint");
+  public static NSOption constrainVisibility() {
+    return CONSTRAIN_VISIBILITY_OPTION;
+  }
   
 }

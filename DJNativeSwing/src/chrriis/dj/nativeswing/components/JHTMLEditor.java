@@ -28,8 +28,8 @@ import chrriis.common.WebServer.HTTPRequest;
 import chrriis.common.WebServer.WebServerContent;
 import chrriis.dj.nativeswing.LocalMessage;
 import chrriis.dj.nativeswing.Message;
-import chrriis.dj.nativeswing.NSPanelComponent;
 import chrriis.dj.nativeswing.NSOption;
+import chrriis.dj.nativeswing.NSPanelComponent;
 
 /**
  * An HTML editor. It is a browser-based component, which relies on the FCKeditor.<br/>
@@ -39,6 +39,21 @@ import chrriis.dj.nativeswing.NSOption;
  */
 public class JHTMLEditor extends NSPanelComponent {
 
+  private static final String SET_CUSTOM_JAVASCRIPT_CONFIGURATION_OPTION_KEY = "HTML Editor Custom Configuration Script";
+  
+  /**
+   * Create an option to set custom configuration for the FCKeditor. The list of possible options to set can be found here: <a href="http://docs.fckeditor.net/FCKeditor_2.x/Developers_Guide/Configuration/Configuration_Options">http://docs.fckeditor.net/FCKeditor_2.x/Developers_Guide/Configuration/Configuration_Options</a>.
+   * @return the option to set a custom configuration.
+   */
+  public static NSOption setCustomJavascriptConfiguration(final String javascript) {
+    return new NSOption(SET_CUSTOM_JAVASCRIPT_CONFIGURATION_OPTION_KEY) {
+      @Override
+      public Object getOptionValue() {
+        return javascript;
+      }
+    };
+  }
+  
   private static final String FCK_INSTANCE = "FCKeditor1";
   
   private JWebBrowser webBrowser;
@@ -84,6 +99,8 @@ public class JHTMLEditor extends NSPanelComponent {
     }
   }
   
+  private String customJavascriptConfiguration;
+  
   /**
    * Construct an HTML editor.
    * @param options the options to configure the behavior of this component.
@@ -92,6 +109,8 @@ public class JHTMLEditor extends NSPanelComponent {
     if(getClass().getResource("/fckeditor/fckeditor.js") == null) {
       throw new IllegalStateException("The FCKEditor distribution is missing from the classpath!");
     }
+    Map<Object, Object> optionMap = NSOption.createOptionMap(options);
+    customJavascriptConfiguration = (String)optionMap.get(SET_CUSTOM_JAVASCRIPT_CONFIGURATION_OPTION_KEY);
     webBrowser = new JWebBrowser(options);
     initialize(webBrowser.getNativeComponent());
     webBrowser.addWebBrowserListener(new NWebBrowserListener(this));
@@ -168,6 +187,7 @@ public class JHTMLEditor extends NSPanelComponent {
             "        oFCKeditor.Width = \"100%\";" + LS +
             "        oFCKeditor.Height = \"100%\";" + LS +
             "        oFCKeditor.BasePath = \"\";" + LS +
+            (htmlEditor.customJavascriptConfiguration != null? "        oFCKeditor.Config[\"CustomConfigurationsPath\"] = '" + WebServer.getDefaultWebServer().getDynamicContentURL(JHTMLEditor.class.getName(), String.valueOf(instanceID),  "customConfigurationScript.js") + "';" + LS: "") +
             "        oFCKeditor.Create();" + LS +
             "      }" + LS +
             "      function FCKeditor_OnComplete(editorInstance) {" + LS +
@@ -186,6 +206,17 @@ public class JHTMLEditor extends NSPanelComponent {
             "  </body>" + LS +
             "</html>" + LS;
           return getInputStream(content);
+        }
+      };
+    }
+    if("customConfigurationScript.js".equals(resourcePath_)) {
+      return new WebServerContent () {
+        @Override
+        public String getContentType () {
+          return getDefaultMimeType(".js");
+        }
+        public InputStream getInputStream () {
+          return getInputStream(htmlEditor.customJavascriptConfiguration);
         }
       };
     }

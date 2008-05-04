@@ -43,7 +43,7 @@ abstract class NativeComponentProxy extends JComponent {
   private AWTEventListener shapeAdjustmentEventListener;
 
   protected NativeComponentProxy(NativeComponent nativeComponent, NSOption visibilityConstraint, NSOption destructionTime) {
-    isDestructionOnFinalization = destructionTime == NSComponentOptions.DESTROY_ON_FINALIZATION;
+    isDestructionOnFinalization = destructionTime != null;
     isVisibilityConstrained = visibilityConstraint != null;
     setFocusable(true);
     this.nativeComponent = nativeComponent;

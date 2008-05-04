@@ -61,10 +61,15 @@ import chrriis.dj.nativeswing.NSPanelComponent;
  */
 public class JWebBrowser extends NSPanelComponent {
 
+  private static final String USE_XULRUNNER_RUNTIME_OPTION_KEY = "Web Browser Runtime";
+  
   /**
-   * An option to make the web browser use the Mozilla XULRunner runtime.
+   * Create an option to make the web browser use the Mozilla XULRunner runtime.
+   * @return the option to use the XULRunner runtime.
    */
-  public static final NSOption USE_XULRUNNER_RUNTIME = new NSOption("Web Browser Runtime");
+  public static NSOption useXULRunnerRuntime() {
+    return new NSOption(USE_XULRUNNER_RUNTIME_OPTION_KEY);
+  }
   
   /**
    * Clear all session cookies from all current web browser instances.
@@ -354,7 +359,7 @@ public class JWebBrowser extends NSPanelComponent {
    */
   public JWebBrowser(NSOption... options) {
     Map<Object, Object> optionMap = NSOption.createOptionMap(options);
-    nativeComponent = new NativeWebBrowser(this, optionMap.get(USE_XULRUNNER_RUNTIME.getOptionKey()) == USE_XULRUNNER_RUNTIME);
+    nativeComponent = new NativeWebBrowser(this, optionMap.get(USE_XULRUNNER_RUNTIME_OPTION_KEY) != null);
     initialize(nativeComponent);
     menuToolAndLocationBarPanel = new JPanel(new BorderLayout(0, 0));
     menuBar = new JMenuBar();
