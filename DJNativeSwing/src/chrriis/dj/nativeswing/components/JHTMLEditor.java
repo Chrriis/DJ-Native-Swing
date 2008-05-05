@@ -159,7 +159,7 @@ public class JHTMLEditor extends NSPanelComponent {
             "<html>" + LS +
             "  <head>" + LS +
             "    <style type=\"text/css\">" + LS +
-            "      body,form {margin: 0; padding: 0}" + LS +
+            "      body,form {margin: 0; padding: 0; overflow: auto;}" + LS +
             "    </style>" + LS +
             "    <script type=\"text/javascript\" src=\"fckeditor.js\"></script>" + LS +
             "    <script type=\"text/javascript\">" + LS +
