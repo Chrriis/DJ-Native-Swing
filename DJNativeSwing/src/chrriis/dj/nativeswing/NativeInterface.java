@@ -57,6 +57,8 @@ import chrriis.common.WebServer;
  */
 public class NativeInterface {
 
+  private static final boolean IS_SYNCING_MESSAGES = Boolean.parseBoolean(System.getProperty("nativeswing.interface.syncmessages"));
+
   private static class HeavyweightForcerWindow extends Window {
     
     private boolean isPacked;
@@ -521,6 +523,7 @@ public class NativeInterface {
         argList.add(param);
       }
     }
+    argList.add("-Dnativeswing.interface.syncmessages=" + Boolean.parseBoolean(System.getProperty("nativeswing.interface.syncmessages")));
     argList.add("-Dnativeswing.interface.debug.printmessages=" + Boolean.parseBoolean(System.getProperty("nativeswing.interface.debug.printmessages")));
     argList.add("-Dnativeswing.peervm.debug.printstartmessage=" + Boolean.parseBoolean(System.getProperty("nativeswing.peervm.debug.printstartmessage")));
     argList.add("-classpath");
@@ -660,13 +663,17 @@ public class NativeInterface {
   }
   
   static void asyncSend(final Message message) {
-    checkOpen();
-    if(message instanceof LocalMessage) {
-      LocalMessage localMessage = (LocalMessage)message;
-      localMessage.runCommand();
-      return;
+    if(IS_SYNCING_MESSAGES) {
+      syncSend(message);
+    } else {
+      checkOpen();
+      if(message instanceof LocalMessage) {
+        LocalMessage localMessage = (LocalMessage)message;
+        localMessage.runCommand();
+        return;
+      }
+      messagingInterface.asyncSend(message);
     }
-    messagingInterface.asyncSend(message);
   }
   
   private static Display display;

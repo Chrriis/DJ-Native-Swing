@@ -26,7 +26,7 @@ import chrriis.common.ObjectRegistry;
  */
 abstract class MessagingInterface {
 
-  private boolean isDebuggingMessages = Boolean.parseBoolean(System.getProperty("nativeswing.interface.debug.printmessages"));
+  private static final boolean IS_DEBUGGING_MESSAGES = Boolean.parseBoolean(System.getProperty("nativeswing.interface.debug.printmessages"));
   
   private static class CommandResultMessage extends Message {
 
@@ -195,7 +195,7 @@ abstract class MessagingInterface {
   }
   
   private CommandResultMessage runMessage(Message message) {
-    if(isDebuggingMessages) {
+    if(IS_DEBUGGING_MESSAGES) {
       System.err.println(">RUN: " + message.getID() + ", " + message);
     }
     CommandResultMessage commandResultMessage;
@@ -225,7 +225,7 @@ abstract class MessagingInterface {
         asyncSend(commandResultMessage);
       }
     }
-    if(isDebuggingMessages) {
+    if(IS_DEBUGGING_MESSAGES) {
       System.err.println("<RUN: " + message.getID());
     }
     return commandResultMessage;
@@ -271,7 +271,10 @@ abstract class MessagingInterface {
     public Object run(Object[] args) {
       Message message = (Message)args[1];
       message.setSyncExec(false);
-      new CM_asyncExecResponse().asyncExec(args[0], NativeInterface.getMessagingInterface().runMessage(message));
+      MessagingInterface messagingInterface = NativeInterface.getMessagingInterface();
+      CM_asyncExecResponse asyncExecResponse = new CM_asyncExecResponse();
+      asyncExecResponse.setArgs(args[0], messagingInterface.runMessage(message));
+      messagingInterface.asyncSend(asyncExecResponse);
       return null;
     }
   }
@@ -281,7 +284,9 @@ abstract class MessagingInterface {
   private Object nonUISyncExec(Message message) {
     Thread thread = Thread.currentThread();
     final int instanceID = syncThreadRegistry.add(Thread.currentThread());
-    new CM_asyncExec().asyncExec(instanceID, message);
+    CM_asyncExec asyncExec = new CM_asyncExec();
+    asyncExec.setArgs(instanceID, message);
+    asyncSend(asyncExec);
     synchronized(thread) {
       while(syncThreadRegistry.get(instanceID) instanceof Thread) {
         try {
@@ -365,7 +370,7 @@ abstract class MessagingInterface {
   }
   
   private Object processCommandResult(CommandResultMessage commandResultMessage) {
-    if(isDebuggingMessages) {
+    if(IS_DEBUGGING_MESSAGES) {
       System.err.println("<USE: " + commandResultMessage.getID());
     }
     Throwable exception = commandResultMessage.getException();
@@ -406,8 +411,8 @@ abstract class MessagingInterface {
       printFailedInvocation(message);
       return;
     }
-    if(isDebuggingMessages) {
-      System.err.println("SEND: " + message.getID() + ", " + message);
+    if(IS_DEBUGGING_MESSAGES) {
+      System.err.println((message.isSyncExec()? "SYNDS": "SYNDA") + ": " + message.getID() + ", " + message);
     }
     synchronized(oos) {
       oos.writeUnshared(message);
@@ -424,7 +429,7 @@ abstract class MessagingInterface {
     Object o = MessagingInterface.this.ois.readUnshared();
     if(o instanceof Message) {
       Message message = (Message)o;
-      if(isDebuggingMessages) {
+      if(IS_DEBUGGING_MESSAGES) {
         System.err.println("RECV: " + message.getID() + ", " + message);
       }
       return message;
