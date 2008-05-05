@@ -374,7 +374,7 @@ public class JHTMLEditor extends NSPanelComponent {
       return "";
     }
     tempResult = this;
-    webBrowser.executeJavascript("JH_sendData()");
+    webBrowser.executeJavascript("JH_sendData();");
     String html = null;
     for(int i=0; i<20; i++) {
       if(tempResult != this) {
@@ -432,7 +432,7 @@ public class JHTMLEditor extends NSPanelComponent {
    */
   public void setHTMLContent(String html) {
     html = convertLinksFromLocal(html.replaceAll("[\r\n]", ""));
-    webBrowser.executeJavascript("JH_setData('" + Utils.encodeURL(html) + "')");
+    webBrowser.executeJavascript("JH_setData('" + Utils.encodeURL(html) + "');");
   }
   
   /**
