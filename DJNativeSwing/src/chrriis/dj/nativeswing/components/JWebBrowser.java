@@ -62,13 +62,14 @@ import chrriis.dj.nativeswing.NSPanelComponent;
 public class JWebBrowser extends NSPanelComponent {
 
   private static final String USE_XULRUNNER_RUNTIME_OPTION_KEY = "Web Browser Runtime";
+  private static final NSOption XUL_RUNNER_RUNTIME_OPTION = new NSOption(USE_XULRUNNER_RUNTIME_OPTION_KEY);
   
   /**
    * Create an option to make the web browser use the Mozilla XULRunner runtime.
    * @return the option to use the XULRunner runtime.
    */
   public static NSOption useXULRunnerRuntime() {
-    return new NSOption(USE_XULRUNNER_RUNTIME_OPTION_KEY);
+    return XUL_RUNNER_RUNTIME_OPTION;
   }
   
   /**
