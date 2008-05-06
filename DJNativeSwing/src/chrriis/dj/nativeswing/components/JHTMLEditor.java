@@ -170,7 +170,7 @@ public class JHTMLEditor extends NSPanelComponent {
             "      }" + LS +
             "      function JH_setData(html) {" + LS +
             "        var inst = FCKeditorAPI.GetInstance('" + FCK_INSTANCE + "');" + LS +
-            "        inst.SetHTML(decodeURIComponent(html))" + LS +
+            "        inst.SetHTML(decodeURIComponent(html));" + LS +
             "      }" + LS +
             "      function JH_sendData() {" + LS +
             "        document.jhtml_form.action = 'jhtml_sendData';" + LS +
