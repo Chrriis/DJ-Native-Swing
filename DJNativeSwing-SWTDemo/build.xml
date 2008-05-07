@@ -5,7 +5,7 @@
     <delete file="../DJNativeSwing/DJNativeSwingDemo.jar"/>
     <jar duplicate="preserve" destfile="../DJNativeSwing/DJNativeSwingDemo.jar">
 		  <manifest>
-			  <attribute name="Class-Path" value="DJNativeSwing.jar swt.jar lib/swt/swt-3.4M6-win32-win32-x86.jar lib/jna/jna.jar lib/jna/jna_WindowUtils.jar lib/fckeditor/FCKeditor_2.6.zip"/>
+			  <attribute name="Class-Path" value="DJNativeSwing.jar swt.jar lib/swt/swt-3.4M7-win32-win32-x86.jar lib/jna/jna.jar lib/jna/jna_WindowUtils.jar lib/fckeditor/FCKeditor_2.6.zip"/>
 			  <attribute name="Main-Class" value="chrriis.dj.nativeswing.demo.DemoFrame"/>
 		  </manifest>
 	    <fileset dir="bin"/>
