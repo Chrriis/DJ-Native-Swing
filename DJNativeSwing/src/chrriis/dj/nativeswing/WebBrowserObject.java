@@ -59,7 +59,7 @@ public abstract class WebBrowserObject {
   }
   
   private JWebBrowser webBrowser;
-  private int instanceID;
+  private int instanceID = ObjectRegistry.getInstance().add(this);;
   
   public WebBrowserObject(JWebBrowser webBrowser) {
     this.webBrowser = webBrowser;
@@ -97,14 +97,11 @@ public abstract class WebBrowserObject {
   @SuppressWarnings("deprecation")
   public void load(String resourcePath) {
     this.resourcePath = resourcePath;
-    ObjectRegistry.getInstance().remove(instanceID);
     if(resourcePath == null) {
       webBrowser.setHTMLContent("");
       return;
     }
-    ObjectRegistry.getInstance().remove(instanceID);
-    instanceID = ObjectRegistry.getInstance().add(this);
-    resourcePath = WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "html/" + instanceID);
+    resourcePath = WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "html/" + instanceID) + "?" + System.currentTimeMillis();
     final Boolean[] resultArray = new Boolean[] {Boolean.FALSE};
     InitializationListener initializationListener = new InitializationListener() {
       public void objectInitialized() {
@@ -204,7 +201,7 @@ public abstract class WebBrowserObject {
             "    <form style=\"display:none;\" name=\"j_form\" action=\"" + WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "postCommand/" + instanceID) + "\" method=\"POST\" target=\"j_iframe\">" + LS +
             "      <input name=\"j_command\" type=\"text\"></input>" + LS +
             "    </form>" + LS +
-            "    <script src=\"" + WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "js/" + instanceID) + "\"></script>" + LS +
+            "    <script src=\"" + WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "js/" + instanceID) + "?" + System.currentTimeMillis() + "\"></script>" + LS +
             "  </body>" + LS +
             "</html>" + LS;
           return getInputStream(content);

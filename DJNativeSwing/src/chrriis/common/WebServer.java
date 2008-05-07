@@ -49,9 +49,14 @@ public class WebServer {
         endQuery = '?' + queryString;
         resourcePath = resourcePath.substring(0, index);
         for(String content: queryString.split("&")) {
-          String key = content.substring(0, content.indexOf('='));
-          String value = Utils.decodeURL(content.substring(key.length() + 1));
-          queryParameterMap.put(key, value);
+          int eqIndex = content.indexOf('=');
+          if(eqIndex > 0) {
+            String key = content.substring(0, eqIndex);
+            String value = Utils.decodeURL(content.substring(key.length() + 1));
+            queryParameterMap.put(key, value);
+          } else {
+            queryParameterMap.put(content, "");
+          }
         }
       }
       index = resourcePath.indexOf('#');
