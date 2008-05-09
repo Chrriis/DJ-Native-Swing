@@ -136,17 +136,27 @@ public class JVLCPlayer extends NSPanelComponent {
     if(updateThread != null) {
       return;
     }
+    if(isNativePeerDisposed()) {
+      return;
+    }
     updateThread = new Thread("NativeSwing - VLC Player control bar update") {
       @Override
       public void run() {
         final Thread currentThread = this;
         while(currentThread == updateThread) {
+          if(isNativePeerDisposed()) {
+            stopUpdateThread();
+            return;
+          }
           try {
             sleep(1000);
           } catch(Exception e) {}
           SwingUtilities.invokeLater(new Runnable() {
             public void run() {
               if(currentThread != updateThread) {
+                return;
+              }
+              if(!isNativePeerValid()) {
                 return;
               }
               VLCInput vlcInput = getVLCInput();
