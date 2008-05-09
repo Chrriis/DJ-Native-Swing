@@ -52,7 +52,7 @@ public class WebServer {
           int eqIndex = content.indexOf('=');
           if(eqIndex > 0) {
             String key = content.substring(0, eqIndex);
-            String value = Utils.decodeURL(content.substring(key.length() + 1));
+            String value = Utils.decodeURL(content.substring(eqIndex + 1));
             queryParameterMap.put(key, value);
           } else {
             queryParameterMap.put(content, "");
@@ -590,9 +590,14 @@ public class WebServer {
               HTTPData httpData = new HTTPData();
               Map<String, String> headerMap = httpData.getHeaderMap();
               for(String content: dataContent.split("&")) {
-                String key = content.substring(0, content.indexOf('='));
-                String value = Utils.decodeURL(content.substring(key.length() + 1));
-                headerMap.put(key, value);
+                int eqIndex = content.indexOf('=');
+                if(eqIndex > 0) {
+                  String key = content.substring(0, eqIndex);
+                  String value = Utils.decodeURL(content.substring(eqIndex + 1));
+                  headerMap.put(key, value);
+                } else {
+                  headerMap.put(content, "");
+                }
               }
               httpDataArray = new HTTPData[] {httpData};
             }
