@@ -554,7 +554,9 @@ public abstract class NativeComponent extends Canvas {
     super.addNotify();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-        if(!isNativePeerInitialized && !isNativePeerDisposed) {
+        if(isNativePeerDisposed) {
+          throwRecreationException();
+        } else if(!isNativePeerInitialized) {
           createNativePeer();
         }
       }
@@ -573,7 +575,9 @@ public abstract class NativeComponent extends Canvas {
     if(windowAncestor == null) {
       throw new IllegalStateException("This method can only be called when the component has a Window ancestor!");
     }
-    if(!isNativePeerInitialized && !isNativePeerDisposed) {
+    if(isNativePeerDisposed) {
+      throwRecreationException();
+    } else if(!isNativePeerInitialized) {
       windowAncestor.addNotify();
       createNativePeer();
     }
@@ -626,6 +630,12 @@ public abstract class NativeComponent extends Canvas {
   protected Object[] getNativePeerCreationParameters() {
     return null;
   }
+
+  private void throwRecreationException() {
+    isNativePeerValid = false;
+    invalidNativePeerText = "Failed to create " + NativeComponent.this.getClass().getName() + "[" + NativeComponent.this.hashCode() + "]\n\nReason:\nA native component cannot be re-created after having been disposed.";
+    throw new IllegalStateException("A native component cannot be re-created after having been disposed! To achieve re-parenting or allow re-creation, set the option to defer destruction until finalization (note that re-parenting accross different frames is not supported).");
+  }
   
   private void createNativePeer() {
     boolean isInterfaceAlive = NativeInterface.isAlive();
@@ -634,9 +644,7 @@ public abstract class NativeComponent extends Canvas {
     }
     NativeInterface.addCanvas(this);
     if(initializationCommandMessageList == null) {
-      isNativePeerValid = false;
-      invalidNativePeerText = "Failed to create " + NativeComponent.this.getClass().getName() + "[" + NativeComponent.this.hashCode() + "]\n\nReason:\nA native component cannot be re-created after having been disposed.";
-      throw new IllegalStateException("A native component cannot be re-created after having been disposed! To achieve re-parenting, set the options to use a proxied filiation and a destruction on finalization (re-parenting accross different frames is not supported).");
+      throwRecreationException();
     }
     List<CommandMessage> initializationCommandMessageList_ = initializationCommandMessageList;
     initializationCommandMessageList = null;
