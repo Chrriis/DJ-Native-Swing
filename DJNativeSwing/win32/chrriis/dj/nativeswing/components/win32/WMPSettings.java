@@ -15,8 +15,8 @@ public class WMPSettings {
   
   private NativeWMediaPlayer nativeComponent;
   
-  WMPSettings(JWMediaPlayer multiMediaPlayer) {
-    this.nativeComponent = (NativeWMediaPlayer)multiMediaPlayer.getNativeComponent();
+  WMPSettings(JWMediaPlayer wMediaPlayer) {
+    this.nativeComponent = (NativeWMediaPlayer)wMediaPlayer.getNativeComponent();
   }
   
   void setErrorDialogsEnabled(boolean isErrorDialogEnabled) {
@@ -36,7 +36,7 @@ public class WMPSettings {
   
   /**
    * Get the volume, as a value between 0 and 100.
-   * @return The volume, between 0 and 100. When mute, the volume is still returned.
+   * @return the volume, between 0 and 100, or -1 in case of failure. When mute, the volume is still returned.
    */
   public int getVolume() {
     try {
@@ -46,6 +46,29 @@ public class WMPSettings {
     }
   }
   
+  /**
+   * Set the speed factor that is applied when a media is played.
+   * @param speedFactor the speed factor, with a value strictly greater than 0.
+   */
+  public void setPlaySpeedFactor(float speedFactor) {
+    if(speedFactor <= 0) {
+      throw new IllegalArgumentException("The rate must be strictly greater than 0!");
+    }
+    nativeComponent.setOleProperty(new String[]{"settings", "rate"}, (double)speedFactor);
+  }
+  
+  /**
+   * Get the speed factor that is applied when a media is played, as a value strictly greater than 0.
+   * @return the speed factor, strictly greater than 0, or NaN in case of failure.
+   */
+  public float getPlaySpeedFactor() {
+    try {
+      return ((Double)nativeComponent.getOleProperty(new String[]{"settings", "rate"})).floatValue();
+    } catch (Exception e) {
+      return Float.NaN;
+    }
+  }
+
   /**
    * @param stereoBalance The stereo balance between -100 and 100, with 0 being the default.
    */
@@ -58,7 +81,7 @@ public class WMPSettings {
   
   /**
    * Get the stereo balance.
-   * @return The stereo balance, between -100 and 100, with 0 being the default. When mute, the balance is still returned.
+   * @return the stereo balance, between -100 and 100, with 0 being the default, or -1 in case of failure. When mute, the balance is still returned.
    */
   public int getStereoBalance() {
     try {

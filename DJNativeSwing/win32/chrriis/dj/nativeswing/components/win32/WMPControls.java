@@ -15,8 +15,8 @@ public class WMPControls {
   
   private NativeWMediaPlayer nativeComponent;
   
-  WMPControls(JWMediaPlayer multiMediaPlayer) {
-    this.nativeComponent = (NativeWMediaPlayer)multiMediaPlayer.getNativeComponent();
+  WMPControls(JWMediaPlayer wMediaPlayer) {
+    this.nativeComponent = (NativeWMediaPlayer)wMediaPlayer.getNativeComponent();
   }
   
   /**
@@ -74,7 +74,7 @@ public class WMPControls {
   
   /**
    * Get the current position on the timeline.
-   * @return the current position in milliseconds.
+   * @return the current position in milliseconds, or -1 in case of failure.
    */
   public int getAbsolutePosition() {
     try {

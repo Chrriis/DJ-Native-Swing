@@ -34,6 +34,7 @@ public class JWMediaPlayer extends NSPanelComponent {
     initialize(nativeComponent);
     wmpSettings = new WMPSettings(this);
     wmpControls = new WMPControls(this);
+    wmpMedia = new WMPMedia(this);
     add(nativeComponent.createEmbeddableComponent(NSOption.createOptionMap(options)), BorderLayout.CENTER);
     wmpSettings.setAutoStart(true);
     wmpSettings.setErrorDialogsEnabled(false);
@@ -60,6 +61,16 @@ public class JWMediaPlayer extends NSPanelComponent {
     return wmpControls;
   }
 
+  private WMPMedia wmpMedia;
+  
+  /**
+   * Get the Media Player object responsible for media-related actions.
+   * @return the Media Player media object.
+   */
+  public WMPMedia getWMPMedia() {
+    return wmpMedia;
+  }
+  
 //  public String getLoadedResource() {
 //    return (String)nativeComponent.getOleProperty(new String[] {"url"});
 //  }
@@ -98,6 +109,38 @@ public class JWMediaPlayer extends NSPanelComponent {
     return Boolean.TRUE.equals("full".equals(nativeComponent.getOleProperty("uiMode")));
   }
   
+  /**
+   * Set whether the video is playing in full screen mode.
+   * @param isFullScreen true if the full screen mode should be active, false otherwise.
+   */
+  public void setFullScreen(boolean isFullScreen) {
+    nativeComponent.setOleProperty("fullScreen", isFullScreen);
+  }
+
+  /**
+   * Indicate whether the video is in full screen mode.
+   * @return true if the video is in full screen mode.
+   */
+  public boolean isFullScreen() {
+    return Boolean.TRUE.equals(nativeComponent.getOleProperty("fullScreen"));
+  }
+
+  /**
+   * Set whether the video is stretched to fit.
+   * @param isStretchToFit true if the video is stretched to fit, false otherwise.
+   */
+  public void setStretchToFit(boolean isStretchToFit) {
+    nativeComponent.setOleProperty("stretchToFit", isStretchToFit);
+  }
+
+  /**
+   * Indicate whether the video is stretched to fit.
+   * @return true if the video is stretched to fit.
+   */
+  public boolean isStretchToFit() {
+    return Boolean.TRUE.equals(nativeComponent.getOleProperty("stretchToFit"));
+  }
+
   /**
    * The state of a media.
    * @author Christopher Deckers
