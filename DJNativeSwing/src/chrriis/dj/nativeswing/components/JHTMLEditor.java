@@ -30,6 +30,7 @@ import chrriis.dj.nativeswing.LocalMessage;
 import chrriis.dj.nativeswing.Message;
 import chrriis.dj.nativeswing.NSOption;
 import chrriis.dj.nativeswing.NSPanelComponent;
+import chrriis.dj.nativeswing.NativeComponent;
 
 /**
  * An HTML editor. It is a browser-based component, which relies on the FCKeditor.<br/>
@@ -432,7 +433,16 @@ public class JHTMLEditor extends NSPanelComponent {
    */
   public void setHTMLContent(String html) {
     html = convertLinksFromLocal(html.replaceAll("[\r\n]", ""));
+//    webBrowser.executeJavascript("JH_setData('" + Utils.encodeURL(html) + "');");
+    // There is a problem: IE crashes when it has the focus and is flooded with this message.
+    // While waiting for an SWT fix, we use the workaround to disable the component which loses the focus.
+    NativeComponent nativeComponent = webBrowser.getNativeComponent();
+    boolean isEnabled = nativeComponent.isEnabled();
+    nativeComponent.setEnabled(false);
+    new Message().syncSend();
     webBrowser.executeJavascript("JH_setData('" + Utils.encodeURL(html) + "');");
+    new Message().syncSend();
+    nativeComponent.setEnabled(isEnabled);
   }
   
   /**
