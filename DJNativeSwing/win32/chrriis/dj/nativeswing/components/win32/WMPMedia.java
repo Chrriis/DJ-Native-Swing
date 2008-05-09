@@ -21,10 +21,10 @@ public class WMPMedia {
   }
   
   /**
-   * Get the length in milliseconds of the current media.
-   * @return the length in milliseconds, or -1 in case of failure.
+   * Get the duration in milliseconds of the current media.
+   * @return the duration in milliseconds, or -1 in case of failure.
    */
-  public int getMediaLength() {
+  public int getDuration() {
     try {
       return (int)Math.round((Double)nativeComponent.getOleProperty(new String[]{"currentMedia", "duration"}) * 1000);
     } catch (Exception e) {

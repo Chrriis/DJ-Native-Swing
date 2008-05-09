@@ -164,7 +164,7 @@ public class JVLCPlayer extends NSPanelComponent {
               boolean isValid = state == VLCMediaState.OPENING || state == VLCMediaState.BUFFERING || state == VLCMediaState.PLAYING || state == VLCMediaState.PAUSED || state == VLCMediaState.STOPPING;
               if(isValid) {
                 int time = vlcInput.getAbsolutePosition();
-                int length = vlcInput.getMediaLength();
+                int length = vlcInput.getDuration();
                 isValid = time >= 0 && length > 0;
                 if(isValid) {
                   isAdjustingSeekBar = true;

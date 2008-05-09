@@ -29,7 +29,7 @@ public class VLCPlaylist {
   
   /**
    * Get the number of items in the playlist.
-   * @return the item count.
+   * @return the item count, or -1 in case of failure.
    */
   public int getItemCount() {
     Object value = webBrowserObject.getObjectProperty("playlist.items.count");

@@ -23,7 +23,7 @@ public class VLCVideo {
   
   /**
    * Get the width of the video.
-   * @return the width.
+   * @return the width, or -1 in case of failure.
    */
   public int getWidth() {
     Object value = webBrowserObject.getObjectProperty("video.width");
@@ -32,7 +32,7 @@ public class VLCVideo {
   
   /**
    * Get the height of the video.
-   * @return the height.
+   * @return the height, or -1 in case of failure.
    */
   public int getHeight() {
     Object value = webBrowserObject.getObjectProperty("video.height");
@@ -83,7 +83,7 @@ public class VLCVideo {
   
   /**
    * Get the aspect ratio of the video media.
-   * @return the aspect ratio.
+   * @return the aspect ratio, or null in case of failure.
    */
   public VLCAspectRatio getAspectRatio() {
     String value = (String)webBrowserObject.getObjectProperty("video.aspectRatio");
@@ -106,7 +106,7 @@ public class VLCVideo {
   
   /**
    * Get the track of the subtitles.
-   * @return the track of the subtitles, or 0 if disabled.
+   * @return the track of the subtitles, or 0 if disabled, or -1 in case of failure.
    */
   public int getSubtitleTrack() {
     Object value = webBrowserObject.getObjectProperty("video.subtitle");

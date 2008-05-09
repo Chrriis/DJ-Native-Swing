@@ -22,17 +22,17 @@ public class VLCInput {
   }
   
   /**
-   * Get the length in milliseconds of the current media.
-   * @return the length in milliseconds.
+   * Get the duration in milliseconds of the current media.
+   * @return the duration in milliseconds, or -1 in case of failure.
    */
-  public int getMediaLength() {
+  public int getDuration() {
     Object value = webBrowserObject.getObjectProperty("input.length");
     return value == null? -1: ((Number)value).intValue();
   }
   
   /**
    * Get the number of frames per second.
-   * @return the number of frames per second.
+   * @return the number of frames per second, or NaN in case of failure.
    */
   public float getFrameRate() {
     Object value = webBrowserObject.getObjectProperty("input.fps");
@@ -78,7 +78,7 @@ public class VLCInput {
   
   /**
    * Get the current position on the timeline.
-   * @return the current position in milliseconds.
+   * @return the current position in milliseconds, or -1 in case of failure.
    */
   public int getAbsolutePosition() {
     Object value = webBrowserObject.getObjectProperty("input.time");
@@ -95,7 +95,7 @@ public class VLCInput {
   
   /**
    * Get the state.
-   * @return the state.
+   * @return the state, or null in case of failure.
    */
   public VLCMediaState getMediaState() {
     Object value = webBrowserObject.getObjectProperty("input.state");
@@ -124,7 +124,7 @@ public class VLCInput {
   
   /**
    * Get the speed factor that is applied when a media is played.
-   * @return the speed factor.
+   * @return the speed factor, or NaN in case of failure.
    */
   public float getPlaySpeedFactor() {
     Object value = webBrowserObject.getObjectProperty("input.rate");

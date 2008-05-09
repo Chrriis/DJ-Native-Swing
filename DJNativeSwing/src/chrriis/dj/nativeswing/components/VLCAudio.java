@@ -54,7 +54,7 @@ public class VLCAudio {
   
   /**
    * Get the volume, as a value between 0 and 100.
-   * @return the volume.
+   * @return the volume, or -1 in case of failure.
    */
   public int getVolume() {
     Object value = webBrowserObject.getObjectProperty("audio.volume");
@@ -71,7 +71,7 @@ public class VLCAudio {
   
   /**
    * Get the audio track, or 0 if disabled.
-   * @return the audio track.
+   * @return the audio track, or -1 in case of failure.
    */
   public int getTrack() {
     Object value = webBrowserObject.getObjectProperty("audio.track");
@@ -105,7 +105,7 @@ public class VLCAudio {
   
   /**
    * Get the audio channel.
-   * @return the audio channel.
+   * @return the audio channel, or null in case of failure.
    */
   public VLCChannel getChannel() {
     Object value = webBrowserObject.getObjectProperty("audio.channel");
