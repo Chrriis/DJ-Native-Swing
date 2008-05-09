@@ -282,13 +282,13 @@ public abstract class NativeComponent extends Canvas {
       if(Utils.IS_JAVA_6_OR_GREATER) {
         // Not specifying the absX and Y in Java 6 results in a deadlock when pressing alt+F4 while moving the mouse over a native control
         if(type == MouseEvent.MOUSE_WHEEL) {
-          me = new MouseWheelEvent(nativeComponent, type, System.currentTimeMillis(), SWTUtils.translateSWTModifiers(e_stateMask), e_x, e_y, e_cursorLocation.x, e_cursorLocation.y, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, e_count, 1);
+          me = new MouseWheelEvent(nativeComponent, type, System.currentTimeMillis(), SWTUtils.translateSWTModifiers(e_stateMask), e_x, e_y, e_cursorLocation.x, e_cursorLocation.y, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, Math.abs(e_count), e_count < 0? 1: -1);
         } else {
           me = new MouseEvent(nativeComponent, type, System.currentTimeMillis(), SWTUtils.translateSWTModifiers(e_stateMask), e_x, e_y, e_cursorLocation.x, e_cursorLocation.y, e_count, false, button);
         }
       } else {
         if(type == MouseEvent.MOUSE_WHEEL) {
-          me = new MouseWheelEvent(nativeComponent, type, System.currentTimeMillis(), SWTUtils.translateSWTModifiers(e_stateMask), e_x, e_y, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, e_count, 1);
+          me = new MouseWheelEvent(nativeComponent, type, System.currentTimeMillis(), SWTUtils.translateSWTModifiers(e_stateMask), e_x, e_y, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, Math.abs(e_count), e_count < 0? 1: -1);
         } else {
           me = new MouseEvent(nativeComponent, type, System.currentTimeMillis(), SWTUtils.translateSWTModifiers(e_stateMask), e_x, e_y, e_count, false, button);
         }
@@ -549,19 +549,35 @@ public abstract class NativeComponent extends Canvas {
     image.flush();
   }
   
+  private void throwDuplicateCreationException() {
+    isNativePeerValid = false;
+    invalidNativePeerText = "Failed to create " + NativeComponent.this.getClass().getName() + "[" + NativeComponent.this.hashCode() + "]\n\nReason:\nA native component cannot be re-created after having been disposed.";
+    repaint();
+    throw new IllegalStateException("A native component cannot be re-created after having been disposed! To achieve re-parenting or allow re-creation, set the option to defer destruction until finalization (note that re-parenting accross different frames is not supported).");
+  }
+  
   @Override
   public void addNotify() {
     super.addNotify();
+    if(isForcingInitialization) {
+      return;
+    }
+    if(isNativePeerDisposed) {
+      throwDuplicateCreationException();
+    }
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         if(isNativePeerDisposed) {
-          throwRecreationException();
-        } else if(!isNativePeerInitialized) {
+          throwDuplicateCreationException();
+        }
+        if(!isNativePeerInitialized) {
           createNativePeer();
         }
       }
     });
   }
+  
+  private boolean isForcingInitialization;
   
   /**
    * Force the component to initialize. All method calls will then be synchronous instead of being queued waiting for the componant to be initialized.
@@ -576,10 +592,16 @@ public abstract class NativeComponent extends Canvas {
       throw new IllegalStateException("This method can only be called when the component has a Window ancestor!");
     }
     if(isNativePeerDisposed) {
-      throwRecreationException();
-    } else if(!isNativePeerInitialized) {
-      windowAncestor.addNotify();
-      createNativePeer();
+      throwDuplicateCreationException();
+    }
+    if(!isNativePeerInitialized) {
+      isForcingInitialization = true;
+      try {
+        windowAncestor.addNotify();
+        createNativePeer();
+      } finally {
+        isForcingInitialization = false;
+      }
     }
   }
   
@@ -630,12 +652,6 @@ public abstract class NativeComponent extends Canvas {
   protected Object[] getNativePeerCreationParameters() {
     return null;
   }
-
-  private void throwRecreationException() {
-    isNativePeerValid = false;
-    invalidNativePeerText = "Failed to create " + NativeComponent.this.getClass().getName() + "[" + NativeComponent.this.hashCode() + "]\n\nReason:\nA native component cannot be re-created after having been disposed.";
-    throw new IllegalStateException("A native component cannot be re-created after having been disposed! To achieve re-parenting or allow re-creation, set the option to defer destruction until finalization (note that re-parenting accross different frames is not supported).");
-  }
   
   private void createNativePeer() {
     boolean isInterfaceAlive = NativeInterface.isAlive();
@@ -644,7 +660,7 @@ public abstract class NativeComponent extends Canvas {
     }
     NativeInterface.addCanvas(this);
     if(initializationCommandMessageList == null) {
-      throwRecreationException();
+      throwDuplicateCreationException();
     }
     List<CommandMessage> initializationCommandMessageList_ = initializationCommandMessageList;
     initializationCommandMessageList = null;
@@ -712,6 +728,7 @@ public abstract class NativeComponent extends Canvas {
   protected void disposeNativePeer() {
     if(!isNativePeerDisposed) {
       isNativePeerDisposed = true;
+      invalidateNativePeer("The native component was disposed.");
       if(isNativePeerInitialized) {
         NativeInterface.removeNativeInterfaceListener(nativeInterfaceListener);
         NativeInterface.removeCanvas(this);
