@@ -188,7 +188,7 @@ public class JHTMLEditor extends NSPanelComponent {
             "        oFCKeditor.Width = \"100%\";" + LS +
             "        oFCKeditor.Height = \"100%\";" + LS +
             "        oFCKeditor.BasePath = \"\";" + LS +
-            (htmlEditor.customJavascriptConfiguration != null? "        oFCKeditor.Config[\"CustomConfigurationsPath\"] = '" + WebServer.getDefaultWebServer().getDynamicContentURL(JHTMLEditor.class.getName(), String.valueOf(instanceID),  "customConfigurationScript.js") + "';" + LS: "") +
+            (htmlEditor.customJavascriptConfiguration != null? "        oFCKeditor.Config[\"CustomConfigurationsPath\"] = '" + WebServer.getDefaultWebServer().getDynamicContentURL(JHTMLEditor.class.getName(), String.valueOf(instanceID), "customConfigurationScript.js") + "';" + LS: "") +
             "        oFCKeditor.Create();" + LS +
             "      }" + LS +
             "      function FCKeditor_OnComplete(editorInstance) {" + LS +
