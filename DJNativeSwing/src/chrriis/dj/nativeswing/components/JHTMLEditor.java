@@ -164,6 +164,10 @@ public class JHTMLEditor extends NSPanelComponent {
             "    </style>" + LS +
             "    <script type=\"text/javascript\" src=\"fckeditor.js\"></script>" + LS +
             "    <script type=\"text/javascript\">" + LS +
+            // We override the FCK editor function because on Linux this may return false if navigator.product is empty (instead of "Gecko")
+            "      function FCKeditor_IsCompatibleBrowser() {" + LS +
+            "        return true;" + LS +
+            "      }" + LS +
             "      function sendCommand(command) {" + LS +
             "        var s = 'command://' + encodeURIComponent(command);" + LS +
             "        for(var i=1; i<arguments.length; s+='&'+encodeURIComponent(arguments[i++]));" + LS +
