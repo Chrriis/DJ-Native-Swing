@@ -831,7 +831,7 @@ public class WebServer {
         public InputStream getInputStream() {
           try {
             for(ClassLoader referenceClassLoader: webServer.referenceClassLoaderList) {
-              InputStream in = referenceClassLoader.getResourceAsStream('/' + resourcePath);
+              InputStream in = referenceClassLoader.getResourceAsStream(resourcePath);
               if(in != null) {
                 return in;
               }
