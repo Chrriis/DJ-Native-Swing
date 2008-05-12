@@ -734,7 +734,7 @@ public class WebServer {
       classPath = classPath.substring(0, classPath.lastIndexOf('/') + 1);
       resourcePath = "/" + classPath + resourcePath;
     }
-    return getURLPrefix() + "/classpath/" + instanceID + resourcePath;
+    return getURLPrefix() + "/classpath/" + instanceID + Utils.simplifyPath(resourcePath);
   }
   
   public String getResourcePathURL(String codeBase, String resourcePath) {

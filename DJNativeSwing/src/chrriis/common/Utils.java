@@ -12,7 +12,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Christopher Deckers
@@ -228,6 +230,46 @@ public class Utils {
       return Arrays.toString((double[])array);
     }
     return Arrays.deepToString((Object[])array);
+  }
+  
+  /**
+   * Simplify a path, where separators are '/', by resolving "." and "..".
+   * @return the simplified path.
+   */
+  public static String simplifyPath(String path) {
+    if(path.indexOf("//") != -1) {
+      throw new IllegalArgumentException("The path is invalid: " + path);
+    }
+    String[] crumbs = path.split("/");
+    List<String> crumbList = new ArrayList<String>(crumbs.length);
+    for(String crumb: crumbs) {
+      if("".equals(crumb) || ".".equals(crumb)) {
+        // do nothing
+      } else if("..".equals(crumb)) {
+        int index = crumbList.size() - 1;
+        if(index == -1) {
+          throw new IllegalArgumentException("The path is invalid: " + path);
+        }
+        crumbList.remove(index);
+      } else {
+        crumbList.add(crumb);
+      }
+    }
+    StringBuilder sb = new StringBuilder(path.length());
+    if(path.startsWith("/")) {
+      sb.append('/');
+    }
+    int crumbCount = crumbList.size();
+    for(int i=0; i<crumbCount; i++) {
+      if(i > 0) {
+        sb.append('/');
+      }
+      sb.append(crumbList.get(i));
+    }
+    if(path.endsWith("/")) {
+      sb.append('/');
+    }
+    return sb.toString();
   }
   
 }
