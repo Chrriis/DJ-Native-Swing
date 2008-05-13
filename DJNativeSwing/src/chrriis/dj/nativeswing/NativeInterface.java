@@ -45,6 +45,8 @@ import java.util.Set;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
 
+import org.eclipse.swt.graphics.Device;
+import org.eclipse.swt.graphics.DeviceData;
 import org.eclipse.swt.widgets.Display;
 
 import chrriis.common.NetworkURLClassLoader;
@@ -523,9 +525,19 @@ public class NativeInterface {
         argList.add(param);
       }
     }
-    argList.add("-Dnativeswing.interface.syncmessages=" + Boolean.parseBoolean(System.getProperty("nativeswing.interface.syncmessages")));
-    argList.add("-Dnativeswing.interface.debug.printmessages=" + Boolean.parseBoolean(System.getProperty("nativeswing.interface.debug.printmessages")));
-    argList.add("-Dnativeswing.peervm.debug.printstartmessage=" + Boolean.parseBoolean(System.getProperty("nativeswing.peervm.debug.printstartmessage")));
+    String[] flags = new String[] {
+        "nativeswing.interface.syncmessages",
+        "nativeswing.interface.debug.printmessages",
+        "nativeswing.peervm.debug.printstartmessage",
+        "nativeswing.swt.debug.device",
+        "nativeswing.swt.devicedata.debug",
+        "nativeswing.swt.devicedata.tracking",
+    };
+    for(String flag: flags) {
+      if(Boolean.parseBoolean(System.getProperty(flag))) {
+        argList.add("-D" + flag + "=true");
+      }
+    }
     argList.add("-classpath");
     argList.add(sb.toString());
     if(isProxyClassLoaderUsed) {
@@ -789,7 +801,11 @@ public class NativeInterface {
     } catch(Exception e) {
       throw new IllegalStateException("The native side did not receive an incoming connection!");
     }
-    display = new Display();
+    Device.DEBUG = Boolean.parseBoolean(System.getProperty("nativeswing.swt.debug.device"));
+    DeviceData data = new DeviceData();
+    data.debug = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.debug"));
+    data.tracking = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.tracking"));
+    display = new Display(data);
     Display.setAppName("DJ Native Swing");
     messagingInterface = new MessagingInterface(socket, true) {
       @Override
