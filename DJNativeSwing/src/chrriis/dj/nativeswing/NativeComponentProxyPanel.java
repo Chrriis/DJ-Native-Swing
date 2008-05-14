@@ -40,10 +40,10 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
 
   private boolean isProxiedFiliation;
 
-  protected NativeComponentProxyPanel(NativeComponent nativeComponent, NSOption visibilityConstraint, NSOption destructionTime, NSOption filiationType) {
-    super(nativeComponent, visibilityConstraint, destructionTime);
+  protected NativeComponentProxyPanel(NativeComponent nativeComponent, boolean isVisibilityConstrained, boolean isDestructionOnFinalization, boolean isProxiedFiliation) {
+    super(nativeComponent, isVisibilityConstrained, isDestructionOnFinalization);
     setLayout(new BorderLayout(0, 0));
-    isProxiedFiliation = filiationType != null;
+    this.isProxiedFiliation = isProxiedFiliation;
     addFocusListener(new FocusAdapter() {
       @Override
       public void focusGained(FocusEvent e) {

@@ -67,8 +67,8 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
     }
   };
 
-  protected NativeComponentProxyWindow(NativeComponent nativeComponent, NSOption visibilityConstraint, NSOption destructionTime) {
-    super(nativeComponent, visibilityConstraint, destructionTime);
+  protected NativeComponentProxyWindow(NativeComponent nativeComponent, boolean isVisibilityConstrained, boolean isDestructionOnFinalization) {
+    super(nativeComponent, isVisibilityConstrained, isDestructionOnFinalization);
     addFocusListener(new FocusAdapter() {
       @Override
       public void focusGained(FocusEvent e) {

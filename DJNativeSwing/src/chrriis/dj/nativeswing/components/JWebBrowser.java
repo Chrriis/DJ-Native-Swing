@@ -61,7 +61,7 @@ import chrriis.dj.nativeswing.NSPanelComponent;
  */
 public class JWebBrowser extends NSPanelComponent {
 
-  private static final String USE_XULRUNNER_RUNTIME_OPTION_KEY = "Web Browser Runtime";
+  private static final String USE_XULRUNNER_RUNTIME_OPTION_KEY = "XULRunner Runtime";
   private static final NSOption XUL_RUNNER_RUNTIME_OPTION = new NSOption(USE_XULRUNNER_RUNTIME_OPTION_KEY);
   
   /**

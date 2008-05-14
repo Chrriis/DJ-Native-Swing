@@ -42,9 +42,9 @@ abstract class NativeComponentProxy extends JComponent {
 
   private AWTEventListener shapeAdjustmentEventListener;
 
-  protected NativeComponentProxy(NativeComponent nativeComponent, NSOption visibilityConstraint, NSOption destructionTime) {
-    isDestructionOnFinalization = destructionTime != null;
-    isVisibilityConstrained = visibilityConstraint != null;
+  protected NativeComponentProxy(NativeComponent nativeComponent, boolean isVisibilityConstrained, boolean isDestructionOnFinalization) {
+    this.isDestructionOnFinalization = isDestructionOnFinalization;
+    this.isVisibilityConstrained = isVisibilityConstrained;
     setFocusable(true);
     this.nativeComponent = nativeComponent;
     backBufferManager = new BackBufferManager(nativeComponent, this);
@@ -52,7 +52,7 @@ abstract class NativeComponentProxy extends JComponent {
       public void hierarchyChanged(HierarchyEvent e) {
         long changeFlags = e.getChangeFlags();
         if((changeFlags & (HierarchyEvent.SHOWING_CHANGED)) != 0) {
-          if(isVisibilityConstrained) {
+          if(NativeComponentProxy.this.isVisibilityConstrained) {
             adjustPeerShape();
           } else {
             adjustPeerBounds();

@@ -74,6 +74,8 @@ import chrriis.common.Utils;
  */
 public abstract class NativeComponent extends Canvas {
 
+  private static final boolean IS_DEBUGGING_OPTIONS = Boolean.parseBoolean(System.getProperty("nativeswing.components.debug.printoptions"));
+
   private class CMLocal_runInSequence extends LocalMessage {
     @Override
     public Object run(Object[] args) {
@@ -143,7 +145,7 @@ public abstract class NativeComponent extends Canvas {
   }
   
   private void printFailedInvocation(Message message) {
-    System.err.println("Invalid " + getClass().getName() + "[" + hashCode() + "]: " + message);
+    System.err.println("Invalid " + getComponentDescription() + ": " + message);
   }
   
   private static ObjectRegistry registry = new ObjectRegistry();
@@ -516,7 +518,7 @@ public abstract class NativeComponent extends Canvas {
     if(!isNativePeerValid()) {
       String text = invalidNativePeerText;
       if(text == null) {
-        text = "Invalid " + getClass().getName() + "[" + hashCode() + "]";
+        text = "Invalid " + getComponentDescription();
       }
       FontMetrics fm = g.getFontMetrics();
       BufferedReader r = new BufferedReader(new StringReader(text));
@@ -551,7 +553,7 @@ public abstract class NativeComponent extends Canvas {
   
   private void throwDuplicateCreationException() {
     isNativePeerValid = false;
-    invalidNativePeerText = "Failed to create " + NativeComponent.this.getClass().getName() + "[" + NativeComponent.this.hashCode() + "]\n\nReason:\nA native component cannot be re-created after having been disposed.";
+    invalidNativePeerText = "Failed to create " + getComponentDescription() + "\n\nReason:\nA native component cannot be re-created after having been disposed.";
     repaint();
     throw new IllegalStateException("A native component cannot be re-created after having been disposed! To achieve re-parenting or allow re-creation, set the option to defer destruction until finalization (note that re-parenting accross different frames is not supported).");
   }
@@ -677,12 +679,12 @@ public abstract class NativeComponent extends Canvas {
         for(Throwable t = e; t != null; t = t.getCause()) {
           sb.append("    " + t.toString() + "\n");
         }
-        invalidNativePeerText = "Failed to create " + NativeComponent.this.getClass().getName() + "[" + NativeComponent.this.hashCode() + "]\n\nReason:\n" + sb.toString();
+        invalidNativePeerText = "Failed to create " + getComponentDescription() + "\n\nReason:\n" + sb.toString();
         e.printStackTrace();
       }
       new CMN_reshape().asyncExec(this, getWidth(), getHeight());
     } else {
-      invalidNativePeerText = "Failed to create " + NativeComponent.this.getClass().getName() + "[" + NativeComponent.this.hashCode() + "]\n\nReason:\nThe native interface is not open!";
+      invalidNativePeerText = "Failed to create " + getComponentDescription() + "\n\nReason:\nThe native interface is not open!";
     }
     for(CommandMessage initCommandMessage: initializationCommandMessageList_) {
       if(!isNativePeerValid()) {
@@ -771,9 +773,13 @@ public abstract class NativeComponent extends Canvas {
   private void invalidateNativePeer(String invalidNativePeerText) {
     if(isNativePeerValid) {
       isNativePeerValid = false;
-      this.invalidNativePeerText = "Invalid " + getClass().getName() + "[" + hashCode() + "]\n\nReason:\n" + invalidNativePeerText;
+      this.invalidNativePeerText = "Invalid " + getComponentDescription() + "\n\nReason:\n" + invalidNativePeerText;
       repaint();
     }
+  }
+  
+  private String getComponentDescription() {
+    return getClass().getName() + "[" + getComponentID() + "/" + hashCode() + "]";
   }
   
   static interface NativeComponentHolder {}
@@ -821,30 +827,52 @@ public abstract class NativeComponent extends Canvas {
    * @return the component that contains the native component and that can be added to the component hierarchy.
    */
   protected Component createEmbeddableComponent(Map<Object, Object> optionMap) {
-    NSOption filiationType = (NSOption)optionMap.get(NSComponentOptions.PROXY_COMPONENT_HIERARCHY_OPTION_KEY);
-    NSOption destructionTime = (NSOption)optionMap.get(NSComponentOptions.DESTROY_ON_FINALIZATION_OPTION_KEY);
-    NSOption visibilityConstraint = (NSOption)optionMap.get(NSComponentOptions.CONSTRAIN_VISIBILITY_OPTION_KEY);
+    if(IS_DEBUGGING_OPTIONS) {
+      StringBuilder sb = new StringBuilder();
+      sb.append("NativeComponent ").append(getComponentDescription()).append(" options: ");
+      boolean isFirst = true;
+      for(Object key: optionMap.keySet()) {
+        if(isFirst) {
+          isFirst = false;
+        } else {
+          sb.append(", ");
+        }
+        Object value = optionMap.get(key);
+        if(value instanceof NSOption) {
+          sb.append(value);
+        } else {
+          sb.append(key).append('=').append(value);
+        }
+      }
+      if(isFirst) {
+        sb.append("<none>");
+      }
+      System.err.println(sb);
+    }
+    Boolean filiationType = optionMap.get(NSComponentOptions.PROXY_COMPONENT_HIERARCHY_OPTION_KEY) != null? Boolean.TRUE: null;
+    Boolean destructionTime = optionMap.get(NSComponentOptions.DESTROY_ON_FINALIZATION_OPTION_KEY) != null? Boolean.TRUE: null;
+    Boolean visibilityConstraint = optionMap.get(NSComponentOptions.CONSTRAIN_VISIBILITY_OPTION_KEY) != null? Boolean.TRUE: null;
     boolean isJNAPresent = isJNAPresent();
     if(visibilityConstraint == null) {
       if(isJNAPresent && filiationType != null) {
-        visibilityConstraint = NSComponentOptions.constrainVisibility();
+        visibilityConstraint = true;
       }
     }
     if(visibilityConstraint != null && !isJNAPresent) {
       throw new IllegalStateException("The JNA libraries are required to use the visibility constraints!");
     }
     if(destructionTime != null && filiationType == null) {
-      filiationType = NSComponentOptions.proxyComponentHierarchy();
+      filiationType = true;
     }
     if(filiationType != null) {
-      return new NativeComponentProxyPanel(this, visibilityConstraint, destructionTime, filiationType);
+      return new NativeComponentProxyPanel(this, Boolean.TRUE.equals(visibilityConstraint), Boolean.TRUE.equals(destructionTime), Boolean.TRUE.equals(filiationType));
       // If for some reasons component-based proxying has some issues, consider using the window-based proxying.
       //return new NativeComponentProxyWindow(this, visibilityConstraint, destructionTime);
     }
     if(visibilityConstraint == null) {
       return new SimpleNativeComponentHolder(this);
     }
-    return new NativeComponentProxyPanel(this, visibilityConstraint, destructionTime, filiationType);
+    return new NativeComponentProxyPanel(this, Boolean.TRUE.equals(visibilityConstraint), Boolean.TRUE.equals(destructionTime), Boolean.TRUE.equals(filiationType));
   }
   
   private static class CMN_setShellEnabled extends ControlCommandMessage {

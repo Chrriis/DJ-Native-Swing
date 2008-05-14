@@ -59,7 +59,16 @@ public class NSOption {
   
   @Override
   public String toString() {
-    return getOptionKey() + "=" + getOptionValue();
+    Object key = getOptionKey();
+    String sKey = key == this? key.getClass().getName(): key.toString();
+    Object value = getOptionValue();
+    if(value == this) {
+      if(getClass() == NSOption.class) {
+        return sKey;
+      }
+      return sKey + "=" + value.getClass().getName();
+    }
+    return sKey + "=" + value;
   }
   
 }
