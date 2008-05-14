@@ -7,7 +7,11 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.5 (xxxxxxxxxxxxxx):
 
-- JFlashPlayer allows call Flash functions on the object.
+- More debug system properties.
+- A memory leak is fixed.
+- JHTMLEditor allows custom configuration.
+- Options system for components is in place.
+- JFlashPlayer allows to call Flash functions on the object.
 - Flash demo contributed by Paulus Tuerah (www.goldenstudios.or.id)
 - NativeComponent.setEnabled(b) is added.
 - Javadoc is generated and part of the distribution.
