@@ -264,7 +264,11 @@ public class NativeInterface {
             if(index <= 0) {
               break;
             }
-            System.setProperty(line.substring(0, index).trim(), line.substring(index + 1).trim());
+            String propertyName = line.substring(0, index).trim();
+            String propertyValue = line.substring(index + 1).trim();
+            if(propertyName.startsWith("nativeswing.")) {
+              System.setProperty(propertyName, propertyValue);
+            }
           }
         }
       }
