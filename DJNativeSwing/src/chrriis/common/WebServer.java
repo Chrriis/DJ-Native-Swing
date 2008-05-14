@@ -513,9 +513,6 @@ public class WebServer {
             return;
           }
           String resourcePath = request.substring((isPostMethod? "POST ": "GET ").length(), request.length() - " HTTP/1.0".length());
-          if(DEBUG_PRINT_REQUESTS) {
-            System.err.println("Web Server " + (isPostMethod? "POST": "GET") + ": " + resourcePath);
-          }
           HTTPRequest httpRequest = new HTTPRequest(resourcePath);
           httpRequest.setPostMethod(isPostMethod);
           if(isPostMethod) {
@@ -613,8 +610,14 @@ public class WebServer {
             }
           }
           if(resourceStream_ == null) {
+            if(DEBUG_PRINT_REQUESTS) {
+              System.err.println("Web Server " + (isPostMethod? "POST": "GET") + ": " + resourcePath + " -> 404 (not found)");
+            }
             writeHTTPError(out, 404, "File Not Found.");
             return;
+          }
+          if(DEBUG_PRINT_REQUESTS) {
+            System.err.println("Web Server " + (isPostMethod? "POST": "GET") + ": " + resourcePath + " -> 200 (OK)");
           }
           BufferedInputStream resourceStream = new BufferedInputStream(resourceStream_);
           writeHTTPHeaders(out, 200, webServerContent.getContentType(), webServerContent.getContentLength(), webServerContent.getLastModified());
