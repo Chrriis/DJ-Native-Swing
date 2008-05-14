@@ -76,7 +76,15 @@ There is of course some access to the CVS tree, from the Sourceforge website.
 For the sources of the SWT libraries, check the eclipse repositories. 
 
 
-6. How to contribute?
+6. Troubleshooting?
+
+In case of a problem with the framework or some components, it is possible to
+activate certain system properties in order to get more information.
+
+The list of properties can be found in SystemProperties.txt.
+
+
+7. How to contribute?
 
 If you are interested in helping the project, simply send me an e-mail. Friendly
 e-mails are always welcome too!

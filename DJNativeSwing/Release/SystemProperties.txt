@@ -1,5 +1,8 @@
 Here are the system properties recognized by the DJ Native Swing framework.
 
+Note that most of these properties need to be defined before the classes that
+are using them get loaded.
+
 --------------------------------------------------------------------------------
 
 * nativeswing.interface.port

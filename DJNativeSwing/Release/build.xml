@@ -9,7 +9,7 @@
     <zip duplicate="preserve" destfile="Release/DJNativeSwing.zip">
       <!-- DJNativeSwing documents -->
       <zipfileset dir="." includes="licence.txt"/>
-      <zipfileset dir="Release" includes="readme.txt,changelog.txt"/>
+      <zipfileset dir="Release" includes="readme.txt,changelog.txt,SystemProperties.txt"/>
       <!-- DJNativeSwing binaries -->
       <zipfileset dir="../DJNativeSwing" includes="DJNativeSwing.jar,DJNativeSwingDemo.jar"/>
       <zipfileset dir="../DJNativeSwing/lib" prefix="lib"/>
