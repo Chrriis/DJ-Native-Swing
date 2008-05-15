@@ -5,7 +5,7 @@ Licence terms: LGPL (see licence.txt)
 
 ---------------------------------- Change log ----------------------------------
 
-* Version 0.9.5 (xxxxxxxxxxxxxx):
+* Version 0.9.5 (May 15, 2008):
 
 - More debug system properties.
 - A memory leak is fixed.
@@ -17,7 +17,8 @@ Licence terms: LGPL (see licence.txt)
 - Javadoc is generated and part of the distribution.
 - Calls to get values from browser are now typed (not just Strings).
 - NativeComponent.createBackBuffer() is added.
-- JMultiMediaPlayer API is completely reviewed.
+- Peer VM has a proper lifecycle.
+- JMultiMediaPlayer API is completely reviewed. Now JWMediaPlayer.
 - Ole integration is greatly simplified using the OleNativeComponent superclass.
 - Possibility to paint a native component to an image.
 - JFlashPlayer and JVLCPlayer can load files from the classpath.
