@@ -65,7 +65,7 @@ public class DemoExampleDefinitionLoader {
         new Example("Simple Example", SimpleHTMLEditorExample.class, "Graphically edit some HTML, get and set the HTML content.", true),
         new Example("Custom Configuration", CustomConfiguration.class, "Modify default behaviors with custom configuration script.", true),
     }));
-    exampleGroupList.add(new ExampleGroup("JMultiMediaPlayer (win32)", new Example[] {
+    exampleGroupList.add(new ExampleGroup("JWMediaPlayer (win32)", new Example[] {
         new Example("Simple Example", SimpleWMediaPlayerExample.class, "Load a movie/sound file to an embedded multimedia player.", true, System.getProperty("os.name").startsWith("Windows"), "This example is only available on a Windows operating system."),
     }));
     exampleGroupList.add(new ExampleGroup("Additional Features", new Example[] {
