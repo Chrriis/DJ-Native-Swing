@@ -266,7 +266,7 @@ public class Utils {
       }
       sb.append(crumbList.get(i));
     }
-    if(path.endsWith("/")) {
+    if(path.length() > 1 && path.endsWith("/")) {
       sb.append('/');
     }
     return sb.toString();
