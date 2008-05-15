@@ -644,7 +644,8 @@ class NativeWebBrowser extends NativeComponent {
       return;
     }
     Menu menu = new Menu(browser.getShell(), SWT.POP_UP);
-    ResourceBundle bundle = ResourceBundle.getBundle(NativeWebBrowser.class.getPackage().getName().replace('.', '/') + "/resource/WebBrowser");
+    String className = NativeWebBrowser.class.getName();
+    ResourceBundle bundle = ResourceBundle.getBundle(className.substring(0, className.lastIndexOf('.')).replace('.', '/') + "/resource/WebBrowser");
     final MenuItem backMenuItem = new MenuItem(menu, SWT.PUSH);
     backMenuItem.setText(bundle.getString("SystemMenuBack"));
     backMenuItem.setImage(new Image(browser.getDisplay(), NativeWebBrowser.class.getResourceAsStream(bundle.getString("SystemMenuBackIcon"))));
