@@ -65,6 +65,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import com.sun.jna.Native;
+
 import chrriis.common.ObjectRegistry;
 import chrriis.common.Utils;
 
@@ -361,13 +363,13 @@ public abstract class NativeComponent extends Canvas {
         shellCreationMethod = Shell.class.getMethod(SWT.getPlatform() + "_new", Display.class, int.class); 
       } catch(Exception e) {}
       if(shellCreationMethod != null) {
-        return (Shell)shellCreationMethod.invoke(null, NativeInterface.getDisplay(), handle);
+        return (Shell)shellCreationMethod.invoke(null, NativeInterface.getDisplay(), ((Number)handle).intValue());
       }
       try {
         shellCreationMethod = Shell.class.getMethod(SWT.getPlatform() + "_new", Display.class, long.class); 
       } catch(Exception e) {}
       if(shellCreationMethod != null) {
-        return (Shell)shellCreationMethod.invoke(null, NativeInterface.getDisplay(), handle);
+        return (Shell)shellCreationMethod.invoke(null, NativeInterface.getDisplay(), ((Number)handle).longValue());
       }
       Constructor<Shell> shellConstructor = null;
       try {
@@ -375,14 +377,14 @@ public abstract class NativeComponent extends Canvas {
       } catch(Exception e) {}
       if(shellConstructor != null) {
         shellConstructor.setAccessible(true);
-        return shellConstructor.newInstance(NativeInterface.getDisplay(), null, SWT.NO_TRIM, handle);
+        return shellConstructor.newInstance(NativeInterface.getDisplay(), null, SWT.NO_TRIM, ((Number)handle).intValue());
       }
       try {
         shellConstructor = Shell.class.getConstructor(Display.class, Shell.class, int.class, long.class); 
       } catch(Exception e) {}
       if(shellConstructor != null) {
         shellConstructor.setAccessible(true);
-        return shellConstructor.newInstance(NativeInterface.getDisplay(), null, SWT.NO_TRIM, handle);
+        return shellConstructor.newInstance(NativeInterface.getDisplay(), null, SWT.NO_TRIM, ((Number)handle).longValue());
       }
       throw new IllegalStateException("Failed to create a Shell!");
     }
@@ -619,7 +621,11 @@ public abstract class NativeComponent extends Canvas {
       }
       return getAWTHandleMethod.invoke(null, this);
     } catch(Exception e) {
-      e.printStackTrace();
+      try {
+        return Native.getComponentID(this);
+      } catch(Exception ex) {
+        ex.printStackTrace();
+      }
     }
     return 0;
   }
