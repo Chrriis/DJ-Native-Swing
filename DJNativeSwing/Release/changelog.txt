@@ -5,6 +5,11 @@ Licence terms: LGPL (see licence.txt)
 
 ---------------------------------- Change log ----------------------------------
 
+* Version 0.9.6 (xxxxxxxxxxxx):
+
+- Charset is forced to UTF-8 in the various HTML components.
+
+
 * Version 0.9.5 (May 15, 2008):
 
 - More debug system properties.

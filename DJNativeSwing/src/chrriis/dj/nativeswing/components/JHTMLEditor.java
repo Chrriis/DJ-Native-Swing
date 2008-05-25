@@ -159,6 +159,7 @@ public class JHTMLEditor extends NSPanelComponent {
           String content =
             "<html>" + LS +
             "  <head>" + LS +
+            "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>" + LS +
             "    <style type=\"text/css\">" + LS +
             "      body, form {margin: 0; padding: 0; overflow: auto;}" + LS +
             "    </style>" + LS +

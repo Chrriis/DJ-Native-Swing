@@ -157,6 +157,7 @@ public abstract class WebBrowserObject {
           String content =
             "<html>" + LS +
             "  <head>" + LS +
+            "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>" + LS +
             "    <script language=\"JavaScript\" type=\"text/javascript\">" + LS +
             "      <!--" + LS +
             "      function sendCommand(command) {" + LS +
