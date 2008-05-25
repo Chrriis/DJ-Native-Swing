@@ -172,7 +172,7 @@ public class NativeInterface {
     canvasList.remove(canvas);
   }
   
-  private static Set<Window> windowSet;
+  private static List<Window> windowList;
   
   static Window[] getWindows() {
     if(Utils.IS_JAVA_6_OR_GREATER) {
@@ -184,7 +184,7 @@ public class NativeInterface {
       }
       return windowList.toArray(new Window[0]);
     }
-    return windowSet == null? new Window[0]: windowSet.toArray(new Window[0]);
+    return windowList == null? new Window[0]: windowList.toArray(new Window[0]);
   }
   
   static boolean isAlive() {
@@ -277,6 +277,173 @@ public class NativeInterface {
     }
   }
   
+  private static class NIAWTEventListener implements AWTEventListener {
+    
+    private List<Dialog> dialogList = new ArrayList<Dialog>();
+    private volatile Set<Window> blockedWindowSet = new HashSet<Window>();
+    
+    private static boolean isDescendant(Window window, Window ancestorWindow) {
+      for(; window != null; window=window.getOwner()) {
+        if(window == ancestorWindow) {
+          return true;
+        }
+      }
+      return false;
+    }
+    
+    private void computeBlockedDialogs() {
+      blockedWindowSet.clear();
+      Window[] windows = getWindows();
+      Dialog applicationModalDialog = null;
+      for(Dialog dialog: dialogList) {
+        if(dialog.isVisible()) {
+          boolean isApplicationModal = false;
+          if(Utils.IS_JAVA_6_OR_GREATER) {
+            switch(dialog.getModalityType()) {
+              case APPLICATION_MODAL:
+              case TOOLKIT_MODAL:
+                isApplicationModal = true;
+                break;
+            }
+          } else if(dialog.isModal()) {
+            isApplicationModal = true;
+          }
+          if(isApplicationModal) {
+            if(applicationModalDialog != null) {
+              if(isDescendant(dialog, applicationModalDialog)) {
+                applicationModalDialog = dialog;
+              }
+            } else {
+              applicationModalDialog = dialog;
+            }
+          }
+        }
+      }
+      if(applicationModalDialog != null) {
+        for(Window window: windows) {
+          if(window != applicationModalDialog && !isDescendant(window, applicationModalDialog)) {
+            boolean isIncluded = true;
+            if(Utils.IS_JAVA_6_OR_GREATER) {
+              switch(window.getModalExclusionType()) {
+                case APPLICATION_EXCLUDE:
+                case TOOLKIT_EXCLUDE:
+                  isIncluded = false;
+                  break;
+              }
+            }
+            if(isIncluded) {
+              blockedWindowSet.add(window);
+            }
+          }
+        }
+      }
+      if(Utils.IS_JAVA_6_OR_GREATER) {
+        // Consider that last in the list block previous ones.
+        for(int i=dialogList.size()-1; i>=0; i--) {
+          Dialog dialog = dialogList.get(i);
+          if(dialog.isVisible() && !blockedWindowSet.contains(dialog)) {
+            switch(dialog.getModalityType()) {
+              case DOCUMENT_MODAL:
+                // Block all windows that have same owner but are not a descendant of this dialog.
+                Window hierarchyOwnerWindow = dialog.getOwner();
+                for(Window owner = hierarchyOwnerWindow; owner != null; owner = owner.getOwner()) {
+                  hierarchyOwnerWindow = owner;
+                }
+                if(hierarchyOwnerWindow != null) {
+                  for(Window window: windows) {
+                    if(window != dialog && !isDescendant(window, dialog) && (window == hierarchyOwnerWindow || isDescendant(window, hierarchyOwnerWindow))) {
+                      blockedWindowSet.add(window);
+                    }
+                  }
+                }
+                break;
+            }
+          }
+        }
+      }
+    }
+    
+    private void adjustNativeComponents() {
+      if(canvasList == null) {
+        return;
+      }
+      for(int i=canvasList.size()-1; i>=0; i--) {
+        final Canvas canvas = canvasList.get(i);
+        Component c = canvas;
+        if(canvas instanceof NativeComponent) {
+          Component componentProxy = ((NativeComponent)canvas).getNativeComponentProxy();
+          if(componentProxy != null) {
+            c = componentProxy;
+          }
+        }
+        Window embedderWindowAncestor = SwingUtilities.getWindowAncestor(c);
+        boolean isBlocked = blockedWindowSet.contains(embedderWindowAncestor);
+        final boolean isShowing = c.isShowing();
+        if(canvas instanceof NativeComponent) {
+          ((NativeComponent)canvas).setShellEnabled(!isBlocked && isShowing);
+        }
+        boolean hasFocus = canvas.hasFocus();
+        if(!isShowing && hasFocus) {
+          canvas.transferFocus();
+        }
+      }
+    }
+    
+    public void eventDispatched(AWTEvent e) {
+      boolean isAdjusting = false;
+      switch(e.getID()) {
+        case ComponentEvent.COMPONENT_SHOWN:
+        case ComponentEvent.COMPONENT_HIDDEN:
+          isAdjusting = true;
+          break;
+      }
+      if(!Utils.IS_JAVA_6_OR_GREATER && e.getSource() instanceof Window) {
+        if(windowList == null) {
+          windowList = new ArrayList<Window>();
+        }
+        switch(e.getID()) {
+          case WindowEvent.WINDOW_OPENED:
+          case ComponentEvent.COMPONENT_SHOWN:
+            Window w = (Window)e.getSource();
+            windowList.remove(w);
+            windowList.add(w);
+            break;
+          case WindowEvent.WINDOW_CLOSED:
+          case ComponentEvent.COMPONENT_HIDDEN:
+            windowList.remove(e.getSource());
+            break;
+        }
+      }
+      if(e.getSource() instanceof Dialog) {
+        switch(e.getID()) {
+          case WindowEvent.WINDOW_OPENED:
+          case ComponentEvent.COMPONENT_SHOWN:
+            Dialog d = (Dialog)e.getSource();
+            dialogList.remove(d);
+            dialogList.add(d);
+            break;
+          case WindowEvent.WINDOW_CLOSED:
+          case ComponentEvent.COMPONENT_HIDDEN:
+            dialogList.remove(e.getSource());
+            break;
+        }
+        switch(e.getID()) {
+          case WindowEvent.WINDOW_OPENED:
+          case WindowEvent.WINDOW_CLOSED:
+          case ComponentEvent.COMPONENT_SHOWN:
+          case ComponentEvent.COMPONENT_HIDDEN:
+            computeBlockedDialogs();
+            isAdjusting = true;
+            break;
+        }
+      }
+      if(isAdjusting) {
+        adjustNativeComponents();
+      }
+    }
+    
+  }
+  
   /**
    * Initialize the native interface, but do not open it. This method sets some properties and registers a few listeners to keep track of certain states necessary for the good functioning of the framework.<br/>
    * This method is automatically called if open() is used. It should be called early in the program, the best place being as the first call in the main method.
@@ -295,89 +462,7 @@ public class NativeInterface {
     // We use our own HW forcing, so we disable the one from JNA
     System.setProperty("jna.force_hw_popups", "false");
     // Create window monitor
-    Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
-      protected Set<Dialog> dialogSet = new HashSet<Dialog>();
-      protected volatile Set<Window> blockedWindowSet = new HashSet<Window>();
-      protected void adjustNativeComponents() {
-        if(canvasList == null) {
-          return;
-        }
-        for(int i=canvasList.size()-1; i>=0; i--) {
-          final Canvas canvas = canvasList.get(i);
-          Component c = canvas;
-          if(canvas instanceof NativeComponent) {
-            Component componentProxy = ((NativeComponent)canvas).getNativeComponentProxy();
-            if(componentProxy != null) {
-              c = componentProxy;
-            }
-          }
-          Window embedderWindowAncestor = SwingUtilities.getWindowAncestor(c);
-          boolean isBlocked = blockedWindowSet.contains(embedderWindowAncestor);
-          final boolean isShowing = c.isShowing();
-          if(canvas instanceof NativeComponent) {
-            ((NativeComponent)canvas).setShellEnabled(!isBlocked && isShowing);
-          }
-          boolean hasFocus = canvas.hasFocus();
-          if(!isShowing && hasFocus) {
-            canvas.transferFocus();
-          }
-        }
-      }
-      public void eventDispatched(AWTEvent e) {
-        boolean isAdjusting = false;
-        switch(e.getID()) {
-          case ComponentEvent.COMPONENT_SHOWN:
-          case ComponentEvent.COMPONENT_HIDDEN:
-            isAdjusting = true;
-            break;
-        }
-        if(!Utils.IS_JAVA_6_OR_GREATER && e.getSource() instanceof Window) {
-          if(windowSet == null) {
-            windowSet = new HashSet<Window>();
-          }
-          switch(e.getID()) {
-            case WindowEvent.WINDOW_OPENED:
-            case ComponentEvent.COMPONENT_SHOWN:
-              windowSet.add((Window)e.getSource());
-              break;
-            case WindowEvent.WINDOW_CLOSED:
-            case ComponentEvent.COMPONENT_HIDDEN:
-              windowSet.remove(e.getSource());
-              break;
-          }
-        }
-        if(e.getSource() instanceof Dialog) {
-          switch(e.getID()) {
-            case WindowEvent.WINDOW_OPENED:
-            case ComponentEvent.COMPONENT_SHOWN:
-              dialogSet.add((Dialog)e.getSource());
-              break;
-            case WindowEvent.WINDOW_CLOSED:
-            case ComponentEvent.COMPONENT_HIDDEN:
-              dialogSet.remove(e.getSource());
-              break;
-          }
-          switch(e.getID()) {
-            case WindowEvent.WINDOW_OPENED:
-            case WindowEvent.WINDOW_CLOSED:
-            case ComponentEvent.COMPONENT_SHOWN:
-            case ComponentEvent.COMPONENT_HIDDEN:
-              blockedWindowSet.clear();
-              for(Dialog dialog: dialogSet) {
-                // TODO: consider modal excluded and other modality types than simple parent blocking.
-                if(dialog.isVisible() && dialog.isModal()) {
-                  blockedWindowSet.add(dialog.getOwner());
-                }
-              }
-              isAdjusting = true;
-              break;
-          }
-        }
-        if(isAdjusting) {
-          adjustNativeComponents();
-        }
-      }
-    }, WindowEvent.WINDOW_EVENT_MASK | ComponentEvent.COMPONENT_EVENT_MASK);
+    Toolkit.getDefaultToolkit().addAWTEventListener(new NIAWTEventListener(), WindowEvent.WINDOW_EVENT_MASK | ComponentEvent.COMPONENT_EVENT_MASK);
     isInitialized = true;
     try {
       for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
