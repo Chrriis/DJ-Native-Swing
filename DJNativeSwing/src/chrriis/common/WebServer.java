@@ -300,14 +300,22 @@ public class WebServer {
       extensionToMimeTypeMap.put("vcf", "text/x-vcard");
       extensionToMimeTypeMap.put("vrml", "x-world/x-vrml");
       extensionToMimeTypeMap.put("wav", "audio/x-wav");
+      extensionToMimeTypeMap.put("wax", "audio/x-ms-wax");
       extensionToMimeTypeMap.put("wcm", "application/vnd.ms-works");
       extensionToMimeTypeMap.put("wdb", "application/vnd.ms-works");
       extensionToMimeTypeMap.put("wks", "application/vnd.ms-works");
+      extensionToMimeTypeMap.put("wm", "video/x-ms-wm");
+      extensionToMimeTypeMap.put("wma", "audio/x-ms-wma");
+      extensionToMimeTypeMap.put("wmd", "application/x-ms-wmd");
       extensionToMimeTypeMap.put("wmf", "application/x-msmetafile");
+      extensionToMimeTypeMap.put("wmv", "audio/x-ms-wmv");
+      extensionToMimeTypeMap.put("wmx", "video/x-ms-wmx");
+      extensionToMimeTypeMap.put("wmz", "application/x-ms-wmz");
       extensionToMimeTypeMap.put("wps", "application/vnd.ms-works");
       extensionToMimeTypeMap.put("wri", "application/x-mswrite");
       extensionToMimeTypeMap.put("wrl", "x-world/x-vrml");
       extensionToMimeTypeMap.put("wrz", "x-world/x-vrml");
+      extensionToMimeTypeMap.put("wvx", "video/x-ms-wvx");
       extensionToMimeTypeMap.put("xaf", "x-world/x-vrml");
       extensionToMimeTypeMap.put("xbm", "image/x-xbitmap");
       extensionToMimeTypeMap.put("xla", "application/vnd.ms-excel");
@@ -576,7 +584,11 @@ public class WebServer {
               String dataContent;
               if(contentLength > 0) {
                 char[] chars = new char[contentLength];
-                reader.read(chars);
+                int offset = 0;
+                while(chars.length > offset) {
+                  int n = reader.read(chars, offset, chars.length - offset);
+                  offset = n == -1? chars.length: offset + n;
+                }
                 dataContent = new String(chars);
               } else {
                 StringBuilder sb = new StringBuilder();

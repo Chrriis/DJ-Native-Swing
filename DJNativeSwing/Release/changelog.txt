@@ -7,6 +7,8 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.6 (xxxxxxxxxxxx):
 
+- Window opening in web browser is delayed a bit more for slow computers.
+- WebServer data was cut when content was long. This is fixed.
 - Java 6 modality is implemented.
 - Charset is forced to UTF-8 in the various HTML components.
 
