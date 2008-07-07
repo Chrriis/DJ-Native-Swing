@@ -159,7 +159,7 @@ class NativeWebBrowser extends NativeComponent {
         @Override
         public void run() {
           try {
-            sleep(200);
+            sleep(600);
           } catch(Exception e) {
           }
           SwingUtilities.invokeLater(new Runnable() {
