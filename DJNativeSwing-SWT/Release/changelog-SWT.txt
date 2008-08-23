@@ -10,6 +10,7 @@ Licence terms: LGPL (see licence.txt)
 - Framework is split from SWT-based implementation.
 - Window opening in web browser is delayed a bit more for slow computers.
 - Charset is forced to UTF-8 in the various HTML components.
+- Libraries are updated: FCKeditor 2.3.6, jna 3.0.5, SWT 3.5M1.
 
 
 * Version 0.9.5 (May 15, 2008):

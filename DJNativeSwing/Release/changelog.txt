@@ -11,3 +11,4 @@ Licence terms: LGPL (see licence.txt)
 - WebServer data was cut when content was long. This is fixed.
 - Java 6 modality is implemented.
 - A clipping problem was fixed.
+- Libraries are updated: jna 3.0.5.
