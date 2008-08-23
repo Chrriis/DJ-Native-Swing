@@ -17,8 +17,10 @@ import com.sun.jna.Native;
 
 /** Sample implementation of C library access. */
 public interface CLibrary extends Library {
+    
+    CLibrary INSTANCE = (CLibrary)
+        Native.loadLibrary((System.getProperty("os.name").startsWith("Windows")
+                            ? "msvcrt" : "c"), CLibrary.class);
 
-  CLibrary INSTANCE = (CLibrary) Native.loadLibrary((System.getProperty("os.name").startsWith("Windows") ? "msvcrt" : "c"), CLibrary.class);
-
-  int atol(String s);
+    int atol(String s);
 }
