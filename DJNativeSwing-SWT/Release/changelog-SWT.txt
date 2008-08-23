@@ -1,0 +1,87 @@
+The DJ project - NativeSwing
+http://djproject.sourceforge.net
+Christopher Deckers (chrriis@nextencia.net)
+Licence terms: LGPL (see licence.txt)
+
+---------------------------------- Change log ----------------------------------
+
+* Version 0.9.6 (xxxxxxxxxxxx):
+
+- Framework is split from SWT-based implementation.
+- Window opening in web browser is delayed a bit more for slow computers.
+- Charset is forced to UTF-8 in the various HTML components.
+
+
+* Version 0.9.5 (May 15, 2008):
+
+- More debug system properties.
+- A memory leak is fixed.
+- JHTMLEditor allows custom configuration.
+- Options system for components is in place.
+- JFlashPlayer allows to call Flash functions on the object.
+- Flash demo contributed by Paulus Tuerah (www.goldenstudios.or.id)
+- NativeComponent.setEnabled(b) is added.
+- Javadoc is generated and part of the distribution.
+- Calls to get values from browser are now typed (not just Strings).
+- NativeComponent.createBackBuffer() is added.
+- Peer VM has a proper lifecycle.
+- JMultiMediaPlayer API is completely reviewed. Now JWMediaPlayer.
+- Ole integration is greatly simplified using the OleNativeComponent superclass.
+- Possibility to paint a native component to an image.
+- JFlashPlayer and JVLCPlayer can load files from the classpath.
+- JFlashPlayer.setURL() and JVLCPlayer.setURL() are changed to load().
+- initializeNativePeer() method is exposed.
+- JFlashPlayer allows to add custom JS.
+- Lightweight popups are handled differently.
+- sendCommand supports parameters.
+- Browser-based components have a postCommand() call.
+- Destroying and re-init the native interface is supported.
+- NativeComponent allows to initializeNativePeer().
+- getNativeComponent() returns a NativeComponent.
+
+
+* Version 0.9.4 (March 11, 2008):
+
+- JHTMLEditor is added.
+- JVLCPlayer component is added.
+- Web browser events API is modified to fix window referencing in JS.
+- Closing a browser window now disposes it.
+- Web browser "new window" menu is implemented.
+- Complete change of the internal native communication: dual process.
+- The L&F is not set anymore (use the corresponding method to apply it).
+- Browser components display messages on failure.
+- Flash player uses a proxy for local files to bypass security restrictions.
+- Flash player allows to set parameters and variables.
+
+
+* Version 0.9.3 (February 8, 2008):
+
+- Constraining the visibility of native components is possible (requires JNA).
+- Proxied filiation of native components allows re-parenting and Z-order change.
+- With proxied filiation, a destruction mode allows to destroy on finalization.
+- Explicit dispose() is added, for the finalization mode.
+- Better cleanup at exit time fixes some freezes (observed with Ole).
+- "default" and "next instance" options to tweak native components' behaviors.
+- Web Server is improved.
+- Convenient main is enhanced to use a system property.
+- Default size of native components is fixed.
+
+
+* Version 0.9.2 (January 15, 2008):
+
+- Code cleanup of unused classes.
+- Possibility to clear all web browser session cookies.
+- JFlashPlayer.getVariable(s) now waits for a result (maximum 1 second).
+- Modified resource access to bypass local file restrictions (web server).
+- URLs cannot be null and now throws an exception immediately to say so.
+- Web browser line comments are removed internally to work with Mozilla.
+- A component that is disposed and then recreated throws a meaningful exception.
+
+
+* Version 0.9.1 (January 6, 2008):
+
+- Web browser and Flash Player are implemented.
+- Multi Media Player is implemented on Windows using Ole controls.
+- Utility to access file associations is implemented.
+- All threading and chains of execution (synchronous and asynchronous callbacks)
+  are implemented.

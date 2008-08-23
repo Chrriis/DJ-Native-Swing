@@ -20,10 +20,10 @@ import chrriis.common.UIUtils;
  */
 class BackBufferManager {
 
-  private NativeComponent nativeComponent;
+  private NativeComponentWrapper nativeComponent;
   private Component paintingComponent;
   
-  public BackBufferManager(NativeComponent nativeComponent, Component paintingComponent) {
+  public BackBufferManager(NativeComponentWrapper nativeComponent, Component paintingComponent) {
     this.nativeComponent = nativeComponent;
     this.paintingComponent = paintingComponent;
   }
@@ -81,7 +81,7 @@ class BackBufferManager {
     } else {
       image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
     }
-    nativeComponent.paintComponent(image, rectangles);
+    nativeComponent.paintNativeComponent(image, rectangles);
     synchronized(backBufferLock) {
       if(backBuffer != null && backBuffer != image) {
         synchronized(backBuffer) {
@@ -93,7 +93,7 @@ class BackBufferManager {
       }
       this.backBuffer = image;
     }
-    if(paintingComponent != nativeComponent) {
+    if(paintingComponent != nativeComponent.getNativeComponent()) {
       Rectangle bounds = UIUtils.getBounds(rectangles);
       paintingComponent.repaint(bounds.x, bounds.y, bounds.width, bounds.height);
     }

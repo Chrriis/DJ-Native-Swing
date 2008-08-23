@@ -14,6 +14,17 @@ package chrriis.dj.nativeswing;
  */
 public abstract class NSComponentOptions {
 
+  static final String DEACTIVATE_NATIVE_INTEGRATION_OPTION_KEY = "Deactivate Native Integration";
+  private static final NSOption DEACTIVATE_NATIVE_INTEGRATION_OPTION = new NSOption(DEACTIVATE_NATIVE_INTEGRATION_OPTION_KEY);
+  
+  /**
+   * Create an option to deactivate the native integration provided by the library. This option can be useful when the library is used but when its handling should be turned off for certain call paths.
+   * @return the option to deactivate the native integration.
+   */
+  public static NSOption deactivateNativeIntegration() {
+    return DEACTIVATE_NATIVE_INTEGRATION_OPTION;
+  }
+  
   static final String DESTROY_ON_FINALIZATION_OPTION_KEY = "Destroy On Finalization";
   private static final NSOption DESTROY_ON_FINALIZATION_OPTION = new NSOption(DESTROY_ON_FINALIZATION_OPTION_KEY);
   

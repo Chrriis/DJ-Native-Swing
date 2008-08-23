@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<project name="DJNativeSwing Build Script" default="createRelease" basedir="..">
+
+  <target name="createRelease" description="Create the release">
+    <delete file="DJNativeSwing-SWT.zip"/>
+    <ant antfile="documentation/build.xml" inheritall="false"/>
+    <ant antfile="../DJNativeSwing/build.xml" inheritall="false"/>
+    <ant antfile="build.xml" inheritall="false"/>
+    <ant antfile="../DJNativeSwing-SWTDemo/build.xml" inheritall="false"/>
+    <zip duplicate="preserve" destfile="Release/DJNativeSwing-SWT.zip">
+      <!-- DJNativeSwing documents -->
+      <zipfileset dir="." includes="licence.txt"/>
+      <zipfileset dir="../DJNativeSwing/Release" includes="readme.txt,changelog.txt,SystemProperties.txt"/>
+      <zipfileset dir="Release" includes="readme-SWT.txt,changelog-SWT.txt,SystemProperties-SWT.txt"/>
+      <!-- DJNativeSwing binaries -->
+      <zipfileset dir="../DJNativeSwing-SWT" includes="DJNativeSwing.jar,DJNativeSwing-SWT.jar,DJNativeSwing-SWTDemo.jar"/>
+      <zipfileset dir="../DJNativeSwing/lib" prefix="lib"/>
+      <zipfileset dir="../DJNativeSwing-SWT/lib" prefix="lib"/>
+      <!-- DJNativeSwingDemo sources -->
+      <zipfileset dir="../DJNativeSwing-SWTDemo/src" prefix="src/DJNativeSwing-SWTDemo"/>
+      <!-- DJNativeSwing sources -->
+      <zipfileset dir="../DJNativeSwing/src" prefix="src/DJNativeSwing"/>
+      <zipfileset dir="../DJNativeSwing-SWT/src" prefix="src/DJNativeSwing-SWT"/>
+      <zipfileset dir="../DJNativeSwing-SWT/win32" prefix="src/DJNativeSwing-SWT"/>
+      <!-- DJNativeSwing documentation -->
+      <zipfileset dir="documentation/javadoc" prefix="api"/>
+    </zip>
+  </target>
+
+</project>

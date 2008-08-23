@@ -2,14 +2,14 @@
 <project name="Build Script" default="createJar">
 
   <target name="createJar" description="Create the Jar files">
-    <delete file="../DJNativeSwing/DJNativeSwingDemo.jar"/>
-    <jar duplicate="preserve" destfile="../DJNativeSwing/DJNativeSwingDemo.jar">
+    <delete file="../DJNativeSwing-SWT/DJNativeSwing-SWTDemo.jar"/>
+    <jar duplicate="preserve" destfile="../DJNativeSwing-SWT/DJNativeSwing-SWTDemo.jar">
 		  <manifest>
-			  <attribute name="Class-Path" value="DJNativeSwing.jar swt.jar lib/swt/swt-3.4M7-win32-win32-x86.jar lib/jna/jna.jar lib/jna/jna_WindowUtils.jar lib/fckeditor/FCKeditor_2.6.zip"/>
-			  <attribute name="Main-Class" value="chrriis.dj.nativeswing.demo.DemoFrame"/>
+			  <attribute name="Class-Path" value="DJNativeSwing-SWT.jar DJNativeSwing.jar swt.jar lib/swt/swt-3.5M1-win32-win32-x86.jar lib/jna/jna.jar lib/jna/jna_WindowUtils.jar lib/fckeditor/FCKeditor_2.6.3.zip"/>
+			  <attribute name="Main-Class" value="chrriis.dj.nativeswing.swtimpl.demo.DemoFrame"/>
 		  </manifest>
 	    <fileset dir="bin"/>
-      <zipfileset dir="src" prefix="src/" includes="chrriis/dj/nativeswing/demo/examples/**/*.java"/>
+      <zipfileset dir="src" prefix="src/" includes="chrriis/dj/nativeswing/swtimpl/demo/examples/**/*.java"/>
 		</jar>
   </target>
 

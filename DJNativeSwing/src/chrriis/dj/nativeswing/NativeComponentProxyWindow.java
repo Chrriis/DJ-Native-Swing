@@ -34,7 +34,7 @@ import javax.swing.JInternalFrame;
 import javax.swing.SwingUtilities;
 
 import chrriis.common.Utils;
-import chrriis.dj.nativeswing.NativeComponent.SimpleNativeComponentHolder;
+import chrriis.dj.nativeswing.NativeComponentWrapper.SimpleNativeComponentHolder;
 
 import com.sun.jna.examples.WindowUtils;
 
@@ -49,8 +49,13 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
   
   private static AWTEventListener focusAdjustmentEventListener = new AWTEventListener() {
     public void eventDispatched(AWTEvent e) {
-      if(e.getSource() instanceof NativeComponent) {
-        return;
+      Object source = e.getSource();
+      if(source instanceof Component && ((Component)source).isLightweight()) {
+        for(NativeComponentWrapper nc: NativeSwing.getNativeComponentWrappers()) {
+          if(nc.getNativeComponent() == source) {
+            return;
+          }
+        }
       }
       switch (e.getID()) {
         case MouseEvent.MOUSE_ENTERED:
@@ -67,7 +72,7 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
     }
   };
 
-  protected NativeComponentProxyWindow(NativeComponent nativeComponent, boolean isVisibilityConstrained, boolean isDestructionOnFinalization) {
+  protected NativeComponentProxyWindow(NativeComponentWrapper nativeComponent, boolean isVisibilityConstrained, boolean isDestructionOnFinalization) {
     super(nativeComponent, isVisibilityConstrained, isDestructionOnFinalization);
     addFocusListener(new FocusAdapter() {
       @Override
@@ -78,7 +83,7 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
         if(!window.isFocused()) {
           window.toFront();
         }
-        NativeComponentProxyWindow.this.nativeComponent.requestFocus();
+        NativeComponentProxyWindow.this.nativeComponentWrapper.getNativeComponent().requestFocus();
       }
     });
   }
@@ -115,7 +120,7 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
       }
 //      System.err.println(isNonFocusable + ", " + nativeComponentEmbedder.isFocusOwner() + ", " + nativeComponentEmbedder.nativeComponent.isFocusOwner());
 //      System.err.println((!isNonFocusable || nativeComponentEmbedder.isFocusOwner()) && super.getFocusableWindowState());
-      return (!isFocusBlocked || nativeComponentEmbedder.isFocusOwner() || nativeComponentEmbedder.nativeComponent.isFocusOwner());
+      return (!isFocusBlocked || nativeComponentEmbedder.isFocusOwner() || nativeComponentEmbedder.nativeComponentWrapper.getNativeComponent().isFocusOwner());
     }
   }
   
@@ -179,7 +184,7 @@ class NativeComponentProxyWindow extends NativeComponentProxy {
       }
     }
     window.addWindowFocusListener(new NWindowFocusListener(this));
-    window.getContentPane().add(new SimpleNativeComponentHolder(nativeComponent), BorderLayout.CENTER);
+    window.getContentPane().add(new SimpleNativeComponentHolder(nativeComponentWrapper), BorderLayout.CENTER);
     return window;
   }
   

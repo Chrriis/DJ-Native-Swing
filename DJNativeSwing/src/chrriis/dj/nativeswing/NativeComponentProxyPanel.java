@@ -28,7 +28,7 @@ import javax.swing.JLayeredPane;
 import javax.swing.RootPaneContainer;
 import javax.swing.SwingUtilities;
 
-import chrriis.dj.nativeswing.NativeComponent.NativeComponentHolder;
+import chrriis.dj.nativeswing.NativeComponentWrapper.NativeComponentHolder;
 
 import com.sun.jna.examples.WindowUtils;
 
@@ -40,14 +40,14 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
 
   private boolean isProxiedFiliation;
 
-  protected NativeComponentProxyPanel(NativeComponent nativeComponent, boolean isVisibilityConstrained, boolean isDestructionOnFinalization, boolean isProxiedFiliation) {
+  protected NativeComponentProxyPanel(NativeComponentWrapper nativeComponent, boolean isVisibilityConstrained, boolean isDestructionOnFinalization, boolean isProxiedFiliation) {
     super(nativeComponent, isVisibilityConstrained, isDestructionOnFinalization);
     setLayout(new BorderLayout(0, 0));
     this.isProxiedFiliation = isProxiedFiliation;
     addFocusListener(new FocusAdapter() {
       @Override
       public void focusGained(FocusEvent e) {
-        NativeComponentProxyPanel.this.nativeComponent.requestFocus();
+        NativeComponentProxyPanel.this.nativeComponentWrapper.getNativeComponent().requestFocus();
       }
     });
   }
@@ -112,20 +112,30 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
   @Override
   protected Component createPeer() {
     panel = new EmbeddedPanel();
-    panel.add(nativeComponent, BorderLayout.CENTER);
+    panel.add(nativeComponentWrapper.getNativeComponent(), BorderLayout.CENTER);
     return panel;
   }
   
   @Override
   protected void connectPeer() {
-    addHierarchyBoundsListener(hierarchyBoundsListener);
-    nativeComponent.addMouseListener(mouseListener);
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        addHierarchyBoundsListener(hierarchyBoundsListener);
+        adjustPeerBounds();
+      }
+    });
+    nativeComponentWrapper.getNativeComponent().addMouseListener(mouseListener);
   }
   
   @Override
   protected void disconnectPeer() {
-    removeHierarchyBoundsListener(hierarchyBoundsListener);
-    nativeComponent.removeMouseListener(mouseListener);
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        removeHierarchyBoundsListener(hierarchyBoundsListener);
+        adjustPeerBounds();
+      }
+    });
+    nativeComponentWrapper.getNativeComponent().removeMouseListener(mouseListener);
   }
   
   @Override
@@ -148,6 +158,8 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     if(panel == null) {
       return;
     }
+    EmbeddedPanel panel = this.panel;
+    this.panel = null;
     Container parent = panel.getParent();
     if(parent != null) {
       parent.remove(panel);
@@ -155,7 +167,6 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
       parent.validate();
       parent.repaint();
     }
-    panel = null;
   }
   
   private volatile boolean isInvoking;

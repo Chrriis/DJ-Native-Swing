@@ -8,7 +8,6 @@
 package chrriis.dj.nativeswing;
 
 import java.awt.AWTEvent;
-import java.awt.Canvas;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -36,18 +35,19 @@ import chrriis.dj.nativeswing.NativeComponentProxyWindow.EmbeddedWindow;
 abstract class NativeComponentProxy extends JComponent {
 
   private BackBufferManager backBufferManager;
-  protected NativeComponent nativeComponent;
+  protected NativeComponentWrapper nativeComponentWrapper;
   protected boolean isDestructionOnFinalization;
   protected boolean isVisibilityConstrained;
 
   private AWTEventListener shapeAdjustmentEventListener;
 
-  protected NativeComponentProxy(NativeComponent nativeComponent, boolean isVisibilityConstrained, boolean isDestructionOnFinalization) {
+  protected NativeComponentProxy(NativeComponentWrapper nativeComponentWrapper, boolean isVisibilityConstrained, boolean isDestructionOnFinalization) {
+    this.nativeComponentWrapper = nativeComponentWrapper;
+    nativeComponentWrapper.setNativeComponentProxy(this);
     this.isDestructionOnFinalization = isDestructionOnFinalization;
     this.isVisibilityConstrained = isVisibilityConstrained;
     setFocusable(true);
-    this.nativeComponent = nativeComponent;
-    backBufferManager = new BackBufferManager(nativeComponent, this);
+    backBufferManager = new BackBufferManager(nativeComponentWrapper, this);
     hierarchyListener = new HierarchyListener() {
       public void hierarchyChanged(HierarchyEvent e) {
         long changeFlags = e.getChangeFlags();
@@ -79,7 +79,7 @@ abstract class NativeComponentProxy extends JComponent {
               break;
           }
           if(isAdjustingShape) {
-            if(NativeComponentProxy.this.nativeComponent.getNativeComponentProxy() == NativeComponentProxy.this) {
+            if(NativeComponentProxy.this.nativeComponentWrapper.getNativeComponentProxy() == NativeComponentProxy.this) {
               adjustPeerShape();
             }
           }
@@ -93,7 +93,6 @@ abstract class NativeComponentProxy extends JComponent {
   @Override
   public void addNotify() {
     super.addNotify();
-    nativeComponent.setNativeComponentProxy(this);
     if(hierarchyListener != null) {
       addHierarchyListener(hierarchyListener);
     }
@@ -122,7 +121,6 @@ abstract class NativeComponentProxy extends JComponent {
   @Override
   public void removeNotify() {
     super.removeNotify();
-    nativeComponent.setNativeComponentProxy(null);
     if(hierarchyListener != null) {
       removeHierarchyListener(hierarchyListener);
     }
@@ -207,13 +205,11 @@ abstract class NativeComponentProxy extends JComponent {
     super.paint(g);
     // On Linux, a JInternalFrame brought to the front may generate a paint call only to that one.
     // We need to adjust the shape of the frames that go to the back as well.
-    for(Canvas canvas: NativeInterface.getCanvas()) {
-      if(canvas instanceof NativeComponent) {
-        NativeComponentProxy nativeComponentProxy = ((NativeComponent)canvas).getNativeComponentProxy();
-        if(nativeComponentProxy != null) {
-          if(nativeComponentProxy.isVisibilityConstrained) {
-            nativeComponentProxy.adjustPeerShape();
-          }
+    for(NativeComponentWrapper ncw: NativeSwing.getNativeComponentWrappers()) {
+      NativeComponentProxy nativeComponentProxy = ncw.getNativeComponentProxy();
+      if(nativeComponentProxy != null) {
+        if(nativeComponentProxy.isVisibilityConstrained) {
+          nativeComponentProxy.adjustPeerShape();
         }
       }
     }
@@ -242,7 +238,7 @@ abstract class NativeComponentProxy extends JComponent {
     }
     Window windowAncestor = SwingUtilities.getWindowAncestor(this);
     Rectangle tempRectangle = new Rectangle();
-    for(Window window: NativeInterface.getWindows()) {
+    for(Window window: NativeSwing.getWindows()) {
       if(!(window instanceof EmbeddedWindow) && window.isVisible()) {
         for(Window owner = window; (owner=owner.getOwner()) != null; ) {
           if(owner == windowAncestor) {
@@ -258,7 +254,7 @@ abstract class NativeComponentProxy extends JComponent {
 
   @Override
   protected void printComponent(Graphics g) {
-    nativeComponent.print(g);
+    nativeComponentWrapper.getNativeComponent().print(g);
   }
   
   @Override
