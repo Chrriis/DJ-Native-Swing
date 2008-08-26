@@ -639,7 +639,7 @@ class NativeWebBrowser extends NativeComponent {
     if(oldMenu != null) {
       oldMenu.dispose();
     }
-    if("win32".equals(SWT.getPlatform()) && (browser.getStyle() & SWT.MOZILLA) == 0) {
+    if("ie".equals(browser.getBrowserType())) {
       browser.setMenu(null);
       return;
     }
