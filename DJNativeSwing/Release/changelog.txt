@@ -5,7 +5,7 @@ Licence terms: LGPL (see licence.txt)
 
 ---------------------------------- Change log ----------------------------------
 
-* Version 0.9.6 (xxxxxxxxxxxx):
+* Version 0.9.6 (August 27, 2008):
 
 - Framework is split from SWT-based implementation.
 - WebServer data was cut when content was long. This is fixed.
