@@ -55,7 +55,7 @@ public class DemoFrame extends JFrame {
   protected static final Font DESCRIPTION_FONT = new Font("Dialog", Font.PLAIN, 14);
   
   public DemoFrame() {
-    super("The DJ Project - NativeSwing");
+    super("The DJ Project - NativeSwing (SWT)");
     Class<DemoFrame> clazz = DemoFrame.class;
     if(System.getProperty("java.version").compareTo("1.6") >= 0) {
       setIconImages(Arrays.asList(new Image[] {

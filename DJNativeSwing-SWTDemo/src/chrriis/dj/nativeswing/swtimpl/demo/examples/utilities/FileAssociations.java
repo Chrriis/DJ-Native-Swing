@@ -59,7 +59,7 @@ public class FileAssociations extends JPanel {
   public FileAssociations() {
     super(new BorderLayout(0, 0));
     JPanel loadingPanel = new JPanel(new GridBagLayout());
-    loadingPanel.add(new JLabel("Please wait while the full list is retrieved..."));
+    loadingPanel.add(new JLabel("Please wait while the full list is being retrieved..."));
     add(loadingPanel, BorderLayout.CENTER);
     initialize();
   }
