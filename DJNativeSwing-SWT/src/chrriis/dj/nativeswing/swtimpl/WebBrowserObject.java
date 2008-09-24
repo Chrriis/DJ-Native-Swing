@@ -70,8 +70,8 @@ public abstract class WebBrowserObject {
     @Override
     public Object run(Object[] args) {
       InitializationListener initializationListener = (InitializationListener)args[0];
-      Boolean[] resultArray = (Boolean[])args[1];
-      for(long time = System.currentTimeMillis(); !resultArray[0].booleanValue() && System.currentTimeMillis() - time < 4000; ) {
+      boolean[] resultArray = (boolean[])args[1];
+      for(long time = System.currentTimeMillis(); !resultArray[0] && System.currentTimeMillis() - time < 4000; ) {
         new Message().syncSend();
         try {
           Thread.sleep(50);
@@ -91,11 +91,11 @@ public abstract class WebBrowserObject {
     }
     instanceID = ObjectRegistry.getInstance().add(this);
     resourcePath = WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "html/" + instanceID);
-    final Boolean[] resultArray = new Boolean[] {Boolean.FALSE};
+    final boolean[] resultArray = new boolean[1];
     InitializationListener initializationListener = new InitializationListener() {
       public void objectInitialized() {
         removeInitializationListener(this);
-        resultArray[0] = Boolean.TRUE;
+        resultArray[0] = true;
       }
     };
     addInitializationListener(initializationListener);
