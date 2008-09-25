@@ -10,7 +10,7 @@ Licence terms: LGPL (see licence.txt)
 - Options can be passed to the JWebBrowserWindow constructor.
 - Fixed a bug that option for XULRunner was not propagated to popups.
 - Location of embedded Shell is forced to (0,0).
-- Size of web browser windows is now the inner size and not the outer window.
+- Size of web browser windows is now the inner size and not the outer size.
 
 
 * Version 0.9.6 (August 27, 2008):
