@@ -42,6 +42,8 @@ import javax.swing.event.EventListenerList;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseMoveListener;
@@ -230,8 +232,8 @@ public abstract class NativeComponent extends Canvas {
           }
           SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+              resizeThread = null;
               if(isNativePeerValid()) {
-                resizeThread = null;
                 new CMN_reshape().asyncExec(NativeComponent.this, getWidth(), getHeight());
               }
             }
@@ -387,6 +389,16 @@ public abstract class NativeComponent extends Canvas {
       // We need to synchronize: a non-UI thread may send a message thinking the component is valid, but the message would be invalid as the control is not yet in the registry.
       synchronized(NativeComponent.registry) {
         Shell shell = createShell(args[2]);
+        shell.addControlListener(new ControlAdapter() {
+          @Override
+          public void controlMoved(ControlEvent e) {
+            Shell shell = (Shell)e.widget;
+            Point location = shell.getLocation();
+            if(location.x != 0 || location.y != 0) {
+              shell.setLocation(0, 0);
+            }
+          }
+        });
         shell.setLayout(new FillLayout());
         int componentID = (Integer)args[0];
         Method createControlMethod = Class.forName((String)args[1]).getDeclaredMethod("createControl", Shell.class, Object[].class);
@@ -549,7 +561,7 @@ public abstract class NativeComponent extends Canvas {
     isNativePeerValid = false;
     invalidNativePeerText = "Failed to create " + getComponentDescription() + "\n\nReason:\nA native component cannot be re-created after having been disposed.";
     repaint();
-    throw new IllegalStateException("A native component cannot be re-created after having been disposed! To achieve re-parenting or allow re-creation, set the option to defer destruction until finalization (note that re-parenting accross different frames is not supported).");
+    throw new IllegalStateException("A native component cannot be re-created after having been disposed! To achieve re-parenting or allow re-creation, set the option to defer destruction until finalization (note that re-parenting accross different windows is not supported).");
   }
   
   private int additionCount;
