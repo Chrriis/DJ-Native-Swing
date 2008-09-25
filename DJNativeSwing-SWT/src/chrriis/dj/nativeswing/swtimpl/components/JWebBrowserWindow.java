@@ -22,6 +22,8 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
+import chrriis.dj.nativeswing.NSOption;
+
 
 /**
  * A web browser window.
@@ -35,9 +37,10 @@ public class JWebBrowserWindow extends JFrame {
   
   /**
    * Create a web browser window.
+   * @param options the options to configure the behavior of the web browser component.
    */
-  public JWebBrowserWindow() {
-    this(new JWebBrowser());
+  public JWebBrowserWindow(NSOption... options) {
+    this(new JWebBrowser(options));
   }
   
   /**
