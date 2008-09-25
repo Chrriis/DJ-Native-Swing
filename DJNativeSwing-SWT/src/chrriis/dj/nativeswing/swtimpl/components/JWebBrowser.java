@@ -96,7 +96,8 @@ public class JWebBrowser extends NSPanelComponent {
   private JCheckBoxMenuItem locationBarCheckBoxMenuItem;
   private StatusBarPane statusBarPane;
   private JCheckBoxMenuItem statusBarCheckBoxMenuItem;
-  private JPanel webBrowserPanel;
+  private JPanel nativeWebBrowserBorderContainerPane;
+  private JPanel nativeWebBrowserContainerPane;
   
   private JMenuItem backMenuItem;
   private JMenuItem forwardMenuItem;
@@ -369,16 +370,23 @@ public class JWebBrowser extends NSPanelComponent {
     menuBar = new JMenuBar();
     menuToolAndLocationBarPanel.add(menuBar, BorderLayout.NORTH);
     add(menuToolAndLocationBarPanel, BorderLayout.NORTH);
-    webBrowserPanel = new JPanel(new BorderLayout(0, 0));
-    webBrowserPanel.add(nativeWebBrowser.createEmbeddableComponent(optionMap), BorderLayout.CENTER);
-    add(webBrowserPanel, BorderLayout.CENTER);
+    nativeWebBrowserBorderContainerPane = new JPanel(new BorderLayout(0, 0));
+    nativeWebBrowserContainerPane = new JPanel(new BorderLayout(0, 0));
+    nativeWebBrowserContainerPane.add(nativeWebBrowser.createEmbeddableComponent(optionMap), BorderLayout.CENTER);
+    nativeWebBrowserBorderContainerPane.add(nativeWebBrowserContainerPane, BorderLayout.CENTER);
+    add(nativeWebBrowserBorderContainerPane, BorderLayout.CENTER);
     nativeWebBrowser.addWebBrowserListener(new NWebBrowserListener());
     adjustBorder();
     fileMenu = new JMenu(RESOURCES.getString("FileMenu"));
     JMenuItem fileNewWindowMenuItem = new JMenuItem(RESOURCES.getString("FileNewWindowMenu"));
     fileNewWindowMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        JWebBrowser webBrowser = new JWebBrowser();
+        JWebBrowser webBrowser;
+        if(((NativeWebBrowser)JWebBrowser.this.getNativeComponent()).isXULRunnerRuntime()) {
+          webBrowser = new JWebBrowser(useXULRunnerRuntime());
+        } else {
+          webBrowser = new JWebBrowser();
+        }
         JWebBrowser.copyAppearance(JWebBrowser.this, webBrowser);
         JWebBrowser.copyContent(JWebBrowser.this, webBrowser);
         JWebBrowserWindow webBrowserWindow = new JWebBrowserWindow(webBrowser);
@@ -993,9 +1001,9 @@ public class JWebBrowser extends NSPanelComponent {
   
   private void adjustBorder() {
     if(isMenuBarVisible() || isButtonBarVisible() || isLocationBarVisible() || isStatusBarVisible()) {
-      webBrowserPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+      nativeWebBrowserBorderContainerPane.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
     } else {
-      webBrowserPanel.setBorder(null);
+      nativeWebBrowserBorderContainerPane.setBorder(null);
     }
   }
   
@@ -1038,6 +1046,10 @@ public class JWebBrowser extends NSPanelComponent {
    */
   public void setDefaultPopupMenuRegistered(boolean isDefaultPopupMenuRegistered) {
     nativeWebBrowser.setDefaultPopupMenuRegistered(isDefaultPopupMenuRegistered);
+  }
+  
+  JPanel getNativeWebBrowserContainerPane() {
+    return nativeWebBrowserContainerPane;
   }
   
 }

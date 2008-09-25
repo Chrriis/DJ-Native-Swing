@@ -92,7 +92,12 @@ class NativeWebBrowser extends NativeComponent {
       if(webBrowser == null) {
         return null;
       }
-      JWebBrowser jWebBrowser = new JWebBrowser();
+      JWebBrowser jWebBrowser;
+      if(nativeWebBrowser.isXULRunnerRuntime()) {
+        jWebBrowser = new JWebBrowser(JWebBrowser.useXULRunnerRuntime());
+      } else {
+        jWebBrowser = new JWebBrowser();
+      }
       Object[] listeners = nativeWebBrowser.listenerList.getListenerList();
       WebBrowserWindowWillOpenEvent e = null;
       for(int i=listeners.length-2; i>=0 && jWebBrowser != null; i-=2) {
@@ -139,7 +144,14 @@ class NativeWebBrowser extends NativeComponent {
       JWebBrowserWindow browserWindow = newWebBrowser.getWebBrowserWindow();;
       if(browserWindow != null) {
         if(size != null) {
-          browserWindow.setSize(size);
+          browserWindow.validate();
+          Dimension windowSize = browserWindow.getSize();
+          Dimension webBrowserSize = browserWindow.getWebBrowser().getNativeWebBrowserContainerPane().getSize();
+          windowSize.width -= webBrowserSize.width;
+          windowSize.height -= webBrowserSize.height;
+          windowSize.width += size.width;
+          windowSize.height += size.height;
+          browserWindow.setSize(windowSize);
         }
         if(location != null) {
           browserWindow.setLocation(location);
@@ -343,11 +355,15 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
   
-  private boolean isXULRunnerEngine;
+  private boolean isXULRunnerRuntime;
+  
+  public boolean isXULRunnerRuntime() {
+    return isXULRunnerRuntime;
+  }
   
   @Override
   protected Object[] getNativePeerCreationParameters() {
-    return new Object[] {isXULRunnerEngine};
+    return new Object[] {isXULRunnerRuntime};
   }
   
   protected static Control createControl(Shell shell, Object[] parameters) {
@@ -389,7 +405,7 @@ class NativeWebBrowser extends NativeComponent {
                 }
               });
             } else {
-              (browser).removeVisibilityWindowListener(this);
+              browser.removeVisibilityWindowListener(this);
               new CMJ_showWindow().asyncExec(newWebBrowser, componentID, e.menuBar, e.toolBar, e.addressBar, e.statusBar, e.location == null? null: new Point(e.location.x, e.location.y), e.size == null? null: new Dimension(e.size.x, e.size.y));
             }
           }
@@ -486,9 +502,9 @@ class NativeWebBrowser extends NativeComponent {
 
   private Reference<JWebBrowser> webBrowser;
   
-  public NativeWebBrowser(JWebBrowser webBrowser, boolean isXULRunnerEngine) {
+  public NativeWebBrowser(JWebBrowser webBrowser, boolean isXULRunnerRuntime) {
     this.webBrowser = new WeakReference<JWebBrowser>(webBrowser);
-    this.isXULRunnerEngine = isXULRunnerEngine || "xulrunner".equals(System.getProperty("nativeswing.webbrowser.runtime"));
+    this.isXULRunnerRuntime = isXULRunnerRuntime || "xulrunner".equals(System.getProperty("nativeswing.webbrowser.runtime"));
   }
 
   private static class CMN_clearSessionCookies extends CommandMessage {
