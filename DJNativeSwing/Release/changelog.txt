@@ -5,6 +5,11 @@ Licence terms: LGPL (see licence.txt)
 
 ---------------------------------- Change log ----------------------------------
 
+* Version 0.9.7 (xxxxxxxxxxxxxxx):
+
+- Debug option to print shape computing is added.
+
+
 * Version 0.9.6 (August 27, 2008):
 
 - Framework is split from SWT-based implementation.

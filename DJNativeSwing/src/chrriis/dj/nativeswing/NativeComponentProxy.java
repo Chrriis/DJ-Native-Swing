@@ -34,6 +34,8 @@ import chrriis.dj.nativeswing.NativeComponentProxyWindow.EmbeddedWindow;
  */
 abstract class NativeComponentProxy extends JComponent {
 
+  private static final boolean IS_DEBUGGING_SHAPE = Boolean.parseBoolean(System.getProperty("nativeswing.components.debug.printshapecomputing"));
+
   private BackBufferManager backBufferManager;
   protected NativeComponentWrapper nativeComponentWrapper;
   protected boolean isDestructionOnFinalization;
@@ -227,8 +229,6 @@ abstract class NativeComponentProxy extends JComponent {
   
   protected abstract Rectangle[] getPeerShapeArea();
   
-  private static final boolean IS_DEBUGGING_SHAPE = Boolean.parseBoolean(System.getProperty("nativeswing.components.debug.printshapecomputing"));
-
   protected Rectangle[] computePeerShapeArea() {
     if(IS_DEBUGGING_SHAPE) {
       System.err.println("Computing shape: [" + NativeComponentProxy.this.getWidth() + "x" + NativeComponentProxy.this.getHeight() + "] " + nativeComponentWrapper.getComponentDescription());
