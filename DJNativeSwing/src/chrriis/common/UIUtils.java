@@ -185,11 +185,9 @@ public class UIUtils {
         if(c == component) {
           break;
         }
-        if(c.isVisible()) {
-          if(filter.accept(c)) {
-            tempRectangle.setBounds(c.getX(), c.getY(), c.getWidth(), c.getHeight());
-            shape = UIUtils.subtract(shape, tempRectangle);
-          }
+        if(c.isVisible() && filter.accept(c)) {
+          tempRectangle.setBounds(c.getX(), c.getY(), c.getWidth(), c.getHeight());
+          shape = UIUtils.subtract(shape, tempRectangle);
         }
       }
     }
@@ -250,11 +248,13 @@ public class UIUtils {
         if(parent instanceof JRootPane && ((JRootPane)parent).getGlassPane() == child) {
           if(child instanceof JComponent) {
             for(Component child2: ((JComponent)child).getComponents()) {
-              if(filter.accept(child2)) {
-                tempRectangle.setBounds(child2.getX(), child2.getY(), child2.getWidth(), child2.getHeight());
-                shape = UIUtils.subtract(shape, SwingUtilities.convertRectangle(child, tempRectangle, component));
-              } else if(traverseChildren && child2 instanceof Container) {
-                shape = getChildrenVisibleArea(component, filter, shape, (Container)child2, null, traverseChildren);
+              if(child2.isVisible()) {
+                if(filter.accept(child2)) {
+                  tempRectangle.setBounds(child2.getX(), child2.getY(), child2.getWidth(), child2.getHeight());
+                  shape = UIUtils.subtract(shape, SwingUtilities.convertRectangle(child, tempRectangle, component));
+                } else if(traverseChildren && child2 instanceof Container) {
+                  shape = getChildrenVisibleArea(component, filter, shape, (Container)child2, null, traverseChildren);
+                }
               }
             }
           }
