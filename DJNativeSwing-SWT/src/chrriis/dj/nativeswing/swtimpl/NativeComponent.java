@@ -793,6 +793,11 @@ public abstract class NativeComponent extends Canvas {
     return getClass().getName() + "[" + getComponentID() + "/" + hashCode() + "]";
   }
   
+  @Override
+  public String toString() {
+    return getComponentDescription();
+  }
+  
   /**
    * A native component instance cannot be added directly to a component hierarchy. This method needs to be called to get a component that will add the native component.
    * @param optionMap the options to configure the behavior of this component.
