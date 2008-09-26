@@ -412,7 +412,7 @@ abstract class MessagingInterface {
       return;
     }
     if(IS_DEBUGGING_MESSAGES) {
-      System.err.println((message.isSyncExec()? "SYNDS": "SYNDA") + ": " + message.getID() + ", " + message);
+      System.err.println((message.isSyncExec()? "SENDS": "SENDA") + ": " + message.getID() + ", " + message);
     }
     synchronized(oos) {
       oos.writeUnshared(message);
