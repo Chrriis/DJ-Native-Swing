@@ -227,10 +227,22 @@ abstract class NativeComponentProxy extends JComponent {
   
   protected abstract Rectangle[] getPeerShapeArea();
   
+  private static final boolean IS_DEBUGGING_SHAPE = Boolean.parseBoolean(System.getProperty("nativeswing.components.debug.printshapecomputing"));
+
   protected Rectangle[] computePeerShapeArea() {
+    if(IS_DEBUGGING_SHAPE) {
+      System.err.println("Computing shape: [" + NativeComponentProxy.this.getWidth() + "x" + NativeComponentProxy.this.getHeight() + "] " + nativeComponentWrapper.getComponentDescription());
+    }
     Rectangle[] shape = UIUtils.getComponentVisibleArea(this, new Filter<Component>() {
       public boolean accept(Component c) {
-        return !(c instanceof EmbeddedPanel);
+        boolean isAccepted = !(c instanceof EmbeddedPanel);
+        if(IS_DEBUGGING_SHAPE && isAccepted) {
+          Rectangle intersectionRectangle = SwingUtilities.convertRectangle(c, new Rectangle(c.getSize()), NativeComponentProxy.this).intersection(new Rectangle(NativeComponentProxy.this.getSize()));
+          if(!intersectionRectangle.isEmpty()) {
+            System.err.println("  -> Subtracting [" + intersectionRectangle.x + "," + intersectionRectangle.y + "," + intersectionRectangle.width + "x" + intersectionRectangle.height + "] " + c);
+          }
+        }
+        return isAccepted;
       }
     }, false);
     if(shape.length == 0) {

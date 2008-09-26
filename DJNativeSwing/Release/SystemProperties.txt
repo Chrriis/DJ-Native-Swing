@@ -30,3 +30,8 @@ are using them get loaded.
 * nativeswing.components.debug.printoptions
   = true/false (default: false)
   Set whether the options used to create a component should be printed.
+
+* nativeswing.components.debug.printshapecomputing
+  = true/false (default: false)
+  Set whether the computation of the shape applied to the native component (when
+  the visibility constraint option is active) should be printed.
