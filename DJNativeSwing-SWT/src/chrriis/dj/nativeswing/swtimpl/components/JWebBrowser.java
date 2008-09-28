@@ -53,7 +53,7 @@ import javax.swing.event.PopupMenuListener;
 
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.NSOption;
-import chrriis.dj.nativeswing.swtimpl.Message;
+import chrriis.dj.nativeswing.swtimpl.EventDispatchUtils;
 import chrriis.dj.nativeswing.swtimpl.NSPanelComponent;
 
 /**
@@ -854,13 +854,10 @@ public class JWebBrowser extends NSPanelComponent {
         if(resultArray[0] != null) {
           break;
         }
-        new Message().syncSend();
+        EventDispatchUtils.sleepWithEventDispatch(50);
         if(resultArray[0] != null) {
           break;
         }
-        try {
-          Thread.sleep(50);
-        } catch(Exception e) {}
       }
     }
     nativeWebBrowser.removeWebBrowserListener(webBrowserListener);

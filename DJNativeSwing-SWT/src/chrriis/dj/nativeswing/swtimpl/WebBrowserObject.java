@@ -66,22 +66,6 @@ public abstract class WebBrowserObject {
     return resourcePath != null;
   }
   
-  private class CMLocal_waitForInitialization extends LocalMessage {
-    @Override
-    public Object run(Object[] args) {
-      InitializationListener initializationListener = (InitializationListener)args[0];
-      boolean[] resultArray = (boolean[])args[1];
-      for(long time = System.currentTimeMillis(); !resultArray[0] && System.currentTimeMillis() - time < 4000; ) {
-        new Message().syncSend();
-        try {
-          Thread.sleep(50);
-        } catch(Exception e) {}
-      }
-      removeInitializationListener(initializationListener);
-      return null;
-    }
-  }
-  
   public void load(String resourcePath) {
     this.resourcePath = resourcePath;
     ObjectRegistry.getInstance().remove(instanceID);
@@ -100,7 +84,16 @@ public abstract class WebBrowserObject {
     };
     addInitializationListener(initializationListener);
     webBrowser.navigate(resourcePath);
-    webBrowser.getNativeComponent().runSync(new CMLocal_waitForInitialization(), initializationListener, resultArray);
+    webBrowser.getNativeComponent().runSync(new LocalMessage() {
+      @Override
+      public Object run(Object[] args) {
+        InitializationListener initializationListener = (InitializationListener)args[0];
+        boolean[] resultArray = (boolean[])args[1];
+        EventDispatchUtils.sleepWithEventDispatch(resultArray, 4000);
+        removeInitializationListener(initializationListener);
+        return null;
+      }
+    }, initializationListener, resultArray);
   }
   
   public String getLocalFileURL(File localFile) {

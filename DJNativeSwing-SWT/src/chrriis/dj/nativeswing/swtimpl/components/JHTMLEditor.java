@@ -25,6 +25,7 @@ import chrriis.common.WebServer;
 import chrriis.common.WebServer.HTTPRequest;
 import chrriis.common.WebServer.WebServerContent;
 import chrriis.dj.nativeswing.NSOption;
+import chrriis.dj.nativeswing.swtimpl.EventDispatchUtils;
 import chrriis.dj.nativeswing.swtimpl.LocalMessage;
 import chrriis.dj.nativeswing.swtimpl.Message;
 import chrriis.dj.nativeswing.swtimpl.NSPanelComponent;
@@ -60,22 +61,6 @@ public class JHTMLEditor extends NSPanelComponent {
 
   private static final String LS = Utils.LINE_SEPARATOR;
 
-  private class CMLocal_waitForInitialization extends LocalMessage {
-    @Override
-    public Object run(Object[] args) {
-      InitializationListener initializationListener = (InitializationListener)args[0];
-      boolean[] resultArray = (boolean[])args[1];
-      for(long time = System.currentTimeMillis(); !resultArray[0] && System.currentTimeMillis() - time < 4000; ) {
-        new Message().syncSend();
-        try {
-          Thread.sleep(50);
-        } catch(Exception e) {}
-      }
-      removeInitializationListener(initializationListener);
-      return null;
-    }
-  }
-  
   private String customJavascriptConfiguration;
   
   /**
@@ -115,7 +100,16 @@ public class JHTMLEditor extends NSPanelComponent {
     };
     addInitializationListener(initializationListener);
     webBrowser.navigate(WebServer.getDefaultWebServer().getDynamicContentURL(JHTMLEditor.class.getName(), String.valueOf(instanceID),  "index.html"));
-    webBrowser.getNativeComponent().runSync(new CMLocal_waitForInitialization(), initializationListener, resultArray);
+    webBrowser.getNativeComponent().runSync(new LocalMessage() {
+      @Override
+      public Object run(Object[] args) {
+        InitializationListener initializationListener = (InitializationListener)args[0];
+        boolean[] resultArray = (boolean[])args[1];
+        EventDispatchUtils.sleepWithEventDispatch(resultArray, 4000);
+        removeInitializationListener(initializationListener);
+        return null;
+      }
+    }, initializationListener, resultArray);
   }
   
   /**
@@ -357,7 +351,7 @@ public class JHTMLEditor extends NSPanelComponent {
     return WebServer.getDefaultWebServer().getURLContent(WebServer.getDefaultWebServer().getClassPathResourceURL(JHTMLEditor.class.getName(), "/fckeditor/" + resourcePath_));
   }
   
-  private Object tempResult;
+  private volatile Object tempResult;
   
   /**
    * Get the HTML content.
@@ -375,14 +369,11 @@ public class JHTMLEditor extends NSPanelComponent {
         html = (String)tempResult;
         break;
       }
-      new Message().syncSend();
+      EventDispatchUtils.sleepWithEventDispatch(50);
       if(tempResult != this) {
         html = (String)tempResult;
         break;
       }
-      try {
-        Thread.sleep(50);
-      } catch(Exception e) {}
     }
     return convertLinksToLocal(html);
   }
