@@ -22,19 +22,34 @@ public class EventDispatchUtils {
    * @param timeout The maximum time this processing should take.
    */
   public static void sleepWithEventDispatch(int timeout) {
-    sleepWithEventDispatch(new boolean[1], timeout);
+    sleepWithEventDispatch(new Condition() {
+      public boolean getValue() {
+        return false;
+      }
+    }, timeout);
+  }
+  
+  public static interface Condition {
+    public boolean getValue();
   }
   
   /**
-   * Sleep but dispatch the events currently in the Swing queue if called from the event dispatch thread, until the first value of the conditionArray changes to true or the timeout is reached.
-   * @param conditionArray The array with at least one cell that indicates whether to stop.
+   * Sleep but dispatch the events currently in the Swing queue if called from the event dispatch thread, until the condition becomes true or the timeout is reached.
+   * @param condition The condition that indicates whether to stop.
    * @param timeout The maximum time this processing should take.
    */
-  public static void sleepWithEventDispatch(boolean[] conditionArray, int timeout) {
+  public static void sleepWithEventDispatch(Condition condition, int timeout) {
     boolean isEventDispatchThread = SwingUtilities.isEventDispatchThread();
-    for(long time = System.currentTimeMillis(); !conditionArray[0] && System.currentTimeMillis() - time < timeout; ) {
+    long time = System.currentTimeMillis();
+    while(true) {
+      if(condition.getValue() || System.currentTimeMillis() - time > timeout) {
+        return;
+      }
       if(isEventDispatchThread) {
         new Message().syncSend();
+        if(condition.getValue() || System.currentTimeMillis() - time > timeout) {
+          return;
+        }
       }
       try {
         Thread.sleep(50);

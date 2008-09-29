@@ -104,8 +104,12 @@ public class JHTMLEditor extends NSPanelComponent {
       @Override
       public Object run(Object[] args) {
         InitializationListener initializationListener = (InitializationListener)args[0];
-        boolean[] resultArray = (boolean[])args[1];
-        EventDispatchUtils.sleepWithEventDispatch(resultArray, 4000);
+        final boolean[] resultArray = (boolean[])args[1];
+        EventDispatchUtils.sleepWithEventDispatch(new EventDispatchUtils.Condition() {
+          public boolean getValue() {
+            return resultArray[0];
+          }
+        }, 4000);
         removeInitializationListener(initializationListener);
         return null;
       }
