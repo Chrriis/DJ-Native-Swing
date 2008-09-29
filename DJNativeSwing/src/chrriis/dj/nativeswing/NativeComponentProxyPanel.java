@@ -140,17 +140,19 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
   
   @Override
   protected void addPeer() {
-    Window windowAncestor = SwingUtilities.getWindowAncestor(this);
-    if(!(windowAncestor instanceof RootPaneContainer)) {
-      throw new IllegalStateException("The window ancestor must be a root pane container!");
+    for(Component parent = this; (parent = parent.getParent()) != null; ) {
+      if(!parent.isLightweight() && parent instanceof RootPaneContainer) {
+        if(isProxiedFiliation) {
+          JLayeredPane layeredPane = ((RootPaneContainer)parent).getLayeredPane();
+          layeredPane.setLayer(panel, Integer.MIN_VALUE);
+          layeredPane.add(panel);
+        } else {
+          add(panel);
+        }
+        return;
+      }
     }
-    if(isProxiedFiliation) {
-      JLayeredPane layeredPane = ((RootPaneContainer)windowAncestor).getLayeredPane();
-      layeredPane.setLayer(panel, Integer.MIN_VALUE);
-      layeredPane.add(panel);
-    } else {
-      add(panel);
-    }
+    throw new IllegalStateException("The window ancestor must be a root pane container!");
   }
   
   @Override
