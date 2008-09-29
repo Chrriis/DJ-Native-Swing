@@ -367,19 +367,17 @@ public class JHTMLEditor extends NSPanelComponent {
     }
     tempResult = this;
     webBrowser.executeJavascript("JH_sendData();");
-    String html = null;
     for(int i=0; i<20; i++) {
+      EventDispatchUtils.sleepWithEventDispatch(new EventDispatchUtils.Condition() {
+        public boolean getValue() {
+          return tempResult != JHTMLEditor.this;
+        }
+      }, 50);
       if(tempResult != this) {
-        html = (String)tempResult;
-        break;
-      }
-      EventDispatchUtils.sleepWithEventDispatch(50);
-      if(tempResult != this) {
-        html = (String)tempResult;
-        break;
+        return convertLinksToLocal((String)tempResult);
       }
     }
-    return convertLinksToLocal(html);
+    return null;
   }
   
   private static String convertLinksToLocal(String html) {

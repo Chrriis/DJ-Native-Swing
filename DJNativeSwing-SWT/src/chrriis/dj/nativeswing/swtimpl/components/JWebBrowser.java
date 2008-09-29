@@ -851,13 +851,11 @@ public class JWebBrowser extends NSPanelComponent {
     nativeWebBrowser.addWebBrowserListener(webBrowserListener);
     if(nativeWebBrowser.executeJavascriptAndWait(script)) {
       for(int i=0; i<20; i++) {
-        if(resultArray[0] != null) {
-          break;
-        }
-        EventDispatchUtils.sleepWithEventDispatch(50);
-        if(resultArray[0] != null) {
-          break;
-        }
+        EventDispatchUtils.sleepWithEventDispatch(new EventDispatchUtils.Condition() {
+          public boolean getValue() {
+            return resultArray[0] != null;
+          }
+        }, 50);
       }
     }
     nativeWebBrowser.removeWebBrowserListener(webBrowserListener);

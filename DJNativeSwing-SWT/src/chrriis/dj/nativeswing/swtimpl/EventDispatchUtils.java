@@ -18,7 +18,7 @@ public class EventDispatchUtils {
   private EventDispatchUtils() {}
   
   /**
-   * Sleep but dispatch the events currently in the Swing queue if called from the event dispatch thread, until the timeout is reached.
+   * Sleep but dispatch the events currently in the queue if called from the event dispatch thread, until the timeout is reached.
    * @param timeout The maximum time this processing should take.
    */
   public static void sleepWithEventDispatch(int timeout) {
@@ -34,7 +34,7 @@ public class EventDispatchUtils {
   }
   
   /**
-   * Sleep but dispatch the events currently in the Swing queue if called from the event dispatch thread, until the condition becomes true or the timeout is reached.
+   * Sleep but dispatch the events currently in the queue if called from the event dispatch thread, until the condition becomes true or the timeout is reached.
    * @param condition The condition that indicates whether to stop.
    * @param timeout The maximum time this processing should take.
    */
