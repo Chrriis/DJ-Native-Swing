@@ -7,12 +7,7 @@
  */
 package chrriis.dj.nativeswing.swtimpl;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,12 +16,33 @@ import org.eclipse.swt.SWT;
 
 import chrriis.common.ObjectRegistry;
 
+
 /**
  * @author Christopher Deckers
  */
 abstract class MessagingInterface {
 
-  private static final boolean IS_DEBUGGING_MESSAGES = Boolean.parseBoolean(System.getProperty("nativeswing.interface.debug.printmessages"));
+  protected static final boolean IS_DEBUGGING_MESSAGES = Boolean.parseBoolean(System.getProperty("nativeswing.interface.debug.printmessages"));
+  
+  public abstract void destroy();
+  
+  public abstract boolean isUIThread();
+  
+  private boolean isAlive;
+  
+  protected void setAlive(boolean isAlive) {
+    this.isAlive = isAlive;
+  }
+  
+  public boolean isAlive() {
+    return isAlive;
+  }
+  
+  protected void initialize(boolean exitOnEndOfStream) {
+    setAlive(true);
+    openChannel();
+    createReceiverThread(exitOnEndOfStream);
+  }
   
   private static class CommandResultMessage extends Message {
 
@@ -60,123 +76,6 @@ abstract class MessagingInterface {
   }
 
   private Object RECEIVER_LOCK = new Object();
-  
-  private ObjectOutputStream oos;
-  private ObjectInputStream ois;
-
-  private boolean isAlive = true;
-  
-  public boolean isAlive() {
-    return isAlive;
-  }
-  
-  public void destroy() {
-    isAlive = false;
-    try {
-      ois.close();
-    } catch(Exception e) {
-    }
-  }
-  
-  public MessagingInterface(final Socket socket, final boolean exitOnEndOfStream) {
-    try {
-      oos = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()) {
-        @Override
-        public synchronized void write(int b) throws IOException {
-          super.write(b);
-          oosByteCount++;
-        }
-        @Override
-        public synchronized void write(byte[] b, int off, int len) throws IOException {
-          super.write(b, off, len);
-          oosByteCount += len;
-        }
-      });
-      oos.flush();
-      ois = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
-    } catch(IOException e) {
-      throw new RuntimeException(e);
-    }
-    Thread receiverThread = new Thread("NativeSwing Receiver") {
-      @Override
-      public void run() {
-        while(isAlive) {
-          Message message = null;
-          try {
-            message = readMessage();
-          } catch(Exception e) {
-            boolean isRespawned = false;
-            if(isAlive) {
-              isAlive = false;
-              if(exitOnEndOfStream) {
-                System.exit(0);
-              }
-              e.printStackTrace();
-              try {
-                isRespawned = NativeInterface.notifyKilled();
-              } catch(Exception ex) {
-                ex.printStackTrace();
-              }
-            }
-            // Unlock all locked sync calls
-            synchronized(RECEIVER_LOCK) {
-              receivedMessageList.clear();
-              RECEIVER_LOCK.notify();
-            }
-            for(int instanceID: syncThreadRegistry.getInstanceIDs()) {
-              Thread thread = (Thread)syncThreadRegistry.get(instanceID);
-              if(thread != null) {
-                synchronized(thread) {
-                  thread.notify();
-                }
-              }
-            }
-            if(isRespawned) {
-              NativeInterface.notifyRespawned();
-            }
-          }
-          if(message != null) {
-            if(!message.isUI()) {
-              final Message message_ = message;
-              new Thread("NativeSwing Async") {
-                @Override
-                public void run() {
-                  runMessage(message_);
-                }
-              }.start();
-            } else {
-              synchronized(RECEIVER_LOCK) {
-                receivedMessageList.add(message);
-                if(isWaitingResponse) {
-                  RECEIVER_LOCK.notify();
-                } else if(receivedMessageList.size() == 1) {
-                  asyncUIExec(new Runnable() {
-                    public void run() {
-                      processReceivedMessages();
-                    }
-                  });
-                }
-              }
-            }
-          }
-        }
-        try {
-          oos.close();
-        } catch(Exception e) {
-        }
-        try {
-          ois.close();
-        } catch(Exception e) {
-        }
-        try {
-          socket.close();
-        } catch(Exception e) {
-        }
-      }
-    };
-    receiverThread.setDaemon(true);
-    receiverThread.start();
-  }
   
   private CommandResultMessage processReceivedMessages() {
     while(true) {
@@ -232,8 +131,6 @@ abstract class MessagingInterface {
   }
   
   protected abstract void asyncUIExec(Runnable runnable);
-  
-  public abstract boolean isUIThread();
   
   public void checkUIThread() {
     if(!isUIThread()) {
@@ -303,10 +200,6 @@ abstract class MessagingInterface {
       syncThreadRegistry.remove(instanceID);
       return processCommandResult(commandResultMessage);
     }
-  }
-  
-  private void printFailedInvocation(Message message) {
-    System.err.println("Failed messaging: " + message);
   }
   
   private final Object LOCK = new Object();
@@ -393,19 +286,6 @@ abstract class MessagingInterface {
     }
   }
   
-  private static final int OOS_RESET_THRESHOLD;
-  
-  static {
-    String maxByteCountProperty = System.getProperty("nativeswing.interface.streamresetthreshold");
-    if(maxByteCountProperty != null) {
-      OOS_RESET_THRESHOLD = Integer.parseInt(maxByteCountProperty);
-    } else {
-      OOS_RESET_THRESHOLD = 500000;
-    }
-  }
-  
-  private int oosByteCount;
-  
   private void writeMessage(Message message) throws IOException {
     if(!isAlive()) {
       printFailedInvocation(message);
@@ -414,28 +294,90 @@ abstract class MessagingInterface {
     if(IS_DEBUGGING_MESSAGES) {
       System.err.println((message.isSyncExec()? "SENDS": "SENDA") + ": " + message.getID() + ", " + message);
     }
-    synchronized(oos) {
-      oos.writeUnshared(message);
-      oos.flush();
-      // Messages are cached, so we need to reset() from time to time to clean the cache, or else we get an OutOfMemoryError.
-      if(oosByteCount > OOS_RESET_THRESHOLD) {
-        oos.reset();
-        oosByteCount = 0;
-      }
-    }
+    writeMessageToChannel(message);
   }
   
-  private Message readMessage() throws IOException, ClassNotFoundException {
-    Object o = MessagingInterface.this.ois.readUnshared();
-    if(o instanceof Message) {
-      Message message = (Message)o;
-      if(IS_DEBUGGING_MESSAGES) {
-        System.err.println("RECV: " + message.getID() + ", " + message);
-      }
-      return message;
-    }
-    System.err.println("Unknown message: " + o);
-    return null;
+  protected abstract void writeMessageToChannel(Message message) throws IOException;
+  
+  protected abstract Message readMessageFromChannel() throws IOException, ClassNotFoundException;
+  
+  private void printFailedInvocation(Message message) {
+    System.err.println("Failed messaging: " + message);
   }
+  
+  protected void createReceiverThread(final boolean exitOnEndOfStream) {
+    Thread receiverThread = new Thread("NativeSwing Receiver") {
+      @Override
+      public void run() {
+        while(isAlive()) {
+          Message message = null;
+          try {
+            message = readMessageFromChannel();
+          } catch(Exception e) {
+            boolean isRespawned = false;
+            if(isAlive()) {
+              setAlive(false);
+              if(exitOnEndOfStream) {
+                System.exit(0);
+              }
+              e.printStackTrace();
+              try {
+                isRespawned = NativeInterface.notifyKilled();
+              } catch(Exception ex) {
+                ex.printStackTrace();
+              }
+            }
+            // Unlock all locked sync calls
+            synchronized(RECEIVER_LOCK) {
+              receivedMessageList.clear();
+              RECEIVER_LOCK.notify();
+            }
+            for(int instanceID: syncThreadRegistry.getInstanceIDs()) {
+              Thread thread = (Thread)syncThreadRegistry.get(instanceID);
+              if(thread != null) {
+                synchronized(thread) {
+                  thread.notify();
+                }
+              }
+            }
+            if(isRespawned) {
+              NativeInterface.notifyRespawned();
+            }
+          }
+          if(message != null) {
+            if(!message.isUI()) {
+              final Message message_ = message;
+              new Thread("NativeSwing Async") {
+                @Override
+                public void run() {
+                  runMessage(message_);
+                }
+              }.start();
+            } else {
+              synchronized(RECEIVER_LOCK) {
+                receivedMessageList.add(message);
+                if(isWaitingResponse) {
+                  RECEIVER_LOCK.notify();
+                } else if(receivedMessageList.size() == 1) {
+                  asyncUIExec(new Runnable() {
+                    public void run() {
+                      processReceivedMessages();
+                    }
+                  });
+                }
+              }
+            }
+          }
+        }
+        closeChannel();
+      }
+    };
+    receiverThread.setDaemon(true);
+    receiverThread.start();
+  }
+  
+  protected abstract void openChannel();
+  
+  protected abstract void closeChannel();
   
 }

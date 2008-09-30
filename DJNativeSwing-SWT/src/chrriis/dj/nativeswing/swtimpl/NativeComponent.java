@@ -166,12 +166,27 @@ public abstract class NativeComponent extends Canvas {
   }
   
   private static ObjectRegistry registry = new ObjectRegistry();
+  private static ObjectRegistry controlRegistry;
   
   /**
-   * Get the registry of the components, which references created components/controls using the component ID.
+   * Get the registry of the components, which references created components using the component ID.
    * @return the registry.
    */
-  protected static ObjectRegistry getRegistry() {
+  protected static ObjectRegistry getComponentRegistry() {
+    return registry;
+  }
+  
+  /**
+   * Get the registry of the controls, which references created controls using the component ID.
+   * @return the registry.
+   */
+  protected static ObjectRegistry getControlRegistry() {
+    if(NativeInterface.isInProcess()) {
+      if(controlRegistry == null) {
+        controlRegistry = new ObjectRegistry();
+      }
+      return controlRegistry;
+    }
     return registry;
   }
   
@@ -205,7 +220,7 @@ public abstract class NativeComponent extends Canvas {
    * Construct a native component.
    */
   public NativeComponent() {
-    componentID = NativeComponent.registry.add(this);
+    componentID = NativeComponent.getComponentRegistry().add(this);
     addFocusListener(new FocusAdapter() {
       @Override
       public void focusGained(FocusEvent e) {
@@ -387,7 +402,7 @@ public abstract class NativeComponent extends Canvas {
     @Override
     public Object run(Object[] args) throws Exception {
       // We need to synchronize: a non-UI thread may send a message thinking the component is valid, but the message would be invalid as the control is not yet in the registry.
-      synchronized(NativeComponent.registry) {
+      synchronized(NativeComponent.getControlRegistry()) {
         Shell shell = createShell(args[2]);
         shell.addControlListener(new ControlAdapter() {
           @Override
@@ -404,7 +419,7 @@ public abstract class NativeComponent extends Canvas {
         Method createControlMethod = Class.forName((String)args[1]).getDeclaredMethod("createControl", Shell.class, Object[].class);
         createControlMethod.setAccessible(true);
         Control control = (Control)createControlMethod.invoke(null, shell, args[3]);
-        NativeComponent.registry.add(control, componentID);
+        NativeComponent.getControlRegistry().add(control, componentID);
         configureControl(control, componentID);
         shell.setVisible (true);
       }
@@ -713,7 +728,7 @@ public abstract class NativeComponent extends Canvas {
     @Override
     public Object run(Object[] args) {
       Control control = getControl();
-      NativeComponent.registry.remove(getComponentID());
+      NativeComponent.getControlRegistry().remove(getComponentID());
       if(control != null) {
         if(!control.isDisposed()) {
           Shell shell = control.getShell();
@@ -751,7 +766,7 @@ public abstract class NativeComponent extends Canvas {
           runSync(new CMN_destroyControl());
         }
       }
-      NativeComponent.registry.remove(componentID);
+      NativeComponent.getComponentRegistry().remove(componentID);
       isNativePeerValid = false;
       nativeComponentWrapper.disposeNativeComponent();
     }

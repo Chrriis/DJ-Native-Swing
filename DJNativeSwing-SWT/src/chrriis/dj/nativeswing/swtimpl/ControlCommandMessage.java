@@ -48,7 +48,7 @@ public abstract class ControlCommandMessage extends CommandMessage {
    * @return the control, or null.
    */
   public Control getControl() {
-    return (Control)NativeComponent.getRegistry().get(componentID);
+    return (Control)NativeComponent.getControlRegistry().get(componentID);
   }
   
   /**
@@ -56,7 +56,7 @@ public abstract class ControlCommandMessage extends CommandMessage {
    * @return the native component, or null.
    */
   public NativeComponent getNativeComponent() {
-    return (NativeComponent)NativeComponent.getRegistry().get(componentID);
+    return (NativeComponent)NativeComponent.getComponentRegistry().get(componentID);
   }
   
   /**
