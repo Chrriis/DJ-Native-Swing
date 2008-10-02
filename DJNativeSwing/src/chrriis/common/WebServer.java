@@ -947,6 +947,10 @@ public class WebServer {
     }
   }
   
+  public static String getHostAddress() {
+    return hostAddress;
+  }
+  
   public static WebServer getDefaultWebServer() {
     synchronized(LOCK) {
       if(webServer != null) {
