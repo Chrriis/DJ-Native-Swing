@@ -33,6 +33,7 @@ public abstract class ControlCommandMessage extends CommandMessage {
    */
   public void setControl(Control control) {
     this.componentID = (Integer)control.getData("NS_ID");
+    setTargetNativeSide(false);
   }
   
   /**
@@ -41,8 +42,26 @@ public abstract class ControlCommandMessage extends CommandMessage {
    */
   public void setNativeComponent(NativeComponent nativeComponent) {
     this.componentID = nativeComponent.getComponentID();
+    setTargetNativeSide(true);
   }
   
+  private transient Boolean isTargetNativeSide;
+  
+  private boolean isTargetNativeSide() {
+    if(isTargetNativeSide == null) {
+      throw new IllegalStateException("The target must be specified!");
+    }
+    return isTargetNativeSide;
+  }
+  
+  /**
+   * Indicate whether the message is to be sent to the native side or the Swing side.
+   * @param isTargetNativeSide true if the target is the native side, false otherwise.
+   */
+  private void setTargetNativeSide(boolean isTargetNativeSide) {
+    this.isTargetNativeSide = isTargetNativeSide;
+  }
+
   /**
    * Get the control, which is only valid when in the native context.
    * @return the control, or null.
@@ -56,7 +75,7 @@ public abstract class ControlCommandMessage extends CommandMessage {
    * @return the native component, or null.
    */
   public NativeComponent getNativeComponent() {
-    return (NativeComponent)NativeComponent.getComponentRegistry().get(componentID);
+    return (NativeComponent)NativeComponent.getNativeComponentRegistry().get(componentID);
   }
   
   /**
@@ -101,30 +120,37 @@ public abstract class ControlCommandMessage extends CommandMessage {
     return syncExec(args);
   }
   
-  @Override
-  public Object syncExec(Object... args) {
-    if(componentID == 0) {
-      if(NativeInterface.isNativeSide()) {
-        throw new IllegalStateException("The control was not specified!");
-      }
-      throw new IllegalStateException("The native component was not specified!");
-    }
-    return super.syncExec(args);
+  private Object syncExec(Object... args) {
+    return syncExec(isTargetNativeSide(), args);
   }
   
   @Override
-  public void asyncExec(Object... args) {
+  public Object syncExec(boolean isTargetNativeSide, Object... args) {
+    checkComponentID();
+    return super.syncExec(isTargetNativeSide, args);
+  }
+  
+  private void asyncExec(Object... args) {
+    super.asyncExec(isTargetNativeSide(), args);
+  }
+  
+  @Override
+  public void asyncExec(boolean isTargetNativeSide, Object... args) {
+    checkComponentID();
+    super.asyncExec(isTargetNativeSide, args);
+  }
+  
+  private void checkComponentID() {
     if(componentID == 0) {
-      if(NativeInterface.isNativeSide()) {
-        throw new IllegalStateException("The control was not specified!");
-      }
-      throw new IllegalStateException("The native component was not specified!");
+      throw new IllegalStateException("The component was not specified!");
     }
-    super.asyncExec(args);
   }
   
   @Override
   protected boolean isValid() {
+    if(NativeInterface.isInProcess()) {
+      return getControl() != null || getNativeComponent() != null;
+    }
     if(NativeInterface.isNativeSide()) {
       return getControl() != null;
     }

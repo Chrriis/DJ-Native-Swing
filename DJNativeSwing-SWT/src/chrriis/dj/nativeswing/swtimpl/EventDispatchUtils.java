@@ -46,7 +46,7 @@ public class EventDispatchUtils {
         return;
       }
       if(isEventDispatchThread) {
-        new Message().syncSend();
+        new Message().syncSend(true);
         if(condition.getValue() || System.currentTimeMillis() - time > timeout) {
           return;
         }

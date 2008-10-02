@@ -64,6 +64,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import chrriis.common.ObjectRegistry;
 import chrriis.common.Utils;
+import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.NativeComponentWrapper;
 
 import com.sun.jna.Native;
@@ -119,7 +120,7 @@ public abstract class NativeComponent extends Canvas {
    */
   public Object runSync(CommandMessage commandMessage, Object... args) {
     if(NativeInterface.isAlive()) {
-      NativeInterface.checkUIThread();
+      NativeInterface.checkUIThread(false);
     }
     if(commandMessage instanceof ControlCommandMessage) {
       ((ControlCommandMessage)commandMessage).setNativeComponent(this);
@@ -134,7 +135,7 @@ public abstract class NativeComponent extends Canvas {
       printFailedInvocation(commandMessage);
       return null;
     }
-    return commandMessage.syncExec(args);
+    return commandMessage.syncExec(true, args);
   }
   
   /**
@@ -145,7 +146,7 @@ public abstract class NativeComponent extends Canvas {
    */
   public void runAsync(CommandMessage commandMessage, Object... args) {
     if(NativeInterface.isAlive()) {
-      NativeInterface.checkUIThread();
+      NativeInterface.checkUIThread(false);
     }
     if(commandMessage instanceof ControlCommandMessage) {
       ((ControlCommandMessage)commandMessage).setNativeComponent(this);
@@ -157,7 +158,7 @@ public abstract class NativeComponent extends Canvas {
       commandMessage.setArgs(args);
       printFailedInvocation(commandMessage);
     } else {
-      commandMessage.asyncExec(args);
+      commandMessage.asyncExec(true, args);
     }
   }
   
@@ -165,15 +166,28 @@ public abstract class NativeComponent extends Canvas {
     System.err.println("Invalid " + getComponentDescription() + ": " + message);
   }
   
-  private static ObjectRegistry registry = new ObjectRegistry();
+  private static ObjectRegistry nativeComponentRegistry;
   private static ObjectRegistry controlRegistry;
+  
+  static {
+    if(NativeInterface.isInProcess()) {
+      nativeComponentRegistry = new ObjectRegistry();
+      controlRegistry = new ObjectRegistry();
+    } else {
+      if(NativeInterface.isNativeSide()) {
+        controlRegistry = new ObjectRegistry();
+      } else {
+        nativeComponentRegistry = new ObjectRegistry();
+      }
+    }
+  }
   
   /**
    * Get the registry of the components, which references created components using the component ID.
    * @return the registry.
    */
-  protected static ObjectRegistry getComponentRegistry() {
-    return registry;
+  protected static ObjectRegistry getNativeComponentRegistry() {
+    return nativeComponentRegistry;
   }
   
   /**
@@ -181,13 +195,7 @@ public abstract class NativeComponent extends Canvas {
    * @return the registry.
    */
   protected static ObjectRegistry getControlRegistry() {
-    if(NativeInterface.isInProcess()) {
-      if(controlRegistry == null) {
-        controlRegistry = new ObjectRegistry();
-      }
-      return controlRegistry;
-    }
-    return registry;
+    return controlRegistry;
   }
   
   private static class CMN_reshape extends ControlCommandMessage {
@@ -220,7 +228,7 @@ public abstract class NativeComponent extends Canvas {
    * Construct a native component.
    */
   public NativeComponent() {
-    componentID = NativeComponent.getComponentRegistry().add(this);
+    componentID = NativeComponent.getNativeComponentRegistry().add(this);
     addFocusListener(new FocusAdapter() {
       @Override
       public void focusGained(FocusEvent e) {
@@ -613,7 +621,7 @@ public abstract class NativeComponent extends Canvas {
    */
   public void initializeNativePeer() {
     if(NativeInterface.isAlive()) {
-      NativeInterface.checkUIThread();
+      NativeInterface.checkUIThread(false);
     }
     Window windowAncestor = SwingUtilities.getWindowAncestor(this);
     if(windowAncestor == null) {
@@ -688,7 +696,7 @@ public abstract class NativeComponent extends Canvas {
   private void createNativePeer() {
     boolean isInterfaceAlive = NativeInterface.isAlive();
     if(isInterfaceAlive) {
-      NativeInterface.checkUIThread();
+      NativeInterface.checkUIThread(false);
     }
     if(initializationCommandMessageList == null) {
       throwDuplicateCreationException();
@@ -719,7 +727,7 @@ public abstract class NativeComponent extends Canvas {
       if(!isNativePeerValid()) {
         printFailedInvocation(initCommandMessage);
       } else {
-        initCommandMessage.asyncSend();
+        initCommandMessage.asyncSend(true);
       }
     }
   }
@@ -766,7 +774,7 @@ public abstract class NativeComponent extends Canvas {
           runSync(new CMN_destroyControl());
         }
       }
-      NativeComponent.getComponentRegistry().remove(componentID);
+      NativeComponent.getNativeComponentRegistry().remove(componentID);
       isNativePeerValid = false;
       nativeComponentWrapper.disposeNativeComponent();
     }
@@ -969,13 +977,14 @@ public abstract class NativeComponent extends Canvas {
     public Object run(Object[] args) throws Exception {
       int port = (Integer)args[0];
       Rectangle[] rectangles = (Rectangle[])args[1];
+      String hostAddress = (String)args[2];
       final Control control = getControl();
       ImageData imageData;
       final Region region = new Region();
       for(Rectangle rectangle: rectangles) {
         region.add(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
       }
-      if(!NativeInterface.isUIThread()) {
+      if(!NativeInterface.isUIThread(true)) {
         final Exception[] eArray = new Exception[1];
         final ImageData[] resultArray = new ImageData[1];
         control.getDisplay().syncExec(new Runnable() {
@@ -988,7 +997,7 @@ public abstract class NativeComponent extends Canvas {
           }
         });
         if(eArray[0] != null) {
-          new Socket("127.0.0.1", port).close();
+          new Socket(hostAddress, port).close();
           throw eArray[0];
         }
         imageData = resultArray[0];
@@ -997,7 +1006,7 @@ public abstract class NativeComponent extends Canvas {
       }
       region.dispose();
       if(imageData == null) {
-        new Socket("127.0.0.1", port).close();
+        new Socket(hostAddress, port).close();
         return null;
       }
       int cursor = 0;
@@ -1005,7 +1014,7 @@ public abstract class NativeComponent extends Canvas {
       byte[] bytes = new byte[1024 * 3];
       PaletteData palette = imageData.palette;
       if (palette.isDirect) {
-        Socket socket = new Socket("127.0.0.1", port);
+        Socket socket = new Socket(hostAddress, port);
         BufferedOutputStream out = new BufferedOutputStream(socket.getOutputStream());
         int width = imageData.width;
         int height = imageData.height;
@@ -1098,7 +1107,7 @@ public abstract class NativeComponent extends Canvas {
       };
       CMN_getComponentImage getComponentImage = new CMN_getComponentImage();
       NativeInterface.addNativeInterfaceListener(nativeInterfaceListener);
-      getComponentImage.asyncExec(this, serverSocket.getLocalPort(), rectangles);
+      getComponentImage.asyncExec(this, serverSocket.getLocalPort(), rectangles, WebServer.getHostAddress());
       Socket socket = serverSocket.accept();
       // Has to be a multiple of 3
       byte[] bytes = new byte[1024 * 3];

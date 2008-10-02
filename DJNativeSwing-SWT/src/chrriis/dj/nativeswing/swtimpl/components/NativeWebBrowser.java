@@ -134,7 +134,7 @@ class NativeWebBrowser extends NativeComponent {
         return null;
       }
       int componentID = (Integer)args[0];
-      final JWebBrowser newWebBrowser = ((NativeWebBrowser)getComponentRegistry().get(componentID)).webBrowser.get();
+      final JWebBrowser newWebBrowser = ((NativeWebBrowser)getNativeComponentRegistry().get(componentID)).webBrowser.get();
       newWebBrowser.setMenuBarVisible((Boolean)args[1]);
       newWebBrowser.setButtonBarVisible((Boolean)args[2]);
       newWebBrowser.setLocationBarVisible((Boolean)args[3]);
@@ -516,7 +516,7 @@ class NativeWebBrowser extends NativeComponent {
   }
 
   public static void clearSessionCookies() {
-    new CMN_clearSessionCookies().asyncExec();
+    new CMN_clearSessionCookies().asyncExec(true);
   }
 
   private static class CMN_getResourceLocation extends ControlCommandMessage {

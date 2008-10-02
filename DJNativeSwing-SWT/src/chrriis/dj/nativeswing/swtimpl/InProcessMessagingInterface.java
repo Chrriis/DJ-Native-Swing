@@ -20,7 +20,8 @@ import org.eclipse.swt.widgets.Display;
  */
 abstract class InProcessMessagingInterface extends MessagingInterface {
 
-  public InProcessMessagingInterface() {
+  public InProcessMessagingInterface(boolean isNativeSide) {
+    super(isNativeSide);
   }
   
   public void destroy() {
@@ -79,6 +80,7 @@ abstract class InProcessMessagingInterface extends MessagingInterface {
     private Display display;
     
     public SWTInProcessMessagingInterface(Display display) {
+      super(true);
       this.display = display;
       setMirrorMessagingInterface(new SwingInProcessMessagingInterface(this));
       initialize(false);
@@ -93,12 +95,13 @@ abstract class InProcessMessagingInterface extends MessagingInterface {
     public boolean isUIThread() {
       return display.getThread() == Thread.currentThread();
     }
-
+    
   }
   
   static class SwingInProcessMessagingInterface extends InProcessMessagingInterface {
     
     public SwingInProcessMessagingInterface(InProcessMessagingInterface mirrorMessagingInterface) {
+      super(false);
       setMirrorMessagingInterface(mirrorMessagingInterface);
       initialize(false);
     }
@@ -112,7 +115,7 @@ abstract class InProcessMessagingInterface extends MessagingInterface {
     public boolean isUIThread() {
       return SwingUtilities.isEventDispatchThread();
     }
-
+    
   }
   
 }

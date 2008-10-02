@@ -36,21 +36,23 @@ public abstract class CommandMessage extends Message {
   
   /**
    * Execute that message asynchronously with the given arguments.
+   * @param isTargetNativeSide true if the target is the native side, false otherwise.
    * @param args the arguments, which must be serializable.
    */
-  public void asyncExec(Object... args) {
+  public void asyncExec(boolean isTargetNativeSide, Object... args) {
     setArgs(args);
-    asyncSend();
+    asyncSend(isTargetNativeSide);
   }
   
   /**
    * Execute that message synchronously with the given arguments and return the result.
+   * @param isTargetNativeSide true if the target is the native side, false otherwise.
    * @param args the arguments, which must be serializable.
    * @return the result of the execution.
    */
-  public Object syncExec(Object... args) {
+  public Object syncExec(boolean isTargetNativeSide, Object... args) {
     setArgs(args);
-    return syncSend();
+    return syncSend(isTargetNativeSide);
   }
   
   private static final Object[] EMPTY_ARGS = new Object[0];

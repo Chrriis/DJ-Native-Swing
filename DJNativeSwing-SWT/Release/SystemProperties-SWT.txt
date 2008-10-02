@@ -23,6 +23,10 @@ are using them get loaded.
   = true/false (default: false)
   Set whether to print the messages that are exchanged.
 
+* nativeswing.interface.inprocess
+  = true/false (default: platform-dependant)
+  Set whether the interface should be in-process or out-process.
+
 --------------------------------------------------------------------------------
 
 * nativeswing.peervm.create

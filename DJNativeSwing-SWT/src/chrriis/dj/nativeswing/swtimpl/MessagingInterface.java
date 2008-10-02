@@ -24,6 +24,10 @@ abstract class MessagingInterface {
 
   protected static final boolean IS_DEBUGGING_MESSAGES = Boolean.parseBoolean(System.getProperty("nativeswing.interface.debug.printmessages"));
   
+  public MessagingInterface(boolean isNativeSide) {
+    this.isNativeSide = isNativeSide;
+  }
+  
   public abstract void destroy();
   
   public abstract boolean isUIThread();
@@ -132,9 +136,15 @@ abstract class MessagingInterface {
   
   protected abstract void asyncUIExec(Runnable runnable);
   
+  private boolean isNativeSide;
+  
+  protected boolean isNativeSide() {
+    return isNativeSide;
+  }
+  
   public void checkUIThread() {
     if(!isUIThread()) {
-      if(NativeInterface.isNativeSide()) {
+      if(isNativeSide()) {
         SWT.error(SWT.ERROR_THREAD_INVALID_ACCESS);
         return;
       }
@@ -148,8 +158,9 @@ abstract class MessagingInterface {
   private static class CM_asyncExecResponse extends CommandMessage {
     @Override
     public Object run(Object[] args) {
-      MessagingInterface messagingInterface = NativeInterface.getMessagingInterface();
       int instanceID = (Integer)args[0];
+      boolean isOriginatorNativeSide = (Boolean)args[2];
+      MessagingInterface messagingInterface = NativeInterface.getMessagingInterface(!isOriginatorNativeSide);
       Thread thread = (Thread)messagingInterface.syncThreadRegistry.get(instanceID);
       messagingInterface.syncThreadRegistry.remove(instanceID);
       if(thread == null) {
@@ -167,10 +178,11 @@ abstract class MessagingInterface {
     @Override
     public Object run(Object[] args) {
       Message message = (Message)args[1];
+      boolean isOriginatorNativeSide = (Boolean)args[2];
       message.setSyncExec(false);
-      MessagingInterface messagingInterface = NativeInterface.getMessagingInterface();
+      MessagingInterface messagingInterface = NativeInterface.getMessagingInterface(!isOriginatorNativeSide);
       CM_asyncExecResponse asyncExecResponse = new CM_asyncExecResponse();
-      asyncExecResponse.setArgs(args[0], messagingInterface.runMessage(message));
+      asyncExecResponse.setArgs(args[0], messagingInterface.runMessage(message), messagingInterface.isNativeSide);
       messagingInterface.asyncSend(asyncExecResponse);
       return null;
     }
@@ -182,7 +194,7 @@ abstract class MessagingInterface {
     Thread thread = Thread.currentThread();
     final int instanceID = syncThreadRegistry.add(Thread.currentThread());
     CM_asyncExec asyncExec = new CM_asyncExec();
-    asyncExec.setArgs(instanceID, message);
+    asyncExec.setArgs(instanceID, message, isNativeSide);
     asyncSend(asyncExec);
     synchronized(thread) {
       while(syncThreadRegistry.get(instanceID) instanceof Thread) {

@@ -25,11 +25,6 @@ public class Message implements Serializable {
    * Create an empty message.
    */
   public Message() {
-    if(NativeInterface.isNativeSide()) {
-      id = -nextID++;
-    } else {
-      id = nextID++;
-    }
   }
   
   void setUI(boolean isUI) {
@@ -54,17 +49,29 @@ public class Message implements Serializable {
   
   /**
    * Send that message asynchronously.
+   * @param isTargetNativeSide true if the target is the native side, false otherwise.
    */
-  public void asyncSend() {
-    NativeInterface.asyncSend(this);
+  public void asyncSend(boolean isTargetNativeSide) {
+    computeId(isTargetNativeSide);
+    NativeInterface.asyncSend(isTargetNativeSide, this);
   }
   
   /**
    * Send that message synchronously, potentially returning a result if the message type allows that.
+   * @param isTargetNativeSide true if the target is the native side, false otherwise.
    * @return the result if any.
    */
-  public Object syncSend() {
-    return NativeInterface.syncSend(this);
+  public Object syncSend(boolean isTargetNativeSide) {
+    computeId(isTargetNativeSide);
+    return NativeInterface.syncSend(isTargetNativeSide, this);
+  }
+  
+  private void computeId(boolean isTargetNativeSide) {
+    if(isTargetNativeSide) {
+      id = nextID++;
+    } else {
+      id = -nextID++;
+    }
   }
   
   /**

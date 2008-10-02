@@ -425,9 +425,9 @@ public class JHTMLEditor extends NSPanelComponent {
     NativeComponent nativeComponent = webBrowser.getNativeComponent();
     boolean isEnabled = nativeComponent.isEnabled();
     nativeComponent.setEnabled(false);
-    new Message().syncSend();
+    new Message().syncSend(true);
     webBrowser.executeJavascript("JH_setData('" + Utils.encodeURL(html) + "');");
-    new Message().syncSend();
+    new Message().syncSend(true);
     nativeComponent.setEnabled(isEnabled);
   }
   

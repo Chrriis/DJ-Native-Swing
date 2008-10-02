@@ -202,6 +202,7 @@ public class DemoFrame extends JFrame {
         new DemoFrame().setVisible(true);
       }
     });
+    NativeInterface.runEventPump();
   }
 
 }

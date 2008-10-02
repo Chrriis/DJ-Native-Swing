@@ -121,7 +121,7 @@ public class FileTypeLauncher {
       return;
     }
     hasInitializedLaunchers = true;
-    new CMN_initializeLaunchers().syncExec();
+    new CMN_initializeLaunchers().syncExec(true);
   }
 
   private static class CMN_initializeExtensions extends CommandMessage {
@@ -152,7 +152,7 @@ public class FileTypeLauncher {
       return;
     }
     hasInitializedExtensions = true;
-    new CMN_initializeExtensions().syncExec();
+    new CMN_initializeExtensions().syncExec(true);
   }
   
   private static class CMN_getAllRegisteredExtensions extends CommandMessage {
@@ -175,7 +175,7 @@ public class FileTypeLauncher {
    */
   public static String[] getAllRegisteredExtensions() {
     initializeExtensions();
-    return (String[])new CMN_getAllRegisteredExtensions().syncExec();
+    return (String[])new CMN_getAllRegisteredExtensions().syncExec(true);
   }
   
   private int id;
@@ -201,7 +201,7 @@ public class FileTypeLauncher {
   public String[] getRegisteredExtensions() {
     if(registeredExtensions == null) {
       initializeExtensions();
-      registeredExtensions = (String[])new CMN_getRegisteredExtensions().syncExec(id);
+      registeredExtensions = (String[])new CMN_getRegisteredExtensions().syncExec(true, id);
     }
     return registeredExtensions;
   }
@@ -221,7 +221,7 @@ public class FileTypeLauncher {
    */
   public String getName() {
     if(name == null) {
-      name = (String)new CMN_getName().syncExec(id);
+      name = (String)new CMN_getName().syncExec(true, id);
     }
     return name;
   }
@@ -243,7 +243,7 @@ public class FileTypeLauncher {
   public ImageIcon getIcon() {
     if(!isIconInitialized) {
       isIconInitialized = true;
-      icon = (ImageIcon)new CMN_getIcon().syncExec(id);
+      icon = (ImageIcon)new CMN_getIcon().syncExec(true, id);
     }
     return icon == null? getDefaultIcon(): icon;
   }
@@ -264,7 +264,7 @@ public class FileTypeLauncher {
   
   public int hashCode() {
     if(hashCode == null) {
-      hashCode = (Integer)new CMN_hashCode().syncExec(id);
+      hashCode = (Integer)new CMN_hashCode().syncExec(true, id);
     }
     return hashCode;
   }
@@ -282,7 +282,7 @@ public class FileTypeLauncher {
    * @param filePath the path to the file to launch.
    */
   public void launch(String filePath) {
-    new CMN_launch().asyncExec(id, filePath);
+    new CMN_launch().asyncExec(true, id, filePath);
   }
   
   private static Map<Integer, FileTypeLauncher> idToFileTypeLauncherMap;
@@ -320,7 +320,7 @@ public class FileTypeLauncher {
       return null;
     }
     final String extension = fileName.substring(index);
-    Integer id = (Integer)new CMN_getLauncherID().syncExec(extension);
+    Integer id = (Integer)new CMN_getLauncherID().syncExec(true, extension);
     if(id == null) {
       return null;
     }
@@ -355,7 +355,7 @@ public class FileTypeLauncher {
    */
   public static FileTypeLauncher[] getLaunchers() {
     load();
-    int[] ids = (int[])new CMN_getLauncherIDs().syncExec();
+    int[] ids = (int[])new CMN_getLauncherIDs().syncExec(true);
     if(idToFileTypeLauncherMap == null) {
       idToFileTypeLauncherMap = new HashMap<Integer, FileTypeLauncher>();
     }

@@ -7,6 +7,7 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.7 (xxxxxxxxxxxxxxx):
 
+- In-process is added for future platforms that cannot handle out-process.
 - Options can be passed to the JWebBrowserWindow constructor.
 - Fixed a bug that option for XULRunner was not propagated to popups.
 - Location of embedded Shell is forced to (0,0).

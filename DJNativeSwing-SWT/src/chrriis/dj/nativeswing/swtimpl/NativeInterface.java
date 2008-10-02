@@ -40,6 +40,7 @@ import chrriis.common.Utils;
 import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.NativeSwing;
 import chrriis.dj.nativeswing.swtimpl.InProcessMessagingInterface.SWTInProcessMessagingInterface;
+import chrriis.dj.nativeswing.swtimpl.InProcessMessagingInterface.SwingInProcessMessagingInterface;
 import chrriis.dj.nativeswing.swtimpl.OutProcessMessagingInterface.SWTOutProcessMessagingInterface;
 import chrriis.dj.nativeswing.swtimpl.OutProcessMessagingInterface.SwingOutProcessMessagingInterface;
 
@@ -185,12 +186,14 @@ public class NativeInterface {
             }
             ThreadGroup group = Thread.currentThread().getThreadGroup();
             for(ThreadGroup parentGroup = group; (parentGroup = parentGroup.getParent()) != null; group = parentGroup);
-            boolean isAlive = false;
-            for(int i=group.enumerate(activeThreads, true)-1; i>=0; i--) {
-              Thread t = activeThreads[i];
-              if(t != display.getThread() && !t.isDaemon() && t.isAlive()) {
-                isAlive = true;
-                break;
+            boolean isAlive = display == null;
+            if(!isAlive) {
+              for(int i=group.enumerate(activeThreads, true)-1; i>=0; i--) {
+                Thread t = activeThreads[i];
+                if(t != display.getThread() && !t.isDaemon() && t.isAlive()) {
+                  isAlive = true;
+                  break;
+                }
               }
             }
             if(!isAlive) {
@@ -260,25 +263,24 @@ public class NativeInterface {
   }
   
   private static void createInProcessCommunicationChannel() {
-    createInProcessMessagingInterface();
-    messagingInterface = createOutProcessMessagingInterface();
+    messagingInterface = createInProcessMessagingInterface();
     isOpen = true;
     isEventPumpRunning = true;
   }
   
-  private static void createInProcessMessagingInterface() {
+  private static MessagingInterface createInProcessMessagingInterface() {
     Device.DEBUG = Boolean.parseBoolean(System.getProperty("nativeswing.swt.debug.device"));
     DeviceData data = new DeviceData();
     data.debug = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.debug"));
     data.tracking = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.tracking"));
     display = new Display(data);
-    messagingInterface = new SWTInProcessMessagingInterface(display).getMirrorMessagingInterface();
+    return new SWTInProcessMessagingInterface(display).getMirrorMessagingInterface();
   }
   
   private static void createOutProcessCommunicationChannel() {
     messagingInterface = createOutProcessMessagingInterface();
     isOpen = true;
-    new CMN_setProperties().syncExec(System.getProperties());
+    new CMN_setProperties().syncExec(true, System.getProperties());
   }
   
   private static Process createProcess(int port) {
@@ -490,24 +492,18 @@ public class NativeInterface {
   
   private NativeInterface() {}
   
-  private static volatile MessagingInterface messagingInterface;
-
-  static MessagingInterface getMessagingInterface() {
-    return messagingInterface;
-  }
-  
-  static Object syncSend(final Message message) {
+  static Object syncSend(boolean isTargetNativeSide, final Message message) {
     checkOpen();
     if(message instanceof LocalMessage) {
       LocalMessage localMessage = (LocalMessage)message;
       return localMessage.runCommand();
     }
-    return messagingInterface.syncSend(message);
+    return getMessagingInterface(!isTargetNativeSide).syncSend(message);
   }
   
-  static void asyncSend(final Message message) {
+  static void asyncSend(boolean isTargetNativeSide, final Message message) {
     if(IS_SYNCING_MESSAGES) {
-      syncSend(message);
+      syncSend(isTargetNativeSide, message);
     } else {
       checkOpen();
       if(message instanceof LocalMessage) {
@@ -515,8 +511,27 @@ public class NativeInterface {
         localMessage.runCommand();
         return;
       }
-      messagingInterface.asyncSend(message);
+      getMessagingInterface(!isTargetNativeSide).asyncSend(message);
     }
+  }
+  
+  private static volatile MessagingInterface messagingInterface;
+
+  static MessagingInterface getMessagingInterface(boolean isNativeSide) {
+    if(isInProcess()) {
+      if(isNativeSide) {
+        SWTInProcessMessagingInterface swtInProcessMessagingInterface = (SWTInProcessMessagingInterface)((SwingInProcessMessagingInterface)messagingInterface).getMirrorMessagingInterface();
+        return swtInProcessMessagingInterface;
+      }
+      SwingInProcessMessagingInterface swingInProcessMessagingInterface = (SwingInProcessMessagingInterface)messagingInterface;
+      return swingInProcessMessagingInterface;
+    }
+    if(isNativeSide) {
+      SWTOutProcessMessagingInterface swtOutProcessMessagingInterface = (SWTOutProcessMessagingInterface)messagingInterface;
+      return swtOutProcessMessagingInterface;
+    }
+    SwingOutProcessMessagingInterface swingOutProcessMessagingInterface = (SwingOutProcessMessagingInterface)messagingInterface;
+    return swingOutProcessMessagingInterface;
   }
   
   private static Display display;
@@ -538,29 +553,29 @@ public class NativeInterface {
    * @return true if the current thread is the user interface thread.
    * @throws IllegalStateException when the native interface is not alive.
    */
-  public static boolean isUIThread() {
+  public static boolean isUIThread(boolean isNativeSide) {
     if(!isAlive()) {
       throw new IllegalStateException("The native interface is not alive!");
     }
-    return messagingInterface.isUIThread();
+    return getMessagingInterface(isNativeSide).isUIThread();
   }
   
-  static void checkUIThread() {
+  static void checkUIThread(boolean isNativeSide) {
     if(!isAlive()) {
       throw new IllegalStateException("The native interface is not alive!");
     }
-    messagingInterface.checkUIThread();
+    getMessagingInterface(isNativeSide).checkUIThread();
   }
   
   private static volatile boolean isEventPumpRunning;
 
-  /*public*/ static void runEventPump() {
+  public static void runEventPump() {
     if(!isInProcess) {
       return;
     }
     while(isEventPumpRunning) {
       try {
-        if(display.readAndDispatch()) {
+        if(!display.readAndDispatch()) {
           if(isEventPumpRunning) {
             display.sleep();
           }

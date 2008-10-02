@@ -23,7 +23,8 @@ import org.eclipse.swt.widgets.Display;
  */
 abstract class OutProcessMessagingInterface extends MessagingInterface {
 
-  public OutProcessMessagingInterface(Socket socket, boolean exitOnEndOfStream) {
+  public OutProcessMessagingInterface(boolean isNativeSide, Socket socket, boolean exitOnEndOfStream) {
+    super(isNativeSide);
     this.socket = socket;
     initialize(exitOnEndOfStream);
   }
@@ -121,7 +122,7 @@ abstract class OutProcessMessagingInterface extends MessagingInterface {
     private Display display;
     
     public SWTOutProcessMessagingInterface(Socket socket, final boolean exitOnEndOfStream, Display display) {
-      super(socket, exitOnEndOfStream);
+      super(true, socket, exitOnEndOfStream);
       this.display = display;
     }
     
@@ -140,7 +141,7 @@ abstract class OutProcessMessagingInterface extends MessagingInterface {
   static class SwingOutProcessMessagingInterface extends OutProcessMessagingInterface {
     
     public SwingOutProcessMessagingInterface(Socket socket, final boolean exitOnEndOfStream) {
-      super(socket, exitOnEndOfStream);
+      super(false, socket, exitOnEndOfStream);
     }
     
     @Override
