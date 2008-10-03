@@ -318,7 +318,7 @@ abstract class MessagingInterface {
   }
   
   protected void createReceiverThread(final boolean exitOnEndOfStream) {
-    Thread receiverThread = new Thread("NativeSwing Receiver") {
+    Thread receiverThread = new Thread("NativeSwing Receiver - " + (isNativeSide()? "SWT": "Swing")) {
       @Override
       public void run() {
         while(isAlive()) {

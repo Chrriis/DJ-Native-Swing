@@ -363,7 +363,7 @@ public class NativeInterface {
     }
     
     static void startAutoShutdownThread() {
-      Thread autoShutdownThread = new Thread("DJNativeSwing Auto-Shutdown") {
+      Thread autoShutdownThread = new Thread("NativeSwing Auto-Shutdown") {
         protected Thread[] activeThreads = new Thread[1024];
         @Override
         public void run() {
