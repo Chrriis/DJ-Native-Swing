@@ -118,6 +118,7 @@ public class SimpleVLCPlayerExample extends JPanel {
         frame.setVisible(true);
       }
     });
+    NativeInterface.runEventPump();
   }
   
 }

@@ -45,6 +45,7 @@ public class ClasspathPages extends JPanel {
         frame.setVisible(true);
       }
     });
+    NativeInterface.runEventPump();
   }
   
 }

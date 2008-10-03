@@ -214,6 +214,7 @@ public class FileAssociations extends JPanel {
         frame.setVisible(true);
       }
     });
+    NativeInterface.runEventPump();
   }
   
 }

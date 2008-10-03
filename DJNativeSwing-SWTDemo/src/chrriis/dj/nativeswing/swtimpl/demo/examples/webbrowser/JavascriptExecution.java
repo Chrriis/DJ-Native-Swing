@@ -84,6 +84,7 @@ public class JavascriptExecution extends JPanel {
         frame.setVisible(true);
       }
     });
+    NativeInterface.runEventPump();
   }
   
 }

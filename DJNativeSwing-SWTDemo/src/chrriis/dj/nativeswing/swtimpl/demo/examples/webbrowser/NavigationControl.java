@@ -130,6 +130,7 @@ public class NavigationControl extends JPanel {
         frame.setVisible(true);
       }
     });
+    NativeInterface.runEventPump();
   }
   
 }

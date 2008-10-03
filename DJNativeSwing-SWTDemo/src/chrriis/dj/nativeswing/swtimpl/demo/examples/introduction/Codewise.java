@@ -13,8 +13,6 @@ import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import chrriis.dj.nativeswing.swtimpl.NativeInterface;
-
 /**
  * @author Christopher Deckers
  */
