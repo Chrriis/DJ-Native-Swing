@@ -25,6 +25,8 @@ abstract class InProcessMessagingInterface extends MessagingInterface {
   }
   
   public void destroy() {
+    // TODO: send a message to dispose all SWT controls (simulate dead peer).
+    // Remove IDs from component registry?
     setAlive(false);
   }
   

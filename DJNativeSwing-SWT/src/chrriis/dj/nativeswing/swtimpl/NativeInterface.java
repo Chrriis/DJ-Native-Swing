@@ -68,27 +68,13 @@ public class NativeInterface {
     }
   }
   
-  private static class CMN_setProperties extends CommandMessage {
-    @Override
-    public Object run(Object[] args) {
-      Properties systemProperties = System.getProperties();
-      Properties properties = (Properties)args[0];
-      for(Object o: properties.keySet()) {
-        if(!systemProperties.containsKey(o)) {
-          try {
-            System.setProperty((String)o, properties.getProperty((String)o));
-          } catch(Exception e) {
-          }
-        }
-      }
-      return null;
-    }
-  }
-  
   /**
    * Close the native interface, which destroys the native side (peer VM). Note that the native interface can be re-opened later.
    */
   public static void close() {
+    if(!isOpen) {
+      return;
+    }
     isOpen = false;
     messagingInterface.destroy();
     messagingInterface = null;
@@ -164,8 +150,7 @@ public class NativeInterface {
     if(inProcessProperty != null) {
       isInProcess = Boolean.parseBoolean(inProcessProperty);
     } else {
-      // TODO: depending on OS
-      isInProcess = false;
+      isInProcess = Utils.IS_MAC;
     }
     try {
       for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
@@ -175,36 +160,7 @@ public class NativeInterface {
       e.printStackTrace();
     }
     if(isInProcess) {
-      Thread autoShutdownThread = new Thread("DJNativeSwing Auto-Shutdown") {
-        protected Thread[] activeThreads = new Thread[1024];
-        @Override
-        public void run() {
-          while(true) {
-            try {
-              Thread.sleep(500);
-            } catch(Exception e) {
-            }
-            ThreadGroup group = Thread.currentThread().getThreadGroup();
-            for(ThreadGroup parentGroup = group; (parentGroup = parentGroup.getParent()) != null; group = parentGroup);
-            boolean isAlive = display == null;
-            if(!isAlive) {
-              for(int i=group.enumerate(activeThreads, true)-1; i>=0; i--) {
-                Thread t = activeThreads[i];
-                if(t != display.getThread() && !t.isDaemon() && t.isAlive()) {
-                  isAlive = true;
-                  break;
-                }
-              }
-            }
-            if(!isAlive) {
-              isEventPumpRunning = false;
-              display.wake();
-            }
-          }
-        }
-      };
-      autoShutdownThread.setDaemon(true);
-      autoShutdownThread.start();
+      InProcessSpecific.startAutoShutdownThread();
     }
   }
   
@@ -219,9 +175,9 @@ public class NativeInterface {
     initialize();
     loadClipboardDebuggingProperties();
     if(isInProcess) {
-      createInProcessCommunicationChannel();
+      InProcessSpecific.createInProcessCommunicationChannel();
     } else {
-      createOutProcessCommunicationChannel();
+      OutProcessSpecific.createOutProcessCommunicationChannel();
     }
     try {
       for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
@@ -242,8 +198,8 @@ public class NativeInterface {
     } catch(Exception e) {
       e.printStackTrace();
     }
-    if(!NativeInterface.isNativeSide() && nativeInterfaceConfiguration.isNativeSideRespawnedOnError()) {
-      createOutProcessCommunicationChannel();
+    if(!NativeInterface.OutProcessSpecific.isNativeSide() && nativeInterfaceConfiguration.isNativeSideRespawnedOnError()) {
+      OutProcessSpecific.createOutProcessCommunicationChannel();
       return true;
     }
     return false;
@@ -260,234 +216,6 @@ public class NativeInterface {
     } catch(Exception e) {
       e.printStackTrace();
     }
-  }
-  
-  private static void createInProcessCommunicationChannel() {
-    messagingInterface = createInProcessMessagingInterface();
-    isOpen = true;
-    isEventPumpRunning = true;
-  }
-  
-  private static MessagingInterface createInProcessMessagingInterface() {
-    Device.DEBUG = Boolean.parseBoolean(System.getProperty("nativeswing.swt.debug.device"));
-    DeviceData data = new DeviceData();
-    data.debug = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.debug"));
-    data.tracking = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.tracking"));
-    display = new Display(data);
-    return new SWTInProcessMessagingInterface(display).getMirrorMessagingInterface();
-  }
-  
-  private static void createOutProcessCommunicationChannel() {
-    messagingInterface = createOutProcessMessagingInterface();
-    isOpen = true;
-    new CMN_setProperties().syncExec(true, System.getProperties());
-  }
-  
-  private static Process createProcess(int port) {
-    List<String> classPathList = new ArrayList<String>();
-    String pathSeparator = System.getProperty("path.separator");
-    List<Object> referenceList = new ArrayList<Object>();
-    referenceList.add(NativeSwing.class);
-    referenceList.add(NativeInterface.class);
-    referenceList.add("org/eclipse/swt/widgets/Display.class");
-    Class<?>[] nativeClassPathReferenceClasses = nativeInterfaceConfiguration.getNativeClassPathReferenceClasses();
-    if(nativeClassPathReferenceClasses != null) {
-      referenceList.addAll(Arrays.asList(nativeClassPathReferenceClasses));
-    }
-    String[] nativeClassPathReferenceResources = nativeInterfaceConfiguration.getNativeClassPathReferenceResources();
-    if(nativeClassPathReferenceResources != null) {
-      referenceList.addAll(Arrays.asList(nativeClassPathReferenceResources));
-    }
-    boolean isProxyClassLoaderUsed = Boolean.parseBoolean(System.getProperty("nativeswing.peervm.forceproxyclassloader"));
-    if(!isProxyClassLoaderUsed) {
-      for(Object o: referenceList) {
-        File clazzClassPath;
-        if(o instanceof Class) {
-          clazzClassPath = Utils.getClassPathFile((Class<?>)o);
-        } else {
-          clazzClassPath = Utils.getClassPathFile((String)o);
-          if(NativeInterface.class.getResource("/" + o) == null) {
-            throw new IllegalStateException("A resource that is needed in the classpath is missing: " + o);
-          }
-        }
-        clazzClassPath = o instanceof Class? Utils.getClassPathFile((Class<?>)o): Utils.getClassPathFile((String)o);
-        if(clazzClassPath != null) {
-          String path = clazzClassPath.getAbsolutePath();
-          if(!classPathList.contains(path)) {
-            classPathList.add(path);
-          }
-        } else {
-          isProxyClassLoaderUsed = true;
-        }
-      }
-    }
-    if(isProxyClassLoaderUsed) {
-      // We set only one item in the classpath: the path to the proxy class loader.
-      classPathList.clear();
-      File classPathFile = new File(System.getProperty("java.io.tmpdir"), ".djnativeswing/classpath");
-      Utils.deleteAll(classPathFile);
-      String classPath = NetworkURLClassLoader.class.getName().replace('.', '/') + ".class";
-      File mainClassFile = new File(classPathFile, classPath);
-      mainClassFile.getParentFile().mkdirs();
-      if(!mainClassFile.exists()) {
-        try {
-          BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(mainClassFile));
-          BufferedInputStream in = new BufferedInputStream(NativeInterface.class.getResourceAsStream("/" + classPath));
-          byte[] bytes = new byte[1024];
-          for(int n; (n=in.read(bytes)) != -1; out.write(bytes, 0, n));
-          in.close();
-          out.close();
-        } catch(Exception e) {
-//          throw new IllegalStateException("Cannot find a suitable classpath to spawn VM!");
-        }
-        mainClassFile.deleteOnExit();
-      }
-      classPathList.add(classPathFile.getAbsolutePath());
-    }
-    StringBuilder sb = new StringBuilder();
-    for(int i=0; i<classPathList.size(); i++) {
-      if(i > 0) {
-        sb.append(pathSeparator);
-      }
-      sb.append(classPathList.get(i));
-    }
-    String javaHome = System.getProperty("java.home");
-    String[] candidateBinaries = new String[] {
-        new File(javaHome, "bin/java").getAbsolutePath(),
-        new File("/usr/lib/java").getAbsolutePath(),
-        "java",
-    };
-    Process p = null;
-    // Create the argument list for the Java process that will be created
-    List<String> argList = new ArrayList<String>();
-    argList.add(null);
-    String[] peerVMParams = nativeInterfaceConfiguration.getPeerVMParams();
-    if(peerVMParams != null) {
-      for(String param: peerVMParams) {
-        argList.add(param);
-      }
-    }
-    String[] flags = new String[] {
-        "nativeswing.interface.syncmessages",
-        "nativeswing.interface.debug.printmessages",
-        "nativeswing.peervm.debug.printstartmessage",
-        "nativeswing.swt.debug.device",
-        "nativeswing.swt.devicedata.debug",
-        "nativeswing.swt.devicedata.tracking",
-    };
-    for(String flag: flags) {
-      if(Boolean.parseBoolean(System.getProperty(flag))) {
-        argList.add("-D" + flag + "=true");
-      }
-    }
-    argList.add("-classpath");
-    argList.add(sb.toString());
-    if(isProxyClassLoaderUsed) {
-      argList.add(NetworkURLClassLoader.class.getName());
-      argList.add(WebServer.getDefaultWebServer().getClassPathResourceURL("", ""));
-    }
-    argList.add(NativeInterface.class.getName());
-    argList.add(String.valueOf(port));
-    // Try these arguments with the various candidate binaries.
-    for(String candidateBinary: candidateBinaries) {
-      argList.set(0, candidateBinary);
-      if(Boolean.parseBoolean(System.getProperty("nativeswing.peervm.debug.printcommandline"))) {
-        System.err.println("Native Command: " + Arrays.toString(argList.toArray()));
-      }
-      try {
-        p = new ProcessBuilder(argList).start();
-        break;
-      } catch(IOException e) {
-      }
-    }
-    if(p == null) {
-      throw new IllegalStateException("Failed to spawn the VM!");
-    }
-    connectStream(System.err, p.getErrorStream());
-    connectStream(System.out, p.getInputStream());
-    return p;
-  }
-  
-  private static MessagingInterface createOutProcessMessagingInterface() {
-    int port = Integer.parseInt(System.getProperty("nativeswing.interface.port", "-1"));
-    if(port <= 0) {
-      ServerSocket serverSocket;
-      try {
-        serverSocket = new ServerSocket();
-        serverSocket.setReuseAddress(false);
-        serverSocket.bind(new InetSocketAddress(0));
-      } catch(IOException e) {
-        throw new RuntimeException(e);
-      }
-      port = serverSocket.getLocalPort();
-      try {
-        serverSocket.close();
-      } catch(IOException e) {
-      }
-    }
-    Process p;
-    if(Boolean.parseBoolean(System.getProperty("nativeswing.peervm.create", "true"))) {
-      p = createProcess(port);
-    } else {
-      p = null;
-    }
-    Socket socket = null;
-    for(int i=99; i>=0; i--) {
-      try {
-        socket = new Socket("127.0.0.1", port);
-        break;
-      } catch(IOException e) {
-        if(i == 0) {
-          throw new RuntimeException(e);
-        }
-      }
-      try {
-        Thread.sleep(200);
-      } catch(Exception e) {
-      }
-    }
-    if(socket == null) {
-      if(p != null) {
-        p.destroy();
-      }
-      throw new IllegalStateException("Failed to connect to spawned VM!");
-    }
-    return new SwingOutProcessMessagingInterface(socket, false);
-  }
-  
-  private static void connectStream(final PrintStream out, InputStream in) {
-    final BufferedInputStream bin = new BufferedInputStream(in);
-    Thread streamThread = new Thread("NativeSwing Stream Connector") {
-      @Override
-      public void run() {
-        try {
-          ByteArrayOutputStream baos = new ByteArrayOutputStream();
-          String lineSeparator = Utils.LINE_SEPARATOR;
-          byte lastByte = (byte)lineSeparator.charAt(lineSeparator.length() - 1);
-          boolean addMessage = true;
-          byte[] bytes = new byte[1024];
-          for(int i; (i=bin.read(bytes)) != -1; ) {
-            baos.reset();
-            for(int j=0; j<i; j++) {
-              byte b = bytes[j];
-              if(addMessage) {
-                baos.write("NativeSwing: ".getBytes());
-              }
-              addMessage = b == lastByte;
-              baos.write(b);
-            }
-            try {
-              out.write(baos.toByteArray());
-            } catch(Exception e) {
-              e.printStackTrace();
-            }
-          }
-        } catch(Exception e) {
-        }
-      }
-    };
-    streamThread.setDaemon(true);
-    streamThread.start();
   }
   
   private NativeInterface() {}
@@ -544,10 +272,6 @@ public class NativeInterface {
     return display;
   }
   
-  static boolean isNativeSide() {
-    return display != null;
-  }
-  
   /**
    * Indicate if the current thread is the user interface thread.
    * @return true if the current thread is the user interface thread.
@@ -567,120 +291,12 @@ public class NativeInterface {
     getMessagingInterface(isNativeSide).checkUIThread();
   }
   
-  private static volatile boolean isEventPumpRunning;
-
-  public static void runEventPump() {
-    if(!isInProcess) {
-      return;
-    }
-    while(isEventPumpRunning) {
-      try {
-        if(!display.readAndDispatch()) {
-          if(isEventPumpRunning) {
-            display.sleep();
-          }
-        }
-      } catch(Exception e) {
-        e.printStackTrace();
-      }
-    }
-  }
-  
   /**
-   * The main method that is called by the native side (peer VM).
-   * @param args the arguments that are passed to the peer VM.
+   * Run the native event pump. Certain platforms require this method call at the end of the main method to function properly, so it is suggested to always add it.
    */
-  public static void main(String[] args) throws Exception {
-    if(Boolean.parseBoolean(System.getProperty("nativeswing.peervm.debug.printstartmessage"))) {
-      System.err.println("Starting spawned VM");
-    }
-    isOpen = true;
-    int port = Integer.parseInt(args[0]);
-    ServerSocket serverSocket = null;
-    for(int i=19; i>=0; i--) {
-      try {
-        serverSocket = new ServerSocket();
-        serverSocket.setReuseAddress(true);
-        serverSocket.bind(new InetSocketAddress(port));
-        break;
-      } catch(IOException e) {
-        if(i == 0) {
-          throw e;
-        }
-      }
-      try {
-        Thread.sleep(100);
-      } catch(Exception e) {
-      }
-    }
-    final ServerSocket serverSocket_ = serverSocket;
-    if(!Boolean.parseBoolean(System.getProperty("nativeswing.peervm.keepalive"))) {
-      Thread shutdownThread = new Thread("NativeSwing Shutdown") {
-        @Override
-        public void run() {
-          try {
-            sleep(10000);
-          } catch(Exception e) {
-          }
-          if(messagingInterface == null) {
-            try {
-              serverSocket_.close();
-            } catch(Exception e) {
-            }
-          }
-        }
-      };
-      shutdownThread.setDaemon(true);
-      shutdownThread.start();
-    }
-//    // We set up a new security manager to track exit calls.
-//    // When this happens, we dispose native resources.
-//    try {
-//      System.setSecurityManager(new SecurityManager() {
-//        protected SecurityManager securityManager = System.getSecurityManager();
-//        @Override
-//        public void checkExit(int status) {
-//          super.checkExit(status);
-//          for(StackTraceElement stackTraceElement: Thread.currentThread().getStackTrace()) {
-//            String className = stackTraceElement.getClassName();
-//            String methodName = stackTraceElement.getMethodName();
-//            if("java.lang.Runtime".equals(className) && ("exit".equals(methodName) || "halt".equals(methodName)) || "java.lang.System".equals(className) && "exit".equals(methodName)) {
-//              //TODO: perform cleanup
-//              break;
-//            }
-//          }
-//        }
-//        @Override
-//        public void checkPermission(Permission perm) {
-//          if(securityManager != null) {
-//            securityManager.checkPermission(perm);
-//          }
-//        }
-//      });
-//    } catch(Exception e) {
-//      e.printStackTrace();
-//    }
-    Socket socket;
-    try {
-      socket = serverSocket.accept();
-    } catch(Exception e) {
-      throw new IllegalStateException("The native side did not receive an incoming connection!");
-    }
-    Device.DEBUG = Boolean.parseBoolean(System.getProperty("nativeswing.swt.debug.device"));
-    DeviceData data = new DeviceData();
-    data.debug = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.debug"));
-    data.tracking = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.tracking"));
-    display = new Display(data);
-    Display.setAppName("DJ Native Swing");
-    messagingInterface = new SWTOutProcessMessagingInterface(socket, true, display);
-    while(display != null && !display.isDisposed()) {
-      try {
-        if(!display.readAndDispatch()) {
-          display.sleep();
-        }
-      } catch(Exception e) {
-        e.printStackTrace();
-      }
+  public static void runEventPump() {
+    if(isInProcess) {
+      InProcessSpecific.runEventPump();
     }
   }
   
@@ -710,4 +326,415 @@ public class NativeInterface {
     return listenerList.getListeners(NativeInterfaceListener.class);
   }
 
+  static class InProcessSpecific {
+    
+    private static volatile boolean isEventPumpRunning;
+
+    static void runEventPump() {
+      if(!isInProcess) {
+        return;
+      }
+      while(isEventPumpRunning) {
+        try {
+          if(!display.readAndDispatch()) {
+            if(isEventPumpRunning) {
+              display.sleep();
+            }
+          }
+        } catch(Exception e) {
+          e.printStackTrace();
+        }
+      }
+    }
+    
+    static void createInProcessCommunicationChannel() {
+      messagingInterface = createInProcessMessagingInterface();
+      isOpen = true;
+      isEventPumpRunning = true;
+    }
+    
+    private static MessagingInterface createInProcessMessagingInterface() {
+      Device.DEBUG = Boolean.parseBoolean(System.getProperty("nativeswing.swt.debug.device"));
+      DeviceData data = new DeviceData();
+      data.debug = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.debug"));
+      data.tracking = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.tracking"));
+      display = new Display(data);
+      return new SWTInProcessMessagingInterface(display).getMirrorMessagingInterface();
+    }
+    
+    static void startAutoShutdownThread() {
+      Thread autoShutdownThread = new Thread("DJNativeSwing Auto-Shutdown") {
+        protected Thread[] activeThreads = new Thread[1024];
+        @Override
+        public void run() {
+          while(true) {
+            try {
+              Thread.sleep(500);
+            } catch(Exception e) {
+            }
+            ThreadGroup group = Thread.currentThread().getThreadGroup();
+            for(ThreadGroup parentGroup = group; (parentGroup = parentGroup.getParent()) != null; group = parentGroup);
+            boolean isAlive = display == null;
+            if(!isAlive) {
+              for(int i=group.enumerate(activeThreads, true)-1; i>=0; i--) {
+                Thread t = activeThreads[i];
+                if(t != display.getThread() && !t.isDaemon() && t.isAlive()) {
+                  isAlive = true;
+                  break;
+                }
+              }
+            }
+            if(!isAlive) {
+              isEventPumpRunning = false;
+              display.wake();
+            }
+          }
+        }
+      };
+      autoShutdownThread.setDaemon(true);
+      autoShutdownThread.start();
+    }
+    
+  }
+  
+  static class OutProcessSpecific {
+    
+    private static class CMN_setProperties extends CommandMessage {
+      @Override
+      public Object run(Object[] args) {
+        Properties systemProperties = System.getProperties();
+        Properties properties = (Properties)args[0];
+        for(Object o: properties.keySet()) {
+          if(!systemProperties.containsKey(o)) {
+            try {
+              System.setProperty((String)o, properties.getProperty((String)o));
+            } catch(Exception e) {
+            }
+          }
+        }
+        return null;
+      }
+    }
+    
+    static boolean isNativeSide() {
+      return display != null;
+    }
+    
+    static void createOutProcessCommunicationChannel() {
+      messagingInterface = createOutProcessMessagingInterface();
+      isOpen = true;
+      new CMN_setProperties().syncExec(true, System.getProperties());
+    }
+    
+    private static Process createProcess(int port) {
+      List<String> classPathList = new ArrayList<String>();
+      String pathSeparator = System.getProperty("path.separator");
+      List<Object> referenceList = new ArrayList<Object>();
+      referenceList.add(NativeSwing.class);
+      referenceList.add(NativeInterface.class);
+      referenceList.add("org/eclipse/swt/widgets/Display.class");
+      Class<?>[] nativeClassPathReferenceClasses = nativeInterfaceConfiguration.getNativeClassPathReferenceClasses();
+      if(nativeClassPathReferenceClasses != null) {
+        referenceList.addAll(Arrays.asList(nativeClassPathReferenceClasses));
+      }
+      String[] nativeClassPathReferenceResources = nativeInterfaceConfiguration.getNativeClassPathReferenceResources();
+      if(nativeClassPathReferenceResources != null) {
+        referenceList.addAll(Arrays.asList(nativeClassPathReferenceResources));
+      }
+      boolean isProxyClassLoaderUsed = Boolean.parseBoolean(System.getProperty("nativeswing.peervm.forceproxyclassloader"));
+      if(!isProxyClassLoaderUsed) {
+        for(Object o: referenceList) {
+          File clazzClassPath;
+          if(o instanceof Class) {
+            clazzClassPath = Utils.getClassPathFile((Class<?>)o);
+          } else {
+            clazzClassPath = Utils.getClassPathFile((String)o);
+            if(NativeInterface.class.getResource("/" + o) == null) {
+              throw new IllegalStateException("A resource that is needed in the classpath is missing: " + o);
+            }
+          }
+          clazzClassPath = o instanceof Class? Utils.getClassPathFile((Class<?>)o): Utils.getClassPathFile((String)o);
+          if(clazzClassPath != null) {
+            String path = clazzClassPath.getAbsolutePath();
+            if(!classPathList.contains(path)) {
+              classPathList.add(path);
+            }
+          } else {
+            isProxyClassLoaderUsed = true;
+          }
+        }
+      }
+      if(isProxyClassLoaderUsed) {
+        // We set only one item in the classpath: the path to the proxy class loader.
+        classPathList.clear();
+        File classPathFile = new File(System.getProperty("java.io.tmpdir"), ".djnativeswing/classpath");
+        Utils.deleteAll(classPathFile);
+        String classPath = NetworkURLClassLoader.class.getName().replace('.', '/') + ".class";
+        File mainClassFile = new File(classPathFile, classPath);
+        mainClassFile.getParentFile().mkdirs();
+        if(!mainClassFile.exists()) {
+          try {
+            BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(mainClassFile));
+            BufferedInputStream in = new BufferedInputStream(NativeInterface.class.getResourceAsStream("/" + classPath));
+            byte[] bytes = new byte[1024];
+            for(int n; (n=in.read(bytes)) != -1; out.write(bytes, 0, n));
+            in.close();
+            out.close();
+          } catch(Exception e) {
+//            throw new IllegalStateException("Cannot find a suitable classpath to spawn VM!");
+          }
+          mainClassFile.deleteOnExit();
+        }
+        classPathList.add(classPathFile.getAbsolutePath());
+      }
+      StringBuilder sb = new StringBuilder();
+      for(int i=0; i<classPathList.size(); i++) {
+        if(i > 0) {
+          sb.append(pathSeparator);
+        }
+        sb.append(classPathList.get(i));
+      }
+      String javaHome = System.getProperty("java.home");
+      String[] candidateBinaries = new String[] {
+          new File(javaHome, "bin/java").getAbsolutePath(),
+          new File("/usr/lib/java").getAbsolutePath(),
+          "java",
+      };
+      Process p = null;
+      // Create the argument list for the Java process that will be created
+      List<String> argList = new ArrayList<String>();
+      argList.add(null);
+      String[] peerVMParams = nativeInterfaceConfiguration.getPeerVMParams();
+      if(peerVMParams != null) {
+        for(String param: peerVMParams) {
+          argList.add(param);
+        }
+      }
+      String[] flags = new String[] {
+          "nativeswing.interface.syncmessages",
+          "nativeswing.interface.debug.printmessages",
+          "nativeswing.peervm.debug.printstartmessage",
+          "nativeswing.swt.debug.device",
+          "nativeswing.swt.devicedata.debug",
+          "nativeswing.swt.devicedata.tracking",
+      };
+      for(String flag: flags) {
+        if(Boolean.parseBoolean(System.getProperty(flag))) {
+          argList.add("-D" + flag + "=true");
+        }
+      }
+      argList.add("-classpath");
+      argList.add(sb.toString());
+      if(isProxyClassLoaderUsed) {
+        argList.add(NetworkURLClassLoader.class.getName());
+        argList.add(WebServer.getDefaultWebServer().getClassPathResourceURL("", ""));
+      }
+      argList.add(NativeInterface.class.getName());
+      argList.add(String.valueOf(port));
+      // Try these arguments with the various candidate binaries.
+      for(String candidateBinary: candidateBinaries) {
+        argList.set(0, candidateBinary);
+        if(Boolean.parseBoolean(System.getProperty("nativeswing.peervm.debug.printcommandline"))) {
+          System.err.println("Native Command: " + Arrays.toString(argList.toArray()));
+        }
+        try {
+          p = new ProcessBuilder(argList).start();
+          break;
+        } catch(IOException e) {
+        }
+      }
+      if(p == null) {
+        throw new IllegalStateException("Failed to spawn the VM!");
+      }
+      connectStream(System.err, p.getErrorStream());
+      connectStream(System.out, p.getInputStream());
+      return p;
+    }
+    
+    private static MessagingInterface createOutProcessMessagingInterface() {
+      int port = Integer.parseInt(System.getProperty("nativeswing.interface.port", "-1"));
+      if(port <= 0) {
+        ServerSocket serverSocket;
+        try {
+          serverSocket = new ServerSocket();
+          serverSocket.setReuseAddress(false);
+          serverSocket.bind(new InetSocketAddress(0));
+        } catch(IOException e) {
+          throw new RuntimeException(e);
+        }
+        port = serverSocket.getLocalPort();
+        try {
+          serverSocket.close();
+        } catch(IOException e) {
+        }
+      }
+      Process p;
+      if(Boolean.parseBoolean(System.getProperty("nativeswing.peervm.create", "true"))) {
+        p = createProcess(port);
+      } else {
+        p = null;
+      }
+      Socket socket = null;
+      for(int i=99; i>=0; i--) {
+        try {
+          socket = new Socket("127.0.0.1", port);
+          break;
+        } catch(IOException e) {
+          if(i == 0) {
+            throw new RuntimeException(e);
+          }
+        }
+        try {
+          Thread.sleep(200);
+        } catch(Exception e) {
+        }
+      }
+      if(socket == null) {
+        if(p != null) {
+          p.destroy();
+        }
+        throw new IllegalStateException("Failed to connect to spawned VM!");
+      }
+      return new SwingOutProcessMessagingInterface(socket, false);
+    }
+    
+    private static void connectStream(final PrintStream out, InputStream in) {
+      final BufferedInputStream bin = new BufferedInputStream(in);
+      Thread streamThread = new Thread("NativeSwing Stream Connector") {
+        @Override
+        public void run() {
+          try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            String lineSeparator = Utils.LINE_SEPARATOR;
+            byte lastByte = (byte)lineSeparator.charAt(lineSeparator.length() - 1);
+            boolean addMessage = true;
+            byte[] bytes = new byte[1024];
+            for(int i; (i=bin.read(bytes)) != -1; ) {
+              baos.reset();
+              for(int j=0; j<i; j++) {
+                byte b = bytes[j];
+                if(addMessage) {
+                  baos.write("NativeSwing: ".getBytes());
+                }
+                addMessage = b == lastByte;
+                baos.write(b);
+              }
+              try {
+                out.write(baos.toByteArray());
+              } catch(Exception e) {
+                e.printStackTrace();
+              }
+            }
+          } catch(Exception e) {
+          }
+        }
+      };
+      streamThread.setDaemon(true);
+      streamThread.start();
+    }
+    
+    static void runNativeSide(String[] args) throws IOException {
+      if(Boolean.parseBoolean(System.getProperty("nativeswing.peervm.debug.printstartmessage"))) {
+        System.err.println("Starting spawned VM");
+      }
+      isOpen = true;
+      int port = Integer.parseInt(args[0]);
+      ServerSocket serverSocket = null;
+      for(int i=19; i>=0; i--) {
+        try {
+          serverSocket = new ServerSocket();
+          serverSocket.setReuseAddress(true);
+          serverSocket.bind(new InetSocketAddress(port));
+          break;
+        } catch(IOException e) {
+          if(i == 0) {
+            throw e;
+          }
+        }
+        try {
+          Thread.sleep(100);
+        } catch(Exception e) {
+        }
+      }
+      final ServerSocket serverSocket_ = serverSocket;
+      if(!Boolean.parseBoolean(System.getProperty("nativeswing.peervm.keepalive"))) {
+        Thread shutdownThread = new Thread("NativeSwing Shutdown") {
+          @Override
+          public void run() {
+            try {
+              sleep(10000);
+            } catch(Exception e) {
+            }
+            if(messagingInterface == null) {
+              try {
+                serverSocket_.close();
+              } catch(Exception e) {
+              }
+            }
+          }
+        };
+        shutdownThread.setDaemon(true);
+        shutdownThread.start();
+      }
+//      // We set up a new security manager to track exit calls.
+//      // When this happens, we dispose native resources.
+//      try {
+//        System.setSecurityManager(new SecurityManager() {
+//          protected SecurityManager securityManager = System.getSecurityManager();
+//          @Override
+//          public void checkExit(int status) {
+//            super.checkExit(status);
+//            for(StackTraceElement stackTraceElement: Thread.currentThread().getStackTrace()) {
+//              String className = stackTraceElement.getClassName();
+//              String methodName = stackTraceElement.getMethodName();
+//              if("java.lang.Runtime".equals(className) && ("exit".equals(methodName) || "halt".equals(methodName)) || "java.lang.System".equals(className) && "exit".equals(methodName)) {
+//                //TODO: perform cleanup
+//                break;
+//              }
+//            }
+//          }
+//          @Override
+//          public void checkPermission(Permission perm) {
+//            if(securityManager != null) {
+//              securityManager.checkPermission(perm);
+//            }
+//          }
+//        });
+//      } catch(Exception e) {
+//        e.printStackTrace();
+//      }
+      Socket socket;
+      try {
+        socket = serverSocket.accept();
+      } catch(Exception e) {
+        throw new IllegalStateException("The native side did not receive an incoming connection!");
+      }
+      Device.DEBUG = Boolean.parseBoolean(System.getProperty("nativeswing.swt.debug.device"));
+      DeviceData data = new DeviceData();
+      data.debug = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.debug"));
+      data.tracking = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.tracking"));
+      display = new Display(data);
+      Display.setAppName("DJ Native Swing");
+      messagingInterface = new SWTOutProcessMessagingInterface(socket, true, display);
+      while(display != null && !display.isDisposed()) {
+        try {
+          if(!display.readAndDispatch()) {
+            display.sleep();
+          }
+        } catch(Exception e) {
+          e.printStackTrace();
+        }
+      }
+    }
+    
+  }
+  
+  /**
+   * The main method that is called by the native side (peer VM).
+   * @param args the arguments that are passed to the peer VM.
+   */
+  public static void main(String[] args) throws Exception {
+    OutProcessSpecific.runNativeSide(args);
+  }
+  
 }
