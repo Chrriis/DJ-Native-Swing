@@ -48,6 +48,7 @@ public class CustomConfiguration extends JPanel {
         frame.setVisible(true);
       }
     });
+    NativeInterface.runEventPump();
   }
   
 }

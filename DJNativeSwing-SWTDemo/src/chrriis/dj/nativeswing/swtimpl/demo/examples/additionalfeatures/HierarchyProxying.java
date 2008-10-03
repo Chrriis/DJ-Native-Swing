@@ -110,6 +110,7 @@ public class HierarchyProxying extends JPanel implements Disposable {
         frame.setVisible(true);
       }
     });
+    NativeInterface.runEventPump();
   }
   
 }

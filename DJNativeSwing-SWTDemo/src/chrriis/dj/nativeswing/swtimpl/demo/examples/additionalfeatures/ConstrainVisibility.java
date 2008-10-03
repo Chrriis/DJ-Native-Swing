@@ -93,6 +93,7 @@ public class ConstrainVisibility extends JPanel {
         frame.setVisible(true);
       }
     });
+    NativeInterface.runEventPump();
   }
   
 }

@@ -121,6 +121,7 @@ public class AlphaBlendingSimulation extends JPanel implements Disposable {
         frame.setVisible(true);
       }
     });
+    NativeInterface.runEventPump();
   }
   
 }

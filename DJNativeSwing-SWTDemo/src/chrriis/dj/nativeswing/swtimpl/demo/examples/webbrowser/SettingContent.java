@@ -81,6 +81,7 @@ public class SettingContent extends JPanel {
         frame.setVisible(true);
       }
     });
+    NativeInterface.runEventPump();
   }
   
 }

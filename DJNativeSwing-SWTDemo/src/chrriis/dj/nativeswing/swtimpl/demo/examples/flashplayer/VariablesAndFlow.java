@@ -97,6 +97,7 @@ public class VariablesAndFlow extends JPanel {
         frame.setVisible(true);
       }
     });
+    NativeInterface.runEventPump();
   }
   
 }

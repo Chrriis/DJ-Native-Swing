@@ -118,6 +118,7 @@ public class SimpleWMediaPlayerExample extends JPanel {
         frame.setVisible(true);
       }
     });
+    NativeInterface.runEventPump();
   }
   
 }

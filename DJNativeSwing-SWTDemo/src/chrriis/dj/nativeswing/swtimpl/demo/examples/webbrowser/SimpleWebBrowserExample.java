@@ -61,6 +61,7 @@ public class SimpleWebBrowserExample extends JPanel {
         frame.setVisible(true);
       }
     });
+    NativeInterface.runEventPump();
   }
   
 }

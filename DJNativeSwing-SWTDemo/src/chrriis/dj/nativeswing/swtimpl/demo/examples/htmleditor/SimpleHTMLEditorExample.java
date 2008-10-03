@@ -91,6 +91,7 @@ public class SimpleHTMLEditorExample extends JPanel {
         frame.setVisible(true);
       }
     });
+    NativeInterface.runEventPump();
   }
   
 }

@@ -107,6 +107,7 @@ public class SendingCommands extends JPanel {
         frame.setVisible(true);
       }
     });
+    NativeInterface.runEventPump();
   }
   
 }

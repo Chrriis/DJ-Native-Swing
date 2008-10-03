@@ -117,6 +117,7 @@ public class FunctionCalls extends JPanel {
         frame.setVisible(true);
       }
     });
+    NativeInterface.runEventPump();
   }
   
 }

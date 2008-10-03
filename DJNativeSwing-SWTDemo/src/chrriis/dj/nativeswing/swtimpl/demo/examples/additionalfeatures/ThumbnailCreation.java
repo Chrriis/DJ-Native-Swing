@@ -167,6 +167,7 @@ public class ThumbnailCreation extends JPanel {
         frame.setVisible(true);
       }
     });
+    NativeInterface.runEventPump();
   }
   
 }

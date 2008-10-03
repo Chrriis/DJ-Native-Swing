@@ -43,6 +43,7 @@ public class SimpleFlashExample extends JPanel {
         frame.setVisible(true);
       }
     });
+    NativeInterface.runEventPump();
   }
   
 }
