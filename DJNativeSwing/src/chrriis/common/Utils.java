@@ -25,6 +25,13 @@ public class Utils {
   
   public static final boolean IS_JAVA_6_OR_GREATER = System.getProperty("java.version").compareTo("1.6") >= 0;
 
+  public static final boolean IS_MAC;
+  
+  static {
+    String os = System.getProperty("os.name");
+    IS_MAC = os.startsWith("Mac") || os.startsWith("Darwin");
+  }
+  
   public static final String LINE_SEPARATOR = System.getProperty("line.separator");
   
   public static String decodeURL(String s) {
