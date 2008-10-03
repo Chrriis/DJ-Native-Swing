@@ -14,6 +14,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.Window;
+import java.awt.event.ComponentListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
@@ -371,6 +372,19 @@ public abstract class NativeComponent extends Canvas {
   
   private static class CMN_createControl extends CommandMessage {
     public Shell createShell(Object handle) throws Exception {
+      if(NativeInterface.isInProcess()) {
+        Canvas canvas = (Canvas)handle;
+        // SWT_AWT adds a component listener, but it conflicts. Thus we have to restore the listeners. 
+        ComponentListener[] componentListeners = canvas.getComponentListeners();
+        Shell shell = SWT_AWT.new_Shell(NativeInterface.getDisplay(), canvas);
+        for(ComponentListener componentListener: canvas.getComponentListeners()) {
+          canvas.removeComponentListener(componentListener);
+        }
+        for(ComponentListener componentListener: componentListeners) {
+          canvas.addComponentListener(componentListener);
+        }
+        return shell;
+      }
       // these are the methods that are in the Shell class, and can create the embedded shell:
       // win32: public static Shell win32_new (Display display, int handle) {
       // photon: public static Shell photon_new (Display display, int handle) {
@@ -643,6 +657,9 @@ public abstract class NativeComponent extends Canvas {
   
   private Method getAWTHandleMethod;
   private Object getHandle() {
+    if(NativeInterface.isInProcess()) {
+      return this;
+    }
     try {
       if(getAWTHandleMethod == null) {
         Method loadLibraryMethod = SWT_AWT.class.getDeclaredMethod("loadLibrary");
