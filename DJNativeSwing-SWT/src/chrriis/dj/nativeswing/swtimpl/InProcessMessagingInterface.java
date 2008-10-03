@@ -28,8 +28,6 @@ abstract class InProcessMessagingInterface extends MessagingInterface {
     setAlive(false);
   }
   
-  protected abstract void asyncUIExec(Runnable runnable);
-
   @Override
   protected void openChannel() {
   }
