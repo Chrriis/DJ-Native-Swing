@@ -151,7 +151,7 @@ public abstract class ControlCommandMessage extends CommandMessage {
     if(NativeInterface.isInProcess()) {
       return getControl() != null || getNativeComponent() != null;
     }
-    if(NativeInterface.OutProcessSpecific.isNativeSide()) {
+    if(NativeInterface.OutProcess.isNativeSide()) {
       return getControl() != null;
     }
     return getNativeComponent() != null;

@@ -160,7 +160,7 @@ public class NativeInterface {
       e.printStackTrace();
     }
     if(isInProcess) {
-      InProcessSpecific.startAutoShutdownThread();
+      InProcess.startAutoShutdownThread();
     }
   }
   
@@ -175,9 +175,9 @@ public class NativeInterface {
     initialize();
     loadClipboardDebuggingProperties();
     if(isInProcess) {
-      InProcessSpecific.createInProcessCommunicationChannel();
+      InProcess.createInProcessCommunicationChannel();
     } else {
-      OutProcessSpecific.createOutProcessCommunicationChannel();
+      OutProcess.createOutProcessCommunicationChannel();
     }
     try {
       for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
@@ -198,8 +198,8 @@ public class NativeInterface {
     } catch(Exception e) {
       e.printStackTrace();
     }
-    if(!NativeInterface.OutProcessSpecific.isNativeSide() && nativeInterfaceConfiguration.isNativeSideRespawnedOnError()) {
-      OutProcessSpecific.createOutProcessCommunicationChannel();
+    if(!NativeInterface.OutProcess.isNativeSide() && nativeInterfaceConfiguration.isNativeSideRespawnedOnError()) {
+      OutProcess.createOutProcessCommunicationChannel();
       return true;
     }
     return false;
@@ -296,7 +296,7 @@ public class NativeInterface {
    */
   public static void runEventPump() {
     if(isInProcess) {
-      InProcessSpecific.runEventPump();
+      InProcess.runEventPump();
     }
   }
   
@@ -326,7 +326,7 @@ public class NativeInterface {
     return listenerList.getListeners(NativeInterfaceListener.class);
   }
 
-  static class InProcessSpecific {
+  static class InProcess {
     
     private static volatile boolean isEventPumpRunning;
 
@@ -397,7 +397,7 @@ public class NativeInterface {
     
   }
   
-  static class OutProcessSpecific {
+  static class OutProcess {
     
     private static class CMN_setProperties extends CommandMessage {
       @Override
@@ -734,7 +734,7 @@ public class NativeInterface {
    * @param args the arguments that are passed to the peer VM.
    */
   public static void main(String[] args) throws Exception {
-    OutProcessSpecific.runNativeSide(args);
+    OutProcess.runNativeSide(args);
   }
   
 }

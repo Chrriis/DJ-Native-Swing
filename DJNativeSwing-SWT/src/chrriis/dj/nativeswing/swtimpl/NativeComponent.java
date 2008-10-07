@@ -175,7 +175,7 @@ public abstract class NativeComponent extends Canvas {
       nativeComponentRegistry = new ObjectRegistry();
       controlRegistry = new ObjectRegistry();
     } else {
-      if(NativeInterface.OutProcessSpecific.isNativeSide()) {
+      if(NativeInterface.OutProcess.isNativeSide()) {
         controlRegistry = new ObjectRegistry();
       } else {
         nativeComponentRegistry = new ObjectRegistry();
