@@ -52,7 +52,6 @@ public class Message implements Serializable {
    * @param isTargetNativeSide true if the target is the native side, false otherwise.
    */
   public void asyncSend(boolean isTargetNativeSide) {
-    computeId(isTargetNativeSide);
     NativeInterface.asyncSend(isTargetNativeSide, this);
   }
   
@@ -62,11 +61,13 @@ public class Message implements Serializable {
    * @return the result if any.
    */
   public Object syncSend(boolean isTargetNativeSide) {
-    computeId(isTargetNativeSide);
     return NativeInterface.syncSend(isTargetNativeSide, this);
   }
   
-  private void computeId(boolean isTargetNativeSide) {
+  void computeId(boolean isTargetNativeSide) {
+    if(id != 0) {
+      return;
+    }
     if(isTargetNativeSide) {
       id = nextID++;
     } else {

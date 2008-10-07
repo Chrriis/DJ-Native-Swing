@@ -217,6 +217,7 @@ abstract class MessagingInterface {
   private final Object LOCK = new Object();
   
   public Object syncSend(Message message) {
+    message.computeId(!isNativeSide);
     if(!isUIThread()) {
       return nonUISyncExec(message);
     }
@@ -289,6 +290,7 @@ abstract class MessagingInterface {
   }
   
   public void asyncSend(Message message) {
+    message.computeId(!isNativeSide);
     message.setUI(isUIThread());
     message.setSyncExec(false);
     try {
