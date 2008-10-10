@@ -57,6 +57,13 @@ are using them get loaded.
 
 --------------------------------------------------------------------------------
 
+* nativeswing.components.debug.printfailedmessages
+  = true/false (default: false)
+  Set whether the messages that did not reach the native component should be
+  printed.
+
+--------------------------------------------------------------------------------
+
 * nativeswing.webbrowser.runtime
   = xulrunner (default: none)
   Set the runtime of the web browser. Currently, only XULRunner is supported.

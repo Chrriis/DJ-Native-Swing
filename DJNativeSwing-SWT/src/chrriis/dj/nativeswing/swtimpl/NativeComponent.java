@@ -76,6 +76,8 @@ import com.sun.jna.Native;
  */
 public abstract class NativeComponent extends Canvas {
 
+  private static final boolean IS_PRINTING_FAILED_MESSAGES = Boolean.parseBoolean(System.getProperty("nativeswing.components.debug.printfailedmessages"));
+  
   private NativeComponentWrapper nativeComponentWrapper = new NativeComponentWrapper(this) {
     
     @Override
@@ -118,6 +120,7 @@ public abstract class NativeComponent extends Canvas {
    * If the component is disposed before the command has a chance to run, it is ignored silently.
    * @param commandMessage the command message to run.
    * @param args the arguments to pass to the command message.
+   * @return the result of running the message, or null if the message is queued.
    */
   public Object runSync(CommandMessage commandMessage, Object... args) {
     if(NativeInterface.isAlive()) {
@@ -164,7 +167,9 @@ public abstract class NativeComponent extends Canvas {
   }
   
   private void printFailedInvocation(Message message) {
-    System.err.println("Invalid " + getComponentDescription() + ": " + message);
+    if(IS_PRINTING_FAILED_MESSAGES) {
+      System.err.println("Invalid " + getComponentDescription() + ": " + message);
+    }
   }
   
   private static ObjectRegistry nativeComponentRegistry;
@@ -202,7 +207,10 @@ public abstract class NativeComponent extends Canvas {
   private static class CMN_reshape extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
-      getControl().getShell().setSize((Integer)args[0], (Integer)args[1]);
+      Shell shell = getControl().getShell();
+      if(!shell.isDisposed()) {
+        shell.setSize((Integer)args[0], (Integer)args[1]);
+      }
       return null;
     }
   }
