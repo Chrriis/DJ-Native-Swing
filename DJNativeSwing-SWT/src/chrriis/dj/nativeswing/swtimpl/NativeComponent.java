@@ -30,6 +30,8 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -435,12 +437,19 @@ public abstract class NativeComponent extends Canvas {
       synchronized(NativeComponent.getControlRegistry()) {
         Shell shell = createShell(args[2]);
         shell.addControlListener(new ControlAdapter() {
+          private boolean isAdjusting;
           @Override
           public void controlMoved(ControlEvent e) {
+            if(isAdjusting) {
+              return;
+            }
             Shell shell = (Shell)e.widget;
             Point location = shell.getLocation();
             if(location.x != 0 || location.y != 0) {
+              // On Linux Ubuntu, I found that the location cannot be forced and this would cause a stack overflow.
+              isAdjusting = true;
               shell.setLocation(0, 0);
+              isAdjusting = false;
             }
           }
         });
@@ -1119,7 +1128,8 @@ public abstract class NativeComponent extends Canvas {
     }
     rectangles = rectangleList.toArray(new Rectangle[0]);
     try {
-      final ServerSocket serverSocket = new ServerSocket(0);
+      final ServerSocket serverSocket = new ServerSocket();
+      serverSocket.bind(new InetSocketAddress(InetAddress.getByName(WebServer.getHostAddress()), 0));
       NativeInterfaceListener nativeInterfaceListener = new NativeInterfaceAdapter() {
         @Override
         public void nativeInterfaceClosed() {

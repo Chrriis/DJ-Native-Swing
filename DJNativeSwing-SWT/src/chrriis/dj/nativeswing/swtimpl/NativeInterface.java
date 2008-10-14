@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.StringReader;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -558,7 +559,7 @@ public class NativeInterface {
         try {
           serverSocket = new ServerSocket();
           serverSocket.setReuseAddress(false);
-          serverSocket.bind(new InetSocketAddress(0));
+          serverSocket.bind(new InetSocketAddress(InetAddress.getByName(WebServer.getHostAddress()), 0));
         } catch(IOException e) {
           throw new RuntimeException(e);
         }
@@ -644,7 +645,7 @@ public class NativeInterface {
         try {
           serverSocket = new ServerSocket();
           serverSocket.setReuseAddress(true);
-          serverSocket.bind(new InetSocketAddress(port));
+          serverSocket.bind(new InetSocketAddress(WebServer.getHostAddress(), port));
           break;
         } catch(IOException e) {
           if(i == 0) {
