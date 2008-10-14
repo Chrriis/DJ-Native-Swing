@@ -7,6 +7,7 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.7 (xxxxxxxxxxxxxxx):
 
+- Local server sockets don't get the firewall to complain anymore.
 - Fixed visibility calculation bug where invisible component was considered.
 - Debug option to print shape computing is added.
 

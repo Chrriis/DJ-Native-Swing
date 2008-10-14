@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
@@ -687,7 +688,8 @@ public class WebServer {
     }
     isRunning = true;
     instanceID = ObjectRegistry.getInstance().add(this);
-    final ServerSocket serverSocket = new ServerSocket(port);
+    final ServerSocket serverSocket = new ServerSocket();
+    serverSocket.bind(new InetSocketAddress(InetAddress.getByName(WebServer.getHostAddress()), port));
     port = serverSocket.getLocalPort();
     if(Boolean.parseBoolean(System.getProperty("nativeswing.webserver.debug.printport"))) {
       System.err.println("Web Server port: " + port);
