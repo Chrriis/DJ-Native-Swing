@@ -601,8 +601,6 @@ public class JWebBrowser extends NSPanelComponent {
     menuToolAndLocationBarPanel.repaint();
     locationBarCheckBoxMenuItem.setSelected(isLocationBarVisible);
     adjustBorder();
-    if(locationBarPane != null) {
-    }
   }
   
   /**
