@@ -7,7 +7,9 @@
  */
 package chrriis.dj.nativeswing.swtimpl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -20,6 +22,8 @@ import org.eclipse.swt.widgets.Display;
  */
 abstract class InProcessMessagingInterface extends MessagingInterface {
 
+  private static final boolean IS_PRINTING_NON_SERIALIZABLE_MESSAGES = Boolean.parseBoolean(System.getProperty("nativeswing.interface.inprocess.printnonserializablemessages"));
+  
   public InProcessMessagingInterface(boolean isNativeSide) {
     super(isNativeSide);
   }
@@ -69,6 +73,15 @@ abstract class InProcessMessagingInterface extends MessagingInterface {
   
   @Override
   protected void writeMessageToChannel(Message message) throws IOException {
+    if(IS_PRINTING_NON_SERIALIZABLE_MESSAGES && !message.getClass().getName().equals("chrriis.dj.nativeswing.swtimpl.NativeComponent$CMN_createControl")) {
+      ObjectOutputStream oos = new ObjectOutputStream(new ByteArrayOutputStream());
+      try {
+        oos.writeObject(message);
+      } catch(Exception e) {
+        System.err.println("Non-serializable message: " + message);
+      }
+      oos.close();
+    }
     synchronized (sentMessageList) {
       sentMessageList.add(message);
       sentMessageList.notifyAll();
