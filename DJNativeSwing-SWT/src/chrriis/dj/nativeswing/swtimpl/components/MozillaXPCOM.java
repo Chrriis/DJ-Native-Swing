@@ -26,7 +26,7 @@ import chrriis.dj.nativeswing.swtimpl.CommandMessage;
 import chrriis.dj.nativeswing.swtimpl.ControlCommandMessage;
 
 /**
- * This class is meant to allow the access to the JavaXPCOM nsIWebBrowser interface.
+ * This class is meant to allow accessing the JavaXPCOM nsIWebBrowser interface, and other Mozilla XPCOM interfaces.
  * @author Christopher Deckers
  */
 public class MozillaXPCOM {
