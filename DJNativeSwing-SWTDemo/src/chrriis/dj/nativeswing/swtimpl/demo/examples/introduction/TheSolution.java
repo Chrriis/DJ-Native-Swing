@@ -35,7 +35,7 @@ public class TheSolution extends JPanel {
         "        <li>All Swing popups are turned to heavyweight components in order to avoid overlapping glitches.</li>" + LS +
         "        <li>Hidden heavyweight components are prevented from messing up with the focus.</li>" + LS +
         "        <li>Swing modality is tracked to automatically adjust the modality of the embedded native components.</li>" + LS +
-        "        <li>SWT is mostly portable: the important components are available on most platforms with a consistant API.</li>" + LS +
+        "        <li>SWT is mostly portable: the important components are available on most platforms with a consistent API.</li>" + LS +
         "        <li>The threading of the two toolkits is taken care internally, so users of the library only have to deal with Swing's threading.</li>" + LS +
         "      </ul>" + LS +
         "    </p>" + LS +
