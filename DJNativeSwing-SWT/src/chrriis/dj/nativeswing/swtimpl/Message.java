@@ -86,8 +86,8 @@ public class Message implements Serializable {
   @Override
   public String toString() {
     String name = getClass().getName();
-    if(name.startsWith("chrriis.dj.nativeswing.")) {
-      name = name.substring("chrriis.dj.nativeswing.".length());
+    if(name.startsWith("chrriis.dj.nativeswing.swtimpl.")) {
+      name = name.substring("chrriis.dj.nativeswing.swtimpl.".length());
     }
     return name;
   }
