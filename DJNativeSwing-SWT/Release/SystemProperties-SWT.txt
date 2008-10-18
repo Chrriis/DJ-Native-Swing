@@ -73,15 +73,13 @@ are using them get loaded.
   = xulrunner (default: none)
   Set the runtime of the web browser. Currently, only XULRunner is supported.
 
+* nativeswing.webbrowser.xulrunner.home
+  = <path to XULRunner>
+  Set which XULRunner installation is used. This property is taken into account
+  when using the XULRunner runtime. 
+
 --------------------------------------------------------------------------------
 
 * nativeswing.swt.debug.device
   = true/false (default: false)
   Set whether the SWT Device debugging is active.
-
---------------------------------------------------------------------------------
-
-* org.eclipse.swt.browser.XULRunnerPath
-  = <path to XULRunner>
-  Set which XULRunner installation is used. This property is taken into account
-  when using the XULRunner runtime. 

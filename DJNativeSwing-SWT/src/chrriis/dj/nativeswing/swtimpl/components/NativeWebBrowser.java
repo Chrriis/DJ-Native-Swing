@@ -367,6 +367,10 @@ class NativeWebBrowser extends NativeComponent {
   }
   
   protected static Control createControl(Shell shell, Object[] parameters) {
+    String xulRunnerPath = System.getProperty("nativeswing.webbrowser.xulrunner.home");
+    if(xulRunnerPath != null) {
+      System.setProperty("org.eclipse.swt.browser.XULRunnerPath", xulRunnerPath);
+    }
     int style = SWT.NONE;
     if(((Boolean)parameters[0])) {
       style |= SWT.MOZILLA;
