@@ -92,7 +92,7 @@ public class SimpleWMediaPlayerExample extends JPanel {
     });
     playerFilePanel.add(playerFileButton);
     add(playerFilePanel, BorderLayout.NORTH);
-    // Create the check boxes, to show/hide the various bars
+    // Create the button pane with a check box to show/hide the control bar
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 4));
     player.setControlBarVisible(false);
     controlBarCheckBox.addItemListener(new ItemListener() {
