@@ -27,6 +27,11 @@ are using them get loaded.
   = true/false (default: platform-dependant)
   Set whether the interface should be in-process or out-process.
 
+* nativeswing.interface.inprocess.printnonserializablemessages
+  = true/false (default: false)
+  When in-process, set whether messages should be artificially serialized to
+  check whether they would be compatible with the out-process mode.
+
 --------------------------------------------------------------------------------
 
 * nativeswing.peervm.create
