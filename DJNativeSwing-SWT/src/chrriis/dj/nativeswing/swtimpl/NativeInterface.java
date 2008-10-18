@@ -431,9 +431,17 @@ public class NativeInterface {
       List<String> classPathList = new ArrayList<String>();
       String pathSeparator = System.getProperty("path.separator");
       List<Object> referenceList = new ArrayList<Object>();
+      List<String> optionalReferenceList = new ArrayList<String>();
       referenceList.add(NativeSwing.class);
       referenceList.add(NativeInterface.class);
       referenceList.add("org/eclipse/swt/widgets/Display.class");
+      optionalReferenceList.add("org/mozilla/xpcom/Mozilla.class");
+      optionalReferenceList.add("org/mozilla/interfaces/nsIWebBrowser.class");
+      for(String optionalReference: optionalReferenceList) {
+        if(NativeInterface.class.getClassLoader().getResource(optionalReference) != null) {
+          referenceList.add(optionalReference);
+        }
+      }
       Class<?>[] nativeClassPathReferenceClasses = nativeInterfaceConfiguration.getNativeClassPathReferenceClasses();
       if(nativeClassPathReferenceClasses != null) {
         referenceList.addAll(Arrays.asList(nativeClassPathReferenceClasses));
@@ -450,7 +458,7 @@ public class NativeInterface {
             clazzClassPath = Utils.getClassPathFile((Class<?>)o);
           } else {
             clazzClassPath = Utils.getClassPathFile((String)o);
-            if(NativeInterface.class.getResource("/" + o) == null) {
+            if(NativeInterface.class.getClassLoader().getResource((String)o) == null) {
               throw new IllegalStateException("A resource that is needed in the classpath is missing: " + o);
             }
           }
