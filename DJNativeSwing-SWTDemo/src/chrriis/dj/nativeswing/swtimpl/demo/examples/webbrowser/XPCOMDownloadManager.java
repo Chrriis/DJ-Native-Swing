@@ -11,6 +11,7 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -54,7 +55,7 @@ public class XPCOMDownloadManager extends JPanel {
     add(webBrowserPanel, BorderLayout.CENTER);
     // Create an additional area to see the downloads in progress.
     final JPanel downloadsPanel = new JPanel(new GridLayout(0, 1));
-    downloadsPanel.setBorder(BorderFactory.createTitledBorder("Download manager (downloads are automatically added to this area)"));
+    downloadsPanel.setBorder(BorderFactory.createTitledBorder("Download manager (on-going downloads are automatically added to this area)"));
     add(downloadsPanel, BorderLayout.SOUTH);
     // We can only access XPCOM when it is properly initialized.
     // This happens when the web browser is created so we run our code in sequence.
@@ -108,6 +109,7 @@ public class XPCOMDownloadManager extends JPanel {
           public void actionPerformed(ActionEvent e) {
             cancelable.cancel(Mozilla.NS_ERROR_ABORT);
             removeDownloadComponent();
+            new File(path + ".part").delete();
           }
         });
         baseText = "Downloading to " + path;
