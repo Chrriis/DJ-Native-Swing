@@ -370,6 +370,14 @@ class NativeWebBrowser extends NativeComponent {
     String xulRunnerPath = System.getProperty("nativeswing.webbrowser.xulrunner.home");
     if(xulRunnerPath != null) {
       System.setProperty("org.eclipse.swt.browser.XULRunnerPath", xulRunnerPath);
+    } else {
+      xulRunnerPath = System.getProperty("org.eclipse.swt.browser.XULRunnerPath");
+      if(xulRunnerPath == null) {
+        xulRunnerPath = System.getenv("XULRUNNER_HOME");
+        if(xulRunnerPath != null) {
+          System.setProperty("org.eclipse.swt.browser.XULRunnerPath", xulRunnerPath);
+        }
+      }
     }
     int style = SWT.NONE;
     if(((Boolean)parameters[0])) {
