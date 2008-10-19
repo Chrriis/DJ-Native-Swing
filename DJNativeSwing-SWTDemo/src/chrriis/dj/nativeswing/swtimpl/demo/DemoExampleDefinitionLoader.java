@@ -31,6 +31,8 @@ import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.NavigationControl
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.SendingCommands;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.SettingContent;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.SimpleWebBrowserExample;
+import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.XPCOMDownloadManager;
+import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.XPCOMToggleEditionMode;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.win32.multimediaplayer.SimpleWMediaPlayerExample;
 
 /**
@@ -39,6 +41,8 @@ import chrriis.dj.nativeswing.swtimpl.demo.examples.win32.multimediaplayer.Simpl
 public class DemoExampleDefinitionLoader {
 
   public static List<ExampleGroup> getExampleGroupList() {
+    boolean isXULRunnerPresent = System.getProperty("nativeswing.webbrowser.xulrunner.home") != null || System.getenv("XULRUNNER_HOME") != null;
+    String xulRunnerErrorMessage = "Mozilla XULRunner is required to run this example.\n\nPlease download it and set the XULRUNNER_HOME environment variable\nor set the \"nativeswing.webbrowser.xulrunner.home\" system property.";
     List<ExampleGroup> exampleGroupList = new ArrayList<ExampleGroup>();
     exampleGroupList.add(new ExampleGroup("Introduction", new Example[] {
         new Example("Native Integration", NativeIntegration.class, "First, some background information on the problems of native integration in a Swing-based application.", false),
@@ -52,6 +56,8 @@ public class DemoExampleDefinitionLoader {
         new Example("Navigation Control", NavigationControl.class, "Control the navigation happening in the web browser from the Java application.\nThis allows to block certain links and/or the creation of new windows, or to open links and/or new windows elsewhere.", true),
         new Example("Sending Commands", SendingCommands.class, "Use static links or simple Javascript to send some commands with arguments to the application:\n    function sendCommand(command) {\n      var s = 'command://' + encodeURIComponent(command);\n      for(var i=1; i<arguments.length; s+='&'+encodeURIComponent(arguments[i++]));\n      window.location = s;\n    }", true),
         new Example("Classpath pages", ClasspathPages.class, "Load web pages from the classpath with the help of the embedded simple web server.", true),
+        new Example("Mozilla XPCOM Page Edition", XPCOMToggleEditionMode.class, "Toggle edition mode of a web page by accessing the Mozilla interfaces using XPCOM.", true, isXULRunnerPresent, xulRunnerErrorMessage),
+        new Example("Mozilla XPCOM Download Manager", XPCOMDownloadManager.class, "Modify the browser's download manager using Mozilla XPCOM.", true, isXULRunnerPresent, xulRunnerErrorMessage),
     }));
     exampleGroupList.add(new ExampleGroup("JFlashPlayer", new Example[] {
         new Example("Simple Example", SimpleFlashExample.class, "Display a Flash application.", true),
