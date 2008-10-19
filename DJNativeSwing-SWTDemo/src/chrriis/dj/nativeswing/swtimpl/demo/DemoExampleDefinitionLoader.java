@@ -42,7 +42,7 @@ public class DemoExampleDefinitionLoader {
 
   public static List<ExampleGroup> getExampleGroupList() {
     boolean isXULRunnerPresent = System.getProperty("nativeswing.webbrowser.xulrunner.home") != null || System.getenv("XULRUNNER_HOME") != null;
-    String xulRunnerErrorMessage = "Mozilla XULRunner is required to run this example.\n\nPlease download it and set the XULRUNNER_HOME environment variable\nor set the \"nativeswing.webbrowser.xulrunner.home\" system property.";
+    String xulRunnerErrorMessage = "Mozilla XULRunner is required to run this example.\n\nPlease download it and either set the \"XULRUNNER_HOME\" environment variable\nor the \"nativeswing.webbrowser.xulrunner.home\" system property.";
     List<ExampleGroup> exampleGroupList = new ArrayList<ExampleGroup>();
     exampleGroupList.add(new ExampleGroup("Introduction", new Example[] {
         new Example("Native Integration", NativeIntegration.class, "First, some background information on the problems of native integration in a Swing-based application.", false),

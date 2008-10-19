@@ -11,6 +11,7 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -100,8 +101,17 @@ public class DemoFrame extends JFrame {
                     JComponent c;
                     Class<? extends JComponent> componentClass = example.getComponentClass();
                     if(!example.isAvailable()) {
+                      GridBagConstraints cons = new GridBagConstraints();
+                      cons.anchor = GridBagConstraints.WEST;
+                      cons.gridy = 0;
                       JPanel panel = new JPanel(new GridBagLayout());
-                      panel.add(new JLabel(example.getNotAvailableMessage()));
+                      for(String notAvailableMessage: example.getNotAvailableMessage().split("\n")) {
+                        if(notAvailableMessage.length() == 0) {
+                          notAvailableMessage = " ";
+                        }
+                        panel.add(new JLabel(notAvailableMessage), cons);
+                        cons.gridy++;
+                      }
                       c = panel;
                     } else {
                       if(componentClass == null) {
