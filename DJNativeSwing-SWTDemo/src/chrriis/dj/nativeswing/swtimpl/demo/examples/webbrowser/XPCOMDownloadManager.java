@@ -17,6 +17,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -59,21 +60,26 @@ public class XPCOMDownloadManager extends JPanel {
     // This happens when the web browser is created so we run our code in sequence.
     webBrowser.runInSequence(new Runnable() {
       public void run() {
-        nsIComponentRegistrar registrar = MozillaXPCOM.Mozilla.getComponentRegistrar();
-        String NS_DOWNLOAD_CID = "e3fa9D0a-1dd1-11b2-bdef-8c720b597445";
-        String NS_TRANSFER_CONTRACTID = "@mozilla.org/transfer;1";
-        registrar.registerFactory(NS_DOWNLOAD_CID, "Transfer", NS_TRANSFER_CONTRACTID, new nsIFactory() {
-          public nsISupports queryInterface(String uuid) {
-            if(uuid.equals(nsIFactory.NS_IFACTORY_IID) || uuid.equals(nsIFactory.NS_ISUPPORTS_IID)) {
-              return this;
+        try {
+          nsIComponentRegistrar registrar = MozillaXPCOM.Mozilla.getComponentRegistrar();
+          String NS_DOWNLOAD_CID = "e3fa9D0a-1dd1-11b2-bdef-8c720b597445";
+          String NS_TRANSFER_CONTRACTID = "@mozilla.org/transfer;1";
+          registrar.registerFactory(NS_DOWNLOAD_CID, "Transfer", NS_TRANSFER_CONTRACTID, new nsIFactory() {
+            public nsISupports queryInterface(String uuid) {
+              if(uuid.equals(nsIFactory.NS_IFACTORY_IID) || uuid.equals(nsIFactory.NS_ISUPPORTS_IID)) {
+                return this;
+              }
+              return null;
             }
-            return null;
-          }
-          public nsISupports createInstance(nsISupports outer, String iid) {
-            return createTransfer(downloadsPanel);
-          }
-          public void lockFactory(boolean lock) {}
-        });
+            public nsISupports createInstance(nsISupports outer, String iid) {
+              return createTransfer(downloadsPanel);
+            }
+            public void lockFactory(boolean lock) {}
+          });
+        } catch(Exception e) {
+          JOptionPane.showMessageDialog(webBrowser, "Failed to register XPCOM download manager.\nPlease check your XULRunner configuration.", "XPCOM interface", JOptionPane.ERROR_MESSAGE);
+          return;
+        }
       }
     });
   }

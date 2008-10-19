@@ -49,7 +49,7 @@ public class XPCOMToggleEditionMode extends JPanel {
       public void itemStateChanged(ItemEvent e) {
         nsIWebBrowser iWebBrowser = MozillaXPCOM.getWebBrowser(webBrowser);
         if(iWebBrowser == null) {
-          JOptionPane.showMessageDialog(webBrowser, "The XPCOM nsIWebBrowser interface could not be obtained.", "XPCOM interface", JOptionPane.ERROR_MESSAGE);
+          JOptionPane.showMessageDialog(webBrowser, "The XPCOM nsIWebBrowser interface could not be obtained.\nPlease check your XULRunner configuration.", "XPCOM interface", JOptionPane.ERROR_MESSAGE);
           return;
         }
         nsIDOMWindow window = iWebBrowser.getContentDOMWindow();
