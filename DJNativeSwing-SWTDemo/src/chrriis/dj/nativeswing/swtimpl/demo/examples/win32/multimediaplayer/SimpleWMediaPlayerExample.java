@@ -39,7 +39,6 @@ public class SimpleWMediaPlayerExample extends JPanel {
 
   public SimpleWMediaPlayerExample() {
     super(new BorderLayout(0, 0));
-    final JCheckBox controlBarCheckBox = new JCheckBox("Control Bar");
     // Create the player.
     JPanel playerPanel = new JPanel(new BorderLayout(0, 0));
     playerPanel.setBorder(BorderFactory.createTitledBorder("Native Media Player component"));
@@ -95,6 +94,7 @@ public class SimpleWMediaPlayerExample extends JPanel {
     // Create the button pane with a check box to show/hide the control bar
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 4));
     player.setControlBarVisible(false);
+    final JCheckBox controlBarCheckBox = new JCheckBox("Control Bar");
     controlBarCheckBox.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         player.setControlBarVisible(e.getStateChange() == ItemEvent.SELECTED);
