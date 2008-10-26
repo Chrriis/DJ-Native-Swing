@@ -79,6 +79,9 @@ public class WMPControls {
   public int getAbsolutePosition() {
     try {
       return (int)Math.round((Double)nativeComponent.getOleProperty(new String[] {"controls", "currentPosition"}) * 1000);
+    } catch(IllegalStateException e) {
+      // Invalid UI thread is an illegal state
+      throw e;
     } catch(Exception e) {
       return -1;
     }

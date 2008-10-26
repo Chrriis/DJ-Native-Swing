@@ -168,6 +168,9 @@ public class JWMediaPlayer extends NSPanelComponent {
         case 10: return WMPMediaState.READY;
         case 11: return WMPMediaState.RECONNECTING;
       }
+    } catch(IllegalStateException e) {
+      // Invalid UI thread is an illegal state
+      throw e;
     } catch(Exception e) {
     }
     return WMPMediaState.UNDEFINED;

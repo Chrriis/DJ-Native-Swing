@@ -41,6 +41,9 @@ public class WMPSettings {
   public int getVolume() {
     try {
       return (Integer)nativeComponent.getOleProperty(new String[] {"settings", "volume"});
+    } catch(IllegalStateException e) {
+      // Invalid UI thread is an illegal state
+      throw e;
     } catch(Exception e) {
       return -1;
     }
@@ -64,6 +67,9 @@ public class WMPSettings {
   public float getPlaySpeedFactor() {
     try {
       return ((Double)nativeComponent.getOleProperty(new String[]{"settings", "rate"})).floatValue();
+    } catch(IllegalStateException e) {
+      // Invalid UI thread is an illegal state
+      throw e;
     } catch (Exception e) {
       return Float.NaN;
     }
@@ -86,6 +92,9 @@ public class WMPSettings {
   public int getStereoBalance() {
     try {
       return (Integer)nativeComponent.getOleProperty(new String[] {"settings", "balance"});
+    } catch(IllegalStateException e) {
+      // Invalid UI thread is an illegal state
+      throw e;
     } catch(Exception e) {
       return -1;
     }
