@@ -35,3 +35,9 @@ are using them get loaded.
   = true/false (default: false)
   Set whether the computation of the shape applied to the native component (when
   the visibility constraint option is active) should be printed.
+
+--------------------------------------------------------------------------------
+
+* nativeswing.integration.active
+  = true/false (default: true)
+  Set whether native integration should be active.
