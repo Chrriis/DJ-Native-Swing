@@ -171,7 +171,8 @@ public class NativeComponentWrapper {
       }
       System.err.println(sb);
     }
-    if(optionMap.get(NSComponentOptions.DEACTIVATE_NATIVE_INTEGRATION_OPTION_KEY) != null || !Boolean.parseBoolean(System.getProperty("nativeswing.integration.active"))) {
+    String isActive = System.getProperty("nativeswing.integration.active");
+    if(optionMap.get(NSComponentOptions.DEACTIVATE_NATIVE_INTEGRATION_OPTION_KEY) != null || isActive != null && !Boolean.parseBoolean(isActive)) {
       isRegistered = true;
       return new SimpleNativeComponentHolder(this);
     }
