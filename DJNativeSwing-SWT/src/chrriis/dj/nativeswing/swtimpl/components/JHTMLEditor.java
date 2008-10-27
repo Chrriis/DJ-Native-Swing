@@ -418,7 +418,7 @@ public class JHTMLEditor extends NSPanelComponent {
    * @param html the HTML content.
    */
   public void setHTMLContent(String html) {
-    html = convertLinksFromLocal(html.replaceAll("[\r\n]", ""));
+    html = convertLinksFromLocal(html.replaceAll("[\r\n]", " "));
 //    webBrowser.executeJavascript("JH_setData('" + Utils.encodeURL(html) + "');");
     // There is a problem: IE crashes when it has the focus and is flooded with this message.
     // While waiting for an SWT fix, we use the workaround to disable the component which loses the focus.
