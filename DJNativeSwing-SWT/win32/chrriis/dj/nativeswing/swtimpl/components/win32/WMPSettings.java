@@ -54,8 +54,8 @@ public class WMPSettings {
    * @param playCount the new playCount, with a value stricly greater than 0.
    */
   public void setPlayCount(int playCount) {
-    if(playCount < 0) {
-      throw new IllegalArgumentException("The play count must be greater than 0");
+    if(playCount <= 0) {
+      throw new IllegalArgumentException("The play count must be strictly greater than 0");
     }
     nativeComponent.setOleProperty(new String[] {"settings", "playCount"}, playCount);
   }
