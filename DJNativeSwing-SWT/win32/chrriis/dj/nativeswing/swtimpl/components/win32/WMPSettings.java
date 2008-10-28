@@ -50,6 +50,32 @@ public class WMPSettings {
   }
   
   /**
+   * Set the play count.
+   * @param playCount the new playCount, with a value stricly greater than 0.
+   */
+  public void setPlayCount(int playCount) {
+    if(playCount < 0) {
+      throw new IllegalArgumentException("The play count must be greater than 0");
+    }
+    nativeComponent.setOleProperty(new String[] {"settings", "playCount"}, playCount);
+  }
+  
+  /**
+   * Get the playCount, as a value strictly greater than 0.
+   * @return the play count, strictly greater than 0, or -1 in case of failure.
+   */
+  public int getPlayCount() {
+    try {
+      return (Integer)nativeComponent.getOleProperty(new String[] {"settings", "playCount"});
+    } catch(IllegalStateException e) {
+      // Invalid UI thread is an illegal state
+      throw e;
+    } catch(Exception e) {
+      return -1;
+    }
+  }
+  
+  /**
    * Set the speed factor that is applied when a media is played.
    * @param speedFactor the speed factor, with a value strictly greater than 0.
    */
