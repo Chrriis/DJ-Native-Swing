@@ -85,6 +85,14 @@ public class NativeSwing {
     }
     
     private void destroyForcer() {
+      if(!SwingUtilities.isEventDispatchThread()) {
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            destroyForcer();
+          }
+        });
+        return;
+      }
       if(forcer == null) {
         return;
       }
@@ -97,6 +105,14 @@ public class NativeSwing {
     }
     
     private void createForcer() {
+      if(!SwingUtilities.isEventDispatchThread()) {
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            createForcer();
+          }
+        });
+        return;
+      }
       Window windowAncestor = SwingUtilities.getWindowAncestor(component);
       for(Window window: windowAncestor.getOwnedWindows()) {
         if(window instanceof HeavyweightForcerWindow) {
