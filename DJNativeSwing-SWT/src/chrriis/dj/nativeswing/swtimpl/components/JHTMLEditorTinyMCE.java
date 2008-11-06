@@ -74,6 +74,26 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
             "          text += x+': '+e[x]+'\\n';" + LS +
             "        } debug (text);" + LS +
             "      };" + LS +
+            "      function sendCommand (command) {" + LS +
+            "        var s = 'command://' + encodeURIComponent(command);" + LS +
+            "        for(var i=1; i<arguments.length; s+='&'+encodeURIComponent(arguments[i++]));" + LS +
+                     // Better load in the iframe, because if too early may stop page loading.
+            "        document.getElementById('j_iframe').src = s;" + LS +
+            "      }" + LS +
+            "      function JH_setData (html) {" + LS +
+            "        tinyMCE.get ('" + EDITOR_INSTANCE + "').setContent (decodeURIComponent (html));" + LS +
+            "      }" + LS +
+            "      function JH_sendData () {" + LS +
+            "        tinyMCE.get ('" + EDITOR_INSTANCE + "').save ();" + LS +
+            "        document.jhtml_form.action = 'jhtml_sendData';" + LS +
+            "        document.jhtml_form.submit ();" + LS +
+            "      }" + LS +
+            "      function JH_doSave () {" + LS +
+            "        tinyMCE.get ('" + EDITOR_INSTANCE + "').save ();" + LS +
+            "        document.jhtml_form.action = 'jhtml_save';" + LS +
+            "        document.jhtml_form.submit ();" + LS +
+            "        return false;" + LS +
+            "      }" + LS +                   
             "      var opts = {" + LS +
             "        mode: 'exact'," + LS +
             "        elements: '" + EDITOR_INSTANCE + "'," + LS +
@@ -87,30 +107,11 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
             "      };" + LS +
             (customJavascriptConfiguration != null? "      var addOpts = {" + customJavascriptConfiguration + "};" + LS + "      for (var x in addOpts) {" + LS + "        opts[x] = addOpts[x];" + LS + "      }" + LS: "") +
             "      tinyMCE.init (opts);" + LS +               
-            "      function JH_setData (html) {" + LS +
-            "        tinyMCE.get ('" + EDITOR_INSTANCE + "').setContent (decodeURIComponent (html));" + LS +
-            "      }" + LS +
-            "      function sendCommand (command) {" + LS +
-            "        var s = 'command://' + encodeURIComponent(command);" + LS +
-            "        for(var i=1; i<arguments.length; s+='&'+encodeURIComponent(arguments[i++]));" + LS +
-            "        window.location = s;" + LS +
-            "      }" + LS +
-            "      function JH_sendData () {" + LS +
-            "        tinyMCE.get ('" + EDITOR_INSTANCE + "').save ();" + LS +
-            "        document.jhtml_form.action = 'jhtml_sendData';" + LS +
-            "        document.jhtml_form.submit ();" + LS +
-            "      }" + LS +
-            "      function JH_doSave () {" + LS +
-            "        tinyMCE.get ('" + EDITOR_INSTANCE + "').save ();" + LS +
-            "        document.jhtml_form.action = 'jhtml_save';" + LS +
-            "        document.jhtml_form.submit ();" + LS +
-            "        return false;" + LS +
-            "      }" + LS +                   
             "    </script>" + LS +
             "  </head>" + LS +
             "  <body>" + LS +
             "    <div id=\"debug\"></div>" + LS +
-            "    <iframe style=\"display:none;\" name=\"j_iframe\"></iframe>" + LS +
+            "    <iframe style=\"display:none;\" id=\"j_iframe\" name=\"j_iframe\"></iframe>" + LS +
             "    <form name=\"jhtml_form\" method=\"POST\" target=\"j_iframe\">" + LS +
             "      <textarea name=\"" + EDITOR_INSTANCE + "\" id=\"" + EDITOR_INSTANCE + "\" style=\"width:100%;height:100%\"></textarea>" + LS +
             "    </form>" + LS +
