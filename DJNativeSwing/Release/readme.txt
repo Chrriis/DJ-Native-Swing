@@ -35,7 +35,7 @@ If you want to use the shaping mode for native components (cf the demo), you
 need "jna.jar" and "jna_WindowUtils.jar" in your classpath.
 
 3. Any tutorial or demo?
-12345678901234567890123456789012345678901234567890123456789012345678901234567890
+
 The DJ NativeSwing SWT-based implementation along with its Demo are good
 examples on how to use the NativeSwing framework.
 
