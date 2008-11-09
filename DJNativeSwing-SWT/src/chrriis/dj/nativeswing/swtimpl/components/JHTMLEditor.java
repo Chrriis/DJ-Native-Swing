@@ -91,13 +91,28 @@ public class JHTMLEditor extends NSPanelComponent {
     webBrowser = new JWebBrowser(options);
     initialize(webBrowser.getNativeComponent());
     HTMLEditorImplementation editorImplementation = (HTMLEditorImplementation)optionMap.get(HTML_EDITOR_COMPONENT_OPTION_KEY);
-    switch(editorImplementation == null? HTMLEditorImplementation.FCKEditor: editorImplementation) {
+    HTMLEditorImplementation editorImplementation_ = editorImplementation == null? HTMLEditorImplementation.FCKEditor: editorImplementation;
+    switch(editorImplementation_) {
+      case FCKEditor:
+        try {
+          implementation = new JHTMLEditorFCKeditor(this, optionMap);
+          break;
+        } catch(RuntimeException e) {
+          if(editorImplementation != null) {
+            throw e;
+          }
+        }
       case TinyMCE:
-        implementation = new JHTMLEditorTinyMCE(this, optionMap);
-        break;
+        try {
+          implementation = new JHTMLEditorTinyMCE(this, optionMap);
+          break;
+        } catch(RuntimeException e) {
+          if(editorImplementation != null) {
+            throw e;
+          }
+        }
       default:
-        implementation = new JHTMLEditorFCKeditor(this, optionMap);
-        break;
+        throw new IllegalStateException("A suitable HTML editor (FCKeditor, TinyMCE) distribution could not be found on the classpath!");
     }
     webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
       @Override
