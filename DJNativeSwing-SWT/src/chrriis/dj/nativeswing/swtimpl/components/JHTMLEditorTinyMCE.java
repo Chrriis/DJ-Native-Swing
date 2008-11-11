@@ -77,8 +77,8 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
             "      function sendCommand (command) {" + LS +
             "        var s = 'command://' + encodeURIComponent(command);" + LS +
             "        for(var i=1; i<arguments.length; s+='&'+encodeURIComponent(arguments[i++]));" + LS +
-                     // Better load in the iframe, because if too early may stop page loading.
-            "        document.getElementById('j_iframe').src = s;" + LS +
+            // We have to use the status, because if window.location is called too early it may stop page loading.
+            "        window.status = s;" + LS +
             "      }" + LS +
             "      function JH_setData (html) {" + LS +
             "        tinyMCE.get ('" + EDITOR_INSTANCE + "').setContent (decodeURIComponent (html));" + LS +
@@ -111,7 +111,7 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
             "  </head>" + LS +
             "  <body>" + LS +
             "    <div id=\"debug\"></div>" + LS +
-            "    <iframe style=\"display:none;\" id=\"j_iframe\" name=\"j_iframe\"></iframe>" + LS +
+            "    <iframe style=\"display:none;\" name=\"j_iframe\"></iframe>" + LS +
             "    <form name=\"jhtml_form\" method=\"POST\" target=\"j_iframe\">" + LS +
             "      <textarea name=\"" + EDITOR_INSTANCE + "\" id=\"" + EDITOR_INSTANCE + "\" style=\"width:100%;height:100%\"></textarea>" + LS +
             "    </form>" + LS +

@@ -482,6 +482,38 @@ class NativeWebBrowser extends NativeComponent {
       public void changed(StatusTextEvent e) {
         String oldStatus = (String)browser.getData("CMJ_updateStatus.status");
         String newStatus = e.text;
+        if(oldStatus == null) {
+          oldStatus = "";
+        }
+        if(newStatus.startsWith(COMMAND_PREFIX)) {
+          browser.execute("window.status = decodeURIComponent('" + Utils.encodeURL(oldStatus) + "');");
+          String query = newStatus.substring(COMMAND_PREFIX.length());
+          if(query.endsWith("/")) {
+            query = query.substring(0, query.length() - 1);
+          }
+          List<String> queryElementList = new ArrayList<String>();
+          StringTokenizer st = new StringTokenizer(query, "&", true);
+          String lastToken = null;
+          while(st.hasMoreTokens()) {
+            String token = st.nextToken();
+            if("&".equals(token)) {
+              if(lastToken == null) {
+                queryElementList.add("");
+              }
+              lastToken = null;
+            } else {
+              lastToken = token;
+              queryElementList.add(Utils.decodeURL(token));
+            }
+          }
+          if(lastToken == null) {
+            queryElementList.add("");
+          }
+          String command = queryElementList.isEmpty()? "": queryElementList.remove(0);
+          String[] args = queryElementList.toArray(new String[0]);
+          new CMJ_commandReceived().asyncExec(browser, command, args);
+          return;
+        }
         if(!Utils.equals(oldStatus, newStatus)) {
           browser.setData("CMJ_updateStatus.status", newStatus);
           new CMJ_updateStatus().asyncExec(browser, newStatus);
