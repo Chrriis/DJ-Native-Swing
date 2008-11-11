@@ -29,6 +29,9 @@ public class SimpleSyntaxHighlighterExample extends JPanel {
     super(new BorderLayout(0, 0));
     final JSyntaxHighlighter syntaxHighlighter = new JSyntaxHighlighter();
     syntaxHighlighter.setContent(
+        "/************************" + LS +
+        " * This is some C# code *" + LS +
+        " ************************/" + LS +
         "public class Foo" + LS +
         "{" + LS +
         "    /// <summary>A summary of the method.</summary>" + LS +
