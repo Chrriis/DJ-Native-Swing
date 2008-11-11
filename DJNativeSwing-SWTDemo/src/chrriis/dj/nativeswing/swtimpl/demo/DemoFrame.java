@@ -45,8 +45,9 @@ import javax.swing.tree.TreeSelectionModel;
 
 import chrriis.common.Disposable;
 import chrriis.common.UIUtils;
-import chrriis.common.ui.source.SourcePane;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
+import chrriis.dj.nativeswing.swtimpl.components.JSyntaxHighlighter;
+import chrriis.dj.nativeswing.swtimpl.components.JSyntaxHighlighter.ContentLanguage;
 
 /**
  * @author Christopher Deckers
@@ -171,7 +172,13 @@ public class DemoFrame extends JFrame {
                               } catch(Exception ex) {
                                 reader = new InputStreamReader(new BufferedInputStream(new FileInputStream("src/" + componentClass.getName().replace('.', '/') + ".java")), "UTF-8");
                               }
-                              sourcePanel.add(new JScrollPane(new SourcePane(reader)), BorderLayout.CENTER);
+//                              sourcePanel.add(new JScrollPane(new SourcePane(reader)), BorderLayout.CENTER);
+                              StringBuilder sb = new StringBuilder();
+                              char[] chars = new char[1024];
+                              for(int i; (i=reader.read(chars)) != -1; sb.append(chars, 0, i));
+                              JSyntaxHighlighter syntaxHighlighter = new JSyntaxHighlighter();
+                              syntaxHighlighter.setContent(sb.toString(), ContentLanguage.Java);
+                              sourcePanel.add(syntaxHighlighter, BorderLayout.CENTER);
                               sourcePanel.revalidate();
                               sourcePanel.repaint();
                               reader.close();

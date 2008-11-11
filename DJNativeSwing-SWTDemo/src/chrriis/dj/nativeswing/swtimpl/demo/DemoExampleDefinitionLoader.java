@@ -24,6 +24,7 @@ import chrriis.dj.nativeswing.swtimpl.demo.examples.htmleditor.TinyMCEExample;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.introduction.Codewise;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.introduction.NativeIntegration;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.introduction.TheSolution;
+import chrriis.dj.nativeswing.swtimpl.demo.examples.syntaxhighlighter.SimpleSyntaxHighlighterExample;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.utilities.FileAssociations;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.vlcplayer.SimpleVLCPlayerExample;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.ClasspathPages;
@@ -72,6 +73,9 @@ public class DemoExampleDefinitionLoader {
         new Example("Simple Example", SimpleHTMLEditorExample.class, "Graphically edit some HTML, get and set the HTML content.", true),
         new Example("Custom Configuration", CustomConfiguration.class, "Modify default behaviors with custom configuration script.", true),
         new Example("TinyMCE implementation", TinyMCEExample.class, "Use the TinyMCE editor implementation instead of the default FCKeditor.", true),
+    }));
+    exampleGroupList.add(new ExampleGroup("JSyntaxHighlighter", new Example[] {
+        new Example("Simple Example", SimpleSyntaxHighlighterExample.class, "Display some content with syntax highlighting from one of the available languages (C++, C#, css, Delphi, Java, JS, PHP, Python, Ruby, SQL, VB, XML, HTML).", true),
     }));
     exampleGroupList.add(new ExampleGroup("JWMediaPlayer (win32)", new Example[] {
         new Example("Simple Example", SimpleWMediaPlayerExample.class, "Load a movie/sound file to an embedded multimedia player.", true, System.getProperty("os.name").startsWith("Windows"), "This example is only available on a Windows operating system."),
