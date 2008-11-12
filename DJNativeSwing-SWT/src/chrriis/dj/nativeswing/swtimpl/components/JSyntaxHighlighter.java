@@ -38,6 +38,7 @@ public class JSyntaxHighlighter extends NSPanelComponent {
     }
     webBrowser = new JWebBrowser(options);
     initialize(webBrowser.getNativeComponent());
+    webBrowser.setDefaultPopupMenuRegistered(false);
     webBrowser.setBarsVisible(false);
     add(webBrowser, BorderLayout.CENTER);
   }
