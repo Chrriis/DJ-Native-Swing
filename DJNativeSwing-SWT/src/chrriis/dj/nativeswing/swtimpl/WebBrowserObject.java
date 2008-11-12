@@ -145,7 +145,7 @@ public abstract class WebBrowserObject {
             "    <script language=\"JavaScript\" type=\"text/javascript\">" + LS +
             "      <!--" + LS +
             "      function sendCommand(command) {" + LS +
-            "        var s = 'command://' + encodeURIComponent(command);" + LS +
+            "        var s = '" + JWebBrowser.COMMAND_LOCATION_PREFIX + "' + encodeURIComponent(command);" + LS +
             "        for(var i=1; i<arguments.length; s+='&'+encodeURIComponent(arguments[i++]));" + LS +
             "        window.location = s;" + LS +
             "      }" + LS +

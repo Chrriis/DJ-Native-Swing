@@ -64,6 +64,12 @@ import chrriis.dj.nativeswing.swtimpl.NSPanelComponent;
  */
 public class JWebBrowser extends NSPanelComponent {
 
+  /** The prefix to use when sending a command from some web content, using a static link or by setting window.location from Javascript. */
+  public static final String COMMAND_LOCATION_PREFIX = NativeWebBrowser.COMMAND_LOCATION_PREFIX;
+  
+  /** The prefix to use when sending a command from some web content, by setting window.status from Javascript. */
+  public static final String COMMAND_STATUS_PREFIX = NativeWebBrowser.COMMAND_STATUS_PREFIX;
+  
   private static final String USE_XULRUNNER_RUNTIME_OPTION_KEY = "XULRunner Runtime";
   private static final NSOption XUL_RUNNER_RUNTIME_OPTION = new NSOption(USE_XULRUNNER_RUNTIME_OPTION_KEY);
   
@@ -736,12 +742,12 @@ public class JWebBrowser extends NSPanelComponent {
         "  var result = function() {" + javascript + "}();" +
         "  var type = result? typeof(result): '';" +
         "  if('string' == type) {" +
-        "    window.location = 'command://' + encodeURIComponent('[[getScriptResult]]') + '&' + encodeURIComponent(result);" +
+        "    window.location = '" + JWebBrowser.COMMAND_LOCATION_PREFIX + "' + encodeURIComponent('[[getScriptResult]]') + '&' + encodeURIComponent(result);" +
         "  } else {" +
-        "    window.location = 'command://' + encodeURIComponent('[[getScriptResult]]') + '&' + encodeURIComponent(type) + '&' + encodeURIComponent(result);" +
+        "    window.location = '" + JWebBrowser.COMMAND_LOCATION_PREFIX + "' + encodeURIComponent('[[getScriptResult]]') + '&' + encodeURIComponent(type) + '&' + encodeURIComponent(result);" +
         "  }" +
         "} catch(exxxxx) {" +
-        "  window.location = 'command://' + encodeURIComponent('[[getScriptResult]]') + '&&'" +
+        "  window.location = '" + JWebBrowser.COMMAND_LOCATION_PREFIX + "' + encodeURIComponent('[[getScriptResult]]') + '&&'" +
         "}");
     if(result == null) {
       return null;

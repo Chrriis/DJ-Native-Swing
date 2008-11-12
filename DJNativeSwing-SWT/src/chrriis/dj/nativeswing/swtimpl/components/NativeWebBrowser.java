@@ -56,7 +56,8 @@ import chrriis.dj.nativeswing.swtimpl.NativeComponent;
  */
 class NativeWebBrowser extends NativeComponent {
 
-  private static final String COMMAND_PREFIX = "command://";
+  public static final String COMMAND_LOCATION_PREFIX = "command://";
+  public static final String COMMAND_STATUS_PREFIX = "scommand://";
   
   private static class CMJ_closeWindow extends ControlCommandMessage {
     @Override
@@ -431,9 +432,9 @@ class NativeWebBrowser extends NativeComponent {
       }
       public void changing(LocationEvent e) {
         final String location = e.location;
-        if(location.startsWith(COMMAND_PREFIX)) {
+        if(location.startsWith(COMMAND_LOCATION_PREFIX)) {
           e.doit = false;
-          String query = location.substring(COMMAND_PREFIX.length());
+          String query = location.substring(COMMAND_LOCATION_PREFIX.length());
           if(query.endsWith("/")) {
             query = query.substring(0, query.length() - 1);
           }
@@ -485,9 +486,9 @@ class NativeWebBrowser extends NativeComponent {
         if(oldStatus == null) {
           oldStatus = "";
         }
-        if(newStatus.startsWith(COMMAND_PREFIX)) {
+        if(newStatus.startsWith(COMMAND_STATUS_PREFIX)) {
           browser.execute("window.status = decodeURIComponent('" + Utils.encodeURL(oldStatus) + "');");
-          String query = newStatus.substring(COMMAND_PREFIX.length());
+          String query = newStatus.substring(COMMAND_STATUS_PREFIX.length());
           if(query.endsWith("/")) {
             query = query.substring(0, query.length() - 1);
           }

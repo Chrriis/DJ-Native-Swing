@@ -68,7 +68,7 @@ class JHTMLEditorFCKeditor implements JHTMLEditorImplementation {
             "        return true;" + LS +
             "      }" + LS +
             "      function sendCommand(command) {" + LS +
-            "        var s = 'command://' + encodeURIComponent(command);" + LS +
+            "        var s = '" + JWebBrowser.COMMAND_STATUS_PREFIX + "' + encodeURIComponent(command);" + LS +
             "        for(var i=1; i<arguments.length; s+='&'+encodeURIComponent(arguments[i++]));" + LS +
             // We have to use the status, because if window.location is called too early it may stop page loading.
             "        window.status = s;" + LS +
