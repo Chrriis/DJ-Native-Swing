@@ -9,6 +9,7 @@ Licence terms: LGPL (see licence.txt)
 
 - JSyntaxHighlighter is added.
 - TinyMCE HTML editor implementation is added (thanks to Jörn Heid).
+- Fixed queued sync/async calls to respect their sync/async state when played.
 - Play count is added to the JWMediaPlayer settings.
 - HTML editor was not loading files with \n and \r properly.
 - WMediaPlayer throws an exception if a method is not called from the UI thread.
