@@ -30,7 +30,7 @@ public class DeferredDestruction extends JPanel {
   protected JFlashPlayer flashPlayer;
   
   public DeferredDestruction() {
-    super(new BorderLayout(0, 0));
+    super(new BorderLayout());
     flashPlayer = new JFlashPlayer(JFlashPlayer.destroyOnFinalization());
     flashPlayer.setControlBarVisible(false);
     flashPlayer.load(SimpleFlashExample.class, "resource/Movement-pointer_or_click.swf");

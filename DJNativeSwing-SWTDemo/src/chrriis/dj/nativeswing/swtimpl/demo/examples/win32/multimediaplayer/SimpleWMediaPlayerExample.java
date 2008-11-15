@@ -38,9 +38,9 @@ import chrriis.dj.nativeswing.swtimpl.components.win32.JWMediaPlayer;
 public class SimpleWMediaPlayerExample extends JPanel {
 
   public SimpleWMediaPlayerExample() {
-    super(new BorderLayout(0, 0));
+    super(new BorderLayout());
     // Create the player.
-    JPanel playerPanel = new JPanel(new BorderLayout(0, 0));
+    JPanel playerPanel = new JPanel(new BorderLayout());
     playerPanel.setBorder(BorderFactory.createTitledBorder("Native Media Player component"));
     final JWMediaPlayer player = new JWMediaPlayer();
     playerPanel.add(player, BorderLayout.CENTER);

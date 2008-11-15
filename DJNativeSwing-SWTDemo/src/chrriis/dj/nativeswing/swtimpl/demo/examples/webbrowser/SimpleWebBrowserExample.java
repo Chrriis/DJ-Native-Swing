@@ -28,8 +28,8 @@ import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
 public class SimpleWebBrowserExample extends JPanel {
 
   public SimpleWebBrowserExample() {
-    super(new BorderLayout(0, 0));
-    JPanel webBrowserPanel = new JPanel(new BorderLayout(0, 0));
+    super(new BorderLayout());
+    JPanel webBrowserPanel = new JPanel(new BorderLayout());
     webBrowserPanel.setBorder(BorderFactory.createTitledBorder("Native Web Browser component"));
     final JWebBrowser webBrowser = new JWebBrowser();
     webBrowser.navigate("http://www.google.com");

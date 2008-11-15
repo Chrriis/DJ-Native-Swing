@@ -72,7 +72,7 @@ public class DemoFrame extends JFrame {
     setDefaultCloseOperation(EXIT_ON_CLOSE);
     setLocationByPlatform(true);
     Container contentPane = getContentPane();
-    final JPanel displayArea = new JPanel(new BorderLayout(0, 0)) {
+    final JPanel displayArea = new JPanel(new BorderLayout()) {
       @Override
       public Dimension getMinimumSize() {
         return new Dimension(0, 0);
@@ -128,10 +128,10 @@ public class DemoFrame extends JFrame {
                     component = c;
                     selectedExample = example;
                     displayArea.removeAll();
-                    JPanel contentPane = new JPanel(new BorderLayout(0, 0));
+                    JPanel contentPane = new JPanel(new BorderLayout());
                     String description = example.getDescription();
                     if(description != null) {
-                      JPanel descriptionPanel = new JPanel(new BorderLayout(0, 0));
+                      JPanel descriptionPanel = new JPanel(new BorderLayout());
                       JEditorPane descriptionEditorPane = new JEditorPane(description.startsWith("<html>")? "text/html": "text/plain", description) {
                         public EditorKit getEditorKitForContentType(String type){
                           if("text/plain".equalsIgnoreCase(type)) {
@@ -154,7 +154,7 @@ public class DemoFrame extends JFrame {
                     if(componentClass != null && example.isShowingSources()) {
                       final JTabbedPane tabbedPane = new JTabbedPane();
                       tabbedPane.addTab("Demo", contentPane);
-                      final JPanel sourcePanel = new JPanel(new BorderLayout(0, 0));
+                      final JPanel sourcePanel = new JPanel(new BorderLayout());
                       tabbedPane.addTab("Source", sourcePanel);
                       tabbedPane.addChangeListener(new ChangeListener() {
                         public void stateChanged(ChangeEvent e) {

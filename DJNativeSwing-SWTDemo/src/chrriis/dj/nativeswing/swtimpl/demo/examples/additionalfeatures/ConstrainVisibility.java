@@ -37,7 +37,7 @@ public class ConstrainVisibility extends JPanel {
   protected static final int HEIGHT = 200;
 
   public ConstrainVisibility() {
-    super(new BorderLayout(0, 0));
+    super(new BorderLayout());
     JLayeredPane layeredPane = new JLayeredPane();
     layeredPane.setOpaque(true);
     layeredPane.setBackground(new Color(200, 200, 255));

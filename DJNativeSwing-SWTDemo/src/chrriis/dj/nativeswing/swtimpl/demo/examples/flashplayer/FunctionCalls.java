@@ -34,8 +34,8 @@ import chrriis.dj.nativeswing.swtimpl.components.JFlashPlayer;
 public class FunctionCalls extends JPanel {
 
   public FunctionCalls() {
-    super(new BorderLayout(0, 0));
-    JPanel flashPlayerPanel = new JPanel(new BorderLayout(0, 0));
+    super(new BorderLayout());
+    JPanel flashPlayerPanel = new JPanel(new BorderLayout());
     flashPlayerPanel.setBorder(BorderFactory.createTitledBorder("Native Flash Player component"));
     final JFlashPlayer flashPlayer = new JFlashPlayer();
     // Flash Demo from Paulus Tuerah (www.goldenstudios.or.id)

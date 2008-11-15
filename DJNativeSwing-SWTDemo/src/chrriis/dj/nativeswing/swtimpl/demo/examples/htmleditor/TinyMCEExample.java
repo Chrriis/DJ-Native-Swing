@@ -36,7 +36,7 @@ public class TinyMCEExample extends JPanel {
   protected static final String LS = System.getProperty("line.separator");
 
   public TinyMCEExample() {
-    super(new BorderLayout(0, 0));
+    super(new BorderLayout());
     String configurationScript =
       "theme_advanced_buttons1: 'bold,italic,underline,strikethrough,sub,sup,|,charmap,|,justifyleft,justifycenter,justifyright,justifyfull,|,hr,removeformat'," +
       "theme_advanced_buttons2: 'undo,redo,|,cut,copy,paste,pastetext,pasteword,|,search,replace,|,forecolor,backcolor,bullist,numlist,|,outdent,indent,blockquote,|,table'," +
@@ -55,7 +55,7 @@ public class TinyMCEExample extends JPanel {
       }
     });
     add(htmlEditor, BorderLayout.CENTER);
-    JPanel southPanel = new JPanel(new BorderLayout(0, 0));
+    JPanel southPanel = new JPanel(new BorderLayout());
     southPanel.setBorder(BorderFactory.createTitledBorder("Custom Controls"));
     JPanel middlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
     JButton setHTMLButton = new JButton("Set HTML");

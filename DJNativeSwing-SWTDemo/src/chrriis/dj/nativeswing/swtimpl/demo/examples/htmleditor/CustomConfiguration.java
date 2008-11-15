@@ -23,7 +23,7 @@ import chrriis.dj.nativeswing.swtimpl.components.JHTMLEditor;
 public class CustomConfiguration extends JPanel {
 
   public CustomConfiguration() {
-    super(new BorderLayout(0, 0));
+    super(new BorderLayout());
     String configurationScript =
       "FCKConfig.ToolbarSets[\"Default\"] = [\n" +
       "['Source','DocProps','-','Save','NewPage','Preview','-','Templates']\n" +

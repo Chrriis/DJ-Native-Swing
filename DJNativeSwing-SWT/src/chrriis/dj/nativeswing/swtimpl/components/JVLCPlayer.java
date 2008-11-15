@@ -212,10 +212,10 @@ public class JVLCPlayer extends NSPanelComponent {
     vlcInput = new VLCInput(this);
     vlcPlaylist = new VLCPlaylist(this);
     vlcVideo = new VLCVideo(this);
-    webBrowserPanel = new JPanel(new BorderLayout(0, 0));
+    webBrowserPanel = new JPanel(new BorderLayout());
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);
-    controlBarPane = new JPanel(new BorderLayout(0, 0));
+    controlBarPane = new JPanel(new BorderLayout());
     seekBarSlider = new JSlider(0, 10000, 0);
     seekBarSlider.setVisible(false);
     seekBarSlider.addChangeListener(new ChangeListener() {

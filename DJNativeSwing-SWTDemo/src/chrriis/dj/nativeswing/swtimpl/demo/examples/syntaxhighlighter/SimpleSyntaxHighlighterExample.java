@@ -26,7 +26,7 @@ public class SimpleSyntaxHighlighterExample extends JPanel {
   private static final String LS = Utils.LINE_SEPARATOR;
 
   public SimpleSyntaxHighlighterExample() {
-    super(new BorderLayout(0, 0));
+    super(new BorderLayout());
     final JSyntaxHighlighter syntaxHighlighter = new JSyntaxHighlighter();
     syntaxHighlighter.setContent(
         "/************************" + LS +

@@ -43,10 +43,10 @@ public class ThumbnailCreation extends JPanel {
     private JLabel thumbnailLabel;
     
     public ThumbnailPane(String title) {
-      super(new BorderLayout(0, 0));
+      super(new BorderLayout());
       setBorder(BorderFactory.createTitledBorder(title));
       JPanel thumbnailPanel = new JPanel(new GridBagLayout());
-      JPanel thumbnailImagePanel = new JPanel(new BorderLayout(0, 0));
+      JPanel thumbnailImagePanel = new JPanel(new BorderLayout());
       thumbnailImagePanel.setBorder(BorderFactory.createEtchedBorder());
       thumbnailLabel = new JLabel();
       thumbnailLabel.setHorizontalAlignment(JLabel.CENTER);
@@ -86,8 +86,8 @@ public class ThumbnailCreation extends JPanel {
   private JWebBrowser webBrowser;
   
   public ThumbnailCreation() {
-    super(new BorderLayout(0, 0));
-    JPanel webBrowserPanel = new JPanel(new BorderLayout(0, 0));
+    super(new BorderLayout());
+    JPanel webBrowserPanel = new JPanel(new BorderLayout());
     webBrowserPanel.setBorder(BorderFactory.createTitledBorder("Web Browser component"));
     webBrowser = new JWebBrowser();
     webBrowser.navigate("http://www.google.com");

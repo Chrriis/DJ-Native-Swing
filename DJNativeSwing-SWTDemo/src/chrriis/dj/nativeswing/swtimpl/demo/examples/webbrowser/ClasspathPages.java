@@ -24,7 +24,7 @@ import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
 public class ClasspathPages extends JPanel {
 
   public ClasspathPages() {
-    super(new BorderLayout(0, 0));
+    super(new BorderLayout());
     JWebBrowser webBrowser = new JWebBrowser();
     webBrowser.navigate(WebServer.getDefaultWebServer().getClassPathResourceURL(getClass().getName(), "resource/page1.html"));
     webBrowser.setBarsVisible(false);

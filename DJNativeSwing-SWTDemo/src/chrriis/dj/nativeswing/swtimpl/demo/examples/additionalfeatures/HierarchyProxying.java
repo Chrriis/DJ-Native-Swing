@@ -32,7 +32,7 @@ public class HierarchyProxying extends JPanel {
   private JWebBrowser webBrowser2;
   
   public HierarchyProxying() {
-    super(new BorderLayout(0, 0));
+    super(new BorderLayout());
     JDesktopPane desktopPane = new JDesktopPane();
     // Web Browser 1 internal frame
     JInternalFrame webBrowser1InternalFrame = new JInternalFrame("Web Browser 1");

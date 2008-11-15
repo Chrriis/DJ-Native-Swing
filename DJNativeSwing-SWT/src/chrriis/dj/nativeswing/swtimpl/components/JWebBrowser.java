@@ -234,7 +234,7 @@ public class JWebBrowser extends NSPanelComponent {
     private JButton stopButton;
 
     public ButtonBarPane() {
-      super(new BorderLayout(0, 0));
+      super(new BorderLayout());
       JToolBar buttonToolBar = new JToolBar();
       buttonToolBar.add(Box.createHorizontalStrut(2));
       buttonToolBar.setFloatable(false);
@@ -286,11 +286,11 @@ public class JWebBrowser extends NSPanelComponent {
     private JTextField locationField;
 
     public LocationBarPane() {
-      super(new BorderLayout(0, 0));
+      super(new BorderLayout());
       JToolBar locationToolBar = new JToolBar();
       // We have to force the layout manager because in Synth L&F the text field does not take the full available width.
       locationToolBar.setLayout(new BoxLayout(locationToolBar, BoxLayout.LINE_AXIS));
-      JPanel locationToolBarInnerPanel = new JPanel(new BorderLayout(0, 0));
+      JPanel locationToolBarInnerPanel = new JPanel(new BorderLayout());
       locationToolBarInnerPanel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
       locationToolBarInnerPanel.setOpaque(false);
       locationToolBar.setFloatable(false);
@@ -337,7 +337,7 @@ public class JWebBrowser extends NSPanelComponent {
     private JProgressBar progressBar;
 
     public StatusBarPane() {
-      super(new BorderLayout(0, 0));
+      super(new BorderLayout());
       setBorder(BorderFactory.createCompoundBorder(STATUS_BAR_BORDER, BorderFactory.createEmptyBorder(2, 2, 2, 2)));
       statusLabel = new JLabel();
       updateStatus();
@@ -373,12 +373,12 @@ public class JWebBrowser extends NSPanelComponent {
     Map<Object, Object> optionMap = NSOption.createOptionMap(options);
     nativeWebBrowser = new NativeWebBrowser(this, optionMap.get(USE_XULRUNNER_RUNTIME_OPTION_KEY) != null);
     initialize(nativeWebBrowser);
-    menuToolAndLocationBarPanel = new JPanel(new BorderLayout(0, 0));
+    menuToolAndLocationBarPanel = new JPanel(new BorderLayout());
     menuBar = new JMenuBar();
     menuToolAndLocationBarPanel.add(menuBar, BorderLayout.NORTH);
     add(menuToolAndLocationBarPanel, BorderLayout.NORTH);
-    nativeWebBrowserBorderContainerPane = new JPanel(new BorderLayout(0, 0));
-    nativeWebBrowserContainerPane = new JPanel(new BorderLayout(0, 0));
+    nativeWebBrowserBorderContainerPane = new JPanel(new BorderLayout());
+    nativeWebBrowserContainerPane = new JPanel(new BorderLayout());
     nativeWebBrowserContainerPane.add(nativeWebBrowser.createEmbeddableComponent(optionMap), BorderLayout.CENTER);
     nativeWebBrowserBorderContainerPane.add(nativeWebBrowserContainerPane, BorderLayout.CENTER);
     add(nativeWebBrowserBorderContainerPane, BorderLayout.CENTER);

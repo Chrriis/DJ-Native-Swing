@@ -33,8 +33,8 @@ public class JavascriptExecution extends JPanel {
   protected static final String LS = System.getProperty("line.separator");
 
   public JavascriptExecution() {
-    super(new BorderLayout(0, 0));
-    JPanel webBrowserPanel = new JPanel(new BorderLayout(0, 0));
+    super(new BorderLayout());
+    JPanel webBrowserPanel = new JPanel(new BorderLayout());
     webBrowserPanel.setBorder(BorderFactory.createTitledBorder("Native Web Browser component"));
     final JWebBrowser webBrowser = new JWebBrowser();
     webBrowser.setBarsVisible(false);
@@ -48,7 +48,7 @@ public class JavascriptExecution extends JPanel {
         "</html>");
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);
-    JPanel configurationPanel = new JPanel(new BorderLayout(0, 0));
+    JPanel configurationPanel = new JPanel(new BorderLayout());
     configurationPanel.setBorder(BorderFactory.createTitledBorder("Configuration"));
     final JTextArea configurationTextArea = new JTextArea(
         "document.bgColor = '#FFFF00';" + LS +

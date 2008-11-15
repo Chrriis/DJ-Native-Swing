@@ -57,7 +57,7 @@ public class FileAssociations extends JPanel {
   };
 
   public FileAssociations() {
-    super(new BorderLayout(0, 0));
+    super(new BorderLayout());
     JPanel loadingPanel = new JPanel(new GridBagLayout());
     loadingPanel.add(new JLabel("Please wait while the full list is being retrieved..."));
     add(loadingPanel, BorderLayout.CENTER);
@@ -72,7 +72,7 @@ public class FileAssociations extends JPanel {
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             removeAll();
-            JPanel contentPane = new JPanel(new BorderLayout(0, 0));
+            JPanel contentPane = new JPanel(new BorderLayout());
             final JTable table = new JTable() {
               @Override
               public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
@@ -128,7 +128,7 @@ public class FileAssociations extends JPanel {
               }
             });
             contentPane.add(new JScrollPane(table), BorderLayout.CENTER);
-            JPanel fileLaunchPanel = new JPanel(new BorderLayout(0, 0));
+            JPanel fileLaunchPanel = new JPanel(new BorderLayout());
             fileLaunchPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 0, 4));
             fileLaunchPanel.add(new JLabel("File: "), BorderLayout.WEST);
             final JTextField fileLaunchTextField = new JTextField();

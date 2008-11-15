@@ -21,7 +21,7 @@ public class NativeIntegration extends JPanel {
   protected static final String LS = System.getProperty("line.separator");
 
   public NativeIntegration() {
-    super(new BorderLayout(0, 0));
+    super(new BorderLayout());
     JEditorPane editorPane = new JEditorPane("text/html", 
         "<html>" + LS +
         "  <body>" + LS +

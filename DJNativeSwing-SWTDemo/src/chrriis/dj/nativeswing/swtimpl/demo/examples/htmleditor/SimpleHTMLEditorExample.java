@@ -36,7 +36,7 @@ public class SimpleHTMLEditorExample extends JPanel {
   protected static final String LS = System.getProperty("line.separator");
 
   public SimpleHTMLEditorExample() {
-    super(new BorderLayout(0, 0));
+    super(new BorderLayout());
     final JHTMLEditor htmlEditor = new JHTMLEditor();
     htmlEditor.addHTMLEditorListener(new HTMLEditorListener() {
       public void saveHTML(HTMLEditorSaveEvent e) {
@@ -44,7 +44,7 @@ public class SimpleHTMLEditorExample extends JPanel {
       }
     });
     add(htmlEditor, BorderLayout.CENTER);
-    JPanel southPanel = new JPanel(new BorderLayout(0, 0));
+    JPanel southPanel = new JPanel(new BorderLayout());
     southPanel.setBorder(BorderFactory.createTitledBorder("Custom Controls"));
     JPanel middlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
     JButton setHTMLButton = new JButton("Set HTML");

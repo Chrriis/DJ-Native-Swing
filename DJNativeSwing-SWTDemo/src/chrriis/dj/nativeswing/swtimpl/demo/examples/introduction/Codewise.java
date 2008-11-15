@@ -21,7 +21,7 @@ public class Codewise extends JPanel {
   protected static final String LS = System.getProperty("line.separator");
 
   public Codewise() {
-    super(new BorderLayout(0, 0));
+    super(new BorderLayout());
     JEditorPane editorPane = new JEditorPane("text/html", 
         "<html>" + LS +
         "  <body>" + LS +

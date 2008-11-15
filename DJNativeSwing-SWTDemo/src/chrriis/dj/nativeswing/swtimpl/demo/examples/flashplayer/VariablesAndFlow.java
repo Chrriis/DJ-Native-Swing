@@ -35,8 +35,8 @@ import chrriis.dj.nativeswing.swtimpl.components.JFlashPlayer;
 public class VariablesAndFlow extends JPanel {
 
   public VariablesAndFlow() {
-    super(new BorderLayout(0, 0));
-    JPanel flashPlayerPanel = new JPanel(new BorderLayout(0, 0));
+    super(new BorderLayout());
+    JPanel flashPlayerPanel = new JPanel(new BorderLayout());
     flashPlayerPanel.setBorder(BorderFactory.createTitledBorder("Native Flash Player component"));
     final JFlashPlayer flashPlayer = new JFlashPlayer();
     flashPlayer.setControlBarVisible(true);
@@ -45,7 +45,7 @@ public class VariablesAndFlow extends JPanel {
     flashPlayer.load(getClass(), "resource/dyn_text_moving.swf", flashLoadingOptions);
     flashPlayerPanel.add(flashPlayer, BorderLayout.CENTER);
     add(flashPlayerPanel, BorderLayout.CENTER);
-    JPanel variablePanel = new JPanel(new BorderLayout(0, 0));
+    JPanel variablePanel = new JPanel(new BorderLayout());
     variablePanel.setBorder(BorderFactory.createTitledBorder("Get/Set Variables"));
     JPanel getSetNorthPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
     getSetNorthPanel.add(new JLabel("Text:"));

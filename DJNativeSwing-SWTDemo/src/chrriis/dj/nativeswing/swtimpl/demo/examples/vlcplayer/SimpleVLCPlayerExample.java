@@ -38,9 +38,9 @@ import chrriis.dj.nativeswing.swtimpl.components.JVLCPlayer;
 public class SimpleVLCPlayerExample extends JPanel {
 
   public SimpleVLCPlayerExample() {
-    super(new BorderLayout(0, 0));
+    super(new BorderLayout());
     // Create the player.
-    JPanel playerPanel = new JPanel(new BorderLayout(0, 0));
+    JPanel playerPanel = new JPanel(new BorderLayout());
     playerPanel.setBorder(BorderFactory.createTitledBorder("VLC Player component"));
     final JVLCPlayer player = new JVLCPlayer();
     playerPanel.add(player, BorderLayout.CENTER);

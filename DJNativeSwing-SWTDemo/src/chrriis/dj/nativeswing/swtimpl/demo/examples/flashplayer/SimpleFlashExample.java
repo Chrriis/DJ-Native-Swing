@@ -23,7 +23,7 @@ import chrriis.dj.nativeswing.swtimpl.components.JFlashPlayer;
 public class SimpleFlashExample extends JPanel {
 
   public SimpleFlashExample() {
-    super(new BorderLayout(0, 0));
+    super(new BorderLayout());
     JFlashPlayer flashPlayer = new JFlashPlayer();
     flashPlayer.load(getClass(), "resource/Movement-pointer_or_click.swf");
     add(flashPlayer, BorderLayout.CENTER);

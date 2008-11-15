@@ -129,7 +129,7 @@ public class JFlashPlayer extends NSPanelComponent {
         }
       }
     });
-    webBrowserPanel = new JPanel(new BorderLayout(0, 0));
+    webBrowserPanel = new JPanel(new BorderLayout());
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);
     controlBarPane = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 2));

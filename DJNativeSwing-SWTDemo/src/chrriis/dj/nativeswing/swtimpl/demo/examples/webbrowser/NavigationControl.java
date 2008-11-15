@@ -30,7 +30,7 @@ public class NavigationControl extends JPanel {
   protected static final String LS = System.getProperty("line.separator");
 
   public NavigationControl() {
-    super(new BorderLayout(0, 0));
+    super(new BorderLayout());
     final JTabbedPane tabbedPane = new JTabbedPane();
     tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
     final JWebBrowser webBrowser = new JWebBrowser();
