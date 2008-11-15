@@ -16,6 +16,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -39,21 +40,13 @@ public class ComponentLifeCycle extends JPanel {
     addLifeCyclePane(true);
   }
   
-  private static final String LS = Utils.LINE_SEPARATOR;
-  
   private void addLifeCyclePane(final boolean isForcedInitializationType) {
     JPanel lifeCyclePane = new JPanel(new BorderLayout(5, 0));
     lifeCyclePane.setBorder(BorderFactory.createTitledBorder(isForcedInitializationType? "Forced initialization life cycle": "Default life cycle"));
-    final JPanel componentPane = new JPanel(new BorderLayout()) {
-      @Override
-      public Dimension getPreferredSize() {
-        Dimension preferredSize = super.getPreferredSize();
-        preferredSize.width = 150;
-        return preferredSize;
-      }
-    };
+    final JPanel componentPane = new JPanel(new BorderLayout());
+    componentPane.setPreferredSize(new Dimension(150, 0));
     JPanel buttonBar = new JPanel(new FlowLayout());
-    JButton createButton = new JButton("Create");
+    JButton createButton = new JButton("Create JFlashPlayer");
     buttonBar.add(createButton);
     componentPane.add(buttonBar, BorderLayout.SOUTH);
     lifeCyclePane.add(componentPane, BorderLayout.WEST);
@@ -61,60 +54,82 @@ public class ComponentLifeCycle extends JPanel {
     logTextArea.setEditable(false);
     lifeCyclePane.add(new JScrollPane(logTextArea));
     add(lifeCyclePane);
-    // Listener
+    // Add listener
     createButton.addActionListener(new ActionListener() {
-      private int count = 1;
       private JFlashPlayer flashPlayer;
-      private void log(String s, boolean isWithCount) {
-        logTextArea.append((logTextArea.getText().length() > 0? LS: "") + (isWithCount? count++ + ". ": "  ") + s);
-        logTextArea.setCaretPosition(0);
-      }
       public void actionPerformed(ActionEvent e) {
         if(flashPlayer != null) {
           componentPane.remove(flashPlayer);
-          count = 1;
           logTextArea.setText("");
         }
-        log("JFlashPlayer creation.", true);
-        flashPlayer = new JFlashPlayer(JFlashPlayer.destroyOnFinalization());
         if(isForcedInitializationType) {
-          log("JFlashPlayer addition to containment hierarchy.", true);
-          log("(mandatory before forced initialization)", false);
-          componentPane.add(flashPlayer, BorderLayout.CENTER);
-          componentPane.revalidate();
-          componentPane.repaint();
-          log("Forced initialization of the native peer.", true);
-          log("-> Calls are now synchronous.", false);
-          flashPlayer.initializeNativePeer();
+          createPlayerWithForcedInitializationLyfeCycle(flashPlayer, logTextArea, componentPane);
         } else {
-          log("-> Calls are queued to be played after initialization.", false);
-        }
-        flashPlayer.setControlBarVisible(false);
-        flashPlayer.runInSequence(new Runnable() {
-          public void run() {
-            log("JFlashPlayer is initialized.", true);
-          }
-        });
-        log("Before JFlashPlayer.load() call.", true);
-        flashPlayer.load(SimpleFlashExample.class, "resource/Movement-pointer_or_click.swf");
-        flashPlayer.runInSequence(new Runnable() {
-          public void run() {
-            log("JFlashPlayer.load() has run.", true);
-            log("-> runInSequence() used to display this message in sync with actual call.", false);
-          }
-        });
-        log("After JFlashPlayer.load() call.", true);
-        if(!isForcedInitializationType) {
-          log("JFlashPlayer addition to containment hierarchy.", true);
-          log("-> Initialization will soon happen automatically.", false);
-          componentPane.add(flashPlayer, BorderLayout.CENTER);
-          componentPane.revalidate();
-          componentPane.repaint();
+          createPlayerWithDefaultLyfeCycle(flashPlayer, logTextArea, componentPane);
         }
       }
     });
   }
   
+  public void createPlayerWithDefaultLyfeCycle(JFlashPlayer flashPlayer, final JTextArea logTextArea, JComponent componentPane) {
+    log(logTextArea, "- JFlashPlayer creation.");
+    flashPlayer = new JFlashPlayer(JFlashPlayer.destroyOnFinalization());
+    flashPlayer.setControlBarVisible(false);
+    log(logTextArea, "  -> Calls will be played after initialization.");
+    flashPlayer.runInSequence(new Runnable() {
+      public void run() {
+        log(logTextArea, "- JFlashPlayer is initialized.");
+        log(logTextArea, "  -> runInSequence() used to display this message.");
+      }
+    });
+    log(logTextArea, "- Before JFlashPlayer.load() call.");
+    flashPlayer.load(SimpleFlashExample.class, "resource/Movement-pointer_or_click.swf");
+    flashPlayer.runInSequence(new Runnable() {
+      public void run() {
+        log(logTextArea, "- runInSequence(): JFlashPlayer.load() has run.");
+      }
+    });
+    log(logTextArea, "- After JFlashPlayer.load() call.");
+    log(logTextArea, "- JFlashPlayer addition to containment hierarchy.");
+    log(logTextArea, "  -> Initialization will soon happen automatically.");
+    componentPane.add(flashPlayer, BorderLayout.CENTER);
+    componentPane.revalidate();
+    componentPane.repaint();
+  }
+
+  public void createPlayerWithForcedInitializationLyfeCycle(JFlashPlayer flashPlayer, final JTextArea logTextArea, JComponent componentPane) {
+    log(logTextArea, "- JFlashPlayer creation.");
+    flashPlayer = new JFlashPlayer(JFlashPlayer.destroyOnFinalization());
+    flashPlayer.setControlBarVisible(false);
+    log(logTextArea, "- JFlashPlayer addition to containment hierarchy.");
+    log(logTextArea, "  (mandatory before forced initialization)");
+    componentPane.add(flashPlayer, BorderLayout.CENTER);
+    componentPane.revalidate();
+    componentPane.repaint();
+    log(logTextArea, "- Forced initialization of the native peer.");
+    log(logTextArea, "  -> Calls are now synchronous.");
+    flashPlayer.initializeNativePeer();
+    flashPlayer.runInSequence(new Runnable() {
+      public void run() {
+        log(logTextArea, "- JFlashPlayer is initialized.");
+        log(logTextArea, "  -> runInSequence() used to display this message.");
+      }
+    });
+    log(logTextArea, "- Before JFlashPlayer.load() call.");
+    flashPlayer.load(SimpleFlashExample.class, "resource/Movement-pointer_or_click.swf");
+    flashPlayer.runInSequence(new Runnable() {
+      public void run() {
+        log(logTextArea, "- runInSequence(): JFlashPlayer.load() has run.");
+      }
+    });
+    log(logTextArea, "- After JFlashPlayer.load() call.");
+  }
+
+  private void log(JTextArea logTextArea, String s) {
+    logTextArea.append((logTextArea.getText().length() > 0? Utils.LINE_SEPARATOR: "") + s);
+    logTextArea.setCaretPosition(0);
+  }
+
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
     UIUtils.setPreferredLookAndFeel();
