@@ -10,6 +10,7 @@ package chrriis.dj.nativeswing.swtimpl.demo;
 import java.util.ArrayList;
 import java.util.List;
 
+import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.ComponentLifeCycle;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.PseudoTransparency;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.ConstrainVisibility;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.DeferredDestruction;
@@ -86,6 +87,7 @@ public class DemoExampleDefinitionLoader {
         new Example("Hierarchy Proxying", HierarchyProxying.class, "Use a proxied component hierarchy for the native components to allow re-parenting and change of component Z-order.", true),
         new Example("Thumbnail Creation", ThumbnailCreation.class, "Create a thumbnail by painting a native component to an image.", true),
         new Example("Pseudo Transparency", PseudoTransparency.class, "Simulate alpha blending of a Swing component over a native component. This works rather well over static content.", true),
+        new Example("Component Life Cycle", ComponentLifeCycle.class, "Present the life cycle of a component, to understand when method calls happen.\nAlso highlight how runInSequence(Runnable) can be useful, and for special needs how to use initializeNativePeer().", true),
     }));
     exampleGroupList.add(new ExampleGroup("Utilities", new Example[] {
         new Example("File Associations", FileAssociations.class, "Get the file type associations, and use them to launch files.", true),
