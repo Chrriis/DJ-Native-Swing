@@ -18,7 +18,6 @@ import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import chrriis.common.Disposable;
 import chrriis.common.UIUtils;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.components.JFlashPlayer;
@@ -28,7 +27,7 @@ import chrriis.dj.nativeswing.swtimpl.demo.examples.flashplayer.SimpleFlashExamp
 /**
  * @author Christopher Deckers
  */
-public class HierarchyProxying extends JPanel implements Disposable {
+public class HierarchyProxying extends JPanel {
 
   private JWebBrowser webBrowser2;
   
@@ -90,9 +89,10 @@ public class HierarchyProxying extends JPanel implements Disposable {
     add(desktopPane, BorderLayout.CENTER);
   }
   
-  public void dispose() {
-    // webBrowser 2 is disposed on finalization.
-    // Rather than waiting for garbage collection, release when the demo leaves this screen.
+  @Override
+  public void removeNotify() {
+    // webBrowser2 is destroyed on finalization.
+    // Rather than wait for garbage collection, release when the component is removed from its parent.
     webBrowser2.disposeNativePeer();
   }
   

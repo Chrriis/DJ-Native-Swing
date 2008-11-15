@@ -17,7 +17,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import chrriis.common.Disposable;
 import chrriis.common.UIUtils;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.components.JFlashPlayer;
@@ -26,7 +25,7 @@ import chrriis.dj.nativeswing.swtimpl.demo.examples.flashplayer.SimpleFlashExamp
 /**
  * @author Christopher Deckers
  */
-public class DeferredDestruction extends JPanel implements Disposable {
+public class DeferredDestruction extends JPanel {
 
   protected JFlashPlayer flashPlayer;
   
@@ -55,7 +54,10 @@ public class DeferredDestruction extends JPanel implements Disposable {
     add(buttonPanel, BorderLayout.SOUTH);
   }
   
-  public void dispose() {
+  @Override
+  public void removeNotify() {
+    // flashPlayer is destroyed on finalization.
+    // Rather than wait for garbage collection, release when the component is removed from its parent.
     flashPlayer.disposeNativePeer();
   }
   

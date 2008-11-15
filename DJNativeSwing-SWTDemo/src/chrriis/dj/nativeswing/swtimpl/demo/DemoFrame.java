@@ -43,7 +43,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import chrriis.common.Disposable;
 import chrriis.common.UIUtils;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.components.JSyntaxHighlighter;
@@ -125,9 +124,6 @@ public class DemoFrame extends JFrame {
                           return;
                         }
                       }
-                    }
-                    if(component instanceof Disposable) {
-                      ((Disposable)component).dispose();
                     }
                     component = c;
                     selectedExample = example;

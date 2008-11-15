@@ -19,7 +19,6 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.MouseInputAdapter;
 
-import chrriis.common.Disposable;
 import chrriis.common.UIUtils;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
@@ -27,7 +26,7 @@ import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
 /**
  * @author Christopher Deckers
  */
-public class AlphaBlendingSimulation extends JPanel implements Disposable {
+public class PseudoTransparency extends JPanel {
 
   private JWebBrowser webBrowser;
   
@@ -37,7 +36,7 @@ public class AlphaBlendingSimulation extends JPanel implements Disposable {
     return false;
   }
   
-  public AlphaBlendingSimulation() {
+  public PseudoTransparency() {
     super(null);
     webBrowser = new JWebBrowser(JWebBrowser.constrainVisibility());
     webBrowser.setBarsVisible(false);
@@ -103,7 +102,8 @@ public class AlphaBlendingSimulation extends JPanel implements Disposable {
     }.start();
   }
   
-  public void dispose() {
+  @Override
+  public void removeNotify() {
     isDisposed = true;
   }
   
@@ -115,7 +115,7 @@ public class AlphaBlendingSimulation extends JPanel implements Disposable {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new AlphaBlendingSimulation(), BorderLayout.CENTER);
+        frame.getContentPane().add(new PseudoTransparency(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

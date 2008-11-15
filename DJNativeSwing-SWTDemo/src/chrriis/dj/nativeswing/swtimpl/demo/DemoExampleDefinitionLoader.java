@@ -10,7 +10,7 @@ package chrriis.dj.nativeswing.swtimpl.demo;
 import java.util.ArrayList;
 import java.util.List;
 
-import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.AlphaBlendingSimulation;
+import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.PseudoTransparency;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.ConstrainVisibility;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.DeferredDestruction;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.HierarchyProxying;
@@ -85,7 +85,7 @@ public class DemoExampleDefinitionLoader {
         new Example("Deferred Destruction", DeferredDestruction.class, "Defer destruction until finalization to add/remove the same component.\nIt is not destroyed when removed but on disposeNativePeer() or garbage collection.", true),
         new Example("Hierarchy Proxying", HierarchyProxying.class, "Use a proxied component hierarchy for the native components to allow re-parenting and change of component Z-order.", true),
         new Example("Thumbnail Creation", ThumbnailCreation.class, "Create a thumbnail by painting a native component to an image.", true),
-        new Example("Pseudo Transparency", AlphaBlendingSimulation.class, "Simulate alpha blending of a Swing component over a native component. This works rather well over static content.", true),
+        new Example("Pseudo Transparency", PseudoTransparency.class, "Simulate alpha blending of a Swing component over a native component. This works rather well over static content.", true),
     }));
     exampleGroupList.add(new ExampleGroup("Utilities", new Example[] {
         new Example("File Associations", FileAssociations.class, "Get the file type associations, and use them to launch files.", true),
