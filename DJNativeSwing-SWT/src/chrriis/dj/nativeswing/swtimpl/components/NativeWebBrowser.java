@@ -487,7 +487,7 @@ class NativeWebBrowser extends NativeComponent {
           oldStatus = "";
         }
         if(newStatus.startsWith(COMMAND_STATUS_PREFIX)) {
-          browser.execute("window.status = decodeURIComponent('" + Utils.encodeURL(oldStatus) + "');");
+          browserExecute(browser, "window.status = decodeURIComponent('" + Utils.encodeURL(oldStatus) + "');");
           String query = newStatus.substring(COMMAND_STATUS_PREFIX.length());
           if(query.endsWith("/")) {
             query = query.substring(0, query.length() - 1);
@@ -609,14 +609,27 @@ class NativeWebBrowser extends NativeComponent {
   }
   
   private static class CMN_executeJavascript extends ControlCommandMessage {
-    private static Pattern JAVASCRIPT_LINE_COMMENT_PATTERN = Pattern.compile("^\\s*//.*$", Pattern.MULTILINE);
     @Override
     public Object run(Object[] args) {
       String script = (String)args[0];
-      // Remove line comments, because it does not work properly on Mozilla.
-      script = JAVASCRIPT_LINE_COMMENT_PATTERN.matcher(script).replaceAll("");
-      return ((Browser)getControl()).execute(script);
+      Browser browser = (Browser)getControl();
+      return browserExecute(browser, script);
     }
+  }
+  
+  private static Pattern JAVASCRIPT_LINE_COMMENT_PATTERN = Pattern.compile("^\\s*//.*$", Pattern.MULTILINE);
+
+  private static boolean browserExecute(Browser browser, String script) {
+    if("mozilla".equals(browser.getBrowserType())) {
+      // Remove line comments, because it does not work properly on Mozilla.
+      // cf. bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=215335
+      script = JAVASCRIPT_LINE_COMMENT_PATTERN.matcher(script).replaceAll("");
+      // encode the script, because it is passed as a URL in Mozilla and gets URI-decoded.
+      // cf. bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=255462
+      script = Utils.encodeURL(script);
+    }
+    return browser.execute(script);
+    
   }
   
   public boolean executeJavascriptAndWait(String script) {
