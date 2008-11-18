@@ -44,7 +44,6 @@ public class ComponentLifeCycle extends JPanel {
     JPanel lifeCyclePane = new JPanel(new BorderLayout(5, 0));
     lifeCyclePane.setBorder(BorderFactory.createTitledBorder(isForcedInitializationType? "Forced initialization life cycle": "Default life cycle"));
     final JPanel componentPane = new JPanel(new BorderLayout());
-    componentPane.setPreferredSize(new Dimension(150, 0));
     JPanel buttonBar = new JPanel(new FlowLayout());
     JButton createButton = new JButton("Create JFlashPlayer");
     buttonBar.add(createButton);
@@ -54,6 +53,7 @@ public class ComponentLifeCycle extends JPanel {
     logTextArea.setEditable(false);
     lifeCyclePane.add(new JScrollPane(logTextArea));
     add(lifeCyclePane);
+    componentPane.setPreferredSize(new Dimension(Math.max(componentPane.getPreferredSize().width, 150), 0));
     // Add listener
     createButton.addActionListener(new ActionListener() {
       private JFlashPlayer flashPlayer;
