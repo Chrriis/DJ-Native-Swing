@@ -27,7 +27,7 @@ public class SimpleSyntaxHighlighterExample extends JPanel {
 
   public SimpleSyntaxHighlighterExample() {
     super(new BorderLayout());
-    final JSyntaxHighlighter syntaxHighlighter = new JSyntaxHighlighter();
+    JSyntaxHighlighter syntaxHighlighter = new JSyntaxHighlighter();
     syntaxHighlighter.setContent(
         "/************************" + LS +
         " * This is some C# code *" + LS +
