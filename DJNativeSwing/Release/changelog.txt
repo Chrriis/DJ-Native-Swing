@@ -5,9 +5,9 @@ Licence terms: LGPL (see licence.txt)
 
 ---------------------------------- Change log ----------------------------------
 
-* Version 0.9.7 (xxxxxxxxxxxxxxx):
+* Version 0.9.7 (November 18, 2008):
 
-- Deadlock  when using wrong threads is fixed.
+- Deadlock when using wrong threads is fixed.
 - Local server sockets don't get the firewall to complain anymore.
 - Fixed visibility calculation bug where invisible component was considered.
 - Debug option to print shape computing is added.
