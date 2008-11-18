@@ -279,4 +279,12 @@ abstract class NativeComponentProxy extends JComponent {
     return backBufferManager;
   }
   
+  @Override
+  public Dimension getPreferredSize() {
+    if(peer != null) {
+      return peer.getPreferredSize();
+    }
+    return super.getPreferredSize();
+  }
+  
 }
