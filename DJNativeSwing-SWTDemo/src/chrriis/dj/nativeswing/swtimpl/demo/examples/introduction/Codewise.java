@@ -47,7 +47,7 @@ public class Codewise extends JPanel {
         "      });</pre>" + LS +
         "    </p>" + LS +
         "  </body>" + LS +
-        "</html");
+        "</html>");
     editorPane.setEditable(false);
     add(new JScrollPane(editorPane));
   }

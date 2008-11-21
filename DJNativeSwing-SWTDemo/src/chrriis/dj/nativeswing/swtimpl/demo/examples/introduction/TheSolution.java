@@ -40,7 +40,7 @@ public class TheSolution extends JPanel {
         "      </ul>" + LS +
         "    </p>" + LS +
         "  </body>" + LS +
-        "</html");
+        "</html>");
     editorPane.setEditable(false);
     add(new JScrollPane(editorPane));
   }
