@@ -540,16 +540,66 @@ public class NativeInterface {
       }
       argList.add(NativeInterface.class.getName());
       argList.add(String.valueOf(port));
-      // Try these arguments with the various candidate binaries.
-      for(String candidateBinary: candidateBinaries) {
-        argList.set(0, candidateBinary);
-        if(Boolean.parseBoolean(System.getProperty("nativeswing.peervm.debug.printcommandline"))) {
-          System.err.println("Native Command: " + Arrays.toString(argList.toArray()));
+      if(Boolean.parseBoolean(System.getProperty("nativeswing.webbrowser.allowapplets"))) {
+        // Try compatibility with Java applets on update 10.
+        String javaVersion = System.getProperty("java.version");
+        if(javaVersion != null && javaVersion.compareTo("1.6.0_10") >= 0 && "Sun Microsystems Inc.".equals(System.getProperty("java.vendor"))) {
+          boolean isTryingAppletCompatibility = true;
+          if(peerVMParams != null) {
+            for(String peerVMParam: peerVMParams) {
+              if(peerVMParam.startsWith("-Xbootclasspath/a:")) {
+                isTryingAppletCompatibility = false;
+                break;
+              }
+            }
+          }
+          if(isTryingAppletCompatibility) {
+            File[] deploymentFiles = new File[] {
+                new File(javaHome, "lib/deploy.jar"),
+                new File(javaHome, "lib/plugin.jar"),
+                new File(javaHome, "lib/javaws.jar"),
+            };
+            List<String> argListX = new ArrayList<String>();
+            argListX.add(candidateBinaries[0]);
+            StringBuilder sbX = new StringBuilder();
+            for(int i=0; i<deploymentFiles.length; i++) {
+              if(i != 0) {
+                sbX.append(pathSeparator);
+              }
+              File deploymentFile = deploymentFiles[i];
+              if(deploymentFile.exists()) {
+                sbX.append(deploymentFile.getAbsolutePath());
+              }
+            }
+            if(sbX.indexOf(" ") != -1) {
+              // TODO: check what to do when there are spaces in paths on non-windows machines
+              argListX.add("\"-Xbootclasspath/a:" + sbX + "\"");
+            } else {
+              argListX.add("-Xbootclasspath/a:" + sbX);
+            }
+            argListX.addAll(argList.subList(1, argList.size()));
+            if(Boolean.parseBoolean(System.getProperty("nativeswing.peervm.debug.printcommandline"))) {
+              System.err.println("Native Command: " + Arrays.toString(argListX.toArray()));
+            }
+            try {
+              p = new ProcessBuilder(argListX).start();
+            } catch(IOException e) {
+            }
+          }
         }
-        try {
-          p = new ProcessBuilder(argList).start();
-          break;
-        } catch(IOException e) {
+      }
+      if(p == null) {
+        // Try these arguments with the various candidate binaries.
+        for(String candidateBinary: candidateBinaries) {
+          argList.set(0, candidateBinary);
+          if(Boolean.parseBoolean(System.getProperty("nativeswing.peervm.debug.printcommandline"))) {
+            System.err.println("Native Command: " + Arrays.toString(argList.toArray()));
+          }
+          try {
+            p = new ProcessBuilder(argList).start();
+            break;
+          } catch(IOException e) {
+          }
         }
       }
       if(p == null) {
