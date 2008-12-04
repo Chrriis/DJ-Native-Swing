@@ -76,7 +76,7 @@ are using them get loaded.
 * nativeswing.webbrowser.xulrunner.home
   = <path to XULRunner>
   Set which XULRunner installation is used. This property is taken into account
-  when using the XULRunner runtime. 
+  when using the XULRunner runtime.
 
 --------------------------------------------------------------------------------
 
