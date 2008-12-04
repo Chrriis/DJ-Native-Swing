@@ -63,7 +63,7 @@ class NativeWebBrowser extends NativeComponent {
     @Override
     public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
-      JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
+      JWebBrowser webBrowser = nativeWebBrowser == null? null: nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
         return null;
       }
@@ -89,7 +89,7 @@ class NativeWebBrowser extends NativeComponent {
     @Override
     public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
-      JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
+      JWebBrowser webBrowser = nativeWebBrowser == null? null: nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
         return null;
       }
@@ -130,7 +130,7 @@ class NativeWebBrowser extends NativeComponent {
     @Override
     public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
-      final JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
+      final JWebBrowser webBrowser = nativeWebBrowser == null? null: nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
         return null;
       }
@@ -193,7 +193,7 @@ class NativeWebBrowser extends NativeComponent {
     @Override
     public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
-      JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
+      JWebBrowser webBrowser = nativeWebBrowser == null? null: nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
         return null;
       }
@@ -217,7 +217,7 @@ class NativeWebBrowser extends NativeComponent {
     @Override
     public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
-      JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
+      JWebBrowser webBrowser = nativeWebBrowser == null? null: nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
         return null;
       }
@@ -241,7 +241,7 @@ class NativeWebBrowser extends NativeComponent {
     @Override
     public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
-      JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
+      JWebBrowser webBrowser = nativeWebBrowser == null? null: nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
         return false;
       }
@@ -267,7 +267,7 @@ class NativeWebBrowser extends NativeComponent {
     @Override
     public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
-      JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
+      JWebBrowser webBrowser = nativeWebBrowser == null? null: nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
         return null;
       }
@@ -291,7 +291,7 @@ class NativeWebBrowser extends NativeComponent {
     @Override
     public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
-      JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
+      JWebBrowser webBrowser = nativeWebBrowser == null? null: nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
         return null;
       }
@@ -314,7 +314,7 @@ class NativeWebBrowser extends NativeComponent {
     @Override
     public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
-      JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
+      JWebBrowser webBrowser = nativeWebBrowser == null? null: nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
         return null;
       }
@@ -337,7 +337,7 @@ class NativeWebBrowser extends NativeComponent {
     @Override
     public Object run(Object[] args) {
       NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
-      JWebBrowser webBrowser = nativeWebBrowser.webBrowser.get();
+      JWebBrowser webBrowser = nativeWebBrowser == null? null: nativeWebBrowser.webBrowser.get();
       if(webBrowser == null) {
         return null;
       }

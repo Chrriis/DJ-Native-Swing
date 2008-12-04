@@ -286,7 +286,7 @@ public abstract class NativeComponent extends Canvas {
     @Override
     public Object run(Object[] args) {
       NativeComponent nativeComponent = getNativeComponent();
-      if(!nativeComponent.isShowing()) {
+      if(nativeComponent == null || !nativeComponent.isShowing()) {
         return null;
       }
       int type = (Integer)args[0];
@@ -350,7 +350,7 @@ public abstract class NativeComponent extends Canvas {
     @Override
     public Object run(Object[] args) {
       NativeComponent nativeComponent = getNativeComponent();
-      if(!nativeComponent.isShowing()) {
+      if(nativeComponent == null || !nativeComponent.isShowing()) {
         return null;
       }
       int type = (Integer)args[0];
