@@ -5,6 +5,11 @@ Licence terms: LGPL (see licence.txt)
 
 ---------------------------------- Change log ----------------------------------
 
+* Version 0.9.8 (xxxxxxxxxxxxxxxxx):
+
+- Fixed a bug in native interface restart.
+
+
 * Version 0.9.7 (November 18, 2008):
 
 - JSyntaxHighlighter is added.

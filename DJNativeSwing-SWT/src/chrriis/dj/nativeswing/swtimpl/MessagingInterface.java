@@ -323,13 +323,13 @@ abstract class MessagingInterface {
     Thread receiverThread = new Thread("NativeSwing Receiver - " + (isNativeSide()? "SWT": "Swing")) {
       @Override
       public void run() {
-        while(isAlive()) {
+        while(MessagingInterface.this.isAlive()) {
           Message message = null;
           try {
             message = readMessageFromChannel();
           } catch(Exception e) {
             boolean isRespawned = false;
-            if(isAlive()) {
+            if(MessagingInterface.this.isAlive()) {
               setAlive(false);
               if(exitOnEndOfStream) {
                 System.exit(0);
