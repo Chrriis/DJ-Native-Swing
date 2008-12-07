@@ -15,7 +15,10 @@ import java.util.List;
 
 import javax.swing.SwingUtilities;
 
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+
+import chrriis.common.ObjectRegistry;
 
 /**
  * @author Christopher Deckers
@@ -29,8 +32,17 @@ abstract class InProcessMessagingInterface extends MessagingInterface {
   }
   
   public void destroy() {
-    // TODO: send a message to dispose all SWT controls (simulate dead peer).
-    // Remove IDs from component registry?
+    // Dispose all SWT controls (simulate dead peer).
+    ObjectRegistry controlRegistry = NativeComponent.getControlRegistry();
+    for(int instanceID: controlRegistry.getInstanceIDs()) {
+      final Control control = (Control)controlRegistry.get(instanceID);
+      controlRegistry.remove(instanceID);
+      control.getDisplay().asyncExec(new Runnable() {
+        public void run() {
+          control.getShell().dispose();
+        }
+      });
+    }
     setAlive(false);
   }
   

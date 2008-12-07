@@ -161,8 +161,9 @@ public class NativeInterface {
       e.printStackTrace();
     }
     if(isInProcess) {
-      InProcess.startAutoShutdownThread();
+      InProcess.initialize();
     }
+    isInitialized = true;
   }
   
   /**
@@ -354,12 +355,16 @@ public class NativeInterface {
       isEventPumpRunning = true;
     }
     
-    private static MessagingInterface createInProcessMessagingInterface() {
+    private static void initialize() {
       Device.DEBUG = Boolean.parseBoolean(System.getProperty("nativeswing.swt.debug.device"));
       DeviceData data = new DeviceData();
       data.debug = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.debug"));
       data.tracking = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.tracking"));
       display = new Display(data);
+      startAutoShutdownThread();
+    }
+    
+    private static MessagingInterface createInProcessMessagingInterface() {
       return new SWTInProcessMessagingInterface(display).getMirrorMessagingInterface();
     }
     

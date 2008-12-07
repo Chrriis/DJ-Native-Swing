@@ -7,7 +7,8 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.8 (xxxxxxxxxxxxxxxxx):
 
-- Fixed a bug in native interface restart.
+- Fixed a bug (regression) in native interface restart.
+- Fixed native interface lifecycle when in-process.
 
 
 * Version 0.9.7 (November 18, 2008):
