@@ -15,12 +15,15 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
@@ -78,6 +81,7 @@ public class DemoFrame extends JFrame {
         return new Dimension(0, 0);
       }
     };
+    JPanel leftPane = new JPanel(new BorderLayout());
     final DemoTree demoTree = new DemoTree();
     TreeSelectionModel selectionModel = demoTree.getSelectionModel();
     selectionModel.setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -198,7 +202,19 @@ public class DemoFrame extends JFrame {
         }
       }
     });
-    JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, new JScrollPane(demoTree), displayArea);
+    leftPane.add(new JScrollPane(demoTree), BorderLayout.CENTER);
+    JCheckBox nativeInterfaceOpenCheckBox = new JCheckBox("Native Interface Open", true);
+    nativeInterfaceOpenCheckBox.addItemListener(new ItemListener() {
+      public void itemStateChanged(ItemEvent e) {
+        if(e.getStateChange() == ItemEvent.SELECTED) {
+          NativeInterface.open();
+        } else {
+          NativeInterface.close();
+        }
+      }
+    });
+    leftPane.add(nativeInterfaceOpenCheckBox, BorderLayout.SOUTH);
+    JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, leftPane, displayArea);
     contentPane.add(splitPane, BorderLayout.CENTER);
     setSize(800, 600);
     splitPane.setDividerLocation(170);
@@ -208,6 +224,7 @@ public class DemoFrame extends JFrame {
   
   public static void main(String[] args) {
     UIUtils.setPreferredLookAndFeel();
+    NativeInterface.getConfiguration().setNativeSideRespawnedOnError(false);
     NativeInterface.open();
     Toolkit.getDefaultToolkit().setDynamicLayout(true);
     SwingUtilities.invokeLater(new Runnable() {
