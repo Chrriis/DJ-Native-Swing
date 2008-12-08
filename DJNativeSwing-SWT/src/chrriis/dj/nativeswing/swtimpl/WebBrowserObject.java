@@ -224,12 +224,18 @@ public abstract class WebBrowserObject {
           StringBuffer embedParameters = new StringBuffer();
           Map<String, String> parameters = objectHtmlConfiguration.getHTMLParameters();
           HashMap<String, String> htmlParameters = parameters == null? new HashMap<String, String>(): new HashMap<String, String>(parameters);
+          String windowsParamName = objectHtmlConfiguration.getWindowsParamName();
+          String paramName = objectHtmlConfiguration.getParamName();
           htmlParameters.remove("width");
           htmlParameters.remove("height");
           htmlParameters.remove("type");
           htmlParameters.remove("name");
-          htmlParameters.remove(objectHtmlConfiguration.getWindowsParamName());
-          htmlParameters.remove(objectHtmlConfiguration.getParamName());
+          if(windowsParamName != null) {
+            htmlParameters.remove(windowsParamName);
+          }
+          if(paramName != null) {
+            htmlParameters.remove(paramName);
+          }
           for(Entry<String, String> param: htmlParameters.entrySet()) {
             String name = Utils.escapeXML(param.getKey());
             String value = Utils.escapeXML(param.getValue());
@@ -242,12 +248,11 @@ public abstract class WebBrowserObject {
           String content =
             "<!--" + LS +
             "window.document.write('<object classid=\"clsid:" + objectHtmlConfiguration.getWindowsClassID() + "\" id=\"" + embeddedObjectJavascriptName + "\" codebase=\"" + objectHtmlConfiguration.getWindowsInstallationURL() + "\" events=\"true\">');" + LS +
-            "window.document.write('  <param name=\"" + objectHtmlConfiguration.getWindowsParamName() + "\" value=\"' + decodeURIComponent('" + escapedURL + "') + '\";\"/>');" + LS +
+            (windowsParamName == null? "": "window.document.write('  <param name=\"" + windowsParamName + "\" value=\"' + decodeURIComponent('" + escapedURL + "') + '\"/>');" + LS) +
             objectParameters +
-            "window.document.write('  <embed" + embedParameters + " name=\"" + embeddedObjectJavascriptName + "\" " + objectHtmlConfiguration.getParamName() + "=\"" + escapedURL + "\" type=\"" + objectHtmlConfiguration.getMimeType() + "\" pluginspage=\"" + objectHtmlConfiguration.getInstallationURL() + "\"" + versionParameter+ ">');" + LS +
+            "window.document.write('  <embed" + embedParameters + " name=\"" + embeddedObjectJavascriptName + "\"" + (paramName == null? "": " " + paramName + "=\"" + escapedURL + "\"") + " type=\"" + objectHtmlConfiguration.getMimeType() + "\" pluginspage=\"" + objectHtmlConfiguration.getInstallationURL() + "\"" + versionParameter+ ">');" + LS +
             "window.document.write('  </embed>');" + LS +
             "window.document.write('</object>');" + LS +
-            "window.document.write('<div></div>');" + LS +
             "window.document.write('<div id=\"messageDiv\" style=\"display:none;\"><table><tr><td>" + objectHtmlConfiguration.getHTMLLoadingMessage() + "</td></tr></table></div>');" + LS +
             "setTimeout('document.getElementById(\\'messageDiv\\').style.display = \\'inline\\'', 200);" + LS +
             "var embeddedObject = getEmbeddedObject();" + LS +

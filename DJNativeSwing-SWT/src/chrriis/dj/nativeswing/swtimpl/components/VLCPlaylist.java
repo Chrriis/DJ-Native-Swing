@@ -49,17 +49,16 @@ public class VLCPlaylist {
    * @param clazz the reference clazz of the file to load.
    * @param resourcePath the path to the file.
    */
-  public int addItem(Class<?> clazz, String resourcePath) {
+  public void addItem(Class<?> clazz, String resourcePath) {
     vlcPlayer.addReferenceClassLoader(clazz.getClassLoader());
-    return addItem(WebServer.getDefaultWebServer().getClassPathResourceURL(clazz.getName(), resourcePath));
+    addItem(WebServer.getDefaultWebServer().getClassPathResourceURL(clazz.getName(), resourcePath));
   }
   
   /**
-   * Add an item to the playlist and get its ID for future manipulation.
+   * Add an item to the playlist.
    * @param resourcePath the path or URL to the file.
-   * @return the item ID, which can be used to add play or remove an item from the playlist.
    */
-  public int addItem(String resourcePath) {
+  public void addItem(String resourcePath) {
     if(!webBrowserObject.hasContent()) {
       vlcPlayer.load();
       clear();
@@ -68,8 +67,7 @@ public class VLCPlaylist {
     if(file != null) {
       resourcePath = webBrowserObject.getLocalFileURL(file);
     }
-    Object value = webBrowserObject.invokeObjectFunctionWithResult("playlist.add", resourcePath);
-    return value == null? -1: ((Number)value).intValue();
+    webBrowserObject.invokeObjectFunction("playlist.add", resourcePath);
   }
   
   /**
@@ -123,11 +121,11 @@ public class VLCPlaylist {
   }
   
   /**
-   * Remove an item using its ID.
-   * @param itemID the ID of the item.
+   * Remove an item using its index.
+   * @param index the index of the item.
    */
-  public void removeItem(int itemID) {
-    webBrowserObject.invokeObjectFunction("playlist.items.removeItem", itemID);
+  public void removeItem(int index) {
+    webBrowserObject.invokeObjectFunction("playlist.items.removeItem", index);
   }
   
 }
