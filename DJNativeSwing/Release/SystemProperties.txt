@@ -5,19 +5,20 @@ are using them get loaded.
 
 --------------------------------------------------------------------------------
 
-* nativeswing.webserver.hostaddress
-  = <String> or "<localhost>" (default: 127.0.0.1)
-  Set the address that is used as the local host address when trying to access
-  the embedded web server.
+* nativeswing.localhostaddress
+  = <String> or "_localhost_" (default: auto-detect, usually 127.0.0.1)
+  Set the address that is used as the local host address for all the internal
+  communication channels that require a sockets (local web server, etc.).
+
+* nativeswing.debug.printlocalhostaddress
+  = true/false (default: false)
+  Set whether the address found as the local host address should be printed.
+  
+--------------------------------------------------------------------------------
 
 * nativeswing.webserver.debug.printport
   = true/false (default: false)
   Set whether the port that is used by the embedded web server should be
-  printed.
-  
-* nativeswing.webserver.debug.printhostaddress
-  = true/false (default: false)
-  Set whether the address used by the web server as the host address should be
   printed.
   
 * nativeswing.webserver.debug.printrequests

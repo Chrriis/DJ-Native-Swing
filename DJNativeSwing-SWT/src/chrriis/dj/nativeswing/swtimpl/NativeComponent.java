@@ -67,7 +67,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import chrriis.common.ObjectRegistry;
 import chrriis.common.Utils;
-import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.NativeComponentWrapper;
 
 import com.sun.jna.Native;
@@ -1137,7 +1136,11 @@ public abstract class NativeComponent extends Canvas {
     rectangles = rectangleList.toArray(new Rectangle[0]);
     try {
       final ServerSocket serverSocket = new ServerSocket();
-      serverSocket.bind(new InetSocketAddress(InetAddress.getByName(WebServer.getHostAddress()), 0));
+      String localHostAddress = Utils.getLocalHostAddress();
+      if(localHostAddress == null) {
+        localHostAddress = "127.0.0.1";
+      }
+      serverSocket.bind(new InetSocketAddress(InetAddress.getByName(localHostAddress), 0));
       NativeInterfaceListener nativeInterfaceListener = new NativeInterfaceAdapter() {
         @Override
         public void nativeInterfaceClosed() {
@@ -1150,7 +1153,7 @@ public abstract class NativeComponent extends Canvas {
       };
       CMN_getComponentImage getComponentImage = new CMN_getComponentImage();
       NativeInterface.addNativeInterfaceListener(nativeInterfaceListener);
-      getComponentImage.asyncExec(this, serverSocket.getLocalPort(), rectangles, WebServer.getHostAddress());
+      getComponentImage.asyncExec(this, serverSocket.getLocalPort(), rectangles, localHostAddress);
       Socket socket = serverSocket.accept();
       // Has to be a multiple of 3
       byte[] bytes = new byte[1024 * 3];

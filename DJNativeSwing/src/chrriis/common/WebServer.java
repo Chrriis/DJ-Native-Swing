@@ -689,7 +689,7 @@ public class WebServer {
     isRunning = true;
     instanceID = ObjectRegistry.getInstance().add(this);
     final ServerSocket serverSocket = new ServerSocket();
-    serverSocket.bind(new InetSocketAddress(InetAddress.getByName(WebServer.getHostAddress()), port));
+    serverSocket.bind(new InetSocketAddress(InetAddress.getByName(getHostAddress()), port));
     port = serverSocket.getLocalPort();
     if(Boolean.parseBoolean(System.getProperty("nativeswing.webserver.debug.printport"))) {
       System.err.println("Web Server port: " + port);
@@ -925,31 +925,14 @@ public class WebServer {
   private static String hostAddress;
   
   static {
-    String hostAddress = System.getProperty("nativeswing.webserver.hostaddress");
-    if("<localhost>".equals(hostAddress)) {
-      try {
-        hostAddress = InetAddress.getLocalHost().getHostAddress();
-      } catch(Exception e) {
-      }
-    }
+    String hostAddress = Utils.getLocalHostAddress();
     if(hostAddress == null) {
       hostAddress = "127.0.0.1";
     }
-    setHostAddress(hostAddress);
-  }
-  
-  /**
-   * Set the host address which is used when the URL prefix is requested, which by default is "127.0.0.1".
-   * @param hostAddress The new host address.
-   */
-  public static void setHostAddress(String hostAddress) {
     WebServer.hostAddress = hostAddress;
-    if(Boolean.parseBoolean(System.getProperty("nativeswing.webserver.debug.printhostaddress"))) {
-      System.err.println("Web Server host address: " + hostAddress);
-    }
   }
   
-  public static String getHostAddress() {
+  private static String getHostAddress() {
     return hostAddress;
   }
   

@@ -432,7 +432,7 @@ public class NativeInterface {
       new CMN_setProperties().syncExec(true, System.getProperties());
     }
     
-    private static Process createProcess(int port) {
+    private static Process createProcess(String localHostAddress, int port) {
       List<String> classPathList = new ArrayList<String>();
       String pathSeparator = System.getProperty("path.separator");
       List<Object> referenceList = new ArrayList<Object>();
@@ -537,6 +537,7 @@ public class NativeInterface {
           argList.add("-D" + flag + "=true");
         }
       }
+      argList.add("-Dnativeswing.localhostaddress=" + localHostAddress);
       argList.add("-classpath");
       argList.add(sb.toString());
       if(isProxyClassLoaderUsed) {
@@ -616,13 +617,17 @@ public class NativeInterface {
     }
     
     private static MessagingInterface createOutProcessMessagingInterface() {
+      String localHostAddress = Utils.getLocalHostAddress();
+      if(localHostAddress == null) {
+        throw new IllegalStateException("Failed to find a suitable local host address to communicate with a spawned VM!");
+      }
       int port = Integer.parseInt(System.getProperty("nativeswing.interface.port", "-1"));
       if(port <= 0) {
         ServerSocket serverSocket;
         try {
           serverSocket = new ServerSocket();
           serverSocket.setReuseAddress(false);
-          serverSocket.bind(new InetSocketAddress(InetAddress.getByName(WebServer.getHostAddress()), 0));
+          serverSocket.bind(new InetSocketAddress(InetAddress.getByName(localHostAddress), 0));
         } catch(IOException e) {
           throw new RuntimeException(e);
         }
@@ -634,7 +639,7 @@ public class NativeInterface {
       }
       Process p;
       if(Boolean.parseBoolean(System.getProperty("nativeswing.peervm.create", "true"))) {
-        p = createProcess(port);
+        p = createProcess(localHostAddress, port);
       } else {
         p = null;
       }
@@ -708,7 +713,7 @@ public class NativeInterface {
         try {
           serverSocket = new ServerSocket();
           serverSocket.setReuseAddress(true);
-          serverSocket.bind(new InetSocketAddress(WebServer.getHostAddress(), port));
+          serverSocket.bind(new InetSocketAddress(Utils.getLocalHostAddress(), port));
           break;
         } catch(IOException e) {
           if(i == 0) {

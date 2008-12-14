@@ -5,6 +5,11 @@ Licence terms: LGPL (see licence.txt)
 
 ---------------------------------- Change log ----------------------------------
 
+* Version 0.9.8 (xxxxxxxxxxxxxxxxx):
+
+- Local host address is in Utils (was in WebServer) and is auto-detected.
+
+
 * Version 0.9.7 (November 18, 2008):
 
 - Deadlock when using wrong threads is fixed.

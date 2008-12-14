@@ -8,12 +8,22 @@
 package chrriis.common;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.List;
 
 /**
@@ -277,6 +287,105 @@ public class Utils {
       sb.append('/');
     }
     return sb.toString();
+  }
+  
+  private static String localHostAddress;
+  
+  /**
+   * Get a local host address on which client and server sockets can connect to communicate. The result is cached so that only the first call may take some time.
+   * @return the local host address that was found, or null.
+   */
+  public static String getLocalHostAddress() {
+    if(localHostAddress != null) {
+      return "".equals(localHostAddress)? null: localHostAddress;
+    }
+    String localHostAddress = System.getProperty("nativeswing.localhostaddress");
+    if("_localhost_".equals(localHostAddress)) {
+      try {
+        localHostAddress = InetAddress.getLocalHost().getHostAddress();
+      } catch(Exception e) {
+        localHostAddress = null;
+      }
+    }
+    if(localHostAddress == null) {
+      localHostAddress = getLocalHostAddress(0);
+    }
+    if(Boolean.parseBoolean(System.getProperty("nativeswing.debug.printlocalhostaddress"))) {
+      System.err.println("Local host address: " + localHostAddress);
+    }
+    Utils.localHostAddress = localHostAddress == null? "": localHostAddress;
+    return localHostAddress;
+  }
+  
+  /**
+   * Get a local host address on which client and server sockets can connect to communicate.
+   * @param port the port on which to test, or 0 for a random test port.
+   * @return the local host address that was found, or null.
+   */
+  public static String getLocalHostAddress(int port) {
+    String loopbackAddress = "127.0.0.1";
+    if(isLocalHostAddressReachable(loopbackAddress, port)) {
+      return loopbackAddress;
+    }
+    List<InetAddress> inetAddressList = new ArrayList<InetAddress>();
+    try {
+      for(Enumeration<NetworkInterface> en=NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
+        NetworkInterface networkInterface = en.nextElement();
+        for(Enumeration<InetAddress> en2=networkInterface.getInetAddresses(); en2.hasMoreElements(); ) {
+          InetAddress inetAddress = en2.nextElement();
+          if(inetAddress.isLoopbackAddress() || inetAddress.isSiteLocalAddress()) {
+            if(!loopbackAddress.equals(inetAddress.getHostAddress())) {
+              inetAddressList.add(inetAddress);
+            }
+          }
+        }
+      }
+    } catch (SocketException e) {
+    }
+    Collections.sort(inetAddressList, new Comparator<InetAddress>() {
+      public int compare(InetAddress o1, InetAddress o2) {
+        if(o1.isLoopbackAddress()) {
+          if(o2.isLoopbackAddress()) {
+            return o1.getHostAddress().compareTo(o2.getHostAddress());
+          }
+          return 1;
+        }
+        if(o2.isLoopbackAddress()) {
+          return -1;
+        }
+        return o1.getHostAddress().compareTo(o2.getHostAddress());
+      }
+    });
+    for(InetAddress address: inetAddressList) {
+      String hostAddress = address.getHostAddress();
+      if(isLocalHostAddressReachable(hostAddress, port)) {
+        return hostAddress;
+      }
+    }
+    return null;
+  }
+  
+  private static boolean isLocalHostAddressReachable(String hostAddress, int port) {
+    boolean isReachable = false;
+    try {
+      ServerSocket serverSocket = new ServerSocket();
+      serverSocket.bind(new InetSocketAddress(InetAddress.getByName(hostAddress), port));
+      port = serverSocket.getLocalPort();
+      try {
+        Socket socket = new Socket();
+        socket.connect(new InetSocketAddress(hostAddress, port), 200);
+        isReachable = true;
+        socket.close();
+      } catch (Exception e) {
+        try {
+          serverSocket.close();
+        } catch (IOException ex) {
+        }
+      }
+      serverSocket.close();
+    } catch (Exception e) {
+    }
+    return isReachable;
   }
   
 }
