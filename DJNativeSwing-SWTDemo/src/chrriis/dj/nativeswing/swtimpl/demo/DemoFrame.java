@@ -224,7 +224,6 @@ public class DemoFrame extends JFrame {
   
   public static void main(String[] args) {
     UIUtils.setPreferredLookAndFeel();
-    NativeInterface.getConfiguration().setNativeSideRespawnedOnError(false);
     NativeInterface.open();
     Toolkit.getDefaultToolkit().setDynamicLayout(true);
     SwingUtilities.invokeLater(new Runnable() {
