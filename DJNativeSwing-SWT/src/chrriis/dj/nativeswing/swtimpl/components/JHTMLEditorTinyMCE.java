@@ -65,14 +65,17 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
             "    <script type=\"text/javascript\">" + LS +
             "      function debug (text) {" + LS +
             "        document.getElementById ('debug').innerHTML = text;" + LS +
-            "      };" + LS +
+            "      }" + LS +
             "      window.onerror = function (e) {" + LS +
             "        var text = '';" + LS +
             "        if (typeof e == 'string') {" + LS +
             "          text = e;" + LS +
-            "        } else for (var x in e) {" + LS +
-            "          text += x+': '+e[x]+'\\n';" + LS +
-            "        } debug (text);" + LS +
+            "        } else {" +
+            "          for (var x in e) {" + LS +
+            "            text += x+': '+e[x]+'\\n';" + LS +
+            "          }" + LS +
+            "        }" + LS +
+            "        debug (text);" + LS +
             "      };" + LS +
             "      function sendCommand (command) {" + LS +
             "        var s = '" + JWebBrowser.COMMAND_STATUS_PREFIX + "' + encodeURIComponent(command);" + LS +
