@@ -481,13 +481,15 @@ class NativeWebBrowser extends NativeComponent {
     });
     browser.addStatusTextListener(new StatusTextListener() {
       public void changed(StatusTextEvent e) {
-        String oldStatus = (String)browser.getData("CMJ_updateStatus.status");
-        String newStatus = e.text;
-        if(oldStatus == null) {
-          oldStatus = "";
-        }
+        final String oldStatus = (String)browser.getData("CMJ_updateStatus.status");
+        final String newStatus = e.text;
         if(newStatus.startsWith(COMMAND_STATUS_PREFIX)) {
-          browserExecute(browser, "window.status = decodeURIComponent('" + Utils.encodeURL(oldStatus) + "');");
+          // XULRunner on Linux: "window" is not defined when synchronous... so we defer.
+          e.display.asyncExec(new Runnable() {
+            public void run() {
+              browserExecute(browser, "if(decodeURIComponent('" + Utils.encodeURL(newStatus) + "') == window.status) {window.status = decodeURIComponent('" + Utils.encodeURL(oldStatus == null? "": oldStatus) + "');}");
+            }
+          });
           String query = newStatus.substring(COMMAND_STATUS_PREFIX.length());
           if(query.endsWith("/")) {
             query = query.substring(0, query.length() - 1);
