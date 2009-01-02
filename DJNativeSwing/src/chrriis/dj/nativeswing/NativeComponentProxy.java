@@ -21,7 +21,6 @@ import java.awt.event.ContainerEvent;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
 
-import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 
 import chrriis.common.Filter;
@@ -32,7 +31,7 @@ import chrriis.dj.nativeswing.NativeComponentProxyWindow.EmbeddedWindow;
 /**
  * @author Christopher Deckers
  */
-abstract class NativeComponentProxy extends JComponent {
+abstract class NativeComponentProxy extends EmbeddableComponent {
 
   private static final boolean IS_DEBUGGING_SHAPE = Boolean.parseBoolean(System.getProperty("nativeswing.components.debug.printshapecomputing"));
 

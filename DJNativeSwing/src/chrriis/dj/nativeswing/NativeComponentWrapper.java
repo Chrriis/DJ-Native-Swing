@@ -7,7 +7,6 @@
  */
 package chrriis.dj.nativeswing;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Graphics;
@@ -19,7 +18,6 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 /**
@@ -101,12 +99,11 @@ public class NativeComponentWrapper {
     return nativeComponentProxy == null? null: nativeComponentProxy.get();
   }
   
-  static class SimpleNativeComponentHolder extends JPanel implements NativeComponentHolder {
+  static class SimpleNativeComponentHolder extends EmbeddableComponent implements NativeComponentHolder {
     
     private NativeComponentWrapper nativeComponent;
     
     public SimpleNativeComponentHolder(NativeComponentWrapper nativeComponent) {
-      super(new BorderLayout(0, 0));
       this.nativeComponent = nativeComponent;
       add(nativeComponent.getNativeComponent());
     }

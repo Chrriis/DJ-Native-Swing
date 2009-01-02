@@ -42,7 +42,6 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
 
   protected NativeComponentProxyPanel(NativeComponentWrapper nativeComponent, boolean isVisibilityConstrained, boolean isDestructionOnFinalization, boolean isProxiedFiliation) {
     super(nativeComponent, isVisibilityConstrained, isDestructionOnFinalization);
-    setLayout(new BorderLayout(0, 0));
     this.isProxiedFiliation = isProxiedFiliation;
     addFocusListener(new FocusAdapter() {
       @Override
@@ -55,7 +54,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
   static class EmbeddedPanel extends Panel implements NativeComponentHolder {
     
     public EmbeddedPanel() {
-      super(new BorderLayout(0, 0));
+      super(new BorderLayout());
     }
     
     @Override
