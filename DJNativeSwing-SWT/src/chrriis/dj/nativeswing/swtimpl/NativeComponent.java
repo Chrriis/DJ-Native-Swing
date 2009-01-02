@@ -7,6 +7,7 @@
  */
 package chrriis.dj.nativeswing.swtimpl;
 
+import java.awt.AWTEvent;
 import java.awt.Canvas;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -249,7 +250,26 @@ public abstract class NativeComponent extends Canvas {
         }
       }
     });
+    // We enable key events because of the special processing added to processKeyEvent(KeyEvent).
+    enableEvents(AWTEvent.KEY_EVENT_MASK);
     setFocusable(true);
+  }
+  
+  @SuppressWarnings("deprecation")
+  @Override
+  protected void processKeyEvent(KeyEvent e) {
+    KeyEvent ke = e;
+    if(!(ke instanceof CKeyEvent)) {
+      // Under Linux, native key events are received in addition to our synthetic events.
+      // This causes problems, because ancestor key strokes may accept a key combination which consumes the native event.
+      // That means the native event is not received by the native component.
+      // The solution is to dispatch the event directly to the peer if it is not our synthetic event (listeners do not get called).
+      // Listeners are then called when our synthetic events are dispatched.
+      getPeer().handleEvent(e);
+      e.consume();
+      return;
+    }
+    super.processKeyEvent(ke);
   }
   
   private Thread resizeThread;
@@ -321,7 +341,7 @@ public abstract class NativeComponent extends Canvas {
       if(buttonPressedCount != 0 && type == MouseEvent.MOUSE_MOVED) {
         type = MouseEvent.MOUSE_DRAGGED;
       }
-      final MouseEvent me;
+      MouseEvent me;
       if(Utils.IS_JAVA_6_OR_GREATER) {
         // Not specifying the absX and Y in Java 6 results in a deadlock when pressing alt+F4 while moving the mouse over a native control
         if(type == MouseEvent.MOUSE_WHEEL) {
@@ -375,9 +395,15 @@ public abstract class NativeComponent extends Canvas {
       } else {
         keyCode = SWTUtils.translateSWTKeyCode(e_keyCode);
       }
-      final KeyEvent ke = new KeyEvent(nativeComponent, type, System.currentTimeMillis(), SWTUtils.translateSWTModifiers(e_stateMask), keyCode, character);
+      KeyEvent ke = new CKeyEvent(nativeComponent, type, System.currentTimeMillis(), SWTUtils.translateSWTModifiers(e_stateMask), keyCode, character);
       nativeComponent.dispatchEvent(ke);
       return null;
+    }
+  }
+  
+  private static class CKeyEvent extends KeyEvent {
+    public CKeyEvent(Component source, int id, long when, int modifiers, int keyCode, char keyChar) {
+      super(source, id, when, modifiers, keyCode, keyChar);
     }
   }
   
