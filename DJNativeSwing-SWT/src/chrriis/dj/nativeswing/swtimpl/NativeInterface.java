@@ -646,7 +646,7 @@ public class NativeInterface {
       Socket socket = null;
       for(int i=99; i>=0; i--) {
         try {
-          socket = new Socket("127.0.0.1", port);
+          socket = new Socket(localHostAddress, port);
           break;
         } catch(IOException e) {
           if(i == 0) {
