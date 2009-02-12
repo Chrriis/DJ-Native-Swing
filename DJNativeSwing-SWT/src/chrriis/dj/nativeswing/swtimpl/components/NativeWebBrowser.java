@@ -467,7 +467,7 @@ class NativeWebBrowser extends NativeComponent {
         browser.setData("CMJ_updateStatus.status", null);
         browser.setData("CMJ_updateProgress.progress", null);
         browser.setData("Browser.loading", true);
-        e.doit = (Boolean)new CMJ_locationChanging().syncExec(browser, location, e.top);
+        e.doit = Boolean.TRUE.equals(new CMJ_locationChanging().syncExec(browser, location, e.top));
         if(!e.doit) {
           browser.setData("Browser.loading", false);
           new CMJ_locationChangeCanceled().asyncExec(browser, location, e.top);
