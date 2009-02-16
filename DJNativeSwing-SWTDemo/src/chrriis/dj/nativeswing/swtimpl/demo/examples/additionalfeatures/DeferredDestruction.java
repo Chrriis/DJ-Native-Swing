@@ -56,6 +56,7 @@ public class DeferredDestruction extends JPanel {
   
   @Override
   public void removeNotify() {
+    super.removeNotify();
     // flashPlayer is destroyed on finalization.
     // Rather than wait for garbage collection, release when the component is removed from its parent.
     flashPlayer.disposeNativePeer();

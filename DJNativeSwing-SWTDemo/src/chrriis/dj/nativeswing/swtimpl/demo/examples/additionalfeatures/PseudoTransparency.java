@@ -104,6 +104,7 @@ public class PseudoTransparency extends JPanel {
   
   @Override
   public void removeNotify() {
+    super.removeNotify();
     isDisposed = true;
   }
   

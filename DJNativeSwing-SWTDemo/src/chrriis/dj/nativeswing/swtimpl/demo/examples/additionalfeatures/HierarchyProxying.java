@@ -91,6 +91,7 @@ public class HierarchyProxying extends JPanel {
   
   @Override
   public void removeNotify() {
+    super.removeNotify();
     // webBrowser2 is destroyed on finalization.
     // Rather than wait for garbage collection, release when the component is removed from its parent.
     webBrowser2.disposeNativePeer();
