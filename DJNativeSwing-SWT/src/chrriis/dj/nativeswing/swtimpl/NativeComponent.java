@@ -834,13 +834,13 @@ public abstract class NativeComponent extends Canvas {
   protected void disposeNativePeer() {
     if(!isNativePeerDisposed) {
       isNativePeerDisposed = true;
-      invalidateNativePeer("The native component was disposed.");
       if(isNativePeerInitialized) {
         NativeInterface.removeNativeInterfaceListener(nativeInterfaceListener);
         if(isNativePeerValid()) {
           runSync(new CMN_destroyControl());
         }
       }
+      invalidateNativePeer("The native component was disposed.");
       NativeComponent.getNativeComponentRegistry().remove(componentID);
       isNativePeerValid = false;
       nativeComponentWrapper.disposeNativeComponent();

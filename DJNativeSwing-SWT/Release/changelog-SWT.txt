@@ -8,6 +8,7 @@ Licence terms: LGPL (see licence.txt)
 * Version 0.9.8 (xxxxxxxxxxxxxxxxx):
 
 - Updated VLC API to latest (0.9.6).
+- Fixed a bug (regression) where native resources were not released properly.
 - Fixed a bug where some key events were not working on Linux.
 - Fixed a bug with status bar messages: state was not restored properly.
 - Fixed a bug (regression) in native interface restart.
