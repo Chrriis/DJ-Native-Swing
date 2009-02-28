@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -30,7 +30,7 @@ public class NativeComponentWrapper {
   private static final boolean IS_DEBUGGING_OPTIONS = Boolean.parseBoolean(System.getProperty("nativeswing.components.debug.printoptions"));
 
   private boolean isRegistered;
-  
+
   private void checkParent() {
     Container parent = nativeComponent.getParent();
     if(parent != null && !(parent instanceof NativeComponentHolder)) {
@@ -49,7 +49,7 @@ public class NativeComponentWrapper {
       }
     }
   }
-  
+
   /**
    * Construct a NativeComponentWrapper.
    * @param nativeComponent the native component to wrap.
@@ -68,13 +68,13 @@ public class NativeComponentWrapper {
       }
     });
   }
-  
+
   private Component nativeComponent;
-  
+
   Component getNativeComponent() {
     return nativeComponent;
   }
-  
+
   /**
    * Paint the native component including its native peer in an image, in the areas that are specified. This method can be called from a non-UI thread.
    * @param image the image to paint to.
@@ -82,11 +82,11 @@ public class NativeComponentWrapper {
    */
   protected void paintNativeComponent(BufferedImage image, Rectangle[] rectangles) {
   }
-  
+
   static interface NativeComponentHolder {}
-  
+
   private Reference<NativeComponentProxy> nativeComponentProxy;
-  
+
   void setNativeComponentProxy(NativeComponentProxy nativeComponentProxy) {
     if(nativeComponentProxy == null) {
       this.nativeComponentProxy = null;
@@ -94,27 +94,27 @@ public class NativeComponentWrapper {
       this.nativeComponentProxy = new WeakReference<NativeComponentProxy>(nativeComponentProxy);
     }
   }
-  
+
   NativeComponentProxy getNativeComponentProxy() {
     return nativeComponentProxy == null? null: nativeComponentProxy.get();
   }
-  
+
   static class SimpleNativeComponentHolder extends EmbeddableComponent implements NativeComponentHolder {
-    
+
     private NativeComponentWrapper nativeComponent;
-    
+
     public SimpleNativeComponentHolder(NativeComponentWrapper nativeComponent) {
       this.nativeComponent = nativeComponent;
       add(nativeComponent.getNativeComponent());
     }
-    
+
     @Override
     protected void printComponent(Graphics g) {
       nativeComponent.getNativeComponent().print(g);
     }
-    
+
   }
-  
+
   /**
    * This method is invoked to enable or disable the native component at its native level, to prevent focus and input problems. It does nothing by default but should be implemented when possible.
    * @param isEnabled true if the native component should be enabled, false otherwise.
@@ -122,7 +122,7 @@ public class NativeComponentWrapper {
   protected void setNativeComponentEnabled(boolean isEnabled) {
     // Do nothing by default, though it is desirable that subclasses implement it.
   }
-  
+
   /**
    * Get a description of this component wrapper, which is used for example to improve debug messages.
    * @return a description of this component wrapper.
@@ -130,7 +130,7 @@ public class NativeComponentWrapper {
   protected String getComponentDescription() {
     return getClass().getName() + "[" + hashCode() + "]";
   }
-  
+
   /**
    * A native component instance cannot be added directly to a component hierarchy: this method creates a component that will host the native component but which can be added to the component hierarchy.
    * @param options the options to configure the behavior of this component.
@@ -139,7 +139,7 @@ public class NativeComponentWrapper {
   public Component createEmbeddableComponent(NSOption... options) {
     return createEmbeddableComponent(NSOption.createOptionMap(options));
   }
-  
+
   /**
    * A native component instance cannot be added directly to a component hierarchy: this method creates a component that will host the native component but which can be added to the component hierarchy.
    * @param optionMap the options to configure the behavior of this component.
@@ -173,8 +173,17 @@ public class NativeComponentWrapper {
       isRegistered = true;
       return new SimpleNativeComponentHolder(this);
     }
-    Boolean componentHierarchyProxying = optionMap.get(NSComponentOptions.PROXY_COMPONENT_HIERARCHY_OPTION_KEY) != null? Boolean.TRUE: null;
     Boolean deferredDestruction = optionMap.get(NSComponentOptions.DESTROY_ON_FINALIZATION_OPTION_KEY) != null? Boolean.TRUE: null;
+    Boolean componentHierarchyProxying = optionMap.get(NSComponentOptions.PROXY_COMPONENT_HIERARCHY_OPTION_KEY) != null? Boolean.TRUE: null;
+//    if(System.getProperty("java.version").compareTo("1.6.0_12") >= 0) {
+//      if(deferredDestruction != null && componentHierarchyProxying == null) {
+//        componentHierarchyProxying = true;
+//      }
+//      if(Boolean.TRUE.equals(componentHierarchyProxying)) {
+//        return new NativeComponentProxyFinalizationPanel(this);
+//      }
+//      return new SimpleNativeComponentHolder(this);
+//    }
     Boolean visibilityConstraint = optionMap.get(NSComponentOptions.CONSTRAIN_VISIBILITY_OPTION_KEY) != null? Boolean.TRUE: null;
     boolean isJNAPresent = isJNAPresent();
     if(visibilityConstraint == null) {
@@ -198,7 +207,7 @@ public class NativeComponentWrapper {
     }
     return new NativeComponentProxyPanel(this, Boolean.TRUE.equals(visibilityConstraint), Boolean.TRUE.equals(deferredDestruction), Boolean.TRUE.equals(componentHierarchyProxying));
   }
-  
+
   private static boolean isJNAPresent() {
     try {
       Class.forName("com.sun.jna.examples.WindowUtils");
@@ -208,7 +217,7 @@ public class NativeComponentWrapper {
     }
     return false;
   }
-  
+
   /**
    * Explicitely dispose the native resources. This is particularly useful if deferred destruction is used (cf native component options) and the component is not going to be used anymore.
    */
@@ -218,9 +227,9 @@ public class NativeComponentWrapper {
       nativeComponentProxy.dispose();
     }
   }
-  
+
   private BackBufferManager backBufferManager;
-  
+
   BackBufferManager getBackBufferManager() {
     NativeComponentProxy nativeComponentProxy = getNativeComponentProxy();
     if(nativeComponentProxy != null) {
@@ -231,7 +240,7 @@ public class NativeComponentWrapper {
     }
     return backBufferManager;
   }
-  
+
   /**
    * Paint the back buffer, if one was created, to a graphic context.
    * @param g the graphic context to paint to.
@@ -241,21 +250,21 @@ public class NativeComponentWrapper {
       backBufferManager.paintBackBuffer(g);
     }
   }
-  
+
   /**
-   * Create an image of the native peer as a back buffer, which can be used when painting the component, or to simulate alpha blending. 
+   * Create an image of the native peer as a back buffer, which can be used when painting the component, or to simulate alpha blending.
    */
   public void createBackBuffer() {
     getBackBufferManager().createBackBuffer();
   }
-  
+
   /**
    * Update the back buffer on the areas that have non opaque overlays and that are not covered by opaque components.
    */
   public void updateBackBufferOnVisibleTranslucentAreas() {
     getBackBufferManager().updateBackBufferOnVisibleTranslucentAreas();
   }
-  
+
   /**
    * Update (eventually creating an empty one if it does not exist) the back buffer on the area specified by the rectangles.
    * @param rectangles the area to update.
@@ -263,14 +272,14 @@ public class NativeComponentWrapper {
   public void updateBackBuffer(Rectangle[] rectangles) {
     getBackBufferManager().updateBackBuffer(rectangles);
   }
-  
+
   /**
    * Destroy the back buffer.
    */
   public void destroyBackBuffer() {
     getBackBufferManager().destroyBackBuffer();
   }
-  
+
   /**
    * This method should be invoked by the native component when it wants to transfer the focus.
    * @param isForward true if the focus should be transfered forward, false if it should be backward.
@@ -286,5 +295,5 @@ public class NativeComponentWrapper {
       c.transferFocusBackward();
     }
   }
-  
+
 }
