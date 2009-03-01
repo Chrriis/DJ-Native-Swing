@@ -405,7 +405,9 @@ public class NativeSwing {
     // We use our own HW forcing, so we disable the one from JNA
     System.setProperty("jna.force_hw_popups", "false");
     // We have to disable mixing until all bahaviors can be implemented using the JDK features.
-    System.setProperty("sun.awt.disableMixing", "true");
+    if(System.getProperty("sun.awt.disableMixing") == null) {
+      System.setProperty("sun.awt.disableMixing", "true");
+    }
     // Create window monitor
     Toolkit.getDefaultToolkit().addAWTEventListener(new NIAWTEventListener(), WindowEvent.WINDOW_EVENT_MASK | ComponentEvent.COMPONENT_EVENT_MASK);
     isInitialized = true;
