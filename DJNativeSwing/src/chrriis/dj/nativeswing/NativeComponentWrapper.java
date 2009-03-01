@@ -175,7 +175,7 @@ public class NativeComponentWrapper {
     }
     Boolean deferredDestruction = optionMap.get(NSComponentOptions.DESTROY_ON_FINALIZATION_OPTION_KEY) != null? Boolean.TRUE: null;
     Boolean componentHierarchyProxying = optionMap.get(NSComponentOptions.PROXY_COMPONENT_HIERARCHY_OPTION_KEY) != null? Boolean.TRUE: null;
-    if(!"true".equals(System.getProperty("sun.awt.disableMixing")) && System.getProperty("java.version").compareTo("1.6.0_12") >= 0) {
+    if(Boolean.valueOf(System.getProperty("nativeswing.integration.useDefaultClipping"))) {
       if(deferredDestruction != null && componentHierarchyProxying == null) {
         componentHierarchyProxying = true;
       }

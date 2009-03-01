@@ -161,7 +161,7 @@ public class NativeSwing {
       nativeComponentWrapperList = new ArrayList<NativeComponentWrapper>();
     }
     nativeComponentWrapperList.add(nativeComponentWrapper);
-    if(isJDKMixingEnabled) {
+    if(!isDefaultClippingEnabled) {
       HeavyweightForcer.activate(nativeComponentWrapper.getNativeComponent());
     }
   }
@@ -391,7 +391,7 @@ public class NativeSwing {
 
   }
 
-  private static boolean isJDKMixingEnabled;
+  private static boolean isDefaultClippingEnabled;
 
   /**
    * Initialize the Native Swing framework. This method sets some properties and registers a few listeners to keep track of certain states.<br/>
@@ -412,7 +412,8 @@ public class NativeSwing {
     if(System.getProperty("sun.awt.disableMixing") == null) {
       System.setProperty("sun.awt.disableMixing", "true");
     }
-    isJDKMixingEnabled = !"true".equals(System.getProperty("sun.awt.disableMixing")) && System.getProperty("java.version").compareTo("1.6.0_12") >= 0;
+    isDefaultClippingEnabled = !"true".equals(System.getProperty("sun.awt.disableMixing")) && System.getProperty("java.version").compareTo("1.6.0_12") >= 0;
+    System.setProperty("nativeswing.integration.useDefaultClipping", String.valueOf(isDefaultClippingEnabled));
     // Create window monitor
     Toolkit.getDefaultToolkit().addAWTEventListener(new NIAWTEventListener(), WindowEvent.WINDOW_EVENT_MASK | ComponentEvent.COMPONENT_EVENT_MASK);
     isInitialized = true;
