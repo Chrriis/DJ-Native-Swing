@@ -175,15 +175,15 @@ public class NativeComponentWrapper {
     }
     Boolean deferredDestruction = optionMap.get(NSComponentOptions.DESTROY_ON_FINALIZATION_OPTION_KEY) != null? Boolean.TRUE: null;
     Boolean componentHierarchyProxying = optionMap.get(NSComponentOptions.PROXY_COMPONENT_HIERARCHY_OPTION_KEY) != null? Boolean.TRUE: null;
-//    if(System.getProperty("java.version").compareTo("1.6.0_12") >= 0) {
-//      if(deferredDestruction != null && componentHierarchyProxying == null) {
-//        componentHierarchyProxying = true;
-//      }
-//      if(Boolean.TRUE.equals(componentHierarchyProxying)) {
-//        return new NativeComponentProxyFinalizationPanel(this);
-//      }
-//      return new SimpleNativeComponentHolder(this);
-//    }
+    if(!"true".equals(System.getProperty("sun.awt.disableMixing")) && System.getProperty("java.version").compareTo("1.6.0_12") >= 0) {
+      if(deferredDestruction != null && componentHierarchyProxying == null) {
+        componentHierarchyProxying = true;
+      }
+      if(Boolean.TRUE.equals(componentHierarchyProxying)) {
+        return new NativeComponentProxyFinalizationPanel(this);
+      }
+      return new SimpleNativeComponentHolder(this);
+    }
     Boolean visibilityConstraint = optionMap.get(NSComponentOptions.CONSTRAIN_VISIBILITY_OPTION_KEY) != null? Boolean.TRUE: null;
     boolean isJNAPresent = isJNAPresent();
     if(visibilityConstraint == null) {

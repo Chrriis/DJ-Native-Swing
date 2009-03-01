@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -39,51 +39,53 @@ import chrriis.common.Utils;
 public class NativeSwing {
 
   private static class HeavyweightForcerWindow extends Window {
-    
+
     private boolean isPacked;
-    
+
     public HeavyweightForcerWindow(Window parent) {
       super(parent);
       pack();
       isPacked = true;
     }
-    
+
+    @Override
     public boolean isVisible() {
       return isPacked;
     }
-    
+
+    @Override
     public Rectangle getBounds() {
       return getOwner().getBounds();
     }
-    
+
     private int count;
-    
+
     public void setCount(int count) {
       this.count = count;
     }
-    
+
     public int getCount() {
       return count;
     }
-    
+
   }
-  
+
   private static class HeavyweightForcer implements HierarchyListener {
-    
+
     private Component component;
     private HeavyweightForcerWindow forcer;
-    
+
     private HeavyweightForcer(Component component) {
       this.component = component;
       if(component.isShowing()) {
         createForcer();
       }
     }
-    
+
     public static void activate(Component component) {
       component.addHierarchyListener(new HeavyweightForcer(component));
     }
-    
+
     private void destroyForcer() {
       if(!SwingUtilities.isEventDispatchThread()) {
         SwingUtilities.invokeLater(new Runnable() {
@@ -103,7 +105,7 @@ public class NativeSwing {
       }
       forcer = null;
     }
-    
+
     private void createForcer() {
       if(!SwingUtilities.isEventDispatchThread()) {
         SwingUtilities.invokeLater(new Runnable() {
@@ -125,7 +127,7 @@ public class NativeSwing {
       }
       forcer.setCount(forcer.getCount() + 1);
     }
-    
+
     public void hierarchyChanged(HierarchyEvent e) {
       long changeFlags = e.getChangeFlags();
       if((changeFlags & HierarchyEvent.DISPLAYABILITY_CHANGED) != 0) {
@@ -141,9 +143,9 @@ public class NativeSwing {
         }
       }
     }
-    
+
   }
-  
+
   private static volatile List<NativeComponentWrapper> nativeComponentWrapperList;
 
   static NativeComponentWrapper[] getNativeComponentWrappers() {
@@ -152,7 +154,7 @@ public class NativeSwing {
     }
     return nativeComponentWrapperList.toArray(new NativeComponentWrapper[0]);
   }
-  
+
   static void addNativeComponentWrapper(NativeComponentWrapper nativeComponentWrapper) {
     checkInitialized();
     if(nativeComponentWrapperList == null) {
@@ -161,16 +163,16 @@ public class NativeSwing {
     nativeComponentWrapperList.add(nativeComponentWrapper);
     HeavyweightForcer.activate(nativeComponentWrapper.getNativeComponent());
   }
-  
+
   static boolean removeNativeComponentWrapper(NativeComponentWrapper nativeComponentWrapper) {
     if(nativeComponentWrapperList == null) {
       return false;
     }
     return nativeComponentWrapperList.remove(nativeComponentWrapper);
   }
-  
+
   private static List<Window> windowList;
-  
+
   static Window[] getWindows() {
     if(Utils.IS_JAVA_6_OR_GREATER) {
       List<Window> windowList = new ArrayList<Window>();
@@ -183,19 +185,19 @@ public class NativeSwing {
     }
     return windowList == null? new Window[0]: windowList.toArray(new Window[0]);
   }
-  
+
   private static boolean isInitialized;
-  
+
   private static boolean isInitialized() {
     return isInitialized;
   }
-  
+
   private static void checkInitialized() {
     if(!isInitialized()) {
       throw new IllegalStateException("The Native Swing framework is not initialized! Please refer to the instructions to set it up properly.");
     }
   }
-  
+
   private static void loadClipboardDebuggingProperties() {
     try {
       Clipboard systemClipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -222,12 +224,12 @@ public class NativeSwing {
     } catch(Exception e) {
     }
   }
-  
+
   private static class NIAWTEventListener implements AWTEventListener {
-    
+
     private List<Dialog> dialogList = new ArrayList<Dialog>();
     private volatile Set<Window> blockedWindowSet = new HashSet<Window>();
-    
+
     private static boolean isDescendant(Window window, Window ancestorWindow) {
       for(; window != null; window=window.getOwner()) {
         if(window == ancestorWindow) {
@@ -236,7 +238,7 @@ public class NativeSwing {
       }
       return false;
     }
-    
+
     private void computeBlockedDialogs() {
       blockedWindowSet.clear();
       Window[] windows = getWindows();
@@ -308,7 +310,7 @@ public class NativeSwing {
         }
       }
     }
-    
+
     private void adjustNativeComponents() {
       if(nativeComponentWrapperList == null) {
         return;
@@ -331,7 +333,7 @@ public class NativeSwing {
         }
       }
     }
-    
+
     public void eventDispatched(AWTEvent e) {
       boolean isAdjusting = false;
       switch(e.getID()) {
@@ -384,9 +386,9 @@ public class NativeSwing {
         adjustNativeComponents();
       }
     }
-    
+
   }
-  
+
   /**
    * Initialize the Native Swing framework. This method sets some properties and registers a few listeners to keep track of certain states.<br/>
    * It should be called early in the program, the best place being as the first call in the main method.
@@ -402,11 +404,13 @@ public class NativeSwing {
     System.setProperty("sun.awt.xembedserver", "true");
     // We use our own HW forcing, so we disable the one from JNA
     System.setProperty("jna.force_hw_popups", "false");
+    // We have to disable mixing until all bahaviors can be implemented using the JDK features.
+    System.setProperty("sun.awt.disableMixing", "true");
     // Create window monitor
     Toolkit.getDefaultToolkit().addAWTEventListener(new NIAWTEventListener(), WindowEvent.WINDOW_EVENT_MASK | ComponentEvent.COMPONENT_EVENT_MASK);
     isInitialized = true;
   }
-  
+
   private NativeSwing() {}
-  
+
 }
