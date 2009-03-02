@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -52,23 +52,23 @@ import chrriis.dj.nativeswing.swtimpl.OutProcessMessagingInterface.SwingOutProce
 public class NativeInterface {
 
   private static final boolean IS_SYNCING_MESSAGES = Boolean.parseBoolean(System.getProperty("nativeswing.interface.syncmessages"));
-    
+
   static boolean isAlive() {
     return isOpen() && messagingInterface.isAlive();
   }
-  
+
   private static boolean isOpen;
-  
+
   private static boolean isOpen() {
     return isOpen;
   }
-  
+
   private static void checkOpen() {
     if(!isOpen()) {
       throw new IllegalStateException("The native interface is not open! Please refer to the instructions to set it up properly.");
     }
   }
-  
+
   /**
    * Close the native interface, which destroys the native side (peer VM). Note that the native interface can be re-opened later.
    */
@@ -85,7 +85,7 @@ public class NativeInterface {
   }
 
   private static NativeInterfaceConfiguration nativeInterfaceConfiguration;
-  
+
   /**
    * Get the configuration, which allows to modify some parameters.
    */
@@ -95,7 +95,7 @@ public class NativeInterface {
     }
     return nativeInterfaceConfiguration;
   }
-  
+
   private static void loadClipboardDebuggingProperties() {
     try {
       Clipboard systemClipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -122,19 +122,19 @@ public class NativeInterface {
     } catch(Exception e) {
     }
   }
-  
+
   private static boolean isInitialized;
 
   private static boolean isInitialized() {
     return isInitialized;
   }
-  
+
   private static boolean isInProcess;
-  
+
   static boolean isInProcess() {
     return isInProcess;
   }
-  
+
   /**
    * Initialize the native interface, but do not open it. This method sets some properties and registers a few listeners to keep track of certain states necessary for the good functioning of the framework.<br/>
    * This method is automatically called if open() is used. It should be called early in the program, the best place being as the first call in the main method.
@@ -165,7 +165,7 @@ public class NativeInterface {
     }
     isInitialized = true;
   }
-  
+
   /**
    * Open the native interface, which creates the peer VM that handles the native side of the native integration.<br/>
    * Initialization takes place if the interface was not already initialized. If initialization was not explicitely performed, this method should be called early in the program, the best place being as the first call in the main method.
@@ -189,7 +189,7 @@ public class NativeInterface {
       e.printStackTrace();
     }
   }
-  
+
   static boolean notifyKilled() {
     isOpen = false;
     messagingInterface = null;
@@ -206,7 +206,7 @@ public class NativeInterface {
     }
     return false;
   }
-  
+
   static void notifyRespawned() {
     try {
       for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
@@ -219,9 +219,9 @@ public class NativeInterface {
       e.printStackTrace();
     }
   }
-  
+
   private NativeInterface() {}
-  
+
   static Object syncSend(boolean isTargetNativeSide, final Message message) {
     checkOpen();
     if(message instanceof LocalMessage) {
@@ -230,7 +230,7 @@ public class NativeInterface {
     }
     return getMessagingInterface(!isTargetNativeSide).syncSend(message);
   }
-  
+
   static void asyncSend(boolean isTargetNativeSide, final Message message) {
     if(IS_SYNCING_MESSAGES) {
       syncSend(isTargetNativeSide, message);
@@ -244,7 +244,7 @@ public class NativeInterface {
       getMessagingInterface(!isTargetNativeSide).asyncSend(message);
     }
   }
-  
+
   private static volatile MessagingInterface messagingInterface;
 
   static MessagingInterface getMessagingInterface(boolean isNativeSide) {
@@ -263,9 +263,9 @@ public class NativeInterface {
     SwingOutProcessMessagingInterface swingOutProcessMessagingInterface = (SwingOutProcessMessagingInterface)messagingInterface;
     return swingOutProcessMessagingInterface;
   }
-  
+
   private static Display display;
-  
+
   /**
    * Get the SWT display. This is only possible when in the native context.
    * @return the display, or null.
@@ -273,7 +273,7 @@ public class NativeInterface {
   public static Display getDisplay() {
     return display;
   }
-  
+
   /**
    * Indicate if the current thread is the user interface thread.
    * @return true if the current thread is the user interface thread.
@@ -285,14 +285,14 @@ public class NativeInterface {
     }
     return getMessagingInterface(isNativeSide).isUIThread();
   }
-  
+
   static void checkUIThread(boolean isNativeSide) {
     if(!isAlive()) {
       throw new IllegalStateException("The native interface is not alive!");
     }
     getMessagingInterface(isNativeSide).checkUIThread();
   }
-  
+
   /**
    * Run the native event pump. Certain platforms require this method call at the end of the main method to function properly, so it is suggested to always add it.
    */
@@ -301,9 +301,9 @@ public class NativeInterface {
       InProcess.runEventPump();
     }
   }
-  
+
   private static EventListenerList listenerList = new EventListenerList();
-  
+
   /**
    * Add a native interface listener.
    * @param listener the native listener to add.
@@ -311,7 +311,7 @@ public class NativeInterface {
   public static void addNativeInterfaceListener(NativeInterfaceListener listener) {
     listenerList.add(NativeInterfaceListener.class, listener);
   }
-  
+
   /**
    * Remove a native interface listener.
    * @param listener the native listener to remove.
@@ -319,7 +319,7 @@ public class NativeInterface {
   public static void removeNativeInterfaceListener(NativeInterfaceListener listener) {
     listenerList.remove(NativeInterfaceListener.class, listener);
   }
-  
+
   /**
    * Get all the native interface listeners.
    * @return the native interface listeners.
@@ -329,7 +329,7 @@ public class NativeInterface {
   }
 
   static class InProcess {
-    
+
     private static volatile boolean isEventPumpRunning;
 
     static void runEventPump() {
@@ -348,13 +348,13 @@ public class NativeInterface {
         }
       }
     }
-    
+
     static void createInProcessCommunicationChannel() {
       messagingInterface = createInProcessMessagingInterface();
       isOpen = true;
       isEventPumpRunning = true;
     }
-    
+
     private static void initialize() {
       Device.DEBUG = Boolean.parseBoolean(System.getProperty("nativeswing.swt.debug.device"));
       DeviceData data = new DeviceData();
@@ -363,11 +363,11 @@ public class NativeInterface {
       display = new Display(data);
       startAutoShutdownThread();
     }
-    
+
     private static MessagingInterface createInProcessMessagingInterface() {
       return new SWTInProcessMessagingInterface(display).getMirrorMessagingInterface();
     }
-    
+
     static void startAutoShutdownThread() {
       Thread autoShutdownThread = new Thread("NativeSwing Auto-Shutdown") {
         protected Thread[] activeThreads = new Thread[1024];
@@ -379,7 +379,9 @@ public class NativeInterface {
             } catch(Exception e) {
             }
             ThreadGroup group = Thread.currentThread().getThreadGroup();
-            for(ThreadGroup parentGroup = group; (parentGroup = parentGroup.getParent()) != null; group = parentGroup);
+            for(ThreadGroup parentGroup = group; (parentGroup = parentGroup.getParent()) != null; group = parentGroup) {
+              ;
+            }
             boolean isAlive = display == null;
             if(!isAlive) {
               for(int i=group.enumerate(activeThreads, true)-1; i>=0; i--) {
@@ -400,11 +402,11 @@ public class NativeInterface {
       autoShutdownThread.setDaemon(true);
       autoShutdownThread.start();
     }
-    
+
   }
-  
+
   static class OutProcess {
-    
+
     private static class CMN_setProperties extends CommandMessage {
       @Override
       public Object run(Object[] args) {
@@ -421,17 +423,27 @@ public class NativeInterface {
         return null;
       }
     }
-    
+
     static boolean isNativeSide() {
       return display != null;
     }
-    
+
     static void createOutProcessCommunicationChannel() {
       messagingInterface = createOutProcessMessagingInterface();
       isOpen = true;
-      new CMN_setProperties().syncExec(true, System.getProperties());
+      Properties nativeProperties = new Properties();
+      Properties properties = System.getProperties();
+      for(Object key: properties.keySet()) {
+        if(key instanceof String) {
+          Object value = properties.get(key);
+          if(value instanceof String) {
+            nativeProperties.setProperty((String)key, (String)value);
+          }
+        }
+      }
+      new CMN_setProperties().syncExec(true, nativeProperties);
     }
-    
+
     private static Process createProcess(String localHostAddress, int port) {
       List<String> classPathList = new ArrayList<String>();
       String pathSeparator = System.getProperty("path.separator");
@@ -491,7 +503,9 @@ public class NativeInterface {
             BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(mainClassFile));
             BufferedInputStream in = new BufferedInputStream(NativeInterface.class.getResourceAsStream("/" + classPath));
             byte[] bytes = new byte[1024];
-            for(int n; (n=in.read(bytes)) != -1; out.write(bytes, 0, n));
+            for(int n; (n=in.read(bytes)) != -1; out.write(bytes, 0, n)) {
+              ;
+            }
             in.close();
             out.close();
           } catch(Exception e) {
@@ -613,7 +627,7 @@ public class NativeInterface {
       connectStream(System.out, p.getInputStream());
       return p;
     }
-    
+
     private static MessagingInterface createOutProcessMessagingInterface() {
       String localHostAddress = Utils.getLocalHostAddress();
       if(localHostAddress == null) {
@@ -664,7 +678,7 @@ public class NativeInterface {
       }
       return new SwingOutProcessMessagingInterface(socket, false);
     }
-    
+
     private static void connectStream(final PrintStream out, InputStream in) {
       final BufferedInputStream bin = new BufferedInputStream(in);
       Thread streamThread = new Thread("NativeSwing Stream Connector") {
@@ -699,7 +713,7 @@ public class NativeInterface {
       streamThread.setDaemon(true);
       streamThread.start();
     }
-    
+
     static void runNativeSide(String[] args) throws IOException {
       if(Boolean.parseBoolean(System.getProperty("nativeswing.peervm.debug.printstartmessage"))) {
         System.err.println("Starting spawned VM");
@@ -793,9 +807,9 @@ public class NativeInterface {
         }
       }
     }
-    
+
   }
-  
+
   /**
    * The main method that is called by the native side (peer VM).
    * @param args the arguments that are passed to the peer VM.
@@ -803,5 +817,5 @@ public class NativeInterface {
   public static void main(String[] args) throws Exception {
     OutProcess.runNativeSide(args);
   }
-  
+
 }
