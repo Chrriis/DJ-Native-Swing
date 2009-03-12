@@ -34,27 +34,6 @@ public class NativeComponentProxyFinalizationPanel extends NativeComponentProxy 
       super(new BorderLayout());
     }
 
-    private boolean isCreated;
-
-    @Override
-    public void addNotify() {
-      if(isCreated) {
-        return;
-      }
-      isCreated = true;
-      super.addNotify();
-    }
-
-    public void removePeer() {
-      isCreated = false;
-      super.removeNotify();
-    }
-
-    @Override
-    public void removeNotify() {
-      // Do nothing
-    }
-
   }
 
   private EmbeddedPanel embeddedPanel;
@@ -71,7 +50,12 @@ public class NativeComponentProxyFinalizationPanel extends NativeComponentProxy 
     isProxied = false;
     JComponent oldParent = (JComponent)embeddedPanel.getParent();
     if(oldParent != this) {
-      add(embeddedPanel, BorderLayout.CENTER);
+      if(oldParent == null) {
+        add(embeddedPanel, BorderLayout.CENTER);
+      } else {
+        // Hack to reparent without the native component to be disposed
+        setComponentZOrder(embeddedPanel, 0);
+      }
       if(oldParent != null) {
         oldParent.revalidate();
         oldParent.repaint();
@@ -91,7 +75,9 @@ public class NativeComponentProxyFinalizationPanel extends NativeComponentProxy 
         if(!parent.isLightweight() && parent instanceof RootPaneContainer) {
           JLayeredPane layeredPane = ((RootPaneContainer)parent).getLayeredPane();
           layeredPane.setLayer(embeddedPanel, Integer.MIN_VALUE);
-          layeredPane.add(embeddedPanel);
+          // Hack to reparent without the native component to be disposed
+//          layeredPane.add(embeddedPanel);
+          layeredPane.setComponentZOrder(embeddedPanel, 0);
           layeredPane.revalidate();
           layeredPane.repaint();
           revalidate();
@@ -124,7 +110,7 @@ public class NativeComponentProxyFinalizationPanel extends NativeComponentProxy 
       return;
     }
     EmbeddedPanel panel = embeddedPanel;
-    embeddedPanel.removePeer();
+    embeddedPanel.removeNotify();
     embeddedPanel = null;
     Container parent = panel.getParent();
     if(parent != null) {
