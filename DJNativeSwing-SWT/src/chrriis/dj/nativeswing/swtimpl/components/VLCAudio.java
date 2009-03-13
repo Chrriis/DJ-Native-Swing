@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -14,15 +14,15 @@ import chrriis.dj.nativeswing.swtimpl.WebBrowserObject;
  * @author Christopher Deckers
  */
 public class VLCAudio {
-  
+
   private JVLCPlayer vlcPlayer;
   private WebBrowserObject webBrowserObject;
-  
+
   VLCAudio(JVLCPlayer vlcPlayer) {
     this.vlcPlayer = vlcPlayer;
-    this.webBrowserObject = vlcPlayer.getWebBrowserObject();
+    webBrowserObject = vlcPlayer.getWebBrowserObject();
   }
-  
+
   /**
    * Set whether audio is mute.
    * @param isMute true if audio should be mute, false otherwise.
@@ -31,7 +31,7 @@ public class VLCAudio {
     webBrowserObject.setObjectProperty("audio.mute", isMute);
     vlcPlayer.adjustVolumePanel();
   }
-  
+
   /**
    * Indicate whether audio is mute.
    * @return true if audio is mute.
@@ -39,7 +39,7 @@ public class VLCAudio {
   public boolean isMute() {
     return Boolean.TRUE.equals(webBrowserObject.getObjectProperty("audio.mute"));
   }
-  
+
   /**
    * Set the volume.
    * @param volume the new volume, with a value between 0 and 100. Note that a value of 0 may not make it completely silent, mute should be used instead.
@@ -51,7 +51,7 @@ public class VLCAudio {
     webBrowserObject.setObjectProperty("audio.volume", Math.round((volume * 1.99 + 1)));
     vlcPlayer.adjustVolumePanel();
   }
-  
+
   /**
    * Get the volume, as a value between 0 and 100.
    * @return the volume, or -1 in case of failure.
@@ -60,7 +60,7 @@ public class VLCAudio {
     Object value = webBrowserObject.getObjectProperty("audio.volume");
     return value == null? -1: Math.max(0, (int)Math.round((((Number)value).intValue() - 1) / 1.99));
   }
-  
+
   /**
    * Set the audio track, or 0 to disable it.
    * @param track the track to play.
@@ -68,7 +68,7 @@ public class VLCAudio {
   public void setTrack(int track) {
     webBrowserObject.setObjectProperty("audio.track", track);
   }
-  
+
   /**
    * Get the audio track, or 0 if disabled.
    * @return the audio track, or -1 in case of failure.
@@ -77,7 +77,7 @@ public class VLCAudio {
     Object value = webBrowserObject.getObjectProperty("audio.track");
     return value == null? -1: ((Number)value).intValue();
   }
-  
+
   /**
    * An audio channel.
    * @author Christopher Deckers
@@ -85,7 +85,7 @@ public class VLCAudio {
   public enum VLCChannel {
     STEREO, REVERSE_STEREO, LEFT, RIGHT, DOLBY
   }
-  
+
   /**
    * Set the audio channel to use.
    * @param channel the audio channel to use.
@@ -102,7 +102,7 @@ public class VLCAudio {
     }
     webBrowserObject.setObjectProperty("audio.channel", value);
   }
-  
+
   /**
    * Get the audio channel.
    * @return the audio channel, or null in case of failure.
@@ -121,7 +121,7 @@ public class VLCAudio {
     }
     return null;
   }
-  
+
   /**
    * Toggle the mute state.
    */
@@ -129,5 +129,5 @@ public class VLCAudio {
     webBrowserObject.invokeObjectFunction("audio.toggleMute");
     vlcPlayer.adjustVolumePanel();
   }
-  
+
 }

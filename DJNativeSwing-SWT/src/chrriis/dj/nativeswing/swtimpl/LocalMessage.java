@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -18,7 +18,7 @@ public abstract class LocalMessage extends CommandMessage {
    */
   public LocalMessage() {
   }
-  
+
   @Override
   Object runCommand() {
     try {
@@ -35,6 +35,7 @@ public abstract class LocalMessage extends CommandMessage {
    * Run the message.
    * @return the result.
    */
+  @Override
   public abstract Object run(Object[] args);
 
 }

@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -74,17 +74,17 @@ public class FileTypeLauncher {
       return icon;
     }
   }
-  
+
   private static boolean isProgramValid(Program program) {
     String name = program.getName();
     return name != null && name.length() > 0 /*&& program.getImageData() != null*/;
   }
-  
+
   private static Map<Integer, FileTypeLauncherInfo> idToFileTypeLauncherInfoMap;
   private static Map<Program, FileTypeLauncherInfo> programToFileTypeLauncherInfoMap;
 
   private static boolean isNativeInitialized;
-  
+
   private static void initNative() {
     if(isNativeInitialized) {
       return;
@@ -93,7 +93,7 @@ public class FileTypeLauncher {
     programToFileTypeLauncherInfoMap = new HashMap<Program, FileTypeLauncherInfo>();
     idToFileTypeLauncherInfoMap = new HashMap<Integer, FileTypeLauncherInfo>();
   }
-  
+
   /**
    * Explicitely load the data if it is not yet loaded, instead of letting the system perform the appropriate loading when needed.
    */
@@ -101,7 +101,7 @@ public class FileTypeLauncher {
     initializeExtensions();
     initializeLaunchers();
   }
-  
+
   private static class CMN_initializeLaunchers extends CommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -113,9 +113,9 @@ public class FileTypeLauncher {
       return null;
     }
   }
-  
+
   private static boolean hasInitializedLaunchers;
-  
+
   private static void initializeLaunchers() {
     if(hasInitializedLaunchers) {
       return;
@@ -144,7 +144,7 @@ public class FileTypeLauncher {
       return null;
     }
   }
-  
+
   private static boolean hasInitializedExtensions;
 
   private static void initializeExtensions() {
@@ -154,7 +154,7 @@ public class FileTypeLauncher {
     hasInitializedExtensions = true;
     new CMN_initializeExtensions().syncExec(true);
   }
-  
+
   private static class CMN_getAllRegisteredExtensions extends CommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -167,7 +167,7 @@ public class FileTypeLauncher {
       return extensionList.toArray(new String[0]);
     }
   }
-  
+
   /**
    * Get all the registered file extensions.
    * Some global loading of data is performed the first time, if it is needed.
@@ -177,9 +177,9 @@ public class FileTypeLauncher {
     initializeExtensions();
     return (String[])new CMN_getAllRegisteredExtensions().syncExec(true);
   }
-  
+
   private int id;
-  
+
   private FileTypeLauncher(int id) {
     this.id = id;
   }
@@ -190,7 +190,7 @@ public class FileTypeLauncher {
       return idToFileTypeLauncherInfoMap.get(args[0]).getRegisteredExtensions();
     }
   }
-  
+
   private String[] registeredExtensions;
 
   /**
@@ -205,16 +205,16 @@ public class FileTypeLauncher {
     }
     return registeredExtensions;
   }
-  
+
   private String name;
-  
+
   private static class CMN_getName extends CommandMessage {
     @Override
     public Object run(Object[] args) {
       return idToFileTypeLauncherInfoMap.get(args[0]).getProgram().getName();
     }
   }
-  
+
   /**
    * Get the name of the launcher.
    * @return the name.
@@ -225,17 +225,17 @@ public class FileTypeLauncher {
     }
     return name;
   }
-  
+
   private ImageIcon icon;
   private boolean isIconInitialized;
-  
+
   private static class CMN_getIcon extends CommandMessage {
     @Override
     public Object run(Object[] args) {
       return idToFileTypeLauncherInfoMap.get(args[0]).getIcon();
     }
   }
-  
+
   /**
    * Get the icon associated with this file type.
    * @return the icon, which could be the default icon.
@@ -247,28 +247,29 @@ public class FileTypeLauncher {
     }
     return icon == null? getDefaultIcon(): icon;
   }
-  
+
   @Override
   public boolean equals(Object o) {
     return this == o;
   }
-  
+
   private Integer hashCode;
-  
+
   private static class CMN_hashCode extends CommandMessage {
     @Override
     public Object run(Object[] args) {
       return idToFileTypeLauncherInfoMap.get(args[0]).getProgram().hashCode();
     }
   }
-  
+
+  @Override
   public int hashCode() {
     if(hashCode == null) {
       hashCode = (Integer)new CMN_hashCode().syncExec(true, id);
     }
     return hashCode;
   }
-  
+
   private static class CMN_launch extends CommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -276,7 +277,7 @@ public class FileTypeLauncher {
       return null;
     }
   }
-  
+
   /**
    * Launch a file using this launcher.
    * @param filePath the path to the file to launch.
@@ -284,9 +285,9 @@ public class FileTypeLauncher {
   public void launch(String filePath) {
     new CMN_launch().asyncExec(true, id, filePath);
   }
-  
+
   private static Map<Integer, FileTypeLauncher> idToFileTypeLauncherMap;
-  
+
   private static class CMN_getLauncherID extends CommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -310,7 +311,7 @@ public class FileTypeLauncher {
       return null;
     }
   }
-  
+
   /**
    * Get the launcher for a given file name, which may or may not represent an existing file. The name can also simply be the extension of a file (including the '.').
    */
@@ -331,7 +332,7 @@ public class FileTypeLauncher {
     }
     return fileTypeLauncher;
   }
-  
+
   private static class CMN_getLauncherIDs extends CommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -349,7 +350,7 @@ public class FileTypeLauncher {
       return ids;
     }
   }
-  
+
   /**
    * Some global loading of data is performed the first time, if it is needed.
    */
@@ -406,7 +407,7 @@ public class FileTypeLauncher {
     }
     return defaultIcon;
   }
-  
+
   /**
    * Get the size of the icons that can be obtained.
    * @return the size of the icons.
@@ -416,5 +417,5 @@ public class FileTypeLauncher {
     // TODO: check if a null default icon can happen, and if yes find alternate code
     return defaultIcon == null? new Dimension(16, 16): new Dimension(defaultIcon.getIconWidth(), defaultIcon.getIconHeight());
   }
-  
+
 }

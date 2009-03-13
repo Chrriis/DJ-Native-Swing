@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -38,11 +38,11 @@ public abstract class OleNativeComponent extends NativeComponent {
    */
   public OleNativeComponent() {
   }
-  
+
   protected static void configureOleFrame(OleClientSite site, OleFrame frame) {
     frame.setData("NS_site", site);
   }
-  
+
   protected static OleClientSite getSite(OleFrame frame) {
     OleClientSite oleClientSite = (OleClientSite)frame.getData("NS_site");
     if(oleClientSite == null) {
@@ -50,7 +50,7 @@ public abstract class OleNativeComponent extends NativeComponent {
     }
     return oleClientSite;
   }
-  
+
   private static class CMN_invokeOleFunction extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -94,23 +94,23 @@ public abstract class OleNativeComponent extends NativeComponent {
       return null;
     }
   }
-  
+
   public void invokeOleFunction(String functionName, Object... args) {
     invokeOleFunction(new String[] {functionName}, args);
   }
-  
+
   public void invokeOleFunction(String[] functionPath, Object... args) {
     runAsync(new CMN_invokeOleFunction(), false, functionPath, args);
   }
-  
+
   public Object invokeOleFunctionWithResult(String functionName, Object... args) {
     return invokeOleFunctionWithResult(new String[] {functionName}, args);
   }
-  
+
   public Object invokeOleFunctionWithResult(String[] functionPath, Object... args) {
     return runSync(new CMN_invokeOleFunction(), true, functionPath, args);
   }
-  
+
   private static class CMN_setOleProperty extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -146,15 +146,15 @@ public abstract class OleNativeComponent extends NativeComponent {
       return false;
     }
   }
-  
+
   public void setOleProperty(String property, Object... args) {
     setOleProperty(new String[] {property}, args);
   }
-  
+
   public void setOleProperty(String[] propertyPath, Object... args) {
     runAsync(new CMN_setOleProperty(), propertyPath, args);
   }
-  
+
   private static class CMN_getOleProperty extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -192,15 +192,15 @@ public abstract class OleNativeComponent extends NativeComponent {
       return null;
     }
   }
-  
+
   public Object getOleProperty(String property, Object... args) {
     return getOleProperty(new String[] {property}, args);
   }
-  
+
   public Object getOleProperty(String[] propertyPath, Object... args) {
     return runSync(new CMN_getOleProperty(), propertyPath, args);
   }
-  
+
   protected static Variant createVariant(Object value) {
     if(value instanceof Boolean) {
       return new Variant((Boolean)value);
@@ -225,7 +225,7 @@ public abstract class OleNativeComponent extends NativeComponent {
     }
     throw new IllegalArgumentException("The value could not be converted to a Variant: " + value);
   }
-  
+
   protected static Object getVariantValue(Variant variant) {
     if(variant == null) {
       return null;
@@ -241,7 +241,7 @@ public abstract class OleNativeComponent extends NativeComponent {
     }
     throw new IllegalArgumentException("The value could not be converted from a Variant: " + variant);
   }
-  
+
   private static class CMN_dumpOleInterfaceDefinitions extends ControlCommandMessage {
     private void dumpOleInterfaceDefinitions(StringBuilder sb, OleAutomation automation, int index) {
       List<OleFunctionDescription> functionList = new ArrayList<OleFunctionDescription>();
@@ -330,19 +330,19 @@ public abstract class OleNativeComponent extends NativeComponent {
       return null;
     }
   }
-  
+
   private static void dispose(Variant variant) {
     if(variant == null) {
       return;
     }
     variant.dispose();
   }
-  
+
   /**
    * Dump the definitions of the OLE interface (properties and functions) to the output stream.
    */
   public void dumpOleInterfaceDefinitions() {
     runSync(new CMN_dumpOleInterfaceDefinitions());
   }
-  
+
 }

@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -33,13 +33,13 @@ import chrriis.dj.nativeswing.swtimpl.WebBrowserObject;
 /**
  * A native Flash player. It is a browser-based component, which relies on the Flash plugin.<br/>
  * Methods execute when this component is initialized. If the component is not initialized, methods will be executed as soon as it gets initialized.
- * If the initialization fails, the methods will not have any effect. The results from methods have relevant values only when the component is valid. 
+ * If the initialization fails, the methods will not have any effect. The results from methods have relevant values only when the component is valid.
  * @author Christopher Deckers
  */
 public class JFlashPlayer extends NSPanelComponent {
 
   private static final String SET_CUSTOM_JAVASCRIPT_DEFINITIONS_OPTION_KEY = "Flash Player Custom Javascript definitions";
-  
+
   /**
    * Create an option to set some custom Javascript definitions (functions) that are added to the HTML page that contains the plugin.
    * @return the option to set some custom Javascript definitions.
@@ -52,26 +52,27 @@ public class JFlashPlayer extends NSPanelComponent {
       }
     };
   }
-  
+
   private final ResourceBundle RESOURCES = ResourceBundle.getBundle(JFlashPlayer.class.getPackage().getName().replace('.', '/') + "/resource/FlashPlayer");
 
   private JPanel webBrowserPanel;
   private JWebBrowser webBrowser;
-  
+
   private JPanel controlBarPane;
   private JButton playButton;
   private JButton pauseButton;
   private JButton stopButton;
 
   private static class NWebBrowserObject extends WebBrowserObject {
-    
+
     private JFlashPlayer flashPlayer;
-    
+
     NWebBrowserObject(JFlashPlayer flashPlayer) {
       super(flashPlayer.webBrowser);
       this.flashPlayer = flashPlayer;
     }
-    
+
+    @Override
     protected ObjectHTMLConfiguration getObjectHtmlConfiguration() {
       ObjectHTMLConfiguration objectHTMLConfiguration = new ObjectHTMLConfiguration();
       objectHTMLConfiguration.setHTMLLoadingMessage(flashPlayer.RESOURCES.getString("LoadingMessage"));
@@ -88,9 +89,9 @@ public class JFlashPlayer extends NSPanelComponent {
       flashPlayer.options = null;
       return objectHTMLConfiguration;
     }
-    
+
     private final String LS = Utils.LINE_SEPARATOR;
-    
+
     @Override
     protected String getJavascriptDefinitions() {
       String javascriptDefinitions = flashPlayer.customJavascriptDefinitions;
@@ -100,7 +101,7 @@ public class JFlashPlayer extends NSPanelComponent {
         "}" + LS +
         (javascriptDefinitions == null? "": javascriptDefinitions);
     }
-    
+
     @Override
     public String getLocalFileURL(File localFile) {
       // Local files cannot be played due to security restrictions. We need to proxy.
@@ -108,7 +109,7 @@ public class JFlashPlayer extends NSPanelComponent {
     }
 
   }
-  
+
   private WebBrowserObject webBrowserObject;
 
   /**
@@ -164,7 +165,7 @@ public class JFlashPlayer extends NSPanelComponent {
     adjustBorder();
     setControlBarVisible(false);
   }
-  
+
   private void adjustBorder() {
     if(isControlBarVisible()) {
       webBrowserPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
@@ -172,18 +173,18 @@ public class JFlashPlayer extends NSPanelComponent {
       webBrowserPanel.setBorder(null);
     }
   }
-  
+
   private Icon createIcon(String resourceKey) {
     String value = RESOURCES.getString(resourceKey);
     return value.length() == 0? null: new ImageIcon(JWebBrowser.class.getResource(value));
   }
-  
+
   private String customJavascriptDefinitions;
-  
+
 //  public String getLoadedResource() {
 //    return webBrowserObject.getLoadedResource();
 //  }
-  
+
   /**
    * Load a file from the classpath.
    * @param clazz the reference clazz of the file to load.
@@ -192,7 +193,7 @@ public class JFlashPlayer extends NSPanelComponent {
   public void load(Class<?> clazz, String resourcePath) {
     load(clazz, resourcePath, null);
   }
-  
+
   /**
    * Load a file from the classpath.
    * @param clazz the reference clazz of the file to load.
@@ -203,7 +204,7 @@ public class JFlashPlayer extends NSPanelComponent {
     addReferenceClassLoader(clazz.getClassLoader());
     load(WebServer.getDefaultWebServer().getClassPathResourceURL(clazz.getName(), resourcePath), options);
   }
-  
+
   /**
    * Load a file.
    * @param resourceLocation the path or URL to the file.
@@ -211,9 +212,9 @@ public class JFlashPlayer extends NSPanelComponent {
   public void load(String resourceLocation) {
     load(resourceLocation, null);
   }
-  
+
   private FlashPluginOptions options;
-  
+
   /**
    * Load a file.
    * @param resourceLocation the path or URL to the file.
@@ -234,8 +235,14 @@ public class JFlashPlayer extends NSPanelComponent {
     stopButton.setEnabled(isEnabled);
   }
 
+  @Override
+  public void removeNotify() {
+    webBrowserObject.dispose();
+    super.removeNotify();
+  }
+
   /**
-   * Play a timeline-based flash applications. 
+   * Play a timeline-based flash applications.
    */
   public void play() {
     if(!webBrowserObject.hasContent()) {
@@ -243,9 +250,9 @@ public class JFlashPlayer extends NSPanelComponent {
     }
     webBrowserObject.invokeObjectFunction("Play");
   }
-  
+
   /**
-   * Pause the execution of timeline-based flash applications. 
+   * Pause the execution of timeline-based flash applications.
    */
   public void pause() {
     if(!webBrowserObject.hasContent()) {
@@ -253,9 +260,9 @@ public class JFlashPlayer extends NSPanelComponent {
     }
     webBrowserObject.invokeObjectFunction("StopPlay");
   }
-  
+
   /**
-   * Stop the execution of timeline-based flash applications. 
+   * Stop the execution of timeline-based flash applications.
    */
   public void stop() {
     if(!webBrowserObject.hasContent()) {
@@ -263,7 +270,7 @@ public class JFlashPlayer extends NSPanelComponent {
     }
     webBrowserObject.invokeObjectFunction("Rewind");
   }
-  
+
   /**
    * Set the value of a variable. It is also possible to set object properties with that method, though it is recommended to create special accessor methods.
    * @param name the name of the variable.
@@ -275,7 +282,7 @@ public class JFlashPlayer extends NSPanelComponent {
     }
     webBrowserObject.invokeObjectFunction("SetVariable", name, value);
   }
-  
+
   /**
    * Get the value of a variable, or an object property if the web browser used is Internet Explorer. On Mozilla, it is not possible to access object properties with that method, an accessor method or a global variable in the Flash application should be used instead.
    * @return the value, potentially a String, Number, Boolean.
@@ -286,7 +293,7 @@ public class JFlashPlayer extends NSPanelComponent {
     }
     return webBrowserObject.invokeObjectFunctionWithResult("GetVariable", name);
   }
-  
+
   /**
    * Invoke a function on the Flash object, with optional arguments (Strings, numbers, booleans).
    * @param functionName the name of the function to invoke.
@@ -295,7 +302,7 @@ public class JFlashPlayer extends NSPanelComponent {
   public void invokeFlashFunction(String functionName, Object... args) {
     webBrowserObject.invokeObjectFunction(functionName, args);
   }
-  
+
   /**
    * Invoke a function on the Flash object and waits for a result, with optional arguments (Strings, numbers, booleans).
    * @param functionName the name of the function to invoke.
@@ -305,7 +312,7 @@ public class JFlashPlayer extends NSPanelComponent {
   public Object invokeFlashFunctionWithResult(String functionName, Object... args) {
     return webBrowserObject.invokeObjectFunctionWithResult(functionName, args);
   }
-  
+
   /**
    * Get the web browser that contains this component. The web browser should only be used to add listeners, for example to listen to window creation events.
    * @return the web browser.
@@ -313,7 +320,7 @@ public class JFlashPlayer extends NSPanelComponent {
   public JWebBrowser getWebBrowser() {
     return webBrowser;
   }
-  
+
   /**
    * Indicate whether the control bar is visible.
    * @return true if the control bar is visible.
@@ -321,7 +328,7 @@ public class JFlashPlayer extends NSPanelComponent {
   public boolean isControlBarVisible() {
     return controlBarPane.isVisible();
   }
-  
+
   /**
    * Set whether the control bar is visible.
    * @param isControlBarVisible true if the control bar should be visible, false otherwise.
@@ -330,7 +337,7 @@ public class JFlashPlayer extends NSPanelComponent {
     controlBarPane.setVisible(isControlBarVisible);
     adjustBorder();
   }
-  
+
   /**
    * Add a flash player listener.
    * @param listener The flash player listener to add.
@@ -338,7 +345,7 @@ public class JFlashPlayer extends NSPanelComponent {
   public void addFlashPlayerListener(FlashPlayerListener listener) {
     listenerList.add(FlashPlayerListener.class, listener);
   }
-  
+
   /**
    * Remove a flash player listener.
    * @param listener the flash player listener to remove.
@@ -354,9 +361,9 @@ public class JFlashPlayer extends NSPanelComponent {
   public FlashPlayerListener[] getFlashPlayerListeners() {
     return listenerList.getListeners(FlashPlayerListener.class);
   }
-  
+
   private List<ClassLoader> referenceClassLoaderList = new ArrayList<ClassLoader>(1);
-  
+
   private void addReferenceClassLoader(ClassLoader referenceClassLoader) {
     if(referenceClassLoader == null || referenceClassLoader == getClass().getClassLoader() || referenceClassLoaderList.contains(referenceClassLoader)) {
       return;
@@ -365,7 +372,7 @@ public class JFlashPlayer extends NSPanelComponent {
     referenceClassLoaderList.add(referenceClassLoader);
     WebServer.getDefaultWebServer().addReferenceClassLoader(referenceClassLoader);
   }
-  
+
   @Override
   protected void finalize() throws Throwable {
     for(ClassLoader referenceClassLoader: referenceClassLoaderList) {
@@ -374,5 +381,5 @@ public class JFlashPlayer extends NSPanelComponent {
     referenceClassLoaderList.clear();
     super.finalize();
   }
-  
+
 }

@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -95,18 +95,21 @@ public class RegExTypes {
     if (color != null) {
       Style style = doc.addStyle(name, null);
       StyleConstants.setForeground(style, color);
-      if (fontStyle == Font.BOLD)
+      if (fontStyle == Font.BOLD) {
         StyleConstants.setBold(style, true);
-      if (fontStyle == Font.ITALIC)
+      }
+      if (fontStyle == Font.ITALIC) {
         StyleConstants.setItalic(style, true);
+      }
     }
   }
 
   public String getExpression() {
     StringBuffer buffer = new StringBuffer();
     for (int i = 0; i < getTypeCount(); i++) {
-      if (i > 0)
+      if (i > 0) {
         buffer.append('|');
+      }
       buffer.append('(');
       buffer.append(getExpr(i));
       buffer.append(')');

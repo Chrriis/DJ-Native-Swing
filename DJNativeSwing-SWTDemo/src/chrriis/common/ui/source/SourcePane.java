@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -29,13 +29,14 @@ public class SourcePane extends JEditorPane {
    * Get the viewport size so that text does not wrap but horizontal scrollbar
    * appears instead.
    */
+  @Override
   public boolean getScrollableTracksViewportWidth() {
     if (getParent() instanceof JViewport) {
       return getParent().getWidth() > getUI().getPreferredSize(this).width;
     }
     return false;
   }
-  
+
   @SuppressWarnings("deprecation")
   @Override
   public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {

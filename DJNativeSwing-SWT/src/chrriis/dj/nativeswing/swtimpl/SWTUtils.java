@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -27,7 +27,7 @@ import org.eclipse.swt.graphics.RGB;
 public class SWTUtils {
 
   private SWTUtils() {}
-  
+
   public static int translateSWTKeyCode(int key) {
     switch(key) {
       /* Keyboard and Mouse Masks */
@@ -36,11 +36,11 @@ public class SWTUtils {
       case SWT.CONTROL: return java.awt.event.KeyEvent.VK_CONTROL;
       case SWT.COMMAND: return java.awt.event.KeyEvent.VK_WINDOWS;
 
-      /* NOT CURRENTLY USED */    
+      /* NOT CURRENTLY USED */
 //      case SWT.BUTTON1: return OS.VK_LBUTTON;
 //      case SWT.BUTTON3: return OS.VK_MBUTTON;
 //      case SWT.BUTTON2: return OS.VK_RBUTTON;
-      
+
       /* Non-Numeric Keypad Keys */
       case SWT.ARROW_UP: return java.awt.event.KeyEvent.VK_UP;
       case SWT.ARROW_DOWN: return java.awt.event.KeyEvent.VK_DOWN;
@@ -59,7 +59,7 @@ public class SWTUtils {
       case SWT.ESC: return java.awt.event.KeyEvent.VK_ESCAPE;
       case SWT.LF: return java.awt.event.KeyEvent.VK_ENTER;
       case SWT.TAB: return java.awt.event.KeyEvent.VK_TAB;
-    
+
       /* Functions Keys */
       case SWT.F1: return java.awt.event.KeyEvent.VK_F1;
       case SWT.F2: return java.awt.event.KeyEvent.VK_F2;
@@ -76,7 +76,7 @@ public class SWTUtils {
       case SWT.F13: return java.awt.event.KeyEvent.VK_F13;
       case SWT.F14: return java.awt.event.KeyEvent.VK_F14;
       case SWT.F15: return java.awt.event.KeyEvent.VK_F15;
-      
+
       /* Numeric Keypad Keys */
       case SWT.KEYPAD_MULTIPLY: return java.awt.event.KeyEvent.VK_MULTIPLY;
       case SWT.KEYPAD_ADD: return java.awt.event.KeyEvent.VK_ADD;
@@ -108,7 +108,7 @@ public class SWTUtils {
     // TODO: return translateChar or something
     return 0;
   }
-  
+
   public static int translateSWTMouseButton(int button) {
     switch(button) {
       case 1: return MouseEvent.BUTTON1;
@@ -117,7 +117,7 @@ public class SWTUtils {
     }
     return 0;
   }
-  
+
   public static int translateSWTModifiers(int stateMask) {
     int modifiers = 0;
     if((stateMask & SWT.SHIFT) != 0) {
@@ -160,7 +160,7 @@ public class SWTUtils {
     imageData.maskData = maskData;
     return imageData;
   }
-  
+
   public static BufferedImage convertSWTImage(ImageData data) {
     ColorModel colorModel = null;
     PaletteData palette = data.palette;
@@ -255,7 +255,7 @@ public class SWTUtils {
       colorModel = new IndexColorModel(data.depth, rgbs.length, red, green, blue, data.transparentPixel);
     } else {
       colorModel = new IndexColorModel(data.depth, rgbs.length, red, green, blue);
-    }   
+    }
     BufferedImage bufferedImage = new BufferedImage(colorModel, colorModel.createCompatibleWritableRaster(data.width, data.height), false, null);
     WritableRaster raster = bufferedImage.getRaster();
     int[] pixelArray = new int[1];
@@ -268,5 +268,5 @@ public class SWTUtils {
     }
     return bufferedImage;
   }
-  
+
 }

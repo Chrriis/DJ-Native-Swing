@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -28,23 +28,23 @@ public class WebBrowserWindowOpeningEvent extends WebBrowserEvent {
     this.location = location;
     this.size = size;
   }
-  
+
   public JWebBrowser getNewWebBrowser() {
     return newWebBrowser;
   }
-  
+
   /**
    * @return the location, or null for default behavior.
    */
   public Point getLocation() {
     return location;
   }
-  
+
   /**
    * @return the size, or null for default behavior.
    */
   public Dimension getSize() {
     return size;
   }
-  
+
 }

@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -17,13 +17,13 @@ import chrriis.dj.nativeswing.swtimpl.NSPanelComponent;
 /**
  * A component to display some content with syntax highlighting. It is a browser-based component, which relies on the SyntaxHighlighter library.<br/>
  * Methods execute when this component is initialized. If the component is not initialized, methods will be executed as soon as it gets initialized.
- * If the initialization fails, the methods will not have any effect. The results from methods have relevant values only when the component is valid. 
+ * If the initialization fails, the methods will not have any effect. The results from methods have relevant values only when the component is valid.
  * @author Christopher Deckers
  */
 public class JSyntaxHighlighter extends NSPanelComponent {
 
   private static final String PACKAGE_PREFIX = "/dp.SyntaxHighlighter/";
-  
+
   private JWebBrowser webBrowser;
 
   private static final String LS = Utils.LINE_SEPARATOR;
@@ -42,7 +42,7 @@ public class JSyntaxHighlighter extends NSPanelComponent {
     webBrowser.setBarsVisible(false);
     add(webBrowser, BorderLayout.CENTER);
   }
-  
+
   /**
    * Get the web browser that contains this component. The web browser should only be used to add listeners, for example to listen to window creation events.
    * @return the web browser.
@@ -50,7 +50,7 @@ public class JSyntaxHighlighter extends NSPanelComponent {
   public JWebBrowser getWebBrowser() {
     return webBrowser;
   }
-  
+
   public static enum ContentLanguage {
     Cpp("c++", "Cpp"),
     CSharp("c#", "CSharp"),
@@ -66,25 +66,25 @@ public class JSyntaxHighlighter extends NSPanelComponent {
     XML("xml", "Xml"),
     HTML("html", "Xml"), // html is same as xml
     ;
-    
+
     private String language;
     private String fileName;
-    
+
     private ContentLanguage(String language, String fileName) {
       this.language = language;
       this.fileName = fileName;
     }
-    
+
     String getLanguage() {
       return language;
     }
-    
+
     String getFileName() {
       return fileName;
     }
-    
+
   }
-  
+
   /**
    * Set the content.
    * @param content the content.
@@ -93,7 +93,7 @@ public class JSyntaxHighlighter extends NSPanelComponent {
   public void setContent(String content, ContentLanguage language) {
     setContent(content, language, null);
   }
-  
+
   /**
    * Set the content.
    * @param content the content.
@@ -107,7 +107,7 @@ public class JSyntaxHighlighter extends NSPanelComponent {
     if(options == null) {
       options = new SyntaxHighlighterOptions();
     }
-    String hContent = 
+    String hContent =
       "<html>" + LS +
       "  <head>" + LS +
       "    <link type=\"text/css\" rel=\"stylesheet\" href=\"" + WebServer.getDefaultWebServer().getClassPathResourceURL(null, "/dp.SyntaxHighlighter/Styles/SyntaxHighlighter.css") + "\"></link>" + LS +
@@ -139,5 +139,5 @@ public class JSyntaxHighlighter extends NSPanelComponent {
       "</html>";
     webBrowser.setHTMLContent(hContent);
   }
-  
+
 }

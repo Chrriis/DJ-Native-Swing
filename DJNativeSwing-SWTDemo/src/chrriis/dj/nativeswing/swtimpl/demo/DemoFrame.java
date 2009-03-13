@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -55,9 +55,9 @@ import chrriis.dj.nativeswing.swtimpl.components.JSyntaxHighlighter.ContentLangu
  * @author Christopher Deckers
  */
 public class DemoFrame extends JFrame {
-  
+
   protected static final Font DESCRIPTION_FONT = new Font("Dialog", Font.PLAIN, 14);
-  
+
   public DemoFrame() {
     super("The DJ Project - NativeSwing (SWT)");
     Class<DemoFrame> clazz = DemoFrame.class;
@@ -137,6 +137,7 @@ public class DemoFrame extends JFrame {
                     if(description != null) {
                       JPanel descriptionPanel = new JPanel(new BorderLayout());
                       JEditorPane descriptionEditorPane = new JEditorPane(description.startsWith("<html>")? "text/html": "text/plain", description) {
+                        @Override
                         public EditorKit getEditorKitForContentType(String type){
                           if("text/plain".equalsIgnoreCase(type)) {
                             StyledEditorKit styledEditorKit = new StyledEditorKit();
@@ -175,7 +176,9 @@ public class DemoFrame extends JFrame {
 //                              sourcePanel.add(new JScrollPane(new SourcePane(reader)), BorderLayout.CENTER);
                               StringBuilder sb = new StringBuilder();
                               char[] chars = new char[1024];
-                              for(int i; (i=reader.read(chars)) != -1; sb.append(chars, 0, i));
+                              for(int i; (i=reader.read(chars)) != -1; sb.append(chars, 0, i)) {
+                                ;
+                              }
                               JSyntaxHighlighter syntaxHighlighter = new JSyntaxHighlighter();
                               syntaxHighlighter.setContent(sb.toString(), ContentLanguage.Java);
                               sourcePanel.add(syntaxHighlighter, BorderLayout.CENTER);
@@ -221,7 +224,7 @@ public class DemoFrame extends JFrame {
     demoTree.expandRow(0);
     demoTree.setSelectionRow(1);
   }
-  
+
   public static void main(String[] args) {
     UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();

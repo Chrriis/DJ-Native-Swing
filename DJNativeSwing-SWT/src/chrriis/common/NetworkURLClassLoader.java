@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -26,9 +26,9 @@ public class NetworkURLClassLoader extends ClassLoader {
    * @param codebase the codebase to load the resources from.
    */
   public NetworkURLClassLoader(String codebase) throws MalformedURLException {
-    this.codebaseURL = new URL(codebase);
+    codebaseURL = new URL(codebase);
   }
-  
+
   @Override
   protected URL findResource(String name) {
     try {
@@ -38,7 +38,7 @@ public class NetworkURLClassLoader extends ClassLoader {
     }
     return null;
   }
-  
+
   @Override
   protected Class<?> findClass(String name) throws ClassNotFoundException {
     String path = name.replace('.', '/') + ".class";
@@ -47,7 +47,9 @@ public class NetworkURLClassLoader extends ClassLoader {
     try {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       byte[] bytes = new byte[1024];
-      for(int n; (n=in.read(bytes)) != -1; baos.write(bytes, 0, n));
+      for(int n; (n=in.read(bytes)) != -1; baos.write(bytes, 0, n)) {
+        ;
+      }
       bytes = baos.toByteArray();
       clazz = defineClass(name, bytes, 0, bytes.length);
     } catch(Exception e) {
@@ -62,7 +64,7 @@ public class NetworkURLClassLoader extends ClassLoader {
     }
     return super.findClass(name);
   }
-  
+
   public static void main(String[] args) throws Exception {
     String codeBase = args[0];
     String mainClass = args[1];
@@ -71,5 +73,5 @@ public class NetworkURLClassLoader extends ClassLoader {
     Class<?> clazz = new NetworkURLClassLoader(codeBase).loadClass(mainClass);
     clazz.getMethod("main", String[].class).invoke(null, new Object[] {newArgs});
   }
-  
+
 }

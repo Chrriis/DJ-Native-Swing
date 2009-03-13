@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -18,15 +18,15 @@ import chrriis.dj.nativeswing.swtimpl.WebBrowserObject;
  * @author Christopher Deckers
  */
 public class VLCPlaylist {
-  
+
   private JVLCPlayer vlcPlayer;
   private WebBrowserObject webBrowserObject;
-  
+
   VLCPlaylist(JVLCPlayer vlcPlayer) {
     this.vlcPlayer = vlcPlayer;
-    this.webBrowserObject = vlcPlayer.getWebBrowserObject();
+    webBrowserObject = vlcPlayer.getWebBrowserObject();
   }
-  
+
   /**
    * Get the number of items in the playlist.
    * @return the item count, or -1 in case of failure.
@@ -35,7 +35,7 @@ public class VLCPlaylist {
     Object value = webBrowserObject.getObjectProperty("playlist.items.count");
     return value == null? -1: ((Number)value).intValue();
   }
-  
+
   /**
    * Indicate whether the playlist is currently playing an item.
    * @return true if an item is being played.
@@ -43,7 +43,7 @@ public class VLCPlaylist {
   public boolean isPlaying() {
     return Boolean.TRUE.equals(webBrowserObject.getObjectProperty("playlist.isPlaying"));
   }
-  
+
   /**
    * Add an item from the classpath to the playlist and get its ID for future manipulation.
    * @param clazz the reference clazz of the file to load.
@@ -53,7 +53,7 @@ public class VLCPlaylist {
     vlcPlayer.addReferenceClassLoader(clazz.getClassLoader());
     addItem(WebServer.getDefaultWebServer().getClassPathResourceURL(clazz.getName(), resourcePath));
   }
-  
+
   /**
    * Add an item to the playlist.
    * @param resourcePath the path or URL to the file.
@@ -69,14 +69,14 @@ public class VLCPlaylist {
     }
     webBrowserObject.invokeObjectFunction("playlist.add", resourcePath);
   }
-  
+
   /**
    * Start playing the playlist.
    */
   public void play() {
     webBrowserObject.invokeObjectFunction("playlist.play");
   }
-  
+
   /**
    * Start playing an item from the playlist using its ID.
    * @param itemID the ID of the item to play.
@@ -84,42 +84,42 @@ public class VLCPlaylist {
   public void playItem(int itemID) {
     webBrowserObject.invokeObjectFunction("playlist.playItem", itemID);
   }
-  
+
   /**
    * Toggle the pause state.
    */
   public void togglePause() {
     webBrowserObject.invokeObjectFunction("playlist.togglePause");
   }
-  
+
   /**
    * Stop playing.
    */
   public void stop() {
     webBrowserObject.invokeObjectFunction("playlist.stop");
   }
-  
+
   /**
    * Move to the next item of the playlist.
    */
   public void goNext() {
     webBrowserObject.invokeObjectFunction("playlist.next");
   }
-  
+
   /**
    * Move to the previous item of the playlist.
    */
   public void goPrevious() {
     webBrowserObject.invokeObjectFunction("playlist.prev");
   }
-  
+
   /**
    * Clear the playlist.
    */
   public void clear() {
     webBrowserObject.invokeObjectFunction("playlist.items.clear");
   }
-  
+
   /**
    * Remove an item using its index.
    * @param index the index of the item.
@@ -127,5 +127,5 @@ public class VLCPlaylist {
   public void removeItem(int index) {
     webBrowserObject.invokeObjectFunction("playlist.items.removeItem", index);
   }
-  
+
 }

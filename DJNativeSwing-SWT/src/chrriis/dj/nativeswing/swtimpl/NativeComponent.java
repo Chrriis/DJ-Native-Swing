@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -79,26 +79,26 @@ import com.sun.jna.Native;
 public abstract class NativeComponent extends Canvas {
 
   private static final boolean IS_PRINTING_FAILED_MESSAGES = Boolean.parseBoolean(System.getProperty("nativeswing.components.debug.printfailedmessages"));
-  
+
   private NativeComponentWrapper nativeComponentWrapper = new NativeComponentWrapper(this) {
-    
+
     @Override
     protected String getComponentDescription() {
       return NativeComponent.this.getComponentDescription();
     }
-    
+
     @Override
     protected void paintNativeComponent(BufferedImage image, Rectangle[] rectangles) {
       NativeComponent.this.paintComponent(image, rectangles);
     }
-    
+
     @Override
     protected void setNativeComponentEnabled(boolean isEnabled) {
       setShellEnabled(isEnabled);
     }
-    
+
   };
-  
+
   private class CMLocal_runInSequence extends LocalMessage {
     @Override
     public Object run(Object[] args) {
@@ -114,7 +114,7 @@ public abstract class NativeComponent extends Canvas {
   public void runInSequence(Runnable runnable) {
     runSync(new CMLocal_runInSequence(), runnable);
   }
-  
+
   private volatile List<CommandMessage> initializationCommandMessageList = new ArrayList<CommandMessage>();
 
   /**
@@ -144,7 +144,7 @@ public abstract class NativeComponent extends Canvas {
     }
     return commandMessage.syncExec(true, args);
   }
-  
+
   /**
    * Run the given command if the control is created, or store it to run it when the creation occurs.
    * If the component is disposed before the command has a chance to run, it is ignored silently.
@@ -169,16 +169,16 @@ public abstract class NativeComponent extends Canvas {
       commandMessage.asyncExec(true, args);
     }
   }
-  
+
   private void printFailedInvocation(Message message) {
     if(IS_PRINTING_FAILED_MESSAGES) {
       System.err.println("Invalid " + getComponentDescription() + ": " + message);
     }
   }
-  
+
   private static ObjectRegistry nativeComponentRegistry;
   private static ObjectRegistry controlRegistry;
-  
+
   static {
     if(NativeInterface.isInProcess()) {
       nativeComponentRegistry = new ObjectRegistry();
@@ -191,7 +191,7 @@ public abstract class NativeComponent extends Canvas {
       }
     }
   }
-  
+
   /**
    * Get the registry of the components, which references created components using the component ID.
    * @return the registry.
@@ -199,7 +199,7 @@ public abstract class NativeComponent extends Canvas {
   protected static ObjectRegistry getNativeComponentRegistry() {
     return nativeComponentRegistry;
   }
-  
+
   /**
    * Get the registry of the controls, which references created controls using the component ID.
    * @return the registry.
@@ -207,7 +207,7 @@ public abstract class NativeComponent extends Canvas {
   protected static ObjectRegistry getControlRegistry() {
     return controlRegistry;
   }
-  
+
   private static class CMN_reshape extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -220,7 +220,7 @@ public abstract class NativeComponent extends Canvas {
   }
 
   private int componentID;
-  
+
   /**
    * Get the unique identifier of this native component, used as a reference to communicate with the native peer.
    * @return the component ID.
@@ -254,7 +254,7 @@ public abstract class NativeComponent extends Canvas {
     enableEvents(AWTEvent.KEY_EVENT_MASK);
     setFocusable(true);
   }
-  
+
   @SuppressWarnings("deprecation")
   @Override
   protected void processKeyEvent(KeyEvent e) {
@@ -271,9 +271,9 @@ public abstract class NativeComponent extends Canvas {
     }
     super.processKeyEvent(ke);
   }
-  
+
   private Thread resizeThread;
-  
+
   @SuppressWarnings("deprecation")
   @Override
   public void reshape(int x, int y, int width, int height) {
@@ -299,7 +299,7 @@ public abstract class NativeComponent extends Canvas {
     }
     super.reshape(x, y, width, height);
   }
-  
+
   private static class CMJ_dispatchMouseEvent extends ControlCommandMessage {
     private static int buttonPressedCount;
     @Override
@@ -360,11 +360,11 @@ public abstract class NativeComponent extends Canvas {
       return null;
     }
   }
-  
+
   private static Object[] getKeyEventArgs(org.eclipse.swt.events.KeyEvent keyEvent, int keyEventType) {
     return new Object[] {keyEventType, keyEvent.stateMask, keyEvent.character, keyEvent.keyCode};
   }
-  
+
   private static class CMJ_dispatchKeyEvent extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -400,18 +400,18 @@ public abstract class NativeComponent extends Canvas {
       return null;
     }
   }
-  
+
   private static class CKeyEvent extends KeyEvent {
     public CKeyEvent(Component source, int id, long when, int modifiers, int keyCode, char keyChar) {
       super(source, id, when, modifiers, keyCode, keyChar);
     }
   }
-  
+
   private static class CMN_createControl extends CommandMessage {
     public Shell createShell(Object handle) throws Exception {
       if(NativeInterface.isInProcess()) {
         Canvas canvas = (Canvas)handle;
-        // SWT_AWT adds a component listener, but it conflicts. Thus we have to restore the listeners. 
+        // SWT_AWT adds a component listener, but it conflicts. Thus we have to restore the listeners.
         ComponentListener[] componentListeners = canvas.getComponentListeners();
         Shell shell = SWT_AWT.new_Shell(NativeInterface.getDisplay(), canvas);
         for(ComponentListener componentListener: canvas.getComponentListeners()) {
@@ -430,27 +430,27 @@ public abstract class NativeComponent extends Canvas {
       // carbon: Shell (Display display, Shell parent, int style, int handle) {
       Method shellCreationMethod = null;
       try {
-        shellCreationMethod = Shell.class.getMethod(SWT.getPlatform() + "_new", Display.class, int.class); 
+        shellCreationMethod = Shell.class.getMethod(SWT.getPlatform() + "_new", Display.class, int.class);
       } catch(Exception e) {}
       if(shellCreationMethod != null) {
         return (Shell)shellCreationMethod.invoke(null, NativeInterface.getDisplay(), ((Number)handle).intValue());
       }
       try {
-        shellCreationMethod = Shell.class.getMethod(SWT.getPlatform() + "_new", Display.class, long.class); 
+        shellCreationMethod = Shell.class.getMethod(SWT.getPlatform() + "_new", Display.class, long.class);
       } catch(Exception e) {}
       if(shellCreationMethod != null) {
         return (Shell)shellCreationMethod.invoke(null, NativeInterface.getDisplay(), ((Number)handle).longValue());
       }
       Constructor<Shell> shellConstructor = null;
       try {
-        shellConstructor = Shell.class.getConstructor(Display.class, Shell.class, int.class, int.class); 
+        shellConstructor = Shell.class.getConstructor(Display.class, Shell.class, int.class, int.class);
       } catch(Exception e) {}
       if(shellConstructor != null) {
         shellConstructor.setAccessible(true);
         return shellConstructor.newInstance(NativeInterface.getDisplay(), null, SWT.NO_TRIM, ((Number)handle).intValue());
       }
       try {
-        shellConstructor = Shell.class.getConstructor(Display.class, Shell.class, int.class, long.class); 
+        shellConstructor = Shell.class.getConstructor(Display.class, Shell.class, int.class, long.class);
       } catch(Exception e) {}
       if(shellConstructor != null) {
         shellConstructor.setAccessible(true);
@@ -512,7 +512,7 @@ public abstract class NativeComponent extends Canvas {
     lastEvent = e;
     return new Object[] {mouseEventType, e.x, e.y, e.button, e.count, e.stateMask, e.display.getCursorLocation()};
   }
-  
+
   private static void configureControl(final Control control, int componentID) {
     control.setData("NS_ID", componentID);
     control.setData("NS_EnabledEventsMask", 0L);
@@ -588,7 +588,7 @@ public abstract class NativeComponent extends Canvas {
     }
     super.addMouseMotionListener(listener);
   }
-  
+
   @Override
   public synchronized void removeMouseMotionListener(MouseMotionListener listener) {
     super.removeMouseMotionListener(listener);
@@ -596,7 +596,7 @@ public abstract class NativeComponent extends Canvas {
       runAsync(new CMN_setEventsEnabled(), MouseEvent.MOUSE_MOTION_EVENT_MASK, false);
     }
   }
-  
+
   /**
    * Paint the component, which also paints the back buffer if any.
    * @param g the graphics to paint to.
@@ -624,7 +624,7 @@ public abstract class NativeComponent extends Canvas {
       nativeComponentWrapper.paintBackBuffer(g);
     }
   }
-  
+
   /**
    * Print the component, which also prints the native peer.
    * @param g the graphics to paint to.
@@ -637,16 +637,16 @@ public abstract class NativeComponent extends Canvas {
     g.dispose();
     image.flush();
   }
-  
+
   private void throwDuplicateCreationException() {
     isNativePeerValid = false;
     invalidNativePeerText = "Failed to create " + getComponentDescription() + "\n\nReason:\nA native component cannot be re-created after having been disposed.";
     repaint();
     throw new IllegalStateException("A native component cannot be re-created after having been disposed! To achieve re-parenting or allow re-creation, set the option to defer destruction until finalization (note that re-parenting accross different windows is not supported).");
   }
-  
+
   private int additionCount;
-  
+
   @Override
   public void addNotify() {
     super.addNotify();
@@ -670,9 +670,9 @@ public abstract class NativeComponent extends Canvas {
       }
     });
   }
-  
+
   private boolean isForcingInitialization;
-  
+
   /**
    * Force the component to initialize. All method calls will then be synchronous instead of being queued waiting for the componant to be initialized.
    * This call fails if the component is not in a component hierarchy with a Window ancestor.
@@ -698,7 +698,7 @@ public abstract class NativeComponent extends Canvas {
       }
     }
   }
-  
+
   private Method getAWTHandleMethod;
   private Object getHandle() {
     if(NativeInterface.isInProcess()) {
@@ -722,9 +722,9 @@ public abstract class NativeComponent extends Canvas {
     }
     return 0;
   }
-  
+
   private NativeInterfaceListener nativeInterfaceListener;
-  
+
   private static class NNativeInterfaceListener extends NativeInterfaceAdapter {
     protected Reference<NativeComponent> nativeComponent;
     protected NNativeInterfaceListener(NativeComponent nativeComponent) {
@@ -753,7 +753,7 @@ public abstract class NativeComponent extends Canvas {
   protected Object[] getNativePeerCreationParameters() {
     return null;
   }
-  
+
   private void createNativePeer() {
     boolean isInterfaceAlive = NativeInterface.isAlive();
     if(isInterfaceAlive) {
@@ -798,7 +798,7 @@ public abstract class NativeComponent extends Canvas {
       }
     }
   }
-  
+
   private static class CMN_destroyControl extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -816,18 +816,18 @@ public abstract class NativeComponent extends Canvas {
       return null;
     }
   }
-  
+
   @Override
   public void removeNotify() {
     disposeNativePeer();
     super.removeNotify();
   }
-  
+
   private boolean isNativePeerValid;
   private String invalidNativePeerText;
   private boolean isNativePeerInitialized;
   private boolean isNativePeerDisposed;
-  
+
   /**
    * Explicitely dispose the native resources. This is particularly useful if deferred destruction is used (cf native component options) and the component is not going to be used anymore.
    */
@@ -846,7 +846,7 @@ public abstract class NativeComponent extends Canvas {
       nativeComponentWrapper.disposeNativeComponent();
     }
   }
-  
+
   /**
    * Indicate whether the native peer is disposed.
    * @return true if the native peer is disposed. This method returns false if the native peer is not initialized.
@@ -854,7 +854,7 @@ public abstract class NativeComponent extends Canvas {
   public boolean isNativePeerDisposed() {
     return isNativePeerDisposed;
   }
-  
+
   /**
    * Indicate whether the native peer initialization phase has happened. This method returns true even if the native peer is disposed of if the creation of the peer failed.
    * @return true if the native peer is initialized.
@@ -862,7 +862,7 @@ public abstract class NativeComponent extends Canvas {
   public boolean isNativePeerInitialized() {
     return isNativePeerInitialized;
   }
-  
+
   /**
    * Indicate if the native peer is valid, which means initialized, not disposed, and alive (communication channel is alive).
    * @return true if the native peer is valid.
@@ -870,7 +870,7 @@ public abstract class NativeComponent extends Canvas {
   public boolean isNativePeerValid() {
     return isNativePeerValid && NativeInterface.isAlive();
   }
-  
+
   private void invalidateNativePeer(String invalidNativePeerText) {
     if(isNativePeerValid) {
       isNativePeerValid = false;
@@ -878,16 +878,16 @@ public abstract class NativeComponent extends Canvas {
       repaint();
     }
   }
-  
+
   private String getComponentDescription() {
     return getClass().getName() + "[" + getComponentID() + "/" + hashCode() + "]";
   }
-  
+
   @Override
   public String toString() {
     return getComponentDescription();
   }
-  
+
   /**
    * A native component instance cannot be added directly to a component hierarchy. This method needs to be called to get a component that will add the native component.
    * @param optionMap the options to configure the behavior of this component.
@@ -896,7 +896,7 @@ public abstract class NativeComponent extends Canvas {
   protected Component createEmbeddableComponent(Map<Object, Object> optionMap) {
     return nativeComponentWrapper.createEmbeddableComponent(optionMap);
   }
-  
+
   private static class CMN_setShellEnabled extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -906,7 +906,7 @@ public abstract class NativeComponent extends Canvas {
   }
 
   private boolean isShellEnabled = true;
-  
+
   private void setShellEnabled(boolean isEnabled) {
     if(isEnabled == isShellEnabled) {
       return;
@@ -932,7 +932,7 @@ public abstract class NativeComponent extends Canvas {
     super.setEnabled(isEnabled);
     runAsync(new CMN_setEnabled(), isEnabled);
   }
-  
+
   private static class CMN_hasFocus extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -948,7 +948,7 @@ public abstract class NativeComponent extends Canvas {
     }
     return hasFocus;
   }
-  
+
   private static class CMN_getPreferredSize extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -969,9 +969,9 @@ public abstract class NativeComponent extends Canvas {
     }
     return result;
   }
-  
+
   private static class CMN_getComponentImage extends ControlCommandMessage {
-    
+
     private void printRemoveClip(Control control, GC gc) {
       Point size = control.getSize();
       Display display = control.getDisplay();
@@ -1014,7 +1014,7 @@ public abstract class NativeComponent extends Canvas {
       control.setRedraw(true);
       screenshot.dispose();
     }
-    
+
     private ImageData getImageData(Control control, Region region) {
       if(control.isDisposed()) {
         return null;
@@ -1039,7 +1039,7 @@ public abstract class NativeComponent extends Canvas {
       image.dispose();
       return imageData;
     }
-    
+
     @Override
     public Object run(Object[] args) throws Exception {
       int port = (Integer)args[0];
@@ -1121,9 +1121,9 @@ public abstract class NativeComponent extends Canvas {
       }
       throw new IllegalStateException("Not implemented");
     }
-    
+
   }
-  
+
   /**
    * Paint the native component including its native peer in an image. This method can be called from a non-UI thread.
    * @param image the image to paint to.
@@ -1131,7 +1131,7 @@ public abstract class NativeComponent extends Canvas {
   public void paintComponent(BufferedImage image) {
     paintComponent(image, null);
   }
-  
+
   /**
    * Paint the native component including its native peer in an image, in the areas that are specified. This method can be called from a non-UI thread.
    * @param image the image to paint to.
@@ -1233,26 +1233,26 @@ public abstract class NativeComponent extends Canvas {
       e.printStackTrace();
     }
   }
-  
+
   @Override
   public Dimension getMinimumSize() {
     return new Dimension(0, 0);
   }
-  
+
   /**
-   * Create an image of the native peer as a back buffer, which can be used when painting the component, or to simulate alpha blending. 
+   * Create an image of the native peer as a back buffer, which can be used when painting the component, or to simulate alpha blending.
    */
   public void createBackBuffer() {
     nativeComponentWrapper.createBackBuffer();
   }
-  
+
   /**
    * Update the back buffer on the areas that have non opaque overlays and that are not covered by opaque components.
    */
   public void updateBackBufferOnVisibleTranslucentAreas() {
     nativeComponentWrapper.updateBackBufferOnVisibleTranslucentAreas();
   }
-  
+
   /**
    * Update (eventually creating an empty one if it does not exist) the back buffer on the area specified by the rectangles.
    * @param rectangles the area to update.
@@ -1260,22 +1260,23 @@ public abstract class NativeComponent extends Canvas {
   public void updateBackBuffer(Rectangle[] rectangles) {
     nativeComponentWrapper.updateBackBuffer(rectangles);
   }
-  
+
   /**
    * Destroy the back buffer.
    */
   public void destroyBackBuffer() {
     nativeComponentWrapper.destroyBackBuffer();
   }
-  
+
   protected EventListenerList listenerList = new EventListenerList();
-  
+
+  @Override
   public <T extends EventListener> T[] getListeners(Class<T> listenerType) {
     T[] result = listenerList.getListeners(listenerType);
-    if(result.length == 0) { 
-      return super.getListeners(listenerType); 
+    if(result.length == 0) {
+      return super.getListeners(listenerType);
     }
-    return result; 
+    return result;
   }
-  
+
 }

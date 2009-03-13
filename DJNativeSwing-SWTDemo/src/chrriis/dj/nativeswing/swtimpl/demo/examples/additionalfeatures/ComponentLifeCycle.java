@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -39,7 +39,7 @@ public class ComponentLifeCycle extends JPanel {
     addLifeCyclePane(false);
     addLifeCyclePane(true);
   }
-  
+
   private void addLifeCyclePane(final boolean isForcedInitializationType) {
     JPanel lifeCyclePane = new JPanel(new BorderLayout(5, 0));
     lifeCyclePane.setBorder(BorderFactory.createTitledBorder(isForcedInitializationType? "Forced initialization life cycle": "Default life cycle"));
@@ -70,7 +70,7 @@ public class ComponentLifeCycle extends JPanel {
       }
     });
   }
-  
+
   public void createPlayerWithDefaultLyfeCycle(JFlashPlayer flashPlayer, final JTextArea logTextArea, JComponent componentPane) {
     log(logTextArea, "- JFlashPlayer creation.");
     flashPlayer = new JFlashPlayer(JFlashPlayer.destroyOnFinalization());
@@ -146,5 +146,5 @@ public class ComponentLifeCycle extends JPanel {
     });
     NativeInterface.runEventPump();
   }
-  
+
 }

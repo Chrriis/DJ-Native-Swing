@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -18,7 +18,7 @@ import java.util.Map;
 public class ObjectRegistry {
 
   private Thread cleanUpThread;
-  
+
   private synchronized void startThread() {
     if(cleanUpThread != null) {
       return;
@@ -48,16 +48,16 @@ public class ObjectRegistry {
     cleanUpThread.setDaemon(true);
     cleanUpThread.start();
   }
-  
+
   private int nextInstanceID = 1;
   private Map<Integer, WeakReference<Object>> instanceIDToObjectReferenceMap = new HashMap<Integer, WeakReference<Object>>();
-  
+
   /**
    * Construct an object registry.
    */
   public ObjectRegistry() {
   }
-  
+
   /**
    * Add an object to the registry.
    * @param o the object to add.
@@ -76,7 +76,7 @@ public class ObjectRegistry {
       }
     }
   }
-  
+
   /**
    * Add an object to the registry, specifying its ID, wich throws an exception if the ID is already in use.
    * @param o the object to add.
@@ -90,7 +90,7 @@ public class ObjectRegistry {
     instanceIDToObjectReferenceMap.put(instanceID, new WeakReference<Object>(o));
     startThread();
   }
-  
+
   /**
    * Get an object using its ID.
    * @return the object, or null.
@@ -106,7 +106,7 @@ public class ObjectRegistry {
     }
     return o;
   }
-  
+
   /**
    * Remove an object from the registry using its instance ID.
    * @param instanceID the ID of the object to remove.
@@ -114,7 +114,7 @@ public class ObjectRegistry {
   public synchronized void remove(int instanceID) {
     instanceIDToObjectReferenceMap.remove(instanceID);
   }
-  
+
   /**
    * Get all the instance IDs that are used in this registry.
    * @return the instance IDs.
@@ -127,14 +127,14 @@ public class ObjectRegistry {
     }
     return instanceIDs;
   }
-  
+
   private static ObjectRegistry registry = new ObjectRegistry();
-  
+
   /**
    * Get the default shared instance of a registry.
    */
   public static ObjectRegistry getInstance() {
     return registry;
   }
-  
+
 }

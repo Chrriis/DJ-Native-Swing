@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -73,7 +73,7 @@ public class WebServer {
     private String resourcePath;
     void setResourcePath(String resourcePath) {
       this.resourcePath = resourcePath;
-      this.urlPath = resourcePath + endQuery;
+      urlPath = resourcePath + endQuery;
     }
     public String getResourcePath() {
       return resourcePath;
@@ -111,7 +111,7 @@ public class WebServer {
       }
     }
   }
-  
+
   public static class HTTPData {
     private Map<String, String> headerMap = new HashMap<String, String>();
     HTTPData() {
@@ -127,11 +127,11 @@ public class WebServer {
       this.bytes = bytes;
     }
   }
-  
+
   public static abstract class WebServerContent {
-    
+
     public static final String MIME_APPLICATION_OCTET_STREAM = "application/octet-stream";
-    
+
     private static Map<String, String> extensionToMimeTypeMap = new HashMap<String, String>();
     static {
       extensionToMimeTypeMap.put("323", "text/h323");
@@ -332,7 +332,7 @@ public class WebServer {
       extensionToMimeTypeMap.put("z", "application/x-compress");
       extensionToMimeTypeMap.put("zip", "application/zip");
     }
-    
+
     public static String getDefaultMimeType(String extension) {
       if(extension == null) {
         return MIME_APPLICATION_OCTET_STREAM;
@@ -343,7 +343,7 @@ public class WebServer {
       String mimeType = extensionToMimeTypeMap.get(extension.toLowerCase(Locale.ENGLISH));
       return mimeType != null? mimeType: MIME_APPLICATION_OCTET_STREAM;
     }
-    
+
     public abstract InputStream getInputStream();
     public static InputStream getInputStream(String content) {
       if(content == null) {
@@ -365,28 +365,28 @@ public class WebServer {
     public long getLastModified() {
       return System.currentTimeMillis();
     }
-    
+
   }
-  
+
   private static class WebServerConnectionThread extends Thread {
-    
+
     private static int threadInitNumber;
     private static Semaphore semaphore = new Semaphore(10);
-    
+
     private static synchronized int nextThreadNumber() {
       return threadInitNumber++;
     }
 
     private Socket socket;
-    
+
     public WebServerConnectionThread(Socket socket) {
       super("WebServer Connection-" + nextThreadNumber());
       this.socket = socket;
       setDaemon(true);
     }
-    
+
     private static final String LS = Utils.LINE_SEPARATOR;
-    
+
     static void writeHTTPHeaders(BufferedOutputStream out, int code, String contentType, long contentLength, long lastModified) {
       StringBuilder sb = new StringBuilder();
       sb.append("HTTP/1.0 " + code + " OK" + LS);
@@ -416,7 +416,7 @@ public class WebServer {
 //        e.printStackTrace();
       }
     }
-    
+
     private static class HTTPInputStream extends InputStream {
       static enum LineSeparator {
         CR,
@@ -471,18 +471,25 @@ public class WebServer {
         }
         switch(lineSeparator) {
           case CR:
-            for(int b; (b=read()) != '\r' && b != -1; baos.write(b));
+            for(int b; (b=read()) != '\r' && b != -1; baos.write(b)) {
+              ;
+            }
             break;
           case LF:
-            for(int b; (b=read()) != '\n' && b != -1; baos.write(b));
+            for(int b; (b=read()) != '\n' && b != -1; baos.write(b)) {
+              ;
+            }
             break;
           case CRLF:
-            for(int b; (b=read()) != '\r' && b != -1; baos.write(b));
+            for(int b; (b=read()) != '\r' && b != -1; baos.write(b)) {
+              ;
+            }
             read();
             break;
         }
         return new String(baos.toByteArray(), "UTF-8");
       }
+      @Override
       public void close() throws IOException {
         inputStream.close();
       }
@@ -500,9 +507,9 @@ public class WebServer {
         return n;
       }
     }
-    
+
     private static final boolean DEBUG_PRINT_REQUESTS = Boolean.parseBoolean(System.getProperty("nativeswing.webserver.debug.printrequests"));
-    
+
     @Override
     public void run() {
       try {
@@ -543,7 +550,9 @@ public class WebServer {
               } else {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 byte[] bytes = new byte[1024];
-                for(int i; (i=in.read(bytes)) != -1; baos.write(bytes, 0, i));
+                for(int i; (i=in.read(bytes)) != -1; baos.write(bytes, 0, i)) {
+                  ;
+                }
                 dataBytes = baos.toByteArray();
               }
               String boundary = "--" + contentType.substring(contentType.indexOf("boundary=") + "boundary=".length());
@@ -577,7 +586,9 @@ public class WebServer {
                   headerMap.put(key, value);
                 }
                 ByteArrayOutputStream aos = new ByteArrayOutputStream();
-                for(int n; (n=din.read()) != -1; aos.write(n));
+                for(int n; (n=din.read()) != -1; aos.write(n)) {
+                  ;
+                }
                 httpData.setBytes(aos.toByteArray());
               }
             } else {
@@ -594,7 +605,9 @@ public class WebServer {
               } else {
                 StringBuilder sb = new StringBuilder();
                 char[] chars = new char[1024];
-                for(int i; (i=reader.read(chars)) != -1; sb.append(chars, 0, i));
+                for(int i; (i=reader.read(chars)) != -1; sb.append(chars, 0, i)) {
+                  ;
+                }
                 dataContent = sb.toString();
               }
               HTTPData httpData = new HTTPData();
@@ -635,7 +648,9 @@ public class WebServer {
           BufferedInputStream resourceStream = new BufferedInputStream(resourceStream_);
           writeHTTPHeaders(out, 200, webServerContent.getContentType(), webServerContent.getContentLength(), webServerContent.getLastModified());
           byte[] bytes = new byte[4096];
-          for(int i; (i=resourceStream.read(bytes)) != -1; out.write(bytes, 0, i));
+          for(int i; (i=resourceStream.read(bytes)) != -1; out.write(bytes, 0, i)) {
+            ;
+          }
           try {
             resourceStream.close();
           } catch(Exception e) {
@@ -653,42 +668,51 @@ public class WebServer {
         semaphore.release();
       }
     }
-    
+
   }
-  
+
   private int port;
 
   public WebServer() {
     this(0);
   }
-  
+
   public WebServer(int port) {
     this.port = port;
   }
-  
+
   private volatile boolean isRunning;
-  
+
   public void stop() {
     isRunning = false;
+    if(serverSocket != null) {
+      ServerSocket serverSocket = this.serverSocket;
+      this.serverSocket = null;
+      try {
+        serverSocket.close();
+      } catch (IOException e) {
+      }
+    }
   }
-  
+
   public boolean isRunning() {
     return isRunning;
   }
-  
+
   public void start() throws IOException {
     start(true);
   }
-  
-  private int instanceID;
-  
+
+  private volatile ServerSocket serverSocket;
+  private volatile int instanceID;
+
   public void start(boolean isDaemon) throws IOException {
     if(isRunning) {
       return;
     }
     isRunning = true;
     instanceID = ObjectRegistry.getInstance().add(this);
-    final ServerSocket serverSocket = new ServerSocket();
+    serverSocket = new ServerSocket();
     serverSocket.bind(new InetSocketAddress(InetAddress.getByName(getHostAddress()), port));
     port = serverSocket.getLocalPort();
     if(Boolean.parseBoolean(System.getProperty("nativeswing.webserver.debug.printport"))) {
@@ -713,38 +737,41 @@ public class WebServer {
             WebServerConnectionThread webServerConnectionThread = new WebServerConnectionThread(socket);
             webServerConnectionThread.start();
           } catch(IOException e) {
-            e.printStackTrace();
+            if(serverSocket != null) {
+              e.printStackTrace();
+            }
           }
         }
+        serverSocket = null;
         ObjectRegistry.getInstance().remove(instanceID);
       }
     };
     listenerThread.setDaemon(isDaemon);
     listenerThread.start();
   }
-  
+
   public int getPort() {
     return port;
   }
-  
+
   public String getURLPrefix() {
     return "http://" + hostAddress + ":" + port;
   }
-  
+
   /**
    * @return A URL that when accessed will invoke the method <code>static WebServerContent getWebServerContent(HTTPRequest)</code> of the parameter class (the method visibility does not matter).
    */
   public String getDynamicContentURL(String className, String parameter) {
     return getURLPrefix() + "/class/" + instanceID + "/" + className + "/" + Utils.encodeURL(parameter);
   }
-  
+
   /**
    * @return A URL that when accessed will invoke the method <code>static WebServerContent getWebServerContent(HTTPRequest)</code> of the parameter class (the method visibility does not matter).
    */
   public String getDynamicContentURL(String className, String codebase, String parameter) {
     return getURLPrefix() + "/class/" + instanceID + "/" + className + "/" + codebase + "/" + Utils.encodeURL(parameter);
   }
-  
+
   public String getClassPathResourceURL(String className, String resourcePath) {
     if(!resourcePath.startsWith("/")) {
       String classPath = className.replace('.', '/');
@@ -753,14 +780,14 @@ public class WebServer {
     }
     return getURLPrefix() + "/classpath/" + instanceID + Utils.simplifyPath(resourcePath);
   }
-  
+
   public String getResourcePathURL(String codeBase, String resourcePath) {
     if(codeBase == null) {
       codeBase = ".";
     }
     return getURLPrefix() + "/resource/" + Utils.encodeURL(codeBase) + "/" + Utils.encodeURL(resourcePath);
   }
-  
+
   public WebServerContent getURLContent(String resourceURL) {
     try {
       HTTPRequest httpRequest = new HTTPRequest(new URL(resourceURL).getPath());
@@ -770,23 +797,23 @@ public class WebServer {
       return null;
     }
   }
-  
+
   private List<ClassLoader> referenceClassLoaderList = new ArrayList<ClassLoader>(1);
-  
+
   public void addReferenceClassLoader(ClassLoader referenceClassLoader) {
     if(referenceClassLoader == null || referenceClassLoader == getClass().getClassLoader()) {
       return;
     }
     referenceClassLoaderList.add(0, referenceClassLoader);
   }
-  
+
   public void removeReferenceClassLoader(ClassLoader referenceClassLoader) {
     if(referenceClassLoader == null || referenceClassLoader == getClass().getClassLoader()) {
       return;
     }
     referenceClassLoaderList.remove(referenceClassLoader);
   }
-  
+
   protected static WebServerContent getWebServerContent(HTTPRequest httpRequest) {
     String parameter = httpRequest.getResourcePath();
     if(parameter.startsWith("/")) {
@@ -923,7 +950,7 @@ public class WebServer {
   private static WebServer webServer;
   private static Object LOCK = new Object();
   private static String hostAddress;
-  
+
   static {
     String hostAddress = Utils.getLocalHostAddress();
     if(hostAddress == null) {
@@ -931,22 +958,26 @@ public class WebServer {
     }
     WebServer.hostAddress = hostAddress;
   }
-  
+
   private static String getHostAddress() {
     return hostAddress;
   }
-  
+
+  public static void stopDefaultWebServer() {
+    synchronized(LOCK) {
+      if(webServer != null) {
+        webServer.stop();
+        webServer = null;
+      }
+    }
+  }
+
   public static WebServer getDefaultWebServer() {
     synchronized(LOCK) {
       if(webServer != null) {
         return webServer;
       }
-      webServer = new WebServer() {
-        @Override
-        public void stop() {
-          throw new IllegalStateException("The default web server may be shared and thus cannot be stopped!");
-        }
-      };
+      webServer = new WebServer();
       try {
         webServer.start();
       } catch(Exception e) {
@@ -955,5 +986,5 @@ public class WebServer {
       return webServer;
     }
   }
-  
+
 }

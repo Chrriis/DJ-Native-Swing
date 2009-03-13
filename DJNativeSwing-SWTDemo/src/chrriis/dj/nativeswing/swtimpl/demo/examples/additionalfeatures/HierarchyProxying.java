@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -30,7 +30,7 @@ import chrriis.dj.nativeswing.swtimpl.demo.examples.flashplayer.SimpleFlashExamp
 public class HierarchyProxying extends JPanel {
 
   private JWebBrowser webBrowser2;
-  
+
   public HierarchyProxying() {
     super(new BorderLayout());
     JDesktopPane desktopPane = new JDesktopPane();
@@ -88,7 +88,7 @@ public class HierarchyProxying extends JPanel {
     desktopPane.add(webBrowser2InternalFrame);
     add(desktopPane, BorderLayout.CENTER);
   }
-  
+
   @Override
   public void removeNotify() {
     super.removeNotify();
@@ -96,7 +96,7 @@ public class HierarchyProxying extends JPanel {
     // Rather than wait for garbage collection, release when the component is removed from its parent.
     webBrowser2.disposeNativePeer();
   }
-  
+
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
     UIUtils.setPreferredLookAndFeel();
@@ -113,5 +113,5 @@ public class HierarchyProxying extends JPanel {
     });
     NativeInterface.runEventPump();
   }
-  
+
 }

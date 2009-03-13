@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -29,13 +29,13 @@ import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
 public class PseudoTransparency extends JPanel {
 
   private JWebBrowser webBrowser;
-  
+
   @Override
   public boolean isOptimizedDrawingEnabled() {
     // This indicates that the component allows layering of children.
     return false;
   }
-  
+
   public PseudoTransparency() {
     super(null);
     webBrowser = new JWebBrowser(JWebBrowser.constrainVisibility());
@@ -74,9 +74,9 @@ public class PseudoTransparency extends JPanel {
     setComponentZOrder(imageLabel, 0);
     updateBackgroundBuffer();
   }
-  
+
   private volatile boolean isDisposed;
-  
+
   private void updateBackgroundBuffer() {
     // we refresh the background buffer outside the UI thread, to minimize the overhead.
     new Thread() {
@@ -101,13 +101,13 @@ public class PseudoTransparency extends JPanel {
       }
     }.start();
   }
-  
+
   @Override
   public void removeNotify() {
     super.removeNotify();
     isDisposed = true;
   }
-  
+
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
     UIUtils.setPreferredLookAndFeel();
@@ -124,5 +124,5 @@ public class PseudoTransparency extends JPanel {
     });
     NativeInterface.runEventPump();
   }
-  
+
 }

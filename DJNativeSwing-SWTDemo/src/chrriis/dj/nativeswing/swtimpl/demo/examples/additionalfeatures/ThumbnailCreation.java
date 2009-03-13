@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -37,11 +37,11 @@ import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
 public class ThumbnailCreation extends JPanel {
 
   private static final Dimension THUMBNAIL_SIZE = new Dimension(200, 150);
-  
+
   private static abstract class ThumbnailPane extends JPanel {
-    
+
     private JLabel thumbnailLabel;
-    
+
     public ThumbnailPane(String title) {
       super(new BorderLayout());
       setBorder(BorderFactory.createTitledBorder(title));
@@ -68,9 +68,9 @@ public class ThumbnailCreation extends JPanel {
       setPreferredSize(getPreferredSize());
       thumbnailLabel.setPreferredSize(null);
     }
-    
+
     public abstract void createThumbnail();
-    
+
     public void setThumbnail(ImageIcon thumbnailIcon) {
       if(thumbnailIcon == null) {
         thumbnailLabel.setText(" No thumbnail ");
@@ -80,11 +80,11 @@ public class ThumbnailCreation extends JPanel {
         thumbnailLabel.setIcon(thumbnailIcon);
       }
     }
-    
+
   }
-  
+
   private JWebBrowser webBrowser;
-  
+
   public ThumbnailCreation() {
     super(new BorderLayout());
     JPanel webBrowserPanel = new JPanel(new BorderLayout());
@@ -112,7 +112,7 @@ public class ThumbnailCreation extends JPanel {
     }, cons);
     add(eastPanel, BorderLayout.EAST);
   }
-  
+
   private void createThumbnail(final ThumbnailPane thumbnailPane, final Component component) {
     final int cWidth = component.getWidth();
     final int cHeight = component.getHeight();
@@ -152,7 +152,7 @@ public class ThumbnailCreation extends JPanel {
       }
     }.start();
   }
-  
+
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
     UIUtils.setPreferredLookAndFeel();
@@ -169,5 +169,5 @@ public class ThumbnailCreation extends JPanel {
     });
     NativeInterface.runEventPump();
   }
-  
+
 }

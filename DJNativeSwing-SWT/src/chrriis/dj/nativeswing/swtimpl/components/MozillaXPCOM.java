@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -33,7 +33,7 @@ import chrriis.dj.nativeswing.swtimpl.ControlCommandMessage;
 public class MozillaXPCOM {
 
   public static class Mozilla {
-    
+
 //    private static boolean isInitialized;
 //    private static void initialize() {
 //      if(isInitialized) {
@@ -42,7 +42,7 @@ public class MozillaXPCOM {
 //      isInitialized = true;
 //      org.mozilla.xpcom.Mozilla.getInstance().initialize(new File(System.getProperty("org.eclipse.swt.browser.XULRunnerPath")));
 //    }
-    
+
     private static class CMN_getComponentRegistrar extends CommandMessage {
       @Override
       public Object run(Object[] args) {
@@ -50,22 +50,22 @@ public class MozillaXPCOM {
         return pack(org.mozilla.xpcom.Mozilla.getInstance().getComponentRegistrar(), true);
       }
     }
-    
+
     public static nsIComponentRegistrar getComponentRegistrar() {
       return (nsIComponentRegistrar)unpack(new CMN_getComponentRegistrar().syncSend(true));
     }
-    
+
   }
-  
+
   private MozillaXPCOM() {}
-  
+
   private static class CMN_getWebBrowser extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       return pack(((Browser)getControl()).getWebBrowser(), true);
     }
   }
-  
+
   /**
    * Get the Mozilla JavaXPCOM nsIWebBrowser if it is available.<br/>
    * Availability requires the web browser to be using the XULRunner runtime (version 1.8.1.2 or greater) and the JavaXPCOM classes (version 1.8.1.2 or greater) to be in the classpath.
@@ -78,46 +78,46 @@ public class MozillaXPCOM {
   private static Map<Integer, Object> idToNativeInterfaceMap = new HashMap<Integer, Object>();
   private static Map<Integer, WeakReference<NativeSwingProxy>> idToProxyInterfaceReferenceMap = new HashMap<Integer, WeakReference<NativeSwingProxy>>();
   private static Map<InterfaceInfo, Integer> interfaceInfoToIDMap = new HashMap<InterfaceInfo, Integer>();
-  
+
   private static int nextNativeSideID = 1;
   private static int nextSwingSideID = -1;
-  
+
   private static class InterfaceDefinition implements Serializable {
-    
+
     private int id;
     private Class<?>[] interfaces;
     private boolean isProxy;
     private boolean isNativeSide;
-    
+
     private InterfaceDefinition(int id, Class<?>[] interfaces, boolean isProxy, boolean isNativeSide) {
       this.id = id;
       this.interfaces = interfaces;
       this.isProxy = isProxy;
       this.isNativeSide = isNativeSide;
     }
-    
+
     public int getID() {
       return id;
     }
-    
+
     public Class<?>[] getInterfaces() {
       return interfaces;
     }
-    
+
     public boolean isProxy() {
       return isProxy;
     }
-    
+
     public boolean isNativeSide() {
       return isNativeSide;
     }
-    
+
   }
-  
+
   private interface NativeSwingProxy {
-    
+
     public void finalize();
-    
+
   }
 
   /**
@@ -125,36 +125,36 @@ public class MozillaXPCOM {
    * @author Christopher Deckers
    */
   private static class InterfaceInfo {
-    
+
     private WeakReference<Object> interfaceReference;
     private int id;
-    
+
     public InterfaceInfo(Object intrface) {
       interfaceReference = new WeakReference<Object>(intrface);
       id = System.identityHashCode(intrface);
     }
-    
+
     @Override
     public int hashCode() {
       return id;
     }
-    
+
     public Object getInterface() {
       return interfaceReference.get();
     }
-    
+
     @Override
     public boolean equals(Object o) {
       return ((InterfaceInfo)o).id == id;
     }
-    
+
   }
-  
+
   private static class ArrayInfo implements Serializable {
-    
+
     private Class<?> arrayClass;
     private Object[] content;
-    
+
     public ArrayInfo(Class<?> arrayClass, Object[] content) {
       // It is not clear whether the interface can return arrays with a class that is not visible in our class loader.
       // To avoid that issue, we try to find a visible class from the class hierarchy of the array.
@@ -173,22 +173,22 @@ public class MozillaXPCOM {
       this.arrayClass = arrayClass;
       this.content = content;
     }
-    
+
     public Class<?> getArrayClass() {
       return arrayClass;
     }
-    
+
     public Object[] getItems() {
       return content;
     }
-    
+
     @Override
     public String toString() {
       return Arrays.deepToString(content);
     }
-    
+
   }
-  
+
   private static Object pack(Object o, boolean isNativeSide) {
     if(o == null) {
       return null;
@@ -232,7 +232,7 @@ public class MozillaXPCOM {
     }
     return new InterfaceDefinition(id, null, !(o instanceof NativeSwingProxy), !isNativeSide);
   }
-  
+
   private static class CM_runMethod extends CommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -252,7 +252,7 @@ public class MozillaXPCOM {
       }
     }
   }
-  
+
   private static class CM_disposeResources extends CommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -261,7 +261,7 @@ public class MozillaXPCOM {
       return null;
     }
   }
-  
+
   private static Object unpack(Object o) {
     if(o == null) {
       return null;
@@ -307,5 +307,5 @@ public class MozillaXPCOM {
     }
     return o;
   }
-  
+
 }

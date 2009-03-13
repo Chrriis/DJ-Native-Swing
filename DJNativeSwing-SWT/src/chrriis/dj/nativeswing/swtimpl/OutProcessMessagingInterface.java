@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -28,10 +28,11 @@ abstract class OutProcessMessagingInterface extends MessagingInterface {
     this.socket = socket;
     initialize(exitOnEndOfStream);
   }
-  
+
   private ObjectOutputStream oos;
   private ObjectInputStream ois;
 
+  @Override
   public void destroy() {
     setAlive(false);
     try {
@@ -39,9 +40,10 @@ abstract class OutProcessMessagingInterface extends MessagingInterface {
     } catch(Exception e) {
     }
   }
-  
+
   private Socket socket;
-  
+
+  @Override
   protected void openChannel() {
     try {
       oos = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()) {
@@ -62,7 +64,8 @@ abstract class OutProcessMessagingInterface extends MessagingInterface {
       throw new RuntimeException(e);
     }
   }
-  
+
+  @Override
   protected void closeChannel() {
     try {
       oos.close();
@@ -78,9 +81,9 @@ abstract class OutProcessMessagingInterface extends MessagingInterface {
     }
     socket = null;
   }
-  
+
   private static final int OOS_RESET_THRESHOLD;
-  
+
   static {
     String maxByteCountProperty = System.getProperty("nativeswing.interface.streamresetthreshold");
     if(maxByteCountProperty != null) {
@@ -89,9 +92,10 @@ abstract class OutProcessMessagingInterface extends MessagingInterface {
       OOS_RESET_THRESHOLD = 500000;
     }
   }
-  
+
   private int oosByteCount;
-  
+
+  @Override
   protected void writeMessageToChannel(Message message) throws IOException {
     synchronized(oos) {
       oos.writeUnshared(message);
@@ -103,9 +107,10 @@ abstract class OutProcessMessagingInterface extends MessagingInterface {
       }
     }
   }
-  
+
+  @Override
   protected Message readMessageFromChannel() throws IOException, ClassNotFoundException {
-    Object o = OutProcessMessagingInterface.this.ois.readUnshared();
+    Object o = ois.readUnshared();
     if(o instanceof Message) {
       Message message = (Message)o;
       if(IS_DEBUGGING_MESSAGES) {
@@ -116,44 +121,44 @@ abstract class OutProcessMessagingInterface extends MessagingInterface {
     System.err.println("Unknown message: " + o);
     return null;
   }
-  
+
   static class SWTOutProcessMessagingInterface extends OutProcessMessagingInterface {
-    
+
     private Display display;
-    
+
     public SWTOutProcessMessagingInterface(Socket socket, final boolean exitOnEndOfStream, Display display) {
       super(true, socket, exitOnEndOfStream);
       this.display = display;
     }
-    
+
     @Override
     protected void asyncUIExec(Runnable runnable) {
       display.asyncExec(runnable);
     }
-    
+
     @Override
     public boolean isUIThread() {
       return Thread.currentThread() == display.getThread();
     }
 
   }
-  
+
   static class SwingOutProcessMessagingInterface extends OutProcessMessagingInterface {
-    
+
     public SwingOutProcessMessagingInterface(Socket socket, final boolean exitOnEndOfStream) {
       super(false, socket, exitOnEndOfStream);
     }
-    
+
     @Override
     protected void asyncUIExec(Runnable runnable) {
       SwingUtilities.invokeLater(runnable);
     }
-    
+
     @Override
     public boolean isUIThread() {
       return SwingUtilities.isEventDispatchThread();
     }
 
   }
-  
+
 }

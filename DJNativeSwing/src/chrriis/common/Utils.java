@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -32,18 +32,18 @@ import java.util.List;
 public class Utils {
 
   private Utils() {}
-  
+
   public static final boolean IS_JAVA_6_OR_GREATER = System.getProperty("java.version").compareTo("1.6") >= 0;
 
   public static final boolean IS_MAC;
-  
+
   static {
     String os = System.getProperty("os.name");
     IS_MAC = os.startsWith("Mac") || os.startsWith("Darwin");
   }
-  
+
   public static final String LINE_SEPARATOR = System.getProperty("line.separator");
-  
+
   public static String decodeURL(String s) {
     try {
       return URLDecoder.decode(s, "UTF-8");
@@ -52,7 +52,7 @@ public class Utils {
       return null;
     }
   }
-  
+
   @SuppressWarnings("deprecation")
   public static String encodeURL(String s) {
     String encodedString;
@@ -63,7 +63,7 @@ public class Utils {
     }
     return encodedString.replaceAll("\\+", "%20");
   }
-  
+
   public static String escapeXML(String s) {
     if(s == null || s.length() == 0) {
       return s;
@@ -114,28 +114,28 @@ public class Utils {
     }
     return null;
   }
-  
+
   public static File getClassPathFile(String resourcePath) {
     File file = getJARFile(resourcePath);
     return file != null? file: getDirectory(resourcePath);
   }
-  
+
   public static File getClassPathFile(Class<?> clazz) {
     File file = getJARFile(clazz);
     return file != null? file: getDirectory(clazz);
   }
-  
+
   public static File getJARFile(String resourcePath) {
     if(!resourcePath.startsWith("/")) {
       resourcePath = '/' + resourcePath;
     }
     return getJARFile(Utils.class, resourcePath);
   }
-  
+
   public static File getJARFile(Class<?> clazz) {
     return getJARFile(clazz, "/" + clazz.getName().replace('.', '/') + ".class");
   }
-  
+
   private static File getJARFile(Class<?> clazz, String resourcePath) {
     URL resource = clazz.getResource(resourcePath);
     if(resource == null) {
@@ -150,18 +150,18 @@ public class Utils {
     }
     return null;
   }
-  
+
   public static File getDirectory(String resourcePath) {
     if(!resourcePath.startsWith("/")) {
       resourcePath = '/' + resourcePath;
     }
     return getDirectory(Utils.class, resourcePath);
   }
-  
+
   public static File getDirectory(Class<?> clazz) {
     return getDirectory(clazz, "/" + clazz.getName().replace('.', '/') + ".class");
   }
-  
+
   private static File getDirectory(Class<?> clazz, String resourcePath) {
     String resourceName = resourcePath;
     if(resourceName.startsWith("/")) {
@@ -183,7 +183,7 @@ public class Utils {
     }
     return null;
   }
-  
+
   /**
    * Delete the file, or delete the directtory and all its children recursively.
    * @param fileOrDir a file or a directory to delete.
@@ -198,7 +198,7 @@ public class Utils {
       }
     }
   }
-  
+
   /**
    * Test the equality of 2 objects, with a check on nullity.
    * @param o1 the first object.
@@ -208,7 +208,7 @@ public class Utils {
   public static boolean equals(Object o1, Object o2) {
     return o1 == null? o2 == null: o1.equals(o2);
   }
-  
+
   /**
    * Produce the deep string value of an array, whatever the actual class type of the array is.
    * @param array the array to get the deep string value of.
@@ -248,7 +248,7 @@ public class Utils {
     }
     return Arrays.deepToString((Object[])array);
   }
-  
+
   /**
    * Simplify a path, where separators are '/', by resolving "." and "..".
    * @return the simplified path.
@@ -288,9 +288,9 @@ public class Utils {
     }
     return sb.toString();
   }
-  
+
   private static String localHostAddress;
-  
+
   /**
    * Get a local host address on which client and server sockets can connect to communicate. The result is cached so that only the first call may take some time.
    * @return the local host address that was found, or null.
@@ -316,7 +316,7 @@ public class Utils {
     Utils.localHostAddress = localHostAddress == null? "": localHostAddress;
     return localHostAddress;
   }
-  
+
   /**
    * Get a local host address on which client and server sockets can connect to communicate.
    * @param port the port on which to test, or 0 for a random test port.
@@ -364,7 +364,7 @@ public class Utils {
     }
     return null;
   }
-  
+
   private static boolean isLocalHostAddressReachable(String hostAddress, int port) {
     boolean isReachable = false;
     try {
@@ -387,5 +387,5 @@ public class Utils {
     }
     return isReachable;
   }
-  
+
 }

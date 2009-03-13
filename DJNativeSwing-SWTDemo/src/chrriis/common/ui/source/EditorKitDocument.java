@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -25,11 +25,13 @@ public class EditorKitDocument extends DefaultStyledDocument {
     types.setStyles(this);
   }
 
+  @Override
   public void insertString(int offset, String text, AttributeSet style) throws BadLocationException {
     super.insertString(offset, text, style);
     highlightSyntax();
   }
 
+  @Override
   public void remove(int offset, int length) throws BadLocationException {
     super.remove(offset, length);
     highlightSyntax();

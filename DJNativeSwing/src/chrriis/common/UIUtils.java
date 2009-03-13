@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -27,7 +27,7 @@ import javax.swing.UIManager;
 public class UIUtils {
 
   private UIUtils() {}
-  
+
   /**
    * Subtracts the area specified by the rectangle rect from each of the areas specified by the rectangles in rects.
    * @param rects The rectangles to substract from.
@@ -37,7 +37,7 @@ public class UIUtils {
   public static Rectangle[] subtract(Rectangle[] rects, Rectangle rect) {
     return subtract(rects, new Rectangle[] {rect});
   }
-  
+
   /**
    * Subtracts the area specified by the rectangles in rects2 from each of the areas specified by the rectangles in rects1.
    * @param rects1 The rectangles to substract from.
@@ -65,7 +65,7 @@ public class UIUtils {
     }
     return rectangleList.toArray(new Rectangle[0]);
   }
-   
+
   /**
    * Subtracts the area of r2 from r1, appending the new rectangle(s) to the
    * list of results.
@@ -161,7 +161,7 @@ public class UIUtils {
       resultList.add(new Rectangle(x, r2.y, r1.x + r1.width - x, r2.height));
     }
   }
-  
+
   /**
    * Get the area that is not covered by components obeying the condition imposed by the visitor. Usually, the filter focuses on all components, or opaque components.
    * @param component the component for which to find the visible areas.
@@ -218,7 +218,7 @@ public class UIUtils {
     }
     return shape;
   }
-  
+
   private static Rectangle[] getChildrenVisibleArea(Component component, Filter<Component> filter, Rectangle[] shape, Container parent, Component c, boolean traverseChildren) {
     Component[] children;
     if(parent instanceof JLayeredPane) {
@@ -286,7 +286,7 @@ public class UIUtils {
     }
     return bounds;
   }
-  
+
   public static void setPreferredLookAndFeel() {
     try {
       String systemLookAndFeelClassName = UIManager.getSystemLookAndFeelClassName();
@@ -297,5 +297,5 @@ public class UIUtils {
       e.printStackTrace();
     }
   }
-  
+
 }

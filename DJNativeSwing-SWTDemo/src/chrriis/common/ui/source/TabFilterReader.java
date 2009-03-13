@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -20,6 +20,7 @@ public class TabFilterReader extends FilterReader {
     super(reader);
     this.reader = reader;
   }
+  @Override
   public int read() throws IOException {
     char c = (char)super.read();
     if(c == '\t') {
@@ -32,6 +33,7 @@ public class TabFilterReader extends FilterReader {
     }
     return c;
   }
+  @Override
   public int read(char[] cbuf, int off, int len) throws IOException {
     int length = sb.length();
     if(length > 0) {

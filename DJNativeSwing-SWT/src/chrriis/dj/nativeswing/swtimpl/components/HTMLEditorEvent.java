@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -16,7 +16,7 @@ import java.util.EventObject;
 public class HTMLEditorEvent extends EventObject{
 
   private JHTMLEditor htmlEditor;
-  
+
   /**
    * Construct an HTML editor event.
    * @param htmlEditor the HTML editor.
@@ -25,7 +25,7 @@ public class HTMLEditorEvent extends EventObject{
     super(htmlEditor);
     this.htmlEditor = htmlEditor;
   }
-  
+
   /**
    * Get the HTML editor.
    * @return the HTML editor.
@@ -33,5 +33,5 @@ public class HTMLEditorEvent extends EventObject{
   public JHTMLEditor getHTMLEditor() {
     return htmlEditor;
   }
-  
+
 }

@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -59,20 +59,20 @@ import chrriis.dj.nativeswing.swtimpl.NSPanelComponent;
 /**
  * A native web browser, using Internet Explorer or Mozilla on Windows, and Mozilla on other platforms.<br/>
  * Methods execute when this component is initialized. If the component is not initialized, methods will be executed as soon as it gets initialized.
- * If the initialization fails, the methods will not have any effect. The results from methods have relevant values only when the component is valid. 
+ * If the initialization fails, the methods will not have any effect. The results from methods have relevant values only when the component is valid.
  * @author Christopher Deckers
  */
 public class JWebBrowser extends NSPanelComponent {
 
   /** The prefix to use when sending a command from some web content, using a static link or by setting window.location from Javascript. */
   public static final String COMMAND_LOCATION_PREFIX = NativeWebBrowser.COMMAND_LOCATION_PREFIX;
-  
+
   /** The prefix to use when sending a command from some web content, by setting window.status from Javascript. */
   public static final String COMMAND_STATUS_PREFIX = NativeWebBrowser.COMMAND_STATUS_PREFIX;
-  
+
   private static final String USE_XULRUNNER_RUNTIME_OPTION_KEY = "XULRunner Runtime";
   private static final NSOption XUL_RUNNER_RUNTIME_OPTION = new NSOption(USE_XULRUNNER_RUNTIME_OPTION_KEY);
-  
+
   /**
    * Create an option to make the web browser use the Mozilla XULRunner runtime.
    * @return the option to use the XULRunner runtime.
@@ -80,14 +80,14 @@ public class JWebBrowser extends NSPanelComponent {
   public static NSOption useXULRunnerRuntime() {
     return XUL_RUNNER_RUNTIME_OPTION;
   }
-  
+
   /**
    * Clear all session cookies from all current web browser instances.
    */
   public static void clearSessionCookies() {
     NativeWebBrowser.clearSessionCookies();
   }
-  
+
   private final ResourceBundle RESOURCES = ResourceBundle.getBundle(JWebBrowser.class.getPackage().getName().replace('.', '/') + "/resource/WebBrowser");
 
   private NativeWebBrowser nativeWebBrowser;
@@ -104,7 +104,7 @@ public class JWebBrowser extends NSPanelComponent {
   private JCheckBoxMenuItem statusBarCheckBoxMenuItem;
   private JPanel nativeWebBrowserBorderContainerPane;
   private JPanel nativeWebBrowserContainerPane;
-  
+
   private JMenuItem backMenuItem;
   private JMenuItem forwardMenuItem;
   private JMenuItem reloadMenuItem;
@@ -168,7 +168,7 @@ public class JWebBrowser extends NSPanelComponent {
   }
 
   private boolean isViewMenuVisible;
-  
+
   private void updateNavigationButtons() {
     if(isViewMenuVisible || isButtonBarVisible()) {
       boolean isBackEnabled = nativeWebBrowser.isNativePeerInitialized()? nativeWebBrowser.isBackNavigationEnabled(): false;
@@ -183,7 +183,7 @@ public class JWebBrowser extends NSPanelComponent {
       forwardMenuItem.setEnabled(isForwardEnabled);
     }
   }
-  
+
   /**
    * Copy the appearance, the visibility of the various bars, from one web browser to another.
    * @param fromWebBrowser the web browser to copy the appearance from.
@@ -195,7 +195,7 @@ public class JWebBrowser extends NSPanelComponent {
     toWebBrowser.setMenuBarVisible(fromWebBrowser.isMenuBarVisible());
     toWebBrowser.setStatusBarVisible(fromWebBrowser.isStatusBarVisible());
   }
-  
+
   /**
    * Copy the content, whether a URL or its HTML content, from one web browser to another.
    * @param fromWebBrowser the web browser to copy the content from.
@@ -209,7 +209,7 @@ public class JWebBrowser extends NSPanelComponent {
       toWebBrowser.navigate(location);
     }
   }
-  
+
   private static final Border STATUS_BAR_BORDER = new AbstractBorder() {
     @Override
     public Insets getBorderInsets(Component c) {
@@ -225,9 +225,9 @@ public class JWebBrowser extends NSPanelComponent {
       g.drawLine(0, 0, 0, height-1);
     }
   };
-  
+
   private class ButtonBarPane extends JPanel {
-    
+
     private JButton backButton;
     private JButton forwardButton;
     private JButton reloadButton;
@@ -278,11 +278,11 @@ public class JWebBrowser extends NSPanelComponent {
       buttonToolBar.add(stopButton);
       add(buttonToolBar, BorderLayout.CENTER);
     }
-    
+
   }
-  
+
   private class LocationBarPane extends JPanel {
-    
+
     private JTextField locationField;
 
     public LocationBarPane() {
@@ -320,19 +320,19 @@ public class JWebBrowser extends NSPanelComponent {
       locationToolBar.add(goButton);
       add(locationToolBar, BorderLayout.CENTER);
     }
-    
+
     public void updateLocation(String location) {
       locationField.setText(location);
     }
-    
+
     public void updateLocation() {
       locationField.setText(nativeWebBrowser.isNativePeerInitialized()? nativeWebBrowser.getResourceLocation(): "");
     }
-    
+
   }
-  
+
   private class StatusBarPane extends JPanel {
-    
+
     private JLabel statusLabel;
     private JProgressBar progressBar;
 
@@ -351,20 +351,20 @@ public class JWebBrowser extends NSPanelComponent {
       updateProgressValue();
       add(progressBar, BorderLayout.EAST);
     }
-    
+
     public void updateProgressValue() {
       int loadingProgress = nativeWebBrowser.isNativePeerInitialized()? nativeWebBrowser.getLoadingProgress(): 100;
       progressBar.setValue(loadingProgress);
       progressBar.setVisible(loadingProgress < 100);
     }
-    
+
     public void updateStatus() {
       String status = nativeWebBrowser.isNativePeerInitialized()? nativeWebBrowser.getStatusText(): "";
       statusLabel.setText(status.length() == 0? " ": status);
     }
-    
+
   }
-  
+
   /**
    * Construct a new web browser.
    * @param options the options to configure the behavior of this component.
@@ -507,7 +507,7 @@ public class JWebBrowser extends NSPanelComponent {
     setLocationBarVisible(true);
     setStatusBarVisible(true);
   }
-  
+
   /**
    * Set whether the status bar is visible.
    * @param isStatusBarVisible true if the status bar should be visible, false otherwise.
@@ -528,7 +528,7 @@ public class JWebBrowser extends NSPanelComponent {
     statusBarCheckBoxMenuItem.setSelected(isStatusBarVisible);
     adjustBorder();
   }
-  
+
   /**
    * Indicate whether the status bar is visible.
    * @return true if the status bar is visible.
@@ -536,7 +536,7 @@ public class JWebBrowser extends NSPanelComponent {
   public boolean isStatusBarVisible() {
     return statusBarPane != null;
   }
-  
+
   /**
    * Set whether the menu bar is visible.
    * @param isMenuBarVisible true if the menu bar should be visible, false otherwise.
@@ -548,7 +548,7 @@ public class JWebBrowser extends NSPanelComponent {
     menuBar.setVisible(isMenuBarVisible);
     adjustBorder();
   }
-  
+
   /**
    * Indicate whether the menu bar is visible.
    * @return true if the menu bar is visible.
@@ -556,7 +556,7 @@ public class JWebBrowser extends NSPanelComponent {
   public boolean isMenuBarVisible() {
     return menuBar.isVisible();
   }
-  
+
   /**
    * Set whether the button bar is visible.
    * @param isButtonBarVisible true if the button bar should be visible, false otherwise.
@@ -580,7 +580,7 @@ public class JWebBrowser extends NSPanelComponent {
       updateNavigationButtons();
     }
   }
-  
+
   /**
    * Indicate whether the button bar is visible.
    * @return true if the button bar is visible.
@@ -588,7 +588,7 @@ public class JWebBrowser extends NSPanelComponent {
   public boolean isButtonBarVisible() {
     return buttonBarPane != null;
   }
-  
+
   /**
    * Set whether the location bar is visible.
    * @param isLocationBarVisible true if the location bar should be visible, false otherwise.
@@ -609,7 +609,7 @@ public class JWebBrowser extends NSPanelComponent {
     locationBarCheckBoxMenuItem.setSelected(isLocationBarVisible);
     adjustBorder();
   }
-  
+
   /**
    * Indicate whether the location bar is visible.
    * @return true if the location bar is visible.
@@ -617,7 +617,7 @@ public class JWebBrowser extends NSPanelComponent {
   public boolean isLocationBarVisible() {
     return locationBarPane != null;
   }
-  
+
   /**
    * Get the title of the web page.
    * @return the title of the page.
@@ -625,7 +625,7 @@ public class JWebBrowser extends NSPanelComponent {
   public String getPageTitle() {
     return nativeWebBrowser.getPageTitle();
   }
-  
+
   /**
    * Get the status text.
    * @return the status text.
@@ -641,7 +641,7 @@ public class JWebBrowser extends NSPanelComponent {
   public String getHTMLContent() {
     return nativeWebBrowser.getHTMLContent();
   }
-  
+
   /**
    * Set the HTML content.
    * @param html the HTML content.
@@ -649,7 +649,7 @@ public class JWebBrowser extends NSPanelComponent {
   public boolean setHTMLContent(String html) {
     return nativeWebBrowser.setHTMLContent(html);
   }
-  
+
   /**
    * Get the location of the resource currently displayed.
    * @return the location.
@@ -657,16 +657,16 @@ public class JWebBrowser extends NSPanelComponent {
   public String getResourceLocation() {
     return nativeWebBrowser.getResourceLocation();
   }
-  
+
   /**
    * Navigate to a resource, with its location specified as a URL or path.
    * @param resourceLocation the URL or path.
-   * @return true if the navigation was successful. 
+   * @return true if the navigation was successful.
    */
   public boolean navigate(String resourceLocation) {
     return nativeWebBrowser.navigate(resourceLocation);
   }
-  
+
   /**
    * Indicate if the web browser Back functionality is enabled.
    * @return true if the web browser Back functionality is enabled.
@@ -674,14 +674,14 @@ public class JWebBrowser extends NSPanelComponent {
   public boolean isBackNavigationEnabled() {
     return nativeWebBrowser.isBackNavigationEnabled();
   }
-  
+
   /**
    * Invoke the web browser Back functionality.
    */
   public void navigateBack() {
     nativeWebBrowser.navigateBack();
   }
-  
+
   /**
    * Indicate if the web browser Forward functionality is enabled.
    * @return true if the web browser Forward functionality is enabled.
@@ -689,48 +689,48 @@ public class JWebBrowser extends NSPanelComponent {
   public boolean isForwardNavigationEnabled() {
     return nativeWebBrowser.isForwardNavigationEnabled();
   }
-  
+
   /**
    * Invoke the web browser Forward functionality.
    */
   public void navigateForward() {
     nativeWebBrowser.navigateForward();
   }
-  
+
   /**
    * Invoke the web browser Reload functionality.
    */
   public void reloadPage() {
     nativeWebBrowser.reloadPage();
   }
-  
+
   /**
    * Invoke the web browser Stop functionality, to stop all current loading operations.
    */
   public void stopLoading() {
     nativeWebBrowser.stopLoading();
   }
-  
+
 //  /**
 //   * Execute some javascript, and wait for the indication of success.
 //   * @param javascript the javascript to execute.
-//   * @return true if the execution succeeded. 
+//   * @return true if the execution succeeded.
 //   */
 //  public boolean executeJavascriptAndWait(String javascript) {
 //    return nativeComponent.executeJavascriptAndWait(javascript);
 //  }
-  
+
   /**
    * Execute some javascript.
-   * @param javascript the javascript to execute. 
+   * @param javascript the javascript to execute.
    */
   public void executeJavascript(String javascript) {
     nativeWebBrowser.executeJavascript(javascript);
   }
-  
+
   /**
    * Execute some javascript, and wait for the result coming from the return statements.
-   * @param javascript the javascript to execute which must contain explicit return statements. 
+   * @param javascript the javascript to execute which must contain explicit return statements.
    * @return the value, potentially a String, Number, Boolean.
    */
   public Object executeJavascriptWithResult(String javascript) {
@@ -776,7 +776,7 @@ public class JWebBrowser extends NSPanelComponent {
     sb.append(")");
     return sb.toString();
   }
-  
+
   /**
    * Convert a Java object to Javascript, to simplify the task of executing scripts. Conversion adds quotes around Strings (with Java escaping and Javascript unescaping around), add brackets to arrays, treats arrays of arrays, and can handle null values.
    * @param o the object to convert, which can be a String, number, boolean, or array.
@@ -808,7 +808,7 @@ public class JWebBrowser extends NSPanelComponent {
     }
     return "decodeURIComponent('" + encodedArg + "')";
   }
-  
+
   private static Object convertJavascriptObjectToJava(String type, String value) {
     if(type.length() == 0) {
       return null;
@@ -830,7 +830,7 @@ public class JWebBrowser extends NSPanelComponent {
     }
     return value;
   }
-  
+
   private static class NCommandListener extends WebBrowserAdapter {
     private String command;
     private Object[] resultArray;
@@ -846,7 +846,7 @@ public class JWebBrowser extends NSPanelComponent {
       }
     }
   }
-  
+
   private String[] executeJavascriptWithCommandResult(final String command, String script) {
     if(!nativeWebBrowser.isNativePeerInitialized()) {
       return null;
@@ -866,7 +866,7 @@ public class JWebBrowser extends NSPanelComponent {
     nativeWebBrowser.removeWebBrowserListener(webBrowserListener);
     return (String[])resultArray[0];
   }
-  
+
   /**
    * Get the loading progress, a value between 0 and 100, where 100 means it is fully loaded.
    * @return a value between 0 and 100 indicating the current loading progress.
@@ -874,11 +874,11 @@ public class JWebBrowser extends NSPanelComponent {
   public int getLoadingProgress() {
     return nativeWebBrowser.getLoadingProgress();
   }
-  
+
   private static class NativeWebBrowserListener implements WebBrowserListener {
-    
+
     private Reference<WebBrowserListener> webBrowserListener;
-    
+
     public NativeWebBrowserListener(WebBrowserListener webBrowserListener) {
       this.webBrowserListener = new WeakReference<WebBrowserListener>(webBrowserListener);
     }
@@ -952,11 +952,11 @@ public class JWebBrowser extends NSPanelComponent {
         webBrowserListener.windowWillOpen(e);
       }
     }
-    
+
   }
-  
+
   private Map<WebBrowserListener, NativeWebBrowserListener> webBrowserListenerToNativeWebBrowserListenerMap = new HashMap<WebBrowserListener, NativeWebBrowserListener>();
-  
+
   /**
    * Add a web browser listener.
    * @param listener The web browser listener to add.
@@ -967,7 +967,7 @@ public class JWebBrowser extends NSPanelComponent {
     webBrowserListenerToNativeWebBrowserListenerMap.put(listener, nativeWebBrowserListener);
     nativeWebBrowser.addWebBrowserListener(nativeWebBrowserListener);
   }
-  
+
   /**
    * Remove a web browser listener.
    * @param listener the web browser listener to remove.
@@ -987,7 +987,7 @@ public class JWebBrowser extends NSPanelComponent {
   public WebBrowserListener[] getWebBrowserListeners() {
     return listenerList.getListeners(WebBrowserListener.class);
   }
-  
+
   /**
    * Show or hide all the bars at once.
    * @param areBarsVisible true to show all bars, false to hide them all.
@@ -998,7 +998,7 @@ public class JWebBrowser extends NSPanelComponent {
     setLocationBarVisible(areBarsVisible);
     setStatusBarVisible(areBarsVisible);
   }
-  
+
   private void adjustBorder() {
     if(isMenuBarVisible() || isButtonBarVisible() || isLocationBarVisible() || isStatusBarVisible()) {
       nativeWebBrowserBorderContainerPane.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
@@ -1006,7 +1006,7 @@ public class JWebBrowser extends NSPanelComponent {
       nativeWebBrowserBorderContainerPane.setBorder(null);
     }
   }
-  
+
   /**
    * Get the menu bar, which allows to modify the items.
    * @return the menu bar.
@@ -1014,7 +1014,7 @@ public class JWebBrowser extends NSPanelComponent {
   public JMenuBar getMenuBar() {
     return menuBar;
   }
-  
+
   /**
    * Get the file menu, which allows to modify the items.
    * @return the file menu.
@@ -1022,12 +1022,12 @@ public class JWebBrowser extends NSPanelComponent {
   public JMenu getFileMenu() {
     return fileMenu;
   }
-  
+
   private Icon createIcon(String resourceKey) {
     String value = RESOURCES.getString(resourceKey);
     return value.length() == 0? null: new ImageIcon(JWebBrowser.class.getResource(value));
   }
-  
+
   /**
    * Get the web browser window if the web browser is contained in one.
    * @return the web browser Window, or null.
@@ -1039,7 +1039,7 @@ public class JWebBrowser extends NSPanelComponent {
     }
     return null;
   }
-  
+
   /**
    * Set whether this component is able to detect a popup menu gesture to show its default popup menu.
    * @param isDefaultPopupMenuRegistered true if the default popup menu is registered.
@@ -1047,9 +1047,9 @@ public class JWebBrowser extends NSPanelComponent {
   public void setDefaultPopupMenuRegistered(boolean isDefaultPopupMenuRegistered) {
     nativeWebBrowser.setDefaultPopupMenuRegistered(isDefaultPopupMenuRegistered);
   }
-  
+
   JPanel getNativeWebBrowserContainerPane() {
     return nativeWebBrowserContainerPane;
   }
-  
+
 }

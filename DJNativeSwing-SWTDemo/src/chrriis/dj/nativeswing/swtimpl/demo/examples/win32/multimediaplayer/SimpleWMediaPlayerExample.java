@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -103,7 +103,7 @@ public class SimpleWMediaPlayerExample extends JPanel {
     buttonPanel.add(controlBarCheckBox);
     add(buttonPanel, BorderLayout.SOUTH);
   }
-  
+
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
     UIUtils.setPreferredLookAndFeel();
@@ -120,5 +120,5 @@ public class SimpleWMediaPlayerExample extends JPanel {
     });
     NativeInterface.runEventPump();
   }
-  
+
 }

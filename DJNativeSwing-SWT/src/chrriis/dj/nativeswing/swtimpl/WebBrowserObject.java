@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -36,7 +36,7 @@ public abstract class WebBrowserObject {
 
   private JWebBrowser webBrowser;
   private int instanceID;
-  
+
   public WebBrowserObject(JWebBrowser webBrowser) {
     this.webBrowser = webBrowser;
     webBrowser.setDefaultPopupMenuRegistered(false);
@@ -55,17 +55,21 @@ public abstract class WebBrowserObject {
       }
     });
   }
-  
+
   private String resourcePath;
 
   public String getLoadedResource() {
     return "".equals(resourcePath)? null: resourcePath;
   }
-  
+
   public boolean hasContent() {
     return resourcePath != null;
   }
-  
+
+  public void dispose() {
+    ObjectRegistry.getInstance().remove(instanceID);
+  }
+
   public void load(String resourcePath) {
     this.resourcePath = resourcePath;
     ObjectRegistry.getInstance().remove(instanceID);
@@ -99,7 +103,7 @@ public abstract class WebBrowserObject {
       }
     }, initializationListener, resultArray);
   }
-  
+
   public String getLocalFileURL(File localFile) {
     try {
       return localFile.toURI().toURL().toExternalForm();
@@ -111,7 +115,7 @@ public abstract class WebBrowserObject {
   public static String getEmbeddedObjectJavascriptName() {
     return "myEmbeddedObject";
   }
-  
+
   private static final String LS = Utils.LINE_SEPARATOR;
 
   protected static WebServerContent getWebServerContent(HTTPRequest httpRequest) {
@@ -218,6 +222,7 @@ public abstract class WebBrowserObject {
         public String getContentType() {
           return getDefaultMimeType(".js");
         }
+        @Override
         public InputStream getInputStream() {
           ObjectHTMLConfiguration objectHtmlConfiguration = webBrowserObject.getObjectHtmlConfiguration();
           StringBuffer objectParameters = new StringBuffer();
@@ -306,121 +311,121 @@ public abstract class WebBrowserObject {
     }
     return null;
   }
-  
+
   public static class ObjectHTMLConfiguration {
-    
+
     private String htmlLoadingMessage;
-    
+
     public void setHTMLLoadingMessage(String htmlLoadingMessage) {
       this.htmlLoadingMessage = htmlLoadingMessage;
     }
-    
+
     public String getHTMLLoadingMessage() {
       return htmlLoadingMessage;
     }
-    
+
     private String windowsClassID;
-    
+
     public void setWindowsClassID(String windowsClassID) {
       this.windowsClassID = windowsClassID;
     }
-    
+
     public String getWindowsClassID() {
       return windowsClassID;
     }
-    
+
     private String windowsInstallationURL;
-    
+
     public String getWindowsInstallationURL() {
       return windowsInstallationURL;
     }
-    
+
     public void setWindowsInstallationURL(String windowsInstallationURL) {
       this.windowsInstallationURL = windowsInstallationURL;
     }
-    
+
     private String installationURL;
-    
+
     public String getInstallationURL() {
       return installationURL;
     }
-    
+
     public void setInstallationURL(String installationURL) {
       this.installationURL = installationURL;
     }
-    
+
     private String version;
-    
+
     public String getVersion() {
       return version;
     }
-    
+
     public void setVersion(String version) {
       this.version = version;
     }
-    
+
     private String windowsParamName;
-    
+
     public String getWindowsParamName() {
       return windowsParamName;
     }
-    
+
     public void setWindowsParamName(String windowsParamName) {
       this.windowsParamName = windowsParamName;
     }
-    
+
     private String paramName;
-    
+
     public String getParamName() {
       return paramName;
     }
-    
+
     public void setParamName(String paramName) {
       this.paramName = paramName;
     }
-    
+
     private Map<String, String> htmlParameters;
-    
+
     public Map<String, String> getHTMLParameters() {
       return htmlParameters;
     }
-    
+
     public void setHTMLParameters(Map<String, String> htmlParameters) {
       this.htmlParameters = htmlParameters;
     }
-    
+
     private String mimeType;
-    
+
     public String getMimeType() {
       return mimeType;
     }
-    
+
     public void setMimeType(String mimeType) {
       this.mimeType = mimeType;
     }
-    
+
   }
-  
+
   protected abstract ObjectHTMLConfiguration getObjectHtmlConfiguration();
- 
+
   protected String getJavascriptDefinitions() {
     return null;
   }
-  
+
   private static interface InitializationListener extends EventListener {
     public void objectInitialized();
   }
 
   private EventListenerList listenerList = new EventListenerList();
-  
+
   private void addInitializationListener(InitializationListener listener) {
     listenerList.add(InitializationListener.class, listener);
   }
-  
+
   private void removeInitializationListener(InitializationListener listener) {
     listenerList.remove(InitializationListener.class, listener);
   }
-  
+
 //  private InitializationListener[] getInitializationListeners() {
 //    return listenerList.getListeners(InitializationListener.class);
 //  }
@@ -431,21 +436,21 @@ public abstract class WebBrowserObject {
   public void setObjectProperty(String property, Object value) {
     webBrowser.executeJavascript("try {getEmbeddedObject()." + property + " = " + JWebBrowser.convertJavaObjectToJavascript(value) + ";} catch(exxxxx) {}");
   }
-  
+
   /**
    * @return The value, potentially a String, Number, boolean.
    */
   public Object getObjectProperty(String property) {
     return webBrowser.executeJavascriptWithResult("return getEmbeddedObject()." + property);
   }
-  
+
   /**
    * Invoke a function on the object, with optional arguments (Strings, numbers, booleans, or array).
    */
   public void invokeObjectFunction(String functionName, Object... args) {
     webBrowser.executeJavascript("try {getEmbeddedObject()." + JWebBrowser.createJavascriptFunctionCall(functionName, args) + ";} catch(exxxxx) {}");
   }
-  
+
   /**
    * Invoke a function on the object and waits for a result, with optional arguments (Strings, numbers, booleans, or array).
    * @return The value, potentially a String, Number, boolean.
@@ -453,5 +458,5 @@ public abstract class WebBrowserObject {
   public Object invokeObjectFunctionWithResult(String functionName, Object... args) {
     return webBrowser.executeJavascriptWithResult("return getEmbeddedObject()." + JWebBrowser.createJavascriptFunctionCall(functionName, args));
   }
-  
+
 }

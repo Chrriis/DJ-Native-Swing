@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -20,9 +20,9 @@ public abstract class CommandMessage extends Message {
    */
   public CommandMessage() {
   }
-  
+
   private Object[] args;
-  
+
   /**
    * Set the arguments that will be used when the message is run.
    * @param args the arguments, which must be serializable.
@@ -33,7 +33,7 @@ public abstract class CommandMessage extends Message {
     }
     this.args = args;
   }
-  
+
   /**
    * Execute that message asynchronously with the given arguments.
    * @param isTargetNativeSide true if the target is the native side, false otherwise.
@@ -43,7 +43,7 @@ public abstract class CommandMessage extends Message {
     setArgs(args);
     asyncSend(isTargetNativeSide);
   }
-  
+
   /**
    * Execute that message synchronously with the given arguments and return the result.
    * @param isTargetNativeSide true if the target is the native side, false otherwise.
@@ -54,13 +54,13 @@ public abstract class CommandMessage extends Message {
     setArgs(args);
     return syncSend(isTargetNativeSide);
   }
-  
+
   private static final Object[] EMPTY_ARGS = new Object[0];
-  
+
   Object runCommand() throws Exception {
     return run(args == null? EMPTY_ARGS: args);
   }
-  
+
   /**
    * Run the message.
    * @param args the arguments that were specified for that command, or an empty array if none were specified.
@@ -68,7 +68,7 @@ public abstract class CommandMessage extends Message {
    * @throws Exception any exception that may happen, and which would be passed back if it is a synchronous execution.
    */
   public abstract Object run(Object[] args) throws Exception;
-  
+
   @Override
   public String toString() {
     String s = super.toString();
@@ -91,5 +91,5 @@ public abstract class CommandMessage extends Message {
     sb.append(')');
     return sb.toString();
   }
-  
+
 }

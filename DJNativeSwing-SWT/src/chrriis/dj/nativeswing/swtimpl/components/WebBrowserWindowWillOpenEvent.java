@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -22,11 +22,11 @@ public class WebBrowserWindowWillOpenEvent extends WebBrowserEvent {
     super(webBrowser);
     this.newWebBrowser = newWebBrowser;
   }
-  
+
   public JWebBrowser getNewWebBrowser() {
     return newWebBrowser;
   }
-  
+
   /**
    * Set a different web browser. Note that null is not allowed: to prevent the window from opening, use the consume() method.
    */
@@ -36,13 +36,13 @@ public class WebBrowserWindowWillOpenEvent extends WebBrowserEvent {
     }
     this.newWebBrowser = newWebBrowser;
   }
-  
+
   public void consume() {
-    this.newWebBrowser = null;
+    newWebBrowser = null;
   }
-  
+
   public boolean isConsumed() {
     return newWebBrowser == null;
   }
-  
+
 }

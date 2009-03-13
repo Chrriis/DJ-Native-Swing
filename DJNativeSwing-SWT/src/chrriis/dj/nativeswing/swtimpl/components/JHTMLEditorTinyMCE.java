@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -29,10 +29,10 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
 
   private static final String PACKAGE_PREFIX = "/tiny_mce/";
   private static final String EDITOR_INSTANCE = "HTMLeditor1";
-  
+
   private JHTMLEditor htmlEditor;
   private String customJavascriptConfiguration;
-  
+
   public JHTMLEditorTinyMCE(JHTMLEditor htmlEditor, Map<Object, Object> optionMap) {
     if(getClass().getResource(PACKAGE_PREFIX + "tiny_mce.js") == null) {
       throw new IllegalStateException("The TinyMCE distribution is missing from the classpath!");
@@ -40,9 +40,9 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
     this.htmlEditor = htmlEditor;
     customJavascriptConfiguration = (String)optionMap.get(JHTMLEditor.SET_CUSTOM_JAVASCRIPT_CONFIGURATION_OPTION_KEY);
   }
-  
+
   private static final String LS = Utils.LINE_SEPARATOR;
-  
+
   public WebServerContent getWebServerContent(final HTTPRequest httpRequest, final String resourcePath, final int instanceID) {
     if ("index.html".equals (resourcePath)) {
       return new WebServerContent() {
@@ -53,7 +53,7 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
         }
         @Override
         public InputStream getInputStream () {
-          String content = 
+          String content =
             "<html xmlns=\"http://www.w3.org/1999/xhtml\">" + LS +
             "  <head>" + LS +
             "    <title></title>" + LS +
@@ -96,7 +96,7 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
             "        document.jhtml_form.action = 'jhtml_save';" + LS +
             "        document.jhtml_form.submit ();" + LS +
             "        return false;" + LS +
-            "      }" + LS +                   
+            "      }" + LS +
             "      var opts = {" + LS +
             "        mode: 'exact'," + LS +
             "        elements: '" + EDITOR_INSTANCE + "'," + LS +
@@ -109,7 +109,7 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
             "        }" + LS +
             "      };" + LS +
             (customJavascriptConfiguration != null? "      var addOpts = {" + customJavascriptConfiguration + "};" + LS + "      for (var x in addOpts) {" + LS + "        opts[x] = addOpts[x];" + LS + "      }" + LS: "") +
-            "      tinyMCE.init (opts);" + LS +               
+            "      tinyMCE.init (opts);" + LS +
             "    </script>" + LS +
             "  </head>" + LS +
             "  <body>" + LS +
@@ -168,9 +168,9 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
     }
     return WebServer.getDefaultWebServer ().getURLContent(WebServer.getDefaultWebServer ().getClassPathResourceURL (JHTMLEditor.class.getName(), PACKAGE_PREFIX + resourcePath));
   }
-  
+
   private volatile Object tempResult;
-  
+
   /**
    * Get the HTML content.
    * @return the HTML content.
@@ -194,7 +194,7 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
     }
     return null;
   }
-  
+
   public void setHTMLContent(String html) {
 //    webBrowser.executeJavascript("JH_setData('" + Utils.encodeURL(html) + "');");
     // There is a problem: IE crashes when it has the focus and is flooded with this message.
@@ -208,5 +208,5 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
     new Message().syncSend(true);
     nativeComponent.setEnabled(isEnabled);
   }
-  
+
 }

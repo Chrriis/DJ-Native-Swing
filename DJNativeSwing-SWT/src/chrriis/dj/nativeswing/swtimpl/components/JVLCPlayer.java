@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -41,7 +41,7 @@ import chrriis.dj.nativeswing.swtimpl.components.VLCInput.VLCMediaState;
 /**
  * A native multimedia player. It is a browser-based component, which relies on the VLC plugin.<br/>
  * Methods execute when this component is initialized. If the component is not initialized, methods will be executed as soon as it gets initialized.
- * If the initialization fails, the methods will not have any effect. The results from methods have relevant values only when the component is valid. 
+ * If the initialization fails, the methods will not have any effect. The results from methods have relevant values only when the component is valid.
  * @author Christopher Deckers
  */
 public class JVLCPlayer extends NSPanelComponent {
@@ -50,21 +50,22 @@ public class JVLCPlayer extends NSPanelComponent {
 
   private JPanel webBrowserPanel;
   private JWebBrowser webBrowser;
-  
+
   private JPanel controlBarPane;
   private JButton playButton;
   private JButton pauseButton;
   private JButton stopButton;
 
   private static class NWebBrowserObject extends WebBrowserObject {
-    
+
     private JVLCPlayer vlcPlayer;
-    
+
     public NWebBrowserObject(JVLCPlayer vlcPlayer) {
       super(vlcPlayer.webBrowser);
       this.vlcPlayer = vlcPlayer;
     }
-    
+
+    @Override
     protected ObjectHTMLConfiguration getObjectHtmlConfiguration() {
       ObjectHTMLConfiguration objectHTMLConfiguration = new ObjectHTMLConfiguration();
       objectHTMLConfiguration.setHTMLLoadingMessage(vlcPlayer.RESOURCES.getString("LoadingMessage"));
@@ -79,20 +80,20 @@ public class JVLCPlayer extends NSPanelComponent {
       vlcPlayer.options = null;
       return objectHTMLConfiguration;
     }
-    
+
     @Override
     public String getLocalFileURL(File localFile) {
       return "file://" + localFile.getAbsolutePath();
     }
 
   }
-  
+
   private WebBrowserObject webBrowserObject;
-  
+
   WebBrowserObject getWebBrowserObject() {
     return webBrowserObject;
   }
-  
+
   private JSlider seekBarSlider;
   private volatile boolean isAdjustingSeekBar;
   private volatile Thread updateThread;
@@ -119,13 +120,14 @@ public class JVLCPlayer extends NSPanelComponent {
       isAdjustingVolume = false;
     }
   }
-  
+
   @Override
   public void removeNotify() {
     stopUpdateThread();
+    webBrowserObject.dispose();
     super.removeNotify();
   }
-  
+
   @Override
   public void addNotify() {
     super.addNotify();
@@ -133,11 +135,11 @@ public class JVLCPlayer extends NSPanelComponent {
       startUpdateThread();
     }
   }
-  
+
   private void stopUpdateThread() {
     updateThread = null;
   }
-  
+
   private void startUpdateThread() {
     if(updateThread != null) {
       return;
@@ -191,7 +193,7 @@ public class JVLCPlayer extends NSPanelComponent {
     updateThread.setDaemon(true);
     updateThread.start();
   }
-  
+
   private static String formatTime(int milliseconds, boolean showHours) {
     int seconds = milliseconds / 1000;
     int hours = seconds / 3600;
@@ -205,7 +207,7 @@ public class JVLCPlayer extends NSPanelComponent {
     sb.append(seconds < 10? "0": "").append(seconds);
     return sb.toString();
   }
-  
+
   /**
    * Construct a VLC player.
    * @param options the options to configure the behavior of this component.
@@ -315,7 +317,7 @@ public class JVLCPlayer extends NSPanelComponent {
     add(controlBarPane, BorderLayout.SOUTH);
     adjustBorder();
   }
-  
+
   private void adjustBorder() {
     if(isControlBarVisible()) {
       webBrowserPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
@@ -323,12 +325,12 @@ public class JVLCPlayer extends NSPanelComponent {
       webBrowserPanel.setBorder(null);
     }
   }
-  
+
   private Icon createIcon(String resourceKey) {
     String value = RESOURCES.getString(resourceKey);
     return value.length() == 0? null: new ImageIcon(JWebBrowser.class.getResource(value));
   }
-  
+
   /**
    * Get the web browser that contains this component. The web browser should only be used to add listeners, for example to listen to window creation events.
    * @return the web browser.
@@ -336,18 +338,18 @@ public class JVLCPlayer extends NSPanelComponent {
   public JWebBrowser getWebBrowser() {
     return webBrowser;
   }
-  
+
 //  public String getLoadedResource() {
 //    return webBrowserObject.getLoadedResource();
 //  }
-  
+
   /**
    * Load the player, with no content.
    */
   public void load() {
     load((VLCPluginOptions)null);
   }
-  
+
   /**
    * Load a file.
    * @param resourceLocation the path or URL to the file.
@@ -355,7 +357,7 @@ public class JVLCPlayer extends NSPanelComponent {
   public void load(String resourceLocation) {
     load(resourceLocation, null);
   }
-  
+
   /**
    * Load the player, with no content.
    * @param options the options to better configure the initialization of the VLC plugin.
@@ -363,7 +365,7 @@ public class JVLCPlayer extends NSPanelComponent {
   public void load(VLCPluginOptions options) {
     load_("", options);
   }
-  
+
   /**
    * Load a file from the classpath.
    * @param clazz the reference clazz of the file to load.
@@ -372,7 +374,7 @@ public class JVLCPlayer extends NSPanelComponent {
   public void load(Class<?> clazz, String resourcePath) {
     load(clazz, resourcePath, null);
   }
-  
+
   /**
    * Load a file from the classpath.
    * @param clazz the reference clazz of the file to load.
@@ -383,9 +385,9 @@ public class JVLCPlayer extends NSPanelComponent {
     addReferenceClassLoader(clazz.getClassLoader());
     load(WebServer.getDefaultWebServer().getClassPathResourceURL(clazz.getName(), resourcePath), options);
   }
-  
+
   private VLCPluginOptions options;
-  
+
   /**
    * Load a file.
    * @param resourceLocation the path or URL to the file.
@@ -397,7 +399,7 @@ public class JVLCPlayer extends NSPanelComponent {
     }
     load_(resourceLocation, options);
   }
-  
+
   private void load_(String resourceLocation, VLCPluginOptions options) {
     if(options == null) {
       options = new VLCPluginOptions();
@@ -427,7 +429,7 @@ public class JVLCPlayer extends NSPanelComponent {
   public boolean isControlBarVisible() {
     return controlBarPane.isVisible();
   }
-  
+
   /**
    * Set whether the control bar is visible.
    * @param isControlBarVisible true if the control bar should be visible, false otherwise.
@@ -436,11 +438,11 @@ public class JVLCPlayer extends NSPanelComponent {
     controlBarPane.setVisible(isControlBarVisible);
     adjustBorder();
   }
-  
+
   /* ------------------------- VLC API exposed ------------------------- */
-  
+
   private VLCAudio vlcAudio;
-  
+
   /**
    * Get the VLC object responsible for audio-related actions.
    * @return the VLC audio object.
@@ -448,9 +450,9 @@ public class JVLCPlayer extends NSPanelComponent {
   public VLCAudio getVLCAudio() {
     return vlcAudio;
   }
-  
+
   private VLCInput vlcInput;
-  
+
   /**
    * Get the VLC object responsible for input-related actions.
    * @return the VLC input object.
@@ -458,9 +460,9 @@ public class JVLCPlayer extends NSPanelComponent {
   public VLCInput getVLCInput() {
     return vlcInput;
   }
-  
+
   private VLCPlaylist vlcPlaylist;
-  
+
   /**
    * Get the VLC object responsible for playlist-related actions.
    * @return the VLC playlist object.
@@ -468,9 +470,9 @@ public class JVLCPlayer extends NSPanelComponent {
   public VLCPlaylist getVLCPlaylist() {
     return vlcPlaylist;
   }
-  
+
   private VLCVideo vlcVideo;
-  
+
   /**
    * Get the VLC object responsible for video-related actions.
    * @return the VLC video object.
@@ -478,9 +480,9 @@ public class JVLCPlayer extends NSPanelComponent {
   public VLCVideo getVLCVideo() {
     return vlcVideo;
   }
-  
+
   private List<ClassLoader> referenceClassLoaderList = new ArrayList<ClassLoader>(1);
-  
+
   void addReferenceClassLoader(ClassLoader referenceClassLoader) {
     if(referenceClassLoader == null || referenceClassLoader == getClass().getClassLoader() || referenceClassLoaderList.contains(referenceClassLoader)) {
       return;
@@ -489,7 +491,7 @@ public class JVLCPlayer extends NSPanelComponent {
     referenceClassLoaderList.add(referenceClassLoader);
     WebServer.getDefaultWebServer().addReferenceClassLoader(referenceClassLoader);
   }
-  
+
   @Override
   protected void finalize() throws Throwable {
     for(ClassLoader referenceClassLoader: referenceClassLoaderList) {
@@ -498,5 +500,5 @@ public class JVLCPlayer extends NSPanelComponent {
     referenceClassLoaderList.clear();
     super.finalize();
   }
-  
+
 }

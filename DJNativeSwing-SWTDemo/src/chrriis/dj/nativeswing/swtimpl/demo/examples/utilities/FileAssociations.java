@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -63,7 +63,7 @@ public class FileAssociations extends JPanel {
     add(loadingPanel, BorderLayout.CENTER);
     initialize();
   }
-  
+
   protected void initialize() {
     new Thread("NativeSwingDemo File Association Loader") {
       @Override
@@ -199,7 +199,7 @@ public class FileAssociations extends JPanel {
       }
     }.start();
   }
-  
+
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
     UIUtils.setPreferredLookAndFeel();
@@ -216,5 +216,5 @@ public class FileAssociations extends JPanel {
     });
     NativeInterface.runEventPump();
   }
-  
+
 }

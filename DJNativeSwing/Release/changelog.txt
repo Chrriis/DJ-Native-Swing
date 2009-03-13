@@ -7,6 +7,7 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.8 (xxxxxxxxxxxxxxxxx):
 
+- Default web server can be stopped.
 - Local host address is in Utils (was in WebServer) and is auto-detected.
 
 

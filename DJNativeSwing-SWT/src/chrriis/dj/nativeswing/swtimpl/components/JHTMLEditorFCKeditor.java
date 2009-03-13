@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -30,10 +30,10 @@ class JHTMLEditorFCKeditor implements JHTMLEditorImplementation {
 
   private static final String PACKAGE_PREFIX = "/fckeditor/";
   private static final String EDITOR_INSTANCE = "HTMLeditor1";
-  
+
   private JHTMLEditor htmlEditor;
   private String customJavascriptConfiguration;
-  
+
   public JHTMLEditorFCKeditor(JHTMLEditor htmlEditor, Map<Object, Object> optionMap) {
     if(getClass().getResource(PACKAGE_PREFIX + "fckeditor.js") == null) {
       throw new IllegalStateException("The FCKEditor distribution is missing from the classpath!");
@@ -41,9 +41,9 @@ class JHTMLEditorFCKeditor implements JHTMLEditorImplementation {
     this.htmlEditor = htmlEditor;
     customJavascriptConfiguration = (String)optionMap.get(JHTMLEditor.SET_CUSTOM_JAVASCRIPT_CONFIGURATION_OPTION_KEY);
   }
-  
+
   private static final String LS = Utils.LINE_SEPARATOR;
-  
+
   public WebServerContent getWebServerContent(final HTTPRequest httpRequest, final String resourcePath, final int instanceID) {
     if("index.html".equals(resourcePath)) {
       return new WebServerContent() {
@@ -120,6 +120,7 @@ class JHTMLEditorFCKeditor implements JHTMLEditorImplementation {
         public String getContentType () {
           return getDefaultMimeType(".js");
         }
+        @Override
         public InputStream getInputStream () {
           return getInputStream(customJavascriptConfiguration);
         }
@@ -264,7 +265,7 @@ class JHTMLEditorFCKeditor implements JHTMLEditorImplementation {
     }
     return WebServer.getDefaultWebServer ().getURLContent(WebServer.getDefaultWebServer ().getClassPathResourceURL(JHTMLEditor.class.getName(), PACKAGE_PREFIX + resourcePath));
   }
-  
+
   private volatile Object tempResult;
 
   public String getHTMLContent() {
@@ -286,7 +287,7 @@ class JHTMLEditorFCKeditor implements JHTMLEditorImplementation {
     }
     return null;
   }
-  
+
   public void setHTMLContent(String html) {
 //    webBrowser.executeJavascript("JH_setData('" + Utils.encodeURL(html) + "');");
     // There is a problem: IE crashes when it has the focus and is flooded with this message.
@@ -300,5 +301,5 @@ class JHTMLEditorFCKeditor implements JHTMLEditorImplementation {
     new Message().syncSend(true);
     nativeComponent.setEnabled(isEnabled);
   }
-  
+
 }

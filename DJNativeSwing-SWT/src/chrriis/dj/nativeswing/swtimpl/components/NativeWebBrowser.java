@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -58,7 +58,7 @@ class NativeWebBrowser extends NativeComponent {
 
   public static final String COMMAND_LOCATION_PREFIX = "command://";
   public static final String COMMAND_STATUS_PREFIX = "scommand://";
-  
+
   private static class CMJ_closeWindow extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -84,7 +84,7 @@ class NativeWebBrowser extends NativeComponent {
       return null;
     }
   }
-  
+
   private static class CMJ_createWindow extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -188,7 +188,7 @@ class NativeWebBrowser extends NativeComponent {
       return null;
     }
   }
-  
+
   private static class CMJ_locationChanged extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -262,7 +262,7 @@ class NativeWebBrowser extends NativeComponent {
       return isNavigating;
     }
   }
-      
+
   private static class CMJ_locationChangeCanceled extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -309,7 +309,7 @@ class NativeWebBrowser extends NativeComponent {
       return null;
     }
   }
-  
+
   private static class CMJ_updateStatus extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -332,7 +332,7 @@ class NativeWebBrowser extends NativeComponent {
       return null;
     }
   }
-  
+
   private static class CMJ_updateLoadingProgress extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -355,18 +355,18 @@ class NativeWebBrowser extends NativeComponent {
       return null;
     }
   }
-  
+
   private boolean isXULRunnerRuntime;
-  
+
   public boolean isXULRunnerRuntime() {
     return isXULRunnerRuntime;
   }
-  
+
   @Override
   protected Object[] getNativePeerCreationParameters() {
     return new Object[] {isXULRunnerRuntime};
   }
-  
+
   protected static Control createControl(Shell shell, Object[] parameters) {
     String xulRunnerPath = System.getProperty("nativeswing.webbrowser.xulrunner.home");
     if(xulRunnerPath != null) {
@@ -548,7 +548,7 @@ class NativeWebBrowser extends NativeComponent {
   }
 
   private Reference<JWebBrowser> webBrowser;
-  
+
   public NativeWebBrowser(JWebBrowser webBrowser, boolean isXULRunnerRuntime) {
     this.webBrowser = new WeakReference<JWebBrowser>(webBrowser);
     this.isXULRunnerRuntime = isXULRunnerRuntime || "xulrunner".equals(System.getProperty("nativeswing.webbrowser.runtime"));
@@ -572,44 +572,44 @@ class NativeWebBrowser extends NativeComponent {
       return ((Browser)getControl()).getUrl();
     }
   }
-  
+
   public String getResourceLocation() {
     return (String)runSync(new CMN_getResourceLocation());
   }
-  
+
   private static class CMN_navigate extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       return ((Browser)getControl()).setUrl((String)args[0]);
     }
   }
-  
+
   public boolean navigate(String resourceLocation) {
     return Boolean.TRUE.equals(runSync(new CMN_navigate(), resourceLocation));
   }
-  
+
   private static class CMN_getHTMLContent extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       return ((Browser)getControl()).getText();
     }
   }
-  
+
   public String getHTMLContent() {
     return (String)runSync(new CMN_getHTMLContent());
   }
-  
+
   private static class CMN_setHTMLContent extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       return ((Browser)getControl()).setText((String)args[0]);
     }
   }
-  
+
   public boolean setHTMLContent(String html) {
     return Boolean.TRUE.equals(runSync(new CMN_setHTMLContent(), html));
   }
-  
+
   private static class CMN_executeJavascript extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -618,7 +618,7 @@ class NativeWebBrowser extends NativeComponent {
       return browserExecute(browser, script);
     }
   }
-  
+
   private static Pattern JAVASCRIPT_LINE_COMMENT_PATTERN = Pattern.compile("^\\s*//.*$", Pattern.MULTILINE);
 
   private static boolean browserExecute(Browser browser, String script) {
@@ -631,17 +631,17 @@ class NativeWebBrowser extends NativeComponent {
       script = Utils.encodeURL(script);
     }
     return browser.execute(script);
-    
+
   }
-  
+
   public boolean executeJavascriptAndWait(String script) {
     return Boolean.TRUE.equals(runSync(new CMN_executeJavascript(), script));
   }
-  
+
   public void executeJavascript(String script) {
     runAsync(new CMN_executeJavascript(), script);
   }
-  
+
   private static class CMN_stopLoading extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -649,11 +649,11 @@ class NativeWebBrowser extends NativeComponent {
       return null;
     }
   }
-  
+
   public void stopLoading() {
     runAsync(new CMN_stopLoading());
   }
-  
+
   private static class CMN_reloadPage extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -661,55 +661,55 @@ class NativeWebBrowser extends NativeComponent {
       return null;
     }
   }
-  
+
   public void reloadPage() {
     runAsync(new CMN_reloadPage());
   }
-  
+
   private static class CMN_isBackNavigationEnabled extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       return ((Browser)getControl()).isBackEnabled();
     }
   }
-  
+
   public boolean isBackNavigationEnabled() {
     return Boolean.TRUE.equals(runSync(new CMN_isBackNavigationEnabled()));
   }
-  
+
   private static class CMN_navigateBack extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       return ((Browser)getControl()).back();
     }
   }
-  
+
   public void navigateBack() {
     runAsync(new CMN_navigateBack());
   }
-  
+
   private static class CMN_isForwardNavigationEnabled extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       return ((Browser)getControl()).isForwardEnabled();
     }
   }
-  
+
   public boolean isForwardNavigationEnabled() {
     return Boolean.TRUE.equals(runSync(new CMN_isForwardNavigationEnabled()));
   }
-  
+
   private static class CMN_navigateForward extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       return ((Browser)getControl()).forward();
     }
   }
-  
+
   public void navigateForward() {
     runAsync(new CMN_navigateForward());
   }
-  
+
   private static void registerDefaultPopupMenu(final Browser browser) {
     Menu oldMenu = browser.getMenu();
     if(oldMenu != null) {
@@ -768,7 +768,7 @@ class NativeWebBrowser extends NativeComponent {
     });
     browser.setMenu(menu);
   }
-  
+
   private static class CMN_setDefaultPopupMenuRegistered extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -793,48 +793,48 @@ class NativeWebBrowser extends NativeComponent {
       return null;
     }
   }
-  
+
   public void setDefaultPopupMenuRegistered(boolean isDefaultPopupMenuRegistered) {
     runAsync(new CMN_setDefaultPopupMenuRegistered(), isDefaultPopupMenuRegistered);
   }
-  
+
   private String status;
 
   public String getStatusText() {
     return status == null? "": status;
   }
-  
+
   private String title;
 
   public String getPageTitle() {
     return title == null? "": title;
   }
-  
+
   private int loadingProgress = 100;
-  
+
   /**
    * @return a value between 0 and 100 indicating the current loading progress.
    */
   public int getLoadingProgress() {
     return loadingProgress;
   }
-  
+
   public void addWebBrowserListener(WebBrowserListener listener) {
     listenerList.add(WebBrowserListener.class, listener);
   }
-  
+
   public void removeWebBrowserListener(WebBrowserListener listener) {
     listenerList.remove(WebBrowserListener.class, listener);
   }
-  
+
   @Override
   protected Component createEmbeddableComponent(Map<Object, Object> optionMap) {
     return super.createEmbeddableComponent(optionMap);
   }
-  
+
   @Override
   protected void disposeNativePeer() {
     super.disposeNativePeer();
   }
-  
+
 }

@@ -7,6 +7,7 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.8 (xxxxxxxxxxxxxxxxx):
 
+- Some clean up is done for WebBrowserObject internal object registry. 
 - Fixed exception when system properties contains non-String objects.
 - JFlashPlayer flashvars are properly encoded.
 - Updated VLC API to latest (0.9.6).

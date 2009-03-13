@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -24,7 +24,7 @@ import chrriis.dj.nativeswing.swtimpl.OleNativeComponent;
  * @author Christopher Deckers
  */
 class NativeWMediaPlayer extends OleNativeComponent {
-  
+
   protected static Control createControl(Shell shell, Object[] parameters) {
     OleFrame frame = new OleFrame(shell, SWT.NONE);
     OleClientSite site;
@@ -39,14 +39,15 @@ class NativeWMediaPlayer extends OleNativeComponent {
     site.doVerb(OLE.OLEIVERB_INPLACEACTIVATE);
     return frame;
   }
-  
+
+  @Override
   protected Component createEmbeddableComponent(Map<Object, Object> optionMap) {
     return super.createEmbeddableComponent(optionMap);
   }
-  
+
   @Override
   protected void disposeNativePeer() {
     super.disposeNativePeer();
   }
-  
+
 }

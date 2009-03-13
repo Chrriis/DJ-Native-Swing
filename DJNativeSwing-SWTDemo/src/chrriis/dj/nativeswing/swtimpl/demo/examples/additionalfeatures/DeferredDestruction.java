@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -28,7 +28,7 @@ import chrriis.dj.nativeswing.swtimpl.demo.examples.flashplayer.SimpleFlashExamp
 public class DeferredDestruction extends JPanel {
 
   protected JFlashPlayer flashPlayer;
-  
+
   public DeferredDestruction() {
     super(new BorderLayout());
     flashPlayer = new JFlashPlayer(JFlashPlayer.destroyOnFinalization());
@@ -53,7 +53,7 @@ public class DeferredDestruction extends JPanel {
     buttonPanel.add(addRemoveButton);
     add(buttonPanel, BorderLayout.SOUTH);
   }
-  
+
   @Override
   public void removeNotify() {
     super.removeNotify();
@@ -61,7 +61,7 @@ public class DeferredDestruction extends JPanel {
     // Rather than wait for garbage collection, release when the component is removed from its parent.
     flashPlayer.disposeNativePeer();
   }
-  
+
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
     UIUtils.setPreferredLookAndFeel();
@@ -78,5 +78,5 @@ public class DeferredDestruction extends JPanel {
     });
     NativeInterface.runEventPump();
   }
-  
+
 }

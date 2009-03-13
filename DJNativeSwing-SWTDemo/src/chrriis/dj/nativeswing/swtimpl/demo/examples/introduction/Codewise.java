@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -22,7 +22,7 @@ public class Codewise extends JPanel {
 
   public Codewise() {
     super(new BorderLayout());
-    JEditorPane editorPane = new JEditorPane("text/html", 
+    JEditorPane editorPane = new JEditorPane("text/html",
         "<html>" + LS +
         "  <body>" + LS +
         "    <h1>Using the library is straightforward</h1>" + LS +
@@ -51,5 +51,5 @@ public class Codewise extends JPanel {
     editorPane.setEditable(false);
     add(new JScrollPane(editorPane));
   }
-  
+
 }

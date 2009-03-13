@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -84,7 +84,7 @@ public class XPCOMDownloadManager extends JPanel {
       }
     });
   }
-  
+
   private static nsITransfer createTransfer(final JPanel downloadsPanel) {
     return new nsITransfer() {
       public nsISupports queryInterface(String uuid) {
@@ -140,7 +140,7 @@ public class XPCOMDownloadManager extends JPanel {
       public void onLocationChange(nsIWebProgress webProgress, nsIRequest request, nsIURI location) {}
     };
   }
-  
+
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
     UIUtils.setPreferredLookAndFeel();
@@ -157,5 +157,5 @@ public class XPCOMDownloadManager extends JPanel {
     });
     NativeInterface.runEventPump();
   }
-  
+
 }

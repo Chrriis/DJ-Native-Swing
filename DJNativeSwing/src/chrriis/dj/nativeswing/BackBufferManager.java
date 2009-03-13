@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -22,15 +22,15 @@ class BackBufferManager {
 
   private NativeComponentWrapper nativeComponent;
   private Component paintingComponent;
-  
+
   public BackBufferManager(NativeComponentWrapper nativeComponent, Component paintingComponent) {
     this.nativeComponent = nativeComponent;
     this.paintingComponent = paintingComponent;
   }
-  
+
   private final Object backBufferLock = new Object();
   private BufferedImage backBuffer;
-  
+
   public void updateBackBufferOnVisibleTranslucentAreas() {
     int width = paintingComponent.getWidth();
     int height = paintingComponent.getHeight();
@@ -43,7 +43,7 @@ class BackBufferManager {
     }
     updateBackBuffer(getTranslucentOverlays());
   }
-  
+
   protected Rectangle[] getTranslucentOverlays() {
     Rectangle[] boundsArea = new Rectangle[] {new Rectangle(0, 0, paintingComponent.getWidth(), paintingComponent.getHeight())};
     Rectangle[] nonOpaqueAreas = UIUtils.subtract(boundsArea, UIUtils.getComponentVisibleArea(paintingComponent, new Filter<Component>() {
@@ -61,7 +61,7 @@ class BackBufferManager {
   public void createBackBuffer() {
     updateBackBuffer(new Rectangle[] {new Rectangle(paintingComponent.getWidth(), paintingComponent.getHeight())});
   }
-  
+
   public void updateBackBuffer(Rectangle[] rectangles) {
     if(rectangles == null || rectangles.length == 0) {
       return;
@@ -91,14 +91,14 @@ class BackBufferManager {
         }
         backBuffer.flush();
       }
-      this.backBuffer = image;
+      backBuffer = image;
     }
     if(paintingComponent != nativeComponent.getNativeComponent()) {
       Rectangle bounds = UIUtils.getBounds(rectangles);
       paintingComponent.repaint(bounds.x, bounds.y, bounds.width, bounds.height);
     }
   }
-  
+
   public void destroyBackBuffer() {
     synchronized(backBufferLock) {
       if(backBuffer != null) {
@@ -107,7 +107,7 @@ class BackBufferManager {
       backBuffer = null;
     }
   }
-  
+
   public void paintBackBuffer(Graphics g) {
     synchronized(backBufferLock) {
       if(backBuffer != null) {
@@ -117,5 +117,5 @@ class BackBufferManager {
       }
     }
   }
-  
+
 }

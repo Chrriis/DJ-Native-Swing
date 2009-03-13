@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -24,7 +24,7 @@ public class DemoTree extends JTree {
 
   protected static final Icon EXAMPLE_GROUP_ICON = new ImageIcon(DemoTree.class.getResource("resource/fldr_obj.gif"));
   protected static final Icon EXAMPLE_ICON = new ImageIcon(DemoTree.class.getResource("resource/brkp_obj.gif"));
-  
+
   public DemoTree() {
     DefaultMutableTreeNode root = new DefaultMutableTreeNode("Demo");
     for(ExampleGroup exampleGroup: DemoExampleDefinitionLoader.getExampleGroupList()) {
@@ -53,5 +53,5 @@ public class DemoTree extends JTree {
       }
     });
   }
-  
+
 }

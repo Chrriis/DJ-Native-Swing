@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -30,7 +30,7 @@ public class RegExJavaTypes extends RegExTypes {
   public static final String JAVADOC_COMMENT = "JavadocComment";
   public static final String MULTI_LINE_COMMENT = "MultiLineComment";
   public static final String SINGLE_LINE_COMMENT = "SingleLineComment";
-  
+
   protected static final String STYLE = "Style";
 
   public RegExJavaTypes() {
@@ -99,8 +99,10 @@ public class RegExJavaTypes extends RegExTypes {
 
   public static EditorKit getEditorKit() {
     return new StyledEditorKit() {
+      @Override
       public Document createDefaultDocument() {
         return new EditorKitDocument(new RegExJavaTypes()) {
+          @Override
           public void insertString(int offset, String text, AttributeSet style) throws BadLocationException {
             super.insertString(offset, text, style);
           }

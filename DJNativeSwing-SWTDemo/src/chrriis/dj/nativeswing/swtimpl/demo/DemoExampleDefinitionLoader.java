@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -11,10 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.ComponentLifeCycle;
-import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.PseudoTransparency;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.ConstrainVisibility;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.DeferredDestruction;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.HierarchyProxying;
+import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.PseudoTransparency;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.ThumbnailCreation;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.flashplayer.FunctionCalls;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.flashplayer.SimpleFlashExample;
@@ -94,5 +94,5 @@ public class DemoExampleDefinitionLoader {
     }));
     return exampleGroupList;
   }
-  
+
 }

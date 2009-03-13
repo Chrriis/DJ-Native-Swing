@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -16,7 +16,7 @@ import java.util.EventObject;
 public class WebBrowserEvent extends EventObject{
 
   private JWebBrowser webBrowser;
-  
+
   /**
    * Construct a web browser event.
    * @param webBrowser the web browser.
@@ -25,7 +25,7 @@ public class WebBrowserEvent extends EventObject{
     super(webBrowser);
     this.webBrowser = webBrowser;
   }
-  
+
   /**
    * Get the web browser.
    * @return the web browser.
@@ -33,5 +33,5 @@ public class WebBrowserEvent extends EventObject{
   public JWebBrowser getWebBrowser() {
     return webBrowser;
   }
-  
+
 }

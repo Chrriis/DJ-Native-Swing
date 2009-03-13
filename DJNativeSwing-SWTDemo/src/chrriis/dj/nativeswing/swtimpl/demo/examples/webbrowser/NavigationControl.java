@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -115,7 +115,7 @@ public class NavigationControl extends JPanel {
     tabbedPane.addTab("Controled Browser", webBrowser);
     add(tabbedPane, BorderLayout.CENTER);
   }
-  
+
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
     UIUtils.setPreferredLookAndFeel();
@@ -132,5 +132,5 @@ public class NavigationControl extends JPanel {
     });
     NativeInterface.runEventPump();
   }
-  
+
 }

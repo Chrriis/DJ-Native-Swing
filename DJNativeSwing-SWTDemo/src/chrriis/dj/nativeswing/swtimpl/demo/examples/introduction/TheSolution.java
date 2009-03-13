@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -22,7 +22,7 @@ public class TheSolution extends JPanel {
 
   public TheSolution() {
     super(new BorderLayout());
-    JEditorPane editorPane = new JEditorPane("text/html", 
+    JEditorPane editorPane = new JEditorPane("text/html",
         "<html>" + LS +
         "  <body>" + LS +
         "    <h1>What about SWT then?</h1>" + LS +
@@ -44,5 +44,5 @@ public class TheSolution extends JPanel {
     editorPane.setEditable(false);
     add(new JScrollPane(editorPane));
   }
-  
+
 }

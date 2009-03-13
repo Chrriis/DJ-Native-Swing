@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -23,31 +23,31 @@ import chrriis.common.ObjectRegistry;
 abstract class MessagingInterface {
 
   protected static final boolean IS_DEBUGGING_MESSAGES = Boolean.parseBoolean(System.getProperty("nativeswing.interface.debug.printmessages"));
-  
+
   public MessagingInterface(boolean isNativeSide) {
     this.isNativeSide = isNativeSide;
   }
-  
+
   public abstract void destroy();
-  
+
   public abstract boolean isUIThread();
-  
+
   private boolean isAlive;
-  
+
   protected void setAlive(boolean isAlive) {
     this.isAlive = isAlive;
   }
-  
+
   public boolean isAlive() {
     return isAlive;
   }
-  
+
   protected void initialize(boolean exitOnEndOfStream) {
     setAlive(true);
     openChannel();
     createReceiverThread(exitOnEndOfStream);
   }
-  
+
   private static class CommandResultMessage extends Message {
 
     private int originalID;
@@ -59,19 +59,19 @@ abstract class MessagingInterface {
       this.result = result;
       this.exception = exception;
     }
-    
+
     int getOriginalID() {
       return originalID;
     }
-    
+
     public Object getResult() {
       return result;
     }
-    
+
     public Throwable getException() {
       return exception;
     }
-    
+
     @Override
     public String toString() {
       return super.toString() + "(" + originalID + ")";
@@ -80,7 +80,7 @@ abstract class MessagingInterface {
   }
 
   private Object RECEIVER_LOCK = new Object();
-  
+
   private CommandResultMessage processReceivedMessages() {
     while(true) {
       Message message;
@@ -96,7 +96,7 @@ abstract class MessagingInterface {
       runMessage(message);
     }
   }
-  
+
   private CommandResultMessage runMessage(Message message) {
     if(IS_DEBUGGING_MESSAGES) {
       System.err.println(">RUN: " + message.getID() + ", " + message);
@@ -133,15 +133,15 @@ abstract class MessagingInterface {
     }
     return commandResultMessage;
   }
-  
+
   protected abstract void asyncUIExec(Runnable runnable);
-  
+
   private boolean isNativeSide;
-  
+
   protected boolean isNativeSide() {
     return isNativeSide;
   }
-  
+
   public void checkUIThread() {
     if(!isUIThread()) {
       if(isNativeSide()) {
@@ -151,10 +151,10 @@ abstract class MessagingInterface {
       throw new IllegalStateException("This call must happen in the AWT Event Dispatch Thread! Please refer to http://java.sun.com/docs/books/tutorial/uiswing/concurrency/index.html and http://java.sun.com/javase/6/docs/api/javax/swing/SwingUtilities.html#invokeLater(java.lang.Runnable)");
     }
   }
-  
+
   private List<Message> receivedMessageList = new LinkedList<Message>();
   private boolean isWaitingResponse;
-  
+
   private static class CM_asyncExecResponse extends CommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -173,7 +173,7 @@ abstract class MessagingInterface {
       return null;
     }
   }
-  
+
   private static class CM_asyncExec extends CommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -187,9 +187,9 @@ abstract class MessagingInterface {
       return null;
     }
   }
-  
+
   private ObjectRegistry syncThreadRegistry = new ObjectRegistry();
-  
+
   private Object nonUISyncExec(Message message) {
     Thread thread = Thread.currentThread();
     final int instanceID = syncThreadRegistry.add(Thread.currentThread());
@@ -213,9 +213,9 @@ abstract class MessagingInterface {
       return processCommandResult(commandResultMessage);
     }
   }
-  
+
   private final Object LOCK = new Object();
-  
+
   public Object syncSend(Message message) {
     message.computeId(!isNativeSide);
     if(!isUIThread()) {
@@ -274,7 +274,7 @@ abstract class MessagingInterface {
       return processCommandResult(commandResultMessage);
     }
   }
-  
+
   private Object processCommandResult(CommandResultMessage commandResultMessage) {
     if(IS_DEBUGGING_MESSAGES) {
       System.err.println("<USE: " + commandResultMessage.getID());
@@ -288,7 +288,7 @@ abstract class MessagingInterface {
     }
     return commandResultMessage.getResult();
   }
-  
+
   public void asyncSend(Message message) {
     message.computeId(!isNativeSide);
     message.setUI(isUIThread());
@@ -299,7 +299,7 @@ abstract class MessagingInterface {
       throw new IllegalStateException(e);
     }
   }
-  
+
   private void writeMessage(Message message) throws IOException {
     if(!isAlive()) {
       printFailedInvocation(message);
@@ -310,15 +310,15 @@ abstract class MessagingInterface {
     }
     writeMessageToChannel(message);
   }
-  
+
   protected abstract void writeMessageToChannel(Message message) throws IOException;
-  
+
   protected abstract Message readMessageFromChannel() throws IOException, ClassNotFoundException;
-  
+
   private void printFailedInvocation(Message message) {
     System.err.println("Failed messaging: " + message);
   }
-  
+
   protected void createReceiverThread(final boolean exitOnEndOfStream) {
     Thread receiverThread = new Thread("NativeSwing Receiver - " + (isNativeSide()? "SWT": "Swing")) {
       @Override
@@ -389,9 +389,9 @@ abstract class MessagingInterface {
     receiverThread.setDaemon(true);
     receiverThread.start();
   }
-  
+
   protected abstract void openChannel();
-  
+
   protected abstract void closeChannel();
-  
+
 }

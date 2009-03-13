@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -28,27 +28,27 @@ import chrriis.dj.nativeswing.swtimpl.NSPanelComponent;
 /**
  * An HTML editor. It is a browser-based component, which relies on the FCKeditor (the default) or the TinyMCE editor.<br/>
  * Methods execute when this component is initialized. If the component is not initialized, methods will be executed as soon as it gets initialized.
- * If the initialization fails, the methods will not have any effect. The results from methods have relevant values only when the component is valid. 
+ * If the initialization fails, the methods will not have any effect. The results from methods have relevant values only when the component is valid.
  * @author Christopher Deckers
  * @author Jörn Heid (TinyMCE implementation)
  */
 public class JHTMLEditor extends NSPanelComponent {
 
   static interface JHTMLEditorImplementation {
-    
+
     public WebServerContent getWebServerContent(HTTPRequest httpRequest, String resourcePath, final int instanceID);
-    
+
     public String getHTMLContent();
-    
+
     public void setHTMLContent(String html);
 
   }
-  
+
   private static final String HTML_EDITOR_COMPONENT_OPTION_KEY = "HTML Editor";
   static final String SET_CUSTOM_JAVASCRIPT_CONFIGURATION_OPTION_KEY = "HTML Editor Custom Configuration Script";
-  
+
   public static enum HTMLEditorImplementation { FCKEditor, TinyMCE };
-  
+
   public static NSOption setEditorImplementation(final HTMLEditorImplementation comp) {
     return new NSOption (HTML_EDITOR_COMPONENT_OPTION_KEY) {
       @Override
@@ -57,7 +57,7 @@ public class JHTMLEditor extends NSPanelComponent {
       }
     };
   }
-   
+
   /**
    * Create an option to set custom configuration for the FCKeditor or the TinyMCE editor.<br/>
    * The list of possible options to set for FCKeditor can be found here: <a href="http://docs.fckeditor.net/FCKeditor_2.x/Developers_Guide/Configuration/Configuration_Options">http://docs.fckeditor.net/FCKeditor_2.x/Developers_Guide/Configuration/Configuration_Options</a>.<br/>
@@ -72,16 +72,16 @@ public class JHTMLEditor extends NSPanelComponent {
       }
     };
   }
-  
+
   private JWebBrowser webBrowser;
   private int instanceID;
 
   private JHTMLEditorImplementation implementation;
-  
+
   JHTMLEditorImplementation getImplementation() {
     return implementation;
   }
-  
+
   /**
    * Construct an HTML editor.
    * @param options the options to configure the behavior of this component.
@@ -154,7 +154,7 @@ public class JHTMLEditor extends NSPanelComponent {
       }
     }, initializationListener, resultArray);
   }
-  
+
   /**
    * Get the web browser that contains this component. The web browser should only be used to add listeners, for example to listen to window creation events.
    * @return the web browser.
@@ -162,7 +162,7 @@ public class JHTMLEditor extends NSPanelComponent {
   public JWebBrowser getWebBrowser() {
     return webBrowser;
   }
-  
+
   protected static WebServerContent getWebServerContent(final HTTPRequest httpRequest) {
     String resourcePath = httpRequest.getResourcePath();
     int index = resourcePath.indexOf('/');
@@ -178,7 +178,7 @@ public class JHTMLEditor extends NSPanelComponent {
     JHTMLEditorImplementation implementation = htmlEditor.getImplementation();
     return implementation.getWebServerContent(httpRequest, resourcePath_, instanceID);
   }
-  
+
   /**
    * Get the HTML content.
    * @return the HTML content.
@@ -195,7 +195,7 @@ public class JHTMLEditor extends NSPanelComponent {
     html = JHTMLEditor.convertLinksFromLocal(html.replaceAll("[\r\n]", " "));
     implementation.setHTMLContent(html);
   }
-  
+
   static String convertLinksToLocal(String html) {
     if(html == null) {
       return html;
@@ -228,7 +228,7 @@ public class JHTMLEditor extends NSPanelComponent {
     }
     return html;
   }
-  
+
   /**
    * Add an HTML editor listener.
    * @param listener The HTML editor listener to add.
@@ -236,7 +236,7 @@ public class JHTMLEditor extends NSPanelComponent {
   public void addHTMLEditorListener(HTMLEditorListener listener) {
     listenerList.add(HTMLEditorListener.class, listener);
   }
-  
+
   /**
    * Remove an HTML editor listener.
    * @param listener the HTML editor listener to remove.
@@ -244,7 +244,7 @@ public class JHTMLEditor extends NSPanelComponent {
   public void removeHTMLEditorListener(HTMLEditorListener listener) {
     listenerList.remove(HTMLEditorListener.class, listener);
   }
-  
+
   /**
    * Get the HTML editor listeners.
    * @return the HTML editor listeners.
@@ -252,7 +252,7 @@ public class JHTMLEditor extends NSPanelComponent {
   public HTMLEditorListener[] getHTMLEditorListeners() {
     return listenerList.getListeners(HTMLEditorListener.class);
   }
-  
+
   private static interface InitializationListener extends EventListener {
     public void objectInitialized();
   }
@@ -260,11 +260,11 @@ public class JHTMLEditor extends NSPanelComponent {
   private void addInitializationListener(InitializationListener listener) {
     listenerList.add(InitializationListener.class, listener);
   }
-  
+
   private void removeInitializationListener(InitializationListener listener) {
     listenerList.remove(InitializationListener.class, listener);
   }
-  
+
 //  private InitializationListener[] getInitializationListeners() {
 //    return listenerList.getListeners(InitializationListener.class);
 //  }

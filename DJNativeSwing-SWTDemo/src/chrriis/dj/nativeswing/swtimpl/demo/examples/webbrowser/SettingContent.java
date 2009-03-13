@@ -1,7 +1,7 @@
 /*
  * Christopher Deckers (chrriis@nextencia.net)
  * http://www.nextencia.net
- * 
+ *
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -66,7 +66,7 @@ public class SettingContent extends JPanel {
     configurationPanel.add(configurationButtonPanel, BorderLayout.SOUTH);
     add(configurationPanel, BorderLayout.NORTH);
   }
-  
+
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
     UIUtils.setPreferredLookAndFeel();
@@ -83,5 +83,5 @@ public class SettingContent extends JPanel {
     });
     NativeInterface.runEventPump();
   }
-  
+
 }
