@@ -124,7 +124,6 @@ public class JVLCPlayer extends NSPanelComponent {
   @Override
   public void removeNotify() {
     stopUpdateThread();
-    webBrowserObject.dispose();
     super.removeNotify();
   }
 

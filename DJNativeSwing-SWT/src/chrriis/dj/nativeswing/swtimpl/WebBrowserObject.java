@@ -66,8 +66,10 @@ public abstract class WebBrowserObject {
     return resourcePath != null;
   }
 
-  public void dispose() {
+  @Override
+  protected void finalize() throws Throwable {
     ObjectRegistry.getInstance().remove(instanceID);
+    super.finalize();
   }
 
   public void load(String resourcePath) {

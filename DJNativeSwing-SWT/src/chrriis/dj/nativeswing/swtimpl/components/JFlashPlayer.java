@@ -235,12 +235,6 @@ public class JFlashPlayer extends NSPanelComponent {
     stopButton.setEnabled(isEnabled);
   }
 
-  @Override
-  public void removeNotify() {
-    webBrowserObject.dispose();
-    super.removeNotify();
-  }
-
   /**
    * Play a timeline-based flash applications.
    */
