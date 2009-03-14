@@ -125,6 +125,7 @@ public class JVLCPlayer extends NSPanelComponent {
   public void removeNotify() {
     stopUpdateThread();
     super.removeNotify();
+    cleanup();
   }
 
   @Override
@@ -498,6 +499,18 @@ public class JVLCPlayer extends NSPanelComponent {
     }
     referenceClassLoaderList.clear();
     super.finalize();
+  }
+
+  @Override
+  public void disposeNativePeer() {
+    super.disposeNativePeer();
+    cleanup();
+  }
+
+  private void cleanup() {
+    if(isNativePeerDisposed()) {
+      webBrowserObject.load(null);
+    }
   }
 
 }

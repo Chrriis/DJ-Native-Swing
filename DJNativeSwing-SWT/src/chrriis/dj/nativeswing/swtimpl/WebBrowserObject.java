@@ -76,7 +76,9 @@ public abstract class WebBrowserObject {
     this.resourcePath = resourcePath;
     ObjectRegistry.getInstance().remove(instanceID);
     if(resourcePath == null) {
-      webBrowser.setHTMLContent("");
+      if(!webBrowser.isNativePeerDisposed()) {
+        webBrowser.setHTMLContent("");
+      }
       return;
     }
     instanceID = ObjectRegistry.getInstance().add(this);

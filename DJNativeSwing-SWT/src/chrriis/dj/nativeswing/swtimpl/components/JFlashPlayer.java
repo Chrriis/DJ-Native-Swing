@@ -376,4 +376,22 @@ public class JFlashPlayer extends NSPanelComponent {
     super.finalize();
   }
 
+  @Override
+  public void removeNotify() {
+    super.removeNotify();
+    cleanup();
+  }
+
+  @Override
+  public void disposeNativePeer() {
+    super.disposeNativePeer();
+    cleanup();
+  }
+
+  private void cleanup() {
+    if(isNativePeerDisposed()) {
+      webBrowserObject.load(null);
+    }
+  }
+
 }
