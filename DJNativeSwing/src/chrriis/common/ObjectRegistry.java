@@ -113,6 +113,10 @@ public class ObjectRegistry {
    */
   public synchronized void remove(int instanceID) {
     instanceIDToObjectReferenceMap.remove(instanceID);
+    if(instanceIDToObjectReferenceMap.isEmpty() && cleanUpThread != null) {
+      cleanUpThread.interrupt();
+      cleanUpThread = null;
+    }
   }
 
   /**
