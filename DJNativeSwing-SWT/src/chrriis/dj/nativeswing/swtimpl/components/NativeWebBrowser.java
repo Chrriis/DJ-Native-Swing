@@ -593,18 +593,18 @@ class NativeWebBrowser extends NativeComponent {
     new CMN_clearSessionCookies().asyncExec(true);
   }
 
-  private static class CMN_getSessionCookie extends CommandMessage {
+  private static class CMN_getCookie extends CommandMessage {
     @Override
     public Object run(Object[] args) {
       return Browser.getCookie((String)args[1], (String)args[0]);
     }
   }
 
-  public static String getSessionCookie(String url, String name) {
-    return (String)new CMN_getSessionCookie().syncExec(true, url, name);
+  public static String getCookie(String url, String name) {
+    return (String)new CMN_getCookie().syncExec(true, url, name);
   }
 
-  private static class CMN_setSessionCookie extends CommandMessage {
+  private static class CMN_setCookie extends CommandMessage {
     @Override
     public Object run(Object[] args) {
       Browser.setCookie((String)args[1], (String)args[0]);
@@ -612,8 +612,8 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
 
-  public static void setSessionCookie(String url, String value) {
-    new CMN_setSessionCookie().asyncExec(true, url, value);
+  public static void setCookie(String url, String value) {
+    new CMN_setCookie().asyncExec(true, url, value);
   }
 
   private static class CMN_getResourceLocation extends ControlCommandMessage {
