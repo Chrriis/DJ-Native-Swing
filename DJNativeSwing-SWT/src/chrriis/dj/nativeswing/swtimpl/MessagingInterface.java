@@ -375,7 +375,12 @@ abstract class MessagingInterface {
                 } else if(receivedMessageList.size() == 1) {
                   asyncUIExec(new Runnable() {
                     public void run() {
-                      processReceivedMessages();
+                      CommandResultMessage commandResultMessage = processReceivedMessages();
+                      if(commandResultMessage != null) {
+                        synchronized(RECEIVER_LOCK) {
+                          receivedMessageList.add(0, commandResultMessage);
+                        }
+                      }
                     }
                   });
                 }

@@ -7,6 +7,8 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.8 (xxxxxxxxxxxxxxxxx):
 
+- Fixed a subtle bug occurring in rare conditions that could cause a freeze.
+- Cookie management is added to the browser.
 - Some clean up is done for WebBrowserObject internal object registry. 
 - Fixed exception when system properties contains non-String objects.
 - JFlashPlayer flashvars are properly encoded.
