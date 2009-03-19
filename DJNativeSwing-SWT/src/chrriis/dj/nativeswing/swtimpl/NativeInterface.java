@@ -32,6 +32,7 @@ import java.util.Properties;
 
 import javax.swing.event.EventListenerList;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.DeviceData;
 import org.eclipse.swt.widgets.Display;
@@ -142,6 +143,10 @@ public class NativeInterface {
   public static void initialize() {
     if(isInitialized()) {
       return;
+    }
+    // Check the versions of the libraries.
+    if(SWT.getVersion() < 3536) {
+      throw new IllegalStateException("The version of SWT that is required is 3.5M6 or later!");
     }
     if(nativeInterfaceConfiguration == null) {
       nativeInterfaceConfiguration = new NativeInterfaceConfiguration();
