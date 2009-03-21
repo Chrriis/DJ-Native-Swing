@@ -732,6 +732,23 @@ public class JWebBrowser extends NSPanelComponent {
     nativeWebBrowser.stopLoading();
   }
 
+  /**
+   * Indicate if Javascript will be allowed to run in pages subsequently viewed.
+   * @return true if Javascript is enabled.
+   */
+  public boolean isJavascriptEnabled() {
+    return nativeWebBrowser.isJavascriptEnabled();
+  }
+
+  /**
+   * Set whether javascript will be allowed to run in pages subsequently.
+   * Note that setting this value does not affect the running of javascript in the current page.
+   * @param isJavascriptEnabled true to enable Javascript, false otherwise.
+   */
+  public void setJavascriptEnabled(boolean isJavascriptEnabled) {
+    nativeWebBrowser.setJavascriptEnabled(isJavascriptEnabled);
+  }
+
 //  /**
 //   * Execute some javascript, and wait for the indication of success.
 //   * @param javascript the javascript to execute.

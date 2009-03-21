@@ -9,6 +9,7 @@ Licence terms: LGPL (see licence.txt)
 
 - Fixed a subtle bug occurring in rare conditions that could cause a freeze.
 - Cookie management is added to the browser.
+- Javascript can be enabled/disabled for subsequently viewed pages.
 - Some clean up is done for WebBrowserObject internal object registry. 
 - Fixed exception when system properties contains non-String objects.
 - JFlashPlayer flashvars are properly encoded.

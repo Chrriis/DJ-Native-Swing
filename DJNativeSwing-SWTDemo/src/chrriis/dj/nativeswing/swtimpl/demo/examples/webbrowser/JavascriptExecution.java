@@ -12,9 +12,12 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -39,13 +42,14 @@ public class JavascriptExecution extends JPanel {
     final JWebBrowser webBrowser = new JWebBrowser();
     webBrowser.setBarsVisible(false);
     webBrowser.setStatusBarVisible(true);
-    webBrowser.setHTMLContent(
-        "<html>" + LS +
-        "  <body>" + LS +
-        "    <h1>Some header</h1>" + LS +
-        "    <p>A paragraph with a <a href=\"http://www.google.com\">link</a>.</p>" + LS +
-        "  </body>" + LS +
-        "</html>");
+    final String htmlContent =
+      "<html>" + LS +
+      "  <body>" + LS +
+      "    <h1>Some header</h1>" + LS +
+      "    <p>A paragraph with a <a href=\"http://www.google.com\">link</a>.</p>" + LS +
+      "  </body>" + LS +
+      "</html>";
+    webBrowser.setHTMLContent(htmlContent);
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
     add(webBrowserPanel, BorderLayout.CENTER);
     JPanel configurationPanel = new JPanel(new BorderLayout());
@@ -58,7 +62,7 @@ public class JavascriptExecution extends JPanel {
     preferredSize.height += 20;
     scrollPane.setPreferredSize(preferredSize);
     configurationPanel.add(scrollPane, BorderLayout.CENTER);
-    JPanel configurationButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+    JPanel configurationButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 2));
     JButton executeJavascriptButton = new JButton("Execute Javascript");
     executeJavascriptButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -66,6 +70,15 @@ public class JavascriptExecution extends JPanel {
       }
     });
     configurationButtonPanel.add(executeJavascriptButton);
+    JCheckBox enableJavascriptCheckBox = new JCheckBox("Enable Javascript", true);
+    enableJavascriptCheckBox.addItemListener(new ItemListener() {
+      public void itemStateChanged(ItemEvent e) {
+        webBrowser.setJavascriptEnabled(e.getStateChange() == ItemEvent.SELECTED);
+        // Javascript state only affects subsequent pages. Let's reload the content.
+        webBrowser.setHTMLContent(htmlContent);
+      }
+    });
+    configurationButtonPanel.add(enableJavascriptCheckBox);
     configurationPanel.add(configurationButtonPanel, BorderLayout.SOUTH);
     add(configurationPanel, BorderLayout.NORTH);
   }

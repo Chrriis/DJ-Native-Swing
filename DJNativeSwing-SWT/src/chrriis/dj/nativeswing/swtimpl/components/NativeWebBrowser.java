@@ -684,6 +684,29 @@ class NativeWebBrowser extends NativeComponent {
 
   }
 
+  private static class CMN_isJavascriptEnabled extends ControlCommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      return ((Browser)getControl()).getJavascriptEnabled();
+    }
+  }
+
+  public boolean isJavascriptEnabled() {
+    return Boolean.TRUE.equals(runSync(new CMN_isJavascriptEnabled()));
+  }
+
+  private static class CMN_setJavascriptEnabled extends ControlCommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      ((Browser)getControl()).setJavascriptEnabled((Boolean)args[0]);
+      return null;
+    }
+  }
+
+  public void setJavascriptEnabled(boolean isJavascriptEnabled) {
+    runAsync(new CMN_setJavascriptEnabled(), isJavascriptEnabled);
+  }
+
   public boolean executeJavascriptAndWait(String script) {
     return Boolean.TRUE.equals(runSync(new CMN_executeJavascript(), script));
   }
