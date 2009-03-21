@@ -489,7 +489,7 @@ class NativeWebBrowser extends NativeComponent {
           // XULRunner on Linux: "window" is not defined when synchronous... so we defer.
           e.display.asyncExec(new Runnable() {
             public void run() {
-              browserExecute(browser, "if(decodeURIComponent('" + Utils.encodeURL(newStatus) + "') == window.status) {window.status = decodeURIComponent('" + Utils.encodeURL(oldStatus == null? "": oldStatus) + "');}");
+              browser.execute(fixJavascript(browser, ("if(decodeURIComponent('" + Utils.encodeURL(newStatus) + "') == window.status) {window.status = decodeURIComponent('" + Utils.encodeURL(oldStatus == null? "": oldStatus) + "');}")));
             }
           });
           String query = newStatus.substring(COMMAND_STATUS_PREFIX.length());
@@ -660,30 +660,6 @@ class NativeWebBrowser extends NativeComponent {
     return Boolean.TRUE.equals(runSync(new CMN_setHTMLContent(), html));
   }
 
-  private static class CMN_executeJavascript extends ControlCommandMessage {
-    @Override
-    public Object run(Object[] args) {
-      String script = (String)args[0];
-      Browser browser = (Browser)getControl();
-      return browserExecute(browser, script);
-    }
-  }
-
-  private static Pattern JAVASCRIPT_LINE_COMMENT_PATTERN = Pattern.compile("^\\s*//.*$", Pattern.MULTILINE);
-
-  private static boolean browserExecute(Browser browser, String script) {
-    if("mozilla".equals(browser.getBrowserType())) {
-      // Remove line comments, because it does not work properly on Mozilla.
-      // cf. bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=215335
-      script = JAVASCRIPT_LINE_COMMENT_PATTERN.matcher(script).replaceAll("");
-      // encode the script, because it is passed as a URL in Mozilla and gets URI-decoded.
-      // cf. bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=255462
-      script = Utils.encodeURL(script);
-    }
-    return browser.execute(script);
-
-  }
-
   private static class CMN_isJavascriptEnabled extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -707,12 +683,48 @@ class NativeWebBrowser extends NativeComponent {
     runAsync(new CMN_setJavascriptEnabled(), isJavascriptEnabled);
   }
 
+  private static Pattern JAVASCRIPT_LINE_COMMENT_PATTERN = Pattern.compile("^\\s*//.*$", Pattern.MULTILINE);
+
+  private static String fixJavascript(Browser browser, String script) {
+    if("mozilla".equals(browser.getBrowserType())) {
+      // Remove line comments, because it does not work properly on Mozilla.
+      // cf. bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=215335
+      script = JAVASCRIPT_LINE_COMMENT_PATTERN.matcher(script).replaceAll("");
+      // encode the script, because it is passed as a URL in Mozilla and gets URI-decoded.
+      // cf. bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=255462
+      script = Utils.encodeURL(script);
+    }
+    return script;
+  }
+
+  private static class CMN_executeJavascript extends ControlCommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      String script = (String)args[0];
+      Browser browser = (Browser)getControl();
+      return browser.execute(fixJavascript(browser, script));
+    }
+  }
+
   public boolean executeJavascriptAndWait(String script) {
     return Boolean.TRUE.equals(runSync(new CMN_executeJavascript(), script));
   }
 
   public void executeJavascript(String script) {
     runAsync(new CMN_executeJavascript(), script);
+  }
+
+  private static class CMN_executeJavascriptWithResult extends ControlCommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      String script = (String)args[0];
+      Browser browser = (Browser)getControl();
+      return browser.evaluate(fixJavascript(browser, script));
+    }
+  }
+
+  public Object executeJavascriptWithResult(String script) {
+    return runSync(new CMN_executeJavascriptWithResult(), script);
   }
 
   private static class CMN_stopLoading extends ControlCommandMessage {

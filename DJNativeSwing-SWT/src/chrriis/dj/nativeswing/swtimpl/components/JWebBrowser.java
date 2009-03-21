@@ -775,6 +775,12 @@ public class JWebBrowser extends NSPanelComponent {
     if(!javascript.endsWith(";")) {
       javascript = javascript + ";";
     }
+//    return nativeWebBrowser.executeJavascriptWithResult(
+//        "try {" +
+//        "  return function() {" + javascript + "}();" +
+//        "} catch(exxxxx) {" +
+//        "  return null;" +
+//        "}");
     String[] result = executeJavascriptWithCommandResult("[[getScriptResult]]",
         "try {" +
         "  var result = function() {" + javascript + "}();" +
