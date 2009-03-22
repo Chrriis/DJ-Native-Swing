@@ -177,7 +177,6 @@ public class DemoFrame extends JFrame {
                               StringBuilder sb = new StringBuilder();
                               char[] chars = new char[1024];
                               for(int i; (i=reader.read(chars)) != -1; sb.append(chars, 0, i)) {
-                                ;
                               }
                               JSyntaxHighlighter syntaxHighlighter = new JSyntaxHighlighter();
                               syntaxHighlighter.setContent(sb.toString(), ContentLanguage.Java);

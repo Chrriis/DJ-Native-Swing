@@ -472,17 +472,14 @@ public class WebServer {
         switch(lineSeparator) {
           case CR:
             for(int b; (b=read()) != '\r' && b != -1; baos.write(b)) {
-              ;
             }
             break;
           case LF:
             for(int b; (b=read()) != '\n' && b != -1; baos.write(b)) {
-              ;
             }
             break;
           case CRLF:
             for(int b; (b=read()) != '\r' && b != -1; baos.write(b)) {
-              ;
             }
             read();
             break;
@@ -551,7 +548,6 @@ public class WebServer {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 byte[] bytes = new byte[1024];
                 for(int i; (i=in.read(bytes)) != -1; baos.write(bytes, 0, i)) {
-                  ;
                 }
                 dataBytes = baos.toByteArray();
               }
@@ -587,7 +583,6 @@ public class WebServer {
                 }
                 ByteArrayOutputStream aos = new ByteArrayOutputStream();
                 for(int n; (n=din.read()) != -1; aos.write(n)) {
-                  ;
                 }
                 httpData.setBytes(aos.toByteArray());
               }
@@ -606,7 +601,6 @@ public class WebServer {
                 StringBuilder sb = new StringBuilder();
                 char[] chars = new char[1024];
                 for(int i; (i=reader.read(chars)) != -1; sb.append(chars, 0, i)) {
-                  ;
                 }
                 dataContent = sb.toString();
               }
@@ -649,7 +643,6 @@ public class WebServer {
           writeHTTPHeaders(out, 200, webServerContent.getContentType(), webServerContent.getContentLength(), webServerContent.getLastModified());
           byte[] bytes = new byte[4096];
           for(int i; (i=resourceStream.read(bytes)) != -1; out.write(bytes, 0, i)) {
-            ;
           }
           try {
             resourceStream.close();

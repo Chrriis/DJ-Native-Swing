@@ -385,7 +385,6 @@ public class NativeInterface {
             }
             ThreadGroup group = Thread.currentThread().getThreadGroup();
             for(ThreadGroup parentGroup = group; (parentGroup = parentGroup.getParent()) != null; group = parentGroup) {
-              ;
             }
             boolean isAlive = display == null;
             if(!isAlive) {
@@ -509,7 +508,6 @@ public class NativeInterface {
             BufferedInputStream in = new BufferedInputStream(NativeInterface.class.getResourceAsStream("/" + classPath));
             byte[] bytes = new byte[1024];
             for(int n; (n=in.read(bytes)) != -1; out.write(bytes, 0, n)) {
-              ;
             }
             in.close();
             out.close();
