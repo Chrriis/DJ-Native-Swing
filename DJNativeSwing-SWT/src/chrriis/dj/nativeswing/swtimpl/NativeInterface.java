@@ -626,8 +626,6 @@ public class NativeInterface {
       if(p == null) {
         throw new IllegalStateException("Failed to spawn the VM!");
       }
-      connectStream(System.err, p.getErrorStream());
-      connectStream(System.out, p.getInputStream());
       return p;
     }
 
@@ -655,6 +653,8 @@ public class NativeInterface {
       Process p;
       if(Boolean.parseBoolean(System.getProperty("nativeswing.peervm.create", "true"))) {
         p = createProcess(localHostAddress, port);
+        connectStream(System.err, p.getErrorStream());
+        connectStream(System.out, p.getInputStream());
       } else {
         p = null;
       }
