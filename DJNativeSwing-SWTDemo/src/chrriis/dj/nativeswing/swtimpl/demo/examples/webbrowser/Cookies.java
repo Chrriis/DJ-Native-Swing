@@ -100,7 +100,7 @@ public class Cookies extends JPanel {
           "          alert('Please enter a value in the text field.');" + LS +
           "        } else {" + LS +
           "          document.cookie = name + '=' + value;" + LS +
-          "          alert('Cookie created');" + LS +
+          "          alert('Cookie set');" + LS +
           "        }" + LS +
           "      }" + LS +
           "      function readCookie(name) {" + LS +
@@ -125,7 +125,7 @@ public class Cookies extends JPanel {
           "    </script>" + LS +
           "  </head>" + LS +
           "  <body>" + LS +
-          "    <form name=\"cookieForm\" action=\"#\"><input name=\"cookieValue\" value=\"Some value\"> <a href=\"javascript:saveCookie('SomeNSCookie')\" class=\"page\">Create cookie</a></form><br>" + LS +
+          "    <form name=\"cookieForm\" action=\"#\"><input name=\"cookieValue\" value=\"Some value\"> <a href=\"javascript:saveCookie('SomeNSCookie')\" class=\"page\">Set cookie</a></form><br>" + LS +
           "    <a href=\"javascript:readCookie('SomeNSCookie')\" class=\"page\">Read cookie</a>, <a href=\"javascript:deleteCookie('SomeNSCookie')\" class=\"page\">Delete cookie</a>" + LS +
           "  </body>" + LS +
           "</html>" + LS;
