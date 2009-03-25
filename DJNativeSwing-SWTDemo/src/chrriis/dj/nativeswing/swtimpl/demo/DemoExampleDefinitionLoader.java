@@ -25,6 +25,7 @@ import chrriis.dj.nativeswing.swtimpl.demo.examples.htmleditor.TinyMCEExample;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.introduction.Codewise;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.introduction.NativeIntegration;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.introduction.TheSolution;
+import chrriis.dj.nativeswing.swtimpl.demo.examples.nativedialogs.NativeDialogs;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.syntaxhighlighter.SimpleSyntaxHighlighterExample;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.utilities.FileAssociations;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.vlcplayer.SimpleVLCPlayerExample;
@@ -82,6 +83,9 @@ public class DemoExampleDefinitionLoader {
     }));
     exampleGroupList.add(new ExampleGroup("JWMediaPlayer (win32)", new Example[] {
         new Example("Simple Example", SimpleWMediaPlayerExample.class, "Load a movie/sound file to an embedded multimedia player.", true, System.getProperty("os.name").startsWith("Windows"), "This example is only available on a Windows operating system."),
+    }));
+    exampleGroupList.add(new ExampleGroup("Native Dialogs", new Example[] {
+        new Example("Simple Example", NativeDialogs.class, "Use a file dialog or a directory dialog, and customize them to your needs.", true),
     }));
     exampleGroupList.add(new ExampleGroup("Additional Features", new Example[] {
         new Example("Constrain Visibility", ConstrainVisibility.class, "Constrain the visibility to superimpose Swing and native components.", true),

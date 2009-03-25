@@ -5,6 +5,11 @@ Licence terms: LGPL (see licence.txt)
 
 ---------------------------------- Change log ----------------------------------
 
+* Version 0.9.9 (xxxxxxxxxxxxxx):
+
+- Native File dialog and Directory dialog are added.
+
+
 * Version 0.9.8 (March 24, 2009):
 
 - Fixed a subtle bug occurring in rare conditions that could cause a freeze.
