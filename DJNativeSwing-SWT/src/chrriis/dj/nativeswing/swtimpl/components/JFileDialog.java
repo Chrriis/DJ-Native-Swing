@@ -19,8 +19,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 
 import chrriis.dj.nativeswing.swtimpl.ControlCommandMessage;
-import chrriis.dj.nativeswing.swtimpl.ModalDialogUtils;
-import chrriis.dj.nativeswing.swtimpl.NativeComponent;
+import chrriis.dj.nativeswing.swtimpl.components.ModalDialogUtils.NativeModalComponent;
 
 /**
  * A native file selection dialog.
@@ -28,7 +27,7 @@ import chrriis.dj.nativeswing.swtimpl.NativeComponent;
  */
 public class JFileDialog {
 
-  private static class NativeFileDialogContainer extends NativeComponent {
+  private static class NativeFileDialogContainer extends NativeModalComponent {
 
     private static class CMN_openFileDialog extends ControlCommandMessage {
       @Override
@@ -72,6 +71,7 @@ public class JFileDialog {
       return new Composite(shell, SWT.NONE);
     }
 
+    @Override
     protected Component createEmbeddableComponent() {
       return super.createEmbeddableComponent(new HashMap<Object, Object>());
     }

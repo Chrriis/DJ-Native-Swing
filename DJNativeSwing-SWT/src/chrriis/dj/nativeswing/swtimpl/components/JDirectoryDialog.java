@@ -19,8 +19,7 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Shell;
 
 import chrriis.dj.nativeswing.swtimpl.ControlCommandMessage;
-import chrriis.dj.nativeswing.swtimpl.ModalDialogUtils;
-import chrriis.dj.nativeswing.swtimpl.NativeComponent;
+import chrriis.dj.nativeswing.swtimpl.components.ModalDialogUtils.NativeModalComponent;
 
 /**
  * A native directory selection dialog.
@@ -28,7 +27,7 @@ import chrriis.dj.nativeswing.swtimpl.NativeComponent;
  */
 public class JDirectoryDialog {
 
-  private static class NativeDirectoryDialogContainer extends NativeComponent {
+  private static class NativeDirectoryDialogContainer extends NativeModalComponent {
 
     private static class CMN_openDirectoryDialog extends ControlCommandMessage {
       @Override
@@ -54,6 +53,7 @@ public class JDirectoryDialog {
       return new Composite(shell, SWT.NONE);
     }
 
+    @Override
     protected Component createEmbeddableComponent() {
       return super.createEmbeddableComponent(new HashMap<Object, Object>());
     }

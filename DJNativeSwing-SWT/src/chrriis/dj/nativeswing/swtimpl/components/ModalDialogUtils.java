@@ -5,9 +5,10 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.dj.nativeswing.swtimpl;
+package chrriis.dj.nativeswing.swtimpl.components;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Frame;
 import java.awt.Window;
@@ -20,13 +21,17 @@ import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 
 import chrriis.common.Utils;
+import chrriis.dj.nativeswing.swtimpl.NativeComponent;
 
-/**
- * @author Christopher Deckers
- */
-public class ModalDialogUtils {
+class ModalDialogUtils {
 
-  public static void showModalDialog(Window window, final NativeComponent nativeComponent, final Runnable runnable) {
+  static class NativeModalComponent extends NativeComponent {
+    protected Component createEmbeddableComponent() {
+      return super.createEmbeddableComponent(new HashMap<Object, Object>());
+    }
+  }
+
+  static void showModalDialog(Window window, final NativeModalComponent nativeModalComponent, final Runnable runnable) {
     final JDialog dialog;
     if(Utils.IS_JAVA_6_OR_GREATER) {
       dialog = new JDialog(window, ModalityType.APPLICATION_MODAL);
@@ -43,8 +48,8 @@ public class ModalDialogUtils {
     dialog.addWindowListener(new WindowAdapter() {
       @Override
       public void windowOpened(WindowEvent e) {
-        dialog.getContentPane().add(nativeComponent.createEmbeddableComponent(new HashMap<Object, Object>()), BorderLayout.CENTER);
-        nativeComponent.initializeNativePeer();
+        dialog.getContentPane().add(nativeModalComponent.createEmbeddableComponent(), BorderLayout.CENTER);
+        nativeModalComponent.initializeNativePeer();
         try {
           runnable.run();
         } finally {
