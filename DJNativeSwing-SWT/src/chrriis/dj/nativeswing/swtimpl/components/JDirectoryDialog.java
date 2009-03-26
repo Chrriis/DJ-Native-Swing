@@ -23,6 +23,7 @@ import chrriis.dj.nativeswing.swtimpl.ModalDialogUtils;
 import chrriis.dj.nativeswing.swtimpl.NativeComponent;
 
 /**
+ * A native directory selection dialog.
  * @author Christopher Deckers
  */
 public class JDirectoryDialog {
@@ -38,13 +39,13 @@ public class JDirectoryDialog {
         if(data.title != null) {
           directoryDialog.setText(data.title);
         }
-        if(data.initialDirectory != null) {
-          directoryDialog.setFilterPath(data.initialDirectory);
+        if(data.selectedDirectory != null) {
+          directoryDialog.setFilterPath(data.selectedDirectory);
         }
         if(data.message != null) {
           directoryDialog.setMessage(data.message);
         }
-        data.selectedDirectoryName = directoryDialog.open();
+        data.selectedDirectory = directoryDialog.open();
         return data;
       }
     }
@@ -66,12 +67,15 @@ public class JDirectoryDialog {
   private static class Data implements Serializable {
     public String title;
     public String message;
-    public String selectedDirectoryName;
-    public String initialDirectory;
+    public String selectedDirectory;
   }
 
   private Data data = new Data();
 
+  /**
+   * Show the directory selection dialog, which is a blocking call until the user has made a choice.
+   * @param window The parent window.
+   */
   public void show(Window window) {
     final NativeDirectoryDialogContainer nativeComponent = new NativeDirectoryDialogContainer();
     ModalDialogUtils.showModalDialog(window, nativeComponent, new Runnable() {
@@ -81,30 +85,50 @@ public class JDirectoryDialog {
     });
   }
 
-  public String getSelectedDirectoryName() {
-    return data.selectedDirectoryName;
+  /**
+   * Get the directory that was selected or that should be selected when the dialog is shown.
+   * @return the selected directory.
+   */
+  public String getSelectedDirectory() {
+    return data.selectedDirectory;
   }
 
-  public String getInitialDirectory() {
-    return data.initialDirectory;
+  /**
+   * Set the directory that should be selected when the dialog is shown.
+   * @param selectedDirectory the directory that should be selected.
+   */
+  public void setSelectedDirectory(String selectedDirectory) {
+    data.selectedDirectory = selectedDirectory;
   }
 
-  public void setInitialDirectory(String initialiDirectory) {
-    data.initialDirectory = initialiDirectory;
-  }
-
+  /**
+   * Set the title of the file dialog.
+   * @param title the title to set or null to use the default title.
+   */
   public void setTitle(String title) {
     data.title = title;
   }
 
+  /**
+   * Get the title of the file dialog.
+   * @return the title or null if it is not set.
+   */
   public String getTitle() {
     return data.title;
   }
 
-  public void setMessage(String title) {
-    data.message = title;
+  /**
+   * Set the message that is shown to the user to describe the purpose of this directory selection.
+   * @param message the message to show.
+   */
+  public void setMessage(String message) {
+    data.message = message;
   }
 
+  /**
+   * Get the message that is shown to the user to describe the purpose of this directory selection.
+   * @return the message or null if it is not set.
+   */
   public String getMessage() {
     return data.message;
   }

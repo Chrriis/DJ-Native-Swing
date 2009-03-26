@@ -97,7 +97,7 @@ public class NativeDialogs extends JPanel {
         if(directoryRadioButton.isSelected()) {
           JDirectoryDialog directoryDialog = new JDirectoryDialog();
           directoryDialog.show(window);
-          JOptionPane.showMessageDialog(window, "Selected directory: " + directoryDialog.getSelectedDirectoryName());
+          JOptionPane.showMessageDialog(window, "Selected directory: " + directoryDialog.getSelectedDirectory());
           return;
         }
         if(customizedDirectoryRadioButton.isSelected()) {
@@ -105,7 +105,7 @@ public class NativeDialogs extends JPanel {
           directoryDialog.setTitle("This is a GREAT dialog!");
           directoryDialog.setMessage("Choose a directory NOW!");
           directoryDialog.show(window);
-          JOptionPane.showMessageDialog(window, "Selected directory: " + directoryDialog.getSelectedDirectoryName());
+          JOptionPane.showMessageDialog(window, "Selected directory: " + directoryDialog.getSelectedDirectory());
           return;
         }
       }

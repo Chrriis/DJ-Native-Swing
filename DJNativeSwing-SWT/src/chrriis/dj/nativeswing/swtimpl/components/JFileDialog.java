@@ -23,6 +23,7 @@ import chrriis.dj.nativeswing.swtimpl.ModalDialogUtils;
 import chrriis.dj.nativeswing.swtimpl.NativeComponent;
 
 /**
+ * A native file selection dialog.
  * @author Christopher Deckers
  */
 public class JFileDialog {
@@ -45,20 +46,24 @@ public class JFileDialog {
         if(data.title != null) {
           fileDialog.setText(data.title);
         }
-        if(data.initialDirectory != null) {
-          fileDialog.setFilterPath(data.initialDirectory);
+        if(data.parentDirectory != null) {
+          fileDialog.setFilterPath(data.parentDirectory);
         }
-        if(data.selectedFileNames != null) {
+        if(data.selectedFileNames != null && data.selectedFileNames.length == 1) {
           fileDialog.setFileName(data.selectedFileNames[0]);
         }
-        if(data.filterExtensions != null) {
-          fileDialog.setFilterExtensions(data.filterExtensions);
-          fileDialog.setFilterNames(data.filterDescriptions);
-          fileDialog.setFilterIndex(data.selectedFilterIndex);
+        if(data.extensionFilters != null) {
+          fileDialog.setFilterExtensions(data.extensionFilters);
+          fileDialog.setFilterNames(data.extensionFiltersNames);
+          fileDialog.setFilterIndex(data.selectedExtensionFilterIndex);
         }
         fileDialog.open();
         data.selectedFileNames = fileDialog.getFileNames();
-        data.selectedFilterIndex = fileDialog.getFilterIndex();
+        data.selectedExtensionFilterIndex = fileDialog.getFilterIndex();
+        data.parentDirectory = fileDialog.getFilterPath();
+        if(data.parentDirectory.length() == 0) {
+          data.parentDirectory = null;
+        }
         return data;
       }
     }
@@ -82,14 +87,18 @@ public class JFileDialog {
     public boolean isSave;
     public boolean isMulti;
     public String[] selectedFileNames;
-    public String[] filterDescriptions;
-    public String[] filterExtensions;
-    public int selectedFilterIndex;
-    public String initialDirectory;
+    public String[] extensionFiltersNames;
+    public String[] extensionFilters;
+    public int selectedExtensionFilterIndex;
+    public String parentDirectory;
   }
 
   private Data data = new Data();
 
+  /**
+   * Show the file selection dialog, which is a blocking call until the user has made a choice.
+   * @param window The parent window.
+   */
   public void show(Window window) {
     final NativeFileDialogContainer nativeComponent = new NativeFileDialogContainer();
     ModalDialogUtils.showModalDialog(window, nativeComponent, new Runnable() {
@@ -99,11 +108,19 @@ public class JFileDialog {
     });
   }
 
+  /**
+   * Get the file name of the first file that was selected relative to the parent directory.
+   * @return the file name or null if no file was selected.
+   */
   public String getSelectedFileName() {
     String[] selectedFileNames = getSelectedFileNames();
     return selectedFileNames.length >= 1? selectedFileNames[0]: null;
   }
 
+  /**
+   * Get the file names of the files that was selected relative to the parent directory.
+   * @return the file names or null if no file was selected.
+   */
   public String[] getSelectedFileNames() {
     if(data.selectedFileNames == null) {
       return new String[0];
@@ -113,66 +130,132 @@ public class JFileDialog {
     return selectedFileNames;
   }
 
+  /**
+   * Set the file name that the dialog will select by default.
+   * @param selectedFileName the name of the file to select or null if no file is to be selected.
+   */
   public void setSelectedFileName(String selectedFileName) {
     data.selectedFileNames = new String[] {selectedFileName};
   }
 
+  /**
+   * A representation of the selection modes that a file dialog supports.
+   * @author Christopher Deckers
+   */
   public static enum SelectionMode {
     SINGLE_SELECTION,
     MULTIPLE_SELECTION,
   }
 
+  /**
+   * Get the selection mode.
+   * @return the selection mode.
+   */
   public SelectionMode getSelectionMode() {
     return data.isMulti? SelectionMode.MULTIPLE_SELECTION: SelectionMode.SINGLE_SELECTION;
   }
 
+  /**
+   * Set the selection mode.
+   * @param selectionMode the selection mode to set.
+   */
   public void setSelectionMode(SelectionMode selectionMode) {
     data.isMulti = selectionMode == SelectionMode.MULTIPLE_SELECTION;
   }
 
+  /**
+   * The types that a file dialog supports.
+   * @author Christopher Deckers
+   */
   public static enum DialogType {
     OPEN_DIALOG_TYPE,
     SAVE_DIALOG_TYPE,
   }
 
+  /**
+   * Get the dialog type.
+   * @return the dialog type.
+   */
   public DialogType getDialogType() {
     return data.isSave? DialogType.SAVE_DIALOG_TYPE: DialogType.OPEN_DIALOG_TYPE;
   }
 
+  /**
+   * Set the dialog type.
+   * @param dialogType the type of dialog.
+   */
   public void setDialogType(DialogType dialogType) {
     data.isSave = dialogType == DialogType.SAVE_DIALOG_TYPE;
   }
 
-  public String getInitialDirectory() {
-    return data.initialDirectory;
+  /**
+   * Get the parent directory of the files that will be/were shown.
+   * @return The parent directory or null if it is not set.
+   */
+  public String getParentDirectory() {
+    return data.parentDirectory;
   }
 
-  public void setInitialDirectory(String initialiDirectory) {
-    data.initialDirectory = initialiDirectory;
+  /**
+   * Set the parent directory of the files that will be shown.
+   * @return The parent directory or null to use the default.
+   */
+  public void setParentDirectory(String parentDirectory) {
+    data.parentDirectory = parentDirectory;
   }
 
-  public void setExtensionFilters(String[] filterExtensions, String[] filterDescriptions, int selectedFilterIndex) {
-    data.filterExtensions = filterExtensions;
-    data.filterDescriptions = filterDescriptions;
-    data.selectedFilterIndex = selectedFilterIndex;
+  /**
+   * Set the extension filters, with optional descriptions, and set which index is selected by default.
+   * To clear the list, set both arrays to null.
+   * @param extensionFilters an array of extensions typically in the form "*.extension" or null. A filter with multiple extension uses semicolon as a separator, e.g. "*.jpg;*.png".
+   * @param extensionFiltersNames the array of names corresponding to each extension filter, or null.
+   * @param selectedExtensionFilterIndex the index that is selected by default.
+   */
+  public void setExtensionFilters(String[] extensionFilters, String[] extensionFiltersNames, int selectedExtensionFilterIndex) {
+    if(extensionFiltersNames != null && (extensionFilters == null || extensionFilters.length != extensionFiltersNames.length)) {
+      throw new IllegalArgumentException("Filter descriptions can only be defined when filter extensions are defined, and the two arrays must have the same size!");
+    }
+    data.extensionFilters = extensionFilters;
+    data.extensionFiltersNames = extensionFiltersNames;
+    data.selectedExtensionFilterIndex = selectedExtensionFilterIndex;
   }
 
-  public String[] getFilterExtensions() {
-    return data.filterExtensions;
+  /**
+   * Get the extension filters.
+   * @return the extension filters, or null if not set.
+   */
+  public String[] getExtensionFilters() {
+    return data.extensionFilters;
   }
 
-  public String[] getFilterDescriptions() {
-    return data.filterDescriptions;
+  /**
+   * Get the names corresponding to the extension filters.
+   * @return the extension filters names, or null if not set.
+   */
+  public String[] getExtensionFiltersNames() {
+    return data.extensionFiltersNames;
   }
 
-  public int getSelectedFilterIndex() {
-    return data.selectedFilterIndex;
+  /**
+   * Get the index of the selected extension filter.
+   * @return the selected extension filter index.
+   */
+  public int getSelectedExtensionFilterIndex() {
+    return data.selectedExtensionFilterIndex;
   }
 
+  /**
+   * Set the title of the file dialog.
+   * @param title the title to set or null to use the default title.
+   */
   public void setTitle(String title) {
     data.title = title;
   }
 
+  /**
+   * Get the title of the file dialog.
+   * @return the title or null if it is not set.
+   */
   public String getTitle() {
     return data.title;
   }
