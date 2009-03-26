@@ -198,7 +198,7 @@ public class JFileDialog {
 
   /**
    * Set the parent directory of the files that will be shown.
-   * @return The parent directory or null to use the default.
+   * @param parentDirectory The parent directory or null to use the default.
    */
   public void setParentDirectory(String parentDirectory) {
     data.parentDirectory = parentDirectory;

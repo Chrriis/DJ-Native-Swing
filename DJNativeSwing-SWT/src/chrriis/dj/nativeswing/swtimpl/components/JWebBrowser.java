@@ -99,7 +99,7 @@ public class JWebBrowser extends NSPanelComponent {
   /**
    * Set a cookie for all web browser instances.
    * @param url the url.
-   * @param the value, in a cookie form like:
+   * @param value the value, in a cookie form like:
    * <code>foo=bar</code> (basic session cookie)
    * <code>foo=bar; path=/; domain=.eclipse.org</code> (session cookie)
    * <code>foo=bar; expires=Thu, 01-Jan-2030 00:00:01 GMT</code> (persistent cookie)
