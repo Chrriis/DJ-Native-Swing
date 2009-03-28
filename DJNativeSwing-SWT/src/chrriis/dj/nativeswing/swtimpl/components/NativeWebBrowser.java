@@ -225,12 +225,16 @@ class NativeWebBrowser extends NativeComponent {
       WebBrowserEvent e = null;
       String command = (String)args[0];
       String[] arguments = (String[])args[1];
+      boolean isInternal = command.startsWith("[Chrriis]");
       for(int i=listeners.length-2; i>=0; i-=2) {
         if(listeners[i] == WebBrowserListener.class) {
           if(e == null) {
             e = new WebBrowserEvent(webBrowser);
           }
-          ((WebBrowserListener)listeners[i + 1]).commandReceived(e, command, arguments);
+          WebBrowserListener webBrowserListener = (WebBrowserListener)listeners[i + 1];
+          if(!isInternal || webBrowserListener.getClass().getName().startsWith("chrriis.")) {
+            webBrowserListener.commandReceived(e, command, arguments);
+          }
         }
       }
       return null;

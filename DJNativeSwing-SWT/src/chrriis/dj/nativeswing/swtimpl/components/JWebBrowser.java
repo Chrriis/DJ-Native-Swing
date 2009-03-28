@@ -930,7 +930,10 @@ public class JWebBrowser extends NSPanelComponent {
     public void commandReceived(WebBrowserEvent e, String command, String[] args) {
       WebBrowserListener webBrowserListener = this.webBrowserListener.get();
       if(webBrowserListener != null) {
-        webBrowserListener.commandReceived(e, command, args);
+        boolean isInternal = command.startsWith("[Chrriis]");
+        if(!isInternal || webBrowserListener.getClass().getName().startsWith("chrriis.")) {
+          webBrowserListener.commandReceived(e, command, args);
+        }
       }
     }
 

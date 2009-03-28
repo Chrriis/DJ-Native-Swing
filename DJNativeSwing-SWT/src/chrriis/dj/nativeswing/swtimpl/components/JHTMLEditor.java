@@ -117,7 +117,7 @@ public class JHTMLEditor extends NSPanelComponent {
     webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
       @Override
       public void commandReceived(WebBrowserEvent e, String command, String[] args) {
-        if("JH_setLoaded".equals(command)) {
+        if("[Chrriis]JH_setLoaded".equals(command)) {
           Object[] listeners = listenerList.getListenerList();
           for(int i=listeners.length-2; i>=0; i-=2) {
             if(listeners[i] == InitializationListener.class) {

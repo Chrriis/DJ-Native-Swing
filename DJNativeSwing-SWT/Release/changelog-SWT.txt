@@ -8,6 +8,7 @@ Licence terms: LGPL (see licence.txt)
 * Version 0.9.9 (xxxxxxxxxxxxxx):
 
 - Native File dialog and Directory dialog are added.
+- Internal web browser commands are not visible from external listeners.
 
 
 * Version 0.9.8 (March 24, 2009):

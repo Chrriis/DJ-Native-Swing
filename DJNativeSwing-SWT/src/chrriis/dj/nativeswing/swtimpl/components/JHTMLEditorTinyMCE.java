@@ -104,7 +104,7 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
             "        save_onsavecallback : 'JH_doSave'," + LS +
             "        setup: function (ed) {" + LS +
             "          ed.onInit.add (function (ed) {" + LS +
-            "            sendCommand ('JH_setLoaded');" + LS +
+            "            sendCommand ('[Chrriis]JH_setLoaded');" + LS +
             "          })" + LS +
             "        }" + LS +
             "      };" + LS +

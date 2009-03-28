@@ -125,8 +125,11 @@ public class JFlashPlayer extends NSPanelComponent {
     webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
       @Override
       public void commandReceived(WebBrowserEvent e, String command, String[] args) {
+        boolean isInternal = command.startsWith("[Chrriis]");
         for(FlashPlayerListener listener: getFlashPlayerListeners()) {
-          listener.commandReceived(command, args);
+          if(!isInternal || listener.getClass().getName().startsWith("chrriis.")) {
+            listener.commandReceived(command, args);
+          }
         }
       }
     });

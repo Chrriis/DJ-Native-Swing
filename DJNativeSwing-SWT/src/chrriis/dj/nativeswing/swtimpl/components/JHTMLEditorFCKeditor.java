@@ -97,7 +97,7 @@ class JHTMLEditorFCKeditor implements JHTMLEditorImplementation {
             "      }" + LS +
             "      function FCKeditor_OnComplete(editorInstance) {" + LS +
             "        editorInstance.LinkedField.form.onsubmit = JH_doSave;" + LS +
-            "        sendCommand('JH_setLoaded');" + LS +
+            "        sendCommand('[Chrriis]JH_setLoaded');" + LS +
             "      }" + LS +
             "    </script>" + LS +
             "  </head>" + LS +

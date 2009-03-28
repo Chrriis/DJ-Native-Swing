@@ -44,7 +44,7 @@ public abstract class WebBrowserObject {
     webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
       @Override
       public void commandReceived(WebBrowserEvent e, String command, String[] args) {
-        if("WB_setLoaded".equals(command)) {
+        if("[Chrriis]WB_setLoaded".equals(command)) {
           Object[] listeners = listenerList.getListenerList();
           for(int i=listeners.length-2; i>=0; i-=2) {
             if(listeners[i] == InitializationListener.class) {
@@ -267,7 +267,7 @@ public abstract class WebBrowserObject {
             "var embeddedObject = getEmbeddedObject();" + LS +
             "embeddedObject.style.width = '100%';" + LS +
             "embeddedObject.style.height = '100%';" + LS +
-            "sendCommand('WB_setLoaded');" + LS +
+            "sendCommand('[Chrriis]WB_setLoaded');" + LS +
             "//-->" + LS;
           return getInputStream(content);
         }
