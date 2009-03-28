@@ -36,10 +36,12 @@ public class Utils {
   public static final boolean IS_JAVA_6_OR_GREATER = System.getProperty("java.version").compareTo("1.6") >= 0;
 
   public static final boolean IS_MAC;
+  public static final boolean IS_WINDOWS;
 
   static {
     String os = System.getProperty("os.name");
     IS_MAC = os.startsWith("Mac") || os.startsWith("Darwin");
+    IS_WINDOWS = os.startsWith("Windows");
   }
 
   public static final String LINE_SEPARATOR = System.getProperty("line.separator");
