@@ -7,9 +7,12 @@
  */
 package chrriis.dj.nativeswing.swtimpl;
 
+import java.awt.AWTEvent;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.event.AWTEventListener;
+import java.awt.event.KeyEvent;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -18,6 +21,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.StringReader;
 import java.net.InetAddress;
@@ -28,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.swing.event.EventListenerList;
@@ -45,6 +50,8 @@ import chrriis.dj.nativeswing.swtimpl.InProcessMessagingInterface.SWTInProcessMe
 import chrriis.dj.nativeswing.swtimpl.InProcessMessagingInterface.SwingInProcessMessagingInterface;
 import chrriis.dj.nativeswing.swtimpl.OutProcessMessagingInterface.SWTOutProcessMessagingInterface;
 import chrriis.dj.nativeswing.swtimpl.OutProcessMessagingInterface.SwingOutProcessMessagingInterface;
+import chrriis.dj.nativeswing.swtimpl.OutProcessPrintStreamMessagingInterface.SWTOutProcessPrintStreamMessagingInterface;
+import chrriis.dj.nativeswing.swtimpl.OutProcessPrintStreamMessagingInterface.SwingOutProcessPrintStreamMessagingInterface;
 
 /**
  * The native interface, which establishes the link between the peer VM (native side) and the local side.
@@ -136,6 +143,20 @@ public class NativeInterface {
     return isInProcess;
   }
 
+  private static class CMN_dumpStackTraces extends CommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      Map<Thread, StackTraceElement[]> allStackTraces = Thread.getAllStackTraces();
+      for(Thread th: allStackTraces.keySet()) {
+        System.err.println("Thread " + th.getName());
+        for(StackTraceElement s: allStackTraces.get(th)) {
+          System.err.println("\t at " + s);
+        }
+      }
+      return null;
+    }
+  }
+
   /**
    * Initialize the native interface, but do not open it. This method sets some properties and registers a few listeners to keep track of certain states necessary for the good functioning of the framework.<br/>
    * This method is automatically called if open() is used. It should be called early in the program, the best place being as the first call in the main method.
@@ -152,6 +173,23 @@ public class NativeInterface {
       nativeInterfaceConfiguration = new NativeInterfaceConfiguration();
     }
     NativeSwing.initialize();
+    Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
+      public void eventDispatched(AWTEvent e) {
+        KeyEvent ke = (KeyEvent)e;
+        if(ke.getID() == KeyEvent.KEY_PRESSED && ke.getKeyCode() == KeyEvent.VK_F3 && ke.isControlDown() && ke.isAltDown() && ke.isShiftDown()) {
+          new Thread("Dump stack traces") {
+            @Override
+            public void run() {
+              CMN_dumpStackTraces cmnDumpStackTraces = new CMN_dumpStackTraces();
+              cmnDumpStackTraces.run(new Object[0]);
+              if(!isInProcess && isOpen) {
+                syncSend(true, cmnDumpStackTraces);
+              }
+            }
+          }.start();
+        }
+      }
+    }, AWTEvent.KEY_EVENT_MASK);
     String inProcessProperty = System.getProperty("nativeswing.interface.inprocess");
     if(inProcessProperty != null) {
       isInProcess = Boolean.parseBoolean(inProcessProperty);
@@ -261,12 +299,14 @@ public class NativeInterface {
       SwingInProcessMessagingInterface swingInProcessMessagingInterface = (SwingInProcessMessagingInterface)messagingInterface;
       return swingInProcessMessagingInterface;
     }
-    if(isNativeSide) {
-      SWTOutProcessMessagingInterface swtOutProcessMessagingInterface = (SWTOutProcessMessagingInterface)messagingInterface;
-      return swtOutProcessMessagingInterface;
-    }
-    SwingOutProcessMessagingInterface swingOutProcessMessagingInterface = (SwingOutProcessMessagingInterface)messagingInterface;
-    return swingOutProcessMessagingInterface;
+    // TODO: check cast?
+    return messagingInterface;
+//    if(isNativeSide) {
+//      SWTOutProcessMessagingInterface swtOutProcessMessagingInterface = (SWTOutProcessMessagingInterface)messagingInterface;
+//      return swtOutProcessMessagingInterface;
+//    }
+//    SwingOutProcessMessagingInterface swingOutProcessMessagingInterface = (SwingOutProcessMessagingInterface)messagingInterface;
+//    return swingOutProcessMessagingInterface;
   }
 
   private static Display display;
@@ -629,34 +669,64 @@ public class NativeInterface {
       return p;
     }
 
+    private static final boolean IS_PRINT_STREAM_CHANNEL_MODE = false;
+
     private static MessagingInterface createOutProcessMessagingInterface() {
       String localHostAddress = Utils.getLocalHostAddress();
       if(localHostAddress == null) {
         throw new IllegalStateException("Failed to find a suitable local host address to communicate with a spawned VM!");
       }
-      int port = Integer.parseInt(System.getProperty("nativeswing.interface.port", "-1"));
-      if(port <= 0) {
-        ServerSocket serverSocket;
-        try {
-          serverSocket = new ServerSocket();
-          serverSocket.setReuseAddress(false);
-          serverSocket.bind(new InetSocketAddress(InetAddress.getByName(localHostAddress), 0));
-        } catch(IOException e) {
-          throw new RuntimeException(e);
-        }
-        port = serverSocket.getLocalPort();
-        try {
-          serverSocket.close();
-        } catch(IOException e) {
+      boolean isCreatingProcess = Boolean.parseBoolean(System.getProperty("nativeswing.peervm.create", "true"));
+      int port;
+      boolean isPrintStreamChannelMode = IS_PRINT_STREAM_CHANNEL_MODE && isCreatingProcess;
+      if(isPrintStreamChannelMode) {
+        port = 0;
+      } else {
+        port = Integer.parseInt(System.getProperty("nativeswing.interface.port", "-1"));
+        if(port <= 0) {
+          ServerSocket serverSocket;
+          try {
+            serverSocket = new ServerSocket();
+            serverSocket.setReuseAddress(false);
+            serverSocket.bind(new InetSocketAddress(InetAddress.getByName(localHostAddress), 0));
+          } catch(IOException e) {
+            throw new RuntimeException(e);
+          }
+          port = serverSocket.getLocalPort();
+          try {
+            serverSocket.close();
+          } catch(IOException e) {
+          }
         }
       }
       Process p;
-      if(Boolean.parseBoolean(System.getProperty("nativeswing.peervm.create", "true"))) {
+      if(isCreatingProcess) {
         p = createProcess(localHostAddress, port);
+        if(!isPrintStreamChannelMode) {
+          connectStream(System.out, p.getInputStream());
+        }
         connectStream(System.err, p.getErrorStream());
-        connectStream(System.out, p.getInputStream());
       } else {
         p = null;
+      }
+      if(isPrintStreamChannelMode) {
+        final SwingOutProcessPrintStreamMessagingInterface swingOutProcessPrintStreamMessagingInterface = new SwingOutProcessPrintStreamMessagingInterface(p.getInputStream(), p.getOutputStream(), false);
+        // TODO: remove this thread when SWT bug 270364 is fixed.
+        if(Utils.IS_WINDOWS) {
+          new Thread("System.in unlocker") {
+            @Override
+            public void run() {
+              while(swingOutProcessPrintStreamMessagingInterface.isAlive()) {
+                try {
+                  asyncSend(true, new Message());
+                  sleep(200);
+                } catch (Exception e) {
+                }
+              }
+            }
+          }.start();
+        }
+        return swingOutProcessPrintStreamMessagingInterface;
       }
       Socket socket = null;
       for(int i=99; i>=0; i--) {
@@ -691,16 +761,16 @@ public class NativeInterface {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             String lineSeparator = Utils.LINE_SEPARATOR;
             byte lastByte = (byte)lineSeparator.charAt(lineSeparator.length() - 1);
-            boolean addMessage = true;
+            boolean isAddingMessage = true;
             byte[] bytes = new byte[1024];
             for(int i; (i=bin.read(bytes)) != -1; ) {
               baos.reset();
               for(int j=0; j<i; j++) {
                 byte b = bytes[j];
-                if(addMessage) {
+                if(isAddingMessage) {
                   baos.write("NativeSwing: ".getBytes());
                 }
-                addMessage = b == lastByte;
+                isAddingMessage = b == lastByte;
                 baos.write(b);
               }
               try {
@@ -723,42 +793,51 @@ public class NativeInterface {
       }
       isOpen = true;
       int port = Integer.parseInt(args[0]);
-      ServerSocket serverSocket = null;
-      for(int i=19; i>=0; i--) {
-        try {
-          serverSocket = new ServerSocket();
-          serverSocket.setReuseAddress(true);
-          serverSocket.bind(new InetSocketAddress(Utils.getLocalHostAddress(), port));
-          break;
-        } catch(IOException e) {
-          if(i == 0) {
-            throw e;
+      boolean isPrintStreamChannelMode = port <= 0;
+      Socket socket = null;
+      if(!isPrintStreamChannelMode) {
+        ServerSocket serverSocket = null;
+        for(int i=19; i>=0; i--) {
+          try {
+            serverSocket = new ServerSocket();
+            serverSocket.setReuseAddress(true);
+            serverSocket.bind(new InetSocketAddress(Utils.getLocalHostAddress(), port));
+            break;
+          } catch(IOException e) {
+            if(i == 0) {
+              throw e;
+            }
+          }
+          try {
+            Thread.sleep(100);
+          } catch(Exception e) {
           }
         }
-        try {
-          Thread.sleep(100);
-        } catch(Exception e) {
-        }
-      }
-      final ServerSocket serverSocket_ = serverSocket;
-      if(!Boolean.parseBoolean(System.getProperty("nativeswing.peervm.keepalive"))) {
-        Thread shutdownThread = new Thread("NativeSwing Shutdown") {
-          @Override
-          public void run() {
-            try {
-              sleep(10000);
-            } catch(Exception e) {
-            }
-            if(messagingInterface == null) {
+        final ServerSocket serverSocket_ = serverSocket;
+        if(!Boolean.parseBoolean(System.getProperty("nativeswing.peervm.keepalive"))) {
+          Thread shutdownThread = new Thread("NativeSwing Shutdown") {
+            @Override
+            public void run() {
               try {
-                serverSocket_.close();
+                sleep(10000);
               } catch(Exception e) {
               }
+              if(messagingInterface == null) {
+                try {
+                  serverSocket_.close();
+                } catch(Exception e) {
+                }
+              }
             }
-          }
-        };
-        shutdownThread.setDaemon(true);
-        shutdownThread.start();
+          };
+          shutdownThread.setDaemon(true);
+          shutdownThread.start();
+        }
+        try {
+          socket = serverSocket.accept();
+        } catch(Exception e) {
+          throw new IllegalStateException("The native side did not receive an incoming connection!");
+        }
       }
 //      // We set up a new security manager to track exit calls.
 //      // When this happens, we dispose native resources.
@@ -787,19 +866,34 @@ public class NativeInterface {
 //      } catch(Exception e) {
 //        e.printStackTrace();
 //      }
-      Socket socket;
-      try {
-        socket = serverSocket.accept();
-      } catch(Exception e) {
-        throw new IllegalStateException("The native side did not receive an incoming connection!");
-      }
       Device.DEBUG = Boolean.parseBoolean(System.getProperty("nativeswing.swt.debug.device"));
       DeviceData data = new DeviceData();
       data.debug = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.debug"));
       data.tracking = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.tracking"));
       display = new Display(data);
       Display.setAppName("DJ Native Swing");
-      messagingInterface = new SWTOutProcessMessagingInterface(socket, true, display);
+      if(isPrintStreamChannelMode) {
+        PrintStream sysout = System.out;
+        InputStream sysin = System.in;
+        messagingInterface = new SWTOutProcessPrintStreamMessagingInterface(sysin, sysout, true, display);
+        System.setIn(new InputStream() {
+          @Override
+          public int read() throws IOException {
+            while(true) {
+              try {
+                Thread.sleep(Long.MAX_VALUE);
+              } catch(Exception e) {}
+            }
+          }
+        });
+        System.setOut(new PrintStream(new OutputStream() {
+          @Override
+          public void write(int b) throws IOException {
+          }
+        }));
+      } else {
+        messagingInterface = new SWTOutProcessMessagingInterface(socket, true, display);
+      }
       while(display != null && !display.isDisposed()) {
         try {
           if(!display.readAndDispatch()) {
