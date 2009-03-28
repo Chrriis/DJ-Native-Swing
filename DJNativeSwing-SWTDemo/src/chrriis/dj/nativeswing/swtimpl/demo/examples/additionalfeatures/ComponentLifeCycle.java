@@ -45,7 +45,7 @@ public class ComponentLifeCycle extends JPanel {
     lifeCyclePane.setBorder(BorderFactory.createTitledBorder(isForcedInitializationType? "Forced initialization life cycle": "Default life cycle"));
     final JPanel componentPane = new JPanel(new BorderLayout());
     JPanel buttonBar = new JPanel(new FlowLayout());
-    JButton createButton = new JButton("Create JFlashPlayer");
+    final JButton createButton = new JButton("Create JFlashPlayer");
     buttonBar.add(createButton);
     componentPane.add(buttonBar, BorderLayout.SOUTH);
     lifeCyclePane.add(componentPane, BorderLayout.WEST);
@@ -62,18 +62,24 @@ public class ComponentLifeCycle extends JPanel {
           componentPane.remove(flashPlayer);
           logTextArea.setText("");
         }
+        createButton.setEnabled(false);
         if(isForcedInitializationType) {
-          createPlayerWithForcedInitializationLyfeCycle(flashPlayer, logTextArea, componentPane);
+          flashPlayer = createPlayerWithForcedInitializationLyfeCycle(logTextArea, componentPane);
         } else {
-          createPlayerWithDefaultLyfeCycle(flashPlayer, logTextArea, componentPane);
+          flashPlayer = createPlayerWithDefaultLyfeCycle(logTextArea, componentPane);
         }
+        flashPlayer.runInSequence(new Runnable() {
+          public void run() {
+            createButton.setEnabled(true);
+          }
+        });
       }
     });
   }
 
-  public void createPlayerWithDefaultLyfeCycle(JFlashPlayer flashPlayer, final JTextArea logTextArea, JComponent componentPane) {
+  public JFlashPlayer createPlayerWithDefaultLyfeCycle(final JTextArea logTextArea, JComponent componentPane) {
     log(logTextArea, "- JFlashPlayer creation.");
-    flashPlayer = new JFlashPlayer(JFlashPlayer.destroyOnFinalization());
+    JFlashPlayer flashPlayer = new JFlashPlayer(JFlashPlayer.destroyOnFinalization());
     flashPlayer.setControlBarVisible(false);
     log(logTextArea, "  -> Calls will be played after initialization.");
     flashPlayer.runInSequence(new Runnable() {
@@ -95,11 +101,12 @@ public class ComponentLifeCycle extends JPanel {
     componentPane.add(flashPlayer, BorderLayout.CENTER);
     componentPane.revalidate();
     componentPane.repaint();
+    return flashPlayer;
   }
 
-  public void createPlayerWithForcedInitializationLyfeCycle(JFlashPlayer flashPlayer, final JTextArea logTextArea, JComponent componentPane) {
+  public JFlashPlayer createPlayerWithForcedInitializationLyfeCycle(final JTextArea logTextArea, JComponent componentPane) {
     log(logTextArea, "- JFlashPlayer creation.");
-    flashPlayer = new JFlashPlayer(JFlashPlayer.destroyOnFinalization());
+    JFlashPlayer flashPlayer = new JFlashPlayer(JFlashPlayer.destroyOnFinalization());
     flashPlayer.setControlBarVisible(false);
     log(logTextArea, "- JFlashPlayer addition to containment hierarchy.");
     log(logTextArea, "  (mandatory before forced initialization)");
@@ -123,6 +130,7 @@ public class ComponentLifeCycle extends JPanel {
       }
     });
     log(logTextArea, "- After JFlashPlayer.load() call.");
+    return flashPlayer;
   }
 
   private void log(JTextArea logTextArea, String s) {
