@@ -842,7 +842,6 @@ public abstract class NativeComponent extends Canvas {
       }
       invalidateNativePeer("The native component was disposed.");
       NativeComponent.getNativeComponentRegistry().remove(componentID);
-      isNativePeerValid = false;
       nativeComponentWrapper.disposeNativeComponent();
     }
   }
@@ -856,7 +855,7 @@ public abstract class NativeComponent extends Canvas {
   }
 
   /**
-   * Indicate whether the native peer initialization phase has happened. This method returns true even if the native peer is disposed of if the creation of the peer failed.
+   * Indicate whether the native peer initialization phase has happened. This method returns true even if the native peer is disposed or if the creation of the peer failed.
    * @return true if the native peer is initialized.
    */
   public boolean isNativePeerInitialized() {
@@ -912,7 +911,10 @@ public abstract class NativeComponent extends Canvas {
       return;
     }
     isShellEnabled = isEnabled;
-    runAsync(new CMN_setShellEnabled(), isEnabled);
+    // We do not want to send this message on a disposed or dead component
+    if(!isNativePeerInitialized() || isNativePeerValid()) {
+      runAsync(new CMN_setShellEnabled(), isEnabled);
+    }
   }
 
   private static class CMN_setEnabled extends ControlCommandMessage {
