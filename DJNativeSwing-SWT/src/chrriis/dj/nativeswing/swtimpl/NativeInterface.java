@@ -181,7 +181,7 @@ public class NativeInterface {
             @Override
             public void run() {
               CMN_dumpStackTraces cmnDumpStackTraces = new CMN_dumpStackTraces();
-              cmnDumpStackTraces.run(new Object[0]);
+              cmnDumpStackTraces.run(null);
               if(!isInProcess && isOpen) {
                 syncSend(true, cmnDumpStackTraces);
               }
@@ -915,20 +915,51 @@ public class NativeInterface {
             } catch(Exception e) {}
           }
         }));
+        if(Utils.IS_WINDOWS) {
+          // TODO: remove when SWT bug 270364 is fixed.
+          final MessagingInterface messagingInterface_ = messagingInterface;
+          new Thread("System.in unlocker") {
+            @Override
+            public void run() {
+              while(messagingInterface_.isAlive()) {
+                if(System.currentTimeMillis() - lastProcessTime > 100) {
+                  new CMJ_unlockSystemIn().asyncExec(false);
+                  lastProcessTime = System.currentTimeMillis();
+                }
+                try {
+                  sleep(100);
+                } catch (Exception e) {
+                }
+              }
+            }
+          }.start();
+        }
       } else {
         messagingInterface = new SWTOutProcessSocketsMessagingInterface(socket, true, display);
       }
       while(display != null && !display.isDisposed()) {
         try {
+          lastProcessTime = System.currentTimeMillis();
           if(!display.readAndDispatch()) {
+            lastProcessTime = Long.MAX_VALUE;
             display.sleep();
           }
+          lastProcessTime = Long.MAX_VALUE;
         } catch(Exception e) {
           e.printStackTrace();
         }
       }
     }
+  }
 
+  private static volatile long lastProcessTime = Long.MAX_VALUE;
+
+  private static class CMJ_unlockSystemIn extends CommandMessage {
+    @Override
+    public Object run(Object[] args) throws Exception {
+      new Message().asyncSend(true);
+      return null;
+    }
   }
 
   /**

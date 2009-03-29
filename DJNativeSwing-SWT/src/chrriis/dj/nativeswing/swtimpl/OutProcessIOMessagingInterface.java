@@ -19,8 +19,6 @@ import javax.swing.SwingUtilities;
 
 import org.eclipse.swt.widgets.Display;
 
-import chrriis.common.Utils;
-
 /**
  * @author Christopher Deckers
  */
@@ -160,28 +158,6 @@ abstract class OutProcessIOMessagingInterface extends MessagingInterface {
 
     public SwingOutProcessIOMessagingInterface(InputStream is, OutputStream os, final boolean exitOnEndOfStream) {
       super(false, is, os, exitOnEndOfStream);
-    }
-
-    @Override
-    protected void openChannel() {
-      // TODO: remove this overriden method when SWT bug 270364 is fixed.
-      super.openChannel();
-      if(Utils.IS_WINDOWS) {
-        new Thread("System.in unlocker") {
-          @Override
-          public void run() {
-            while(isAlive()) {
-              try {
-                Message message = new Message();
-                message.setSyncExec(false);
-                writeMessageToChannel(message);
-                sleep(200);
-              } catch (Exception e) {
-              }
-            }
-          }
-        }.start();
-      }
     }
 
     @Override
