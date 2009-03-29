@@ -25,7 +25,9 @@ are using them get loaded.
 
 * nativeswing.interface.inprocess
   = true/false (default: platform-dependant)
-  Set whether the interface should be in-process or out-process.
+  Set whether the interface should be in-process or out-process. Platforms which
+  use out-process may be switched to in-process, but this may affect stability.
+  Change this setting only when you need to debug sequences in a single VM.
 
 * nativeswing.interface.outprocess.communication
   = sockets/processio (default: sockets)
