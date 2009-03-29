@@ -10,22 +10,26 @@ package chrriis.dj.nativeswing.swtimpl;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.Socket;
+import java.io.OutputStream;
 
 import javax.swing.SwingUtilities;
 
 import org.eclipse.swt.widgets.Display;
 
+import chrriis.common.Utils;
+
 /**
  * @author Christopher Deckers
  */
-abstract class OutProcessMessagingInterface extends MessagingInterface {
+abstract class OutProcessIOMessagingInterface extends MessagingInterface {
 
-  public OutProcessMessagingInterface(boolean isNativeSide, Socket socket, boolean exitOnEndOfStream) {
+  public OutProcessIOMessagingInterface(boolean isNativeSide, InputStream is, OutputStream os, boolean exitOnEndOfStream) {
     super(isNativeSide);
-    this.socket = socket;
+    this.is = is;
+    this.os = os;
     initialize(exitOnEndOfStream);
   }
 
@@ -36,17 +40,22 @@ abstract class OutProcessMessagingInterface extends MessagingInterface {
   public void destroy() {
     setAlive(false);
     try {
+      oos.close();
+    } catch(Exception e) {
+    }
+    try {
       ois.close();
     } catch(Exception e) {
     }
   }
 
-  private Socket socket;
+  private InputStream is;
+  private OutputStream os;
 
   @Override
   protected void openChannel() {
     try {
-      oos = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()) {
+      oos = new ObjectOutputStream(new BufferedOutputStream(os) {
         @Override
         public synchronized void write(int b) throws IOException {
           super.write(b);
@@ -59,7 +68,7 @@ abstract class OutProcessMessagingInterface extends MessagingInterface {
         }
       });
       oos.flush();
-      ois = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
+      ois = new ObjectInputStream(new BufferedInputStream(is));
     } catch(IOException e) {
       throw new RuntimeException(e);
     }
@@ -76,10 +85,15 @@ abstract class OutProcessMessagingInterface extends MessagingInterface {
     } catch(Exception e) {
     }
     try {
-      socket.close();
+      is.close();
     } catch(Exception e) {
     }
-    socket = null;
+    is = null;
+    try {
+      os.close();
+    } catch(Exception e) {
+    }
+    os = null;
   }
 
   private static final int OOS_RESET_THRESHOLD;
@@ -118,16 +132,15 @@ abstract class OutProcessMessagingInterface extends MessagingInterface {
       }
       return message;
     }
-    System.err.println("Unknown message: " + o);
     return null;
   }
 
-  static class SWTOutProcessMessagingInterface extends OutProcessMessagingInterface {
+  static class SWTOutProcessIOMessagingInterface extends OutProcessIOMessagingInterface {
 
     private Display display;
 
-    public SWTOutProcessMessagingInterface(Socket socket, final boolean exitOnEndOfStream, Display display) {
-      super(true, socket, exitOnEndOfStream);
+    public SWTOutProcessIOMessagingInterface(InputStream is, OutputStream os, final boolean exitOnEndOfStream, Display display) {
+      super(true, is, os, exitOnEndOfStream);
       this.display = display;
     }
 
@@ -143,10 +156,32 @@ abstract class OutProcessMessagingInterface extends MessagingInterface {
 
   }
 
-  static class SwingOutProcessMessagingInterface extends OutProcessMessagingInterface {
+  static class SwingOutProcessIOMessagingInterface extends OutProcessIOMessagingInterface {
 
-    public SwingOutProcessMessagingInterface(Socket socket, final boolean exitOnEndOfStream) {
-      super(false, socket, exitOnEndOfStream);
+    public SwingOutProcessIOMessagingInterface(InputStream is, OutputStream os, final boolean exitOnEndOfStream) {
+      super(false, is, os, exitOnEndOfStream);
+    }
+
+    @Override
+    protected void openChannel() {
+      // TODO: remove this overriden method when SWT bug 270364 is fixed.
+      super.openChannel();
+      if(Utils.IS_WINDOWS) {
+        new Thread("System.in unlocker") {
+          @Override
+          public void run() {
+            while(isAlive()) {
+              try {
+                Message message = new Message();
+                message.setSyncExec(false);
+                writeMessageToChannel(message);
+                sleep(200);
+              } catch (Exception e) {
+              }
+            }
+          }
+        }.start();
+      }
     }
 
     @Override

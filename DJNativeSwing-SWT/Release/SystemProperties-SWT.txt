@@ -27,6 +27,10 @@ are using them get loaded.
   = true/false (default: platform-dependant)
   Set whether the interface should be in-process or out-process.
 
+* nativeswing.interface.outprocess.communication
+  = sockets/processio (default: sockets)
+  Set whether the communication interface should use sockets or the process IO.
+
 * nativeswing.interface.inprocess.printnonserializablemessages
   = true/false (default: false)
   When in-process, set whether messages should be artificially serialized to

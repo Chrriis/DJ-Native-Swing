@@ -10,10 +10,9 @@ package chrriis.dj.nativeswing.swtimpl;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
+import java.net.Socket;
 
 import javax.swing.SwingUtilities;
 
@@ -22,12 +21,11 @@ import org.eclipse.swt.widgets.Display;
 /**
  * @author Christopher Deckers
  */
-abstract class OutProcessPrintStreamMessagingInterface extends MessagingInterface {
+abstract class OutProcessSocketsMessagingInterface extends MessagingInterface {
 
-  public OutProcessPrintStreamMessagingInterface(boolean isNativeSide, InputStream is, OutputStream os, boolean exitOnEndOfStream) {
+  public OutProcessSocketsMessagingInterface(boolean isNativeSide, Socket socket, boolean exitOnEndOfStream) {
     super(isNativeSide);
-    this.is = is;
-    this.os = os;
+    this.socket = socket;
     initialize(exitOnEndOfStream);
   }
 
@@ -38,22 +36,17 @@ abstract class OutProcessPrintStreamMessagingInterface extends MessagingInterfac
   public void destroy() {
     setAlive(false);
     try {
-      oos.close();
-    } catch(Exception e) {
-    }
-    try {
       ois.close();
     } catch(Exception e) {
     }
   }
 
-  private InputStream is;
-  private OutputStream os;
+  private Socket socket;
 
   @Override
   protected void openChannel() {
     try {
-      oos = new ObjectOutputStream(new BufferedOutputStream(os) {
+      oos = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()) {
         @Override
         public synchronized void write(int b) throws IOException {
           super.write(b);
@@ -66,7 +59,7 @@ abstract class OutProcessPrintStreamMessagingInterface extends MessagingInterfac
         }
       });
       oos.flush();
-      ois = new ObjectInputStream(new BufferedInputStream(is));
+      ois = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
     } catch(IOException e) {
       throw new RuntimeException(e);
     }
@@ -83,15 +76,10 @@ abstract class OutProcessPrintStreamMessagingInterface extends MessagingInterfac
     } catch(Exception e) {
     }
     try {
-      is.close();
+      socket.close();
     } catch(Exception e) {
     }
-    is = null;
-    try {
-      os.close();
-    } catch(Exception e) {
-    }
-    os = null;
+    socket = null;
   }
 
   private static final int OOS_RESET_THRESHOLD;
@@ -130,15 +118,16 @@ abstract class OutProcessPrintStreamMessagingInterface extends MessagingInterfac
       }
       return message;
     }
+    System.err.println("Unknown message: " + o);
     return null;
   }
 
-  static class SWTOutProcessPrintStreamMessagingInterface extends OutProcessPrintStreamMessagingInterface {
+  static class SWTOutProcessSocketsMessagingInterface extends OutProcessSocketsMessagingInterface {
 
     private Display display;
 
-    public SWTOutProcessPrintStreamMessagingInterface(InputStream is, OutputStream os, final boolean exitOnEndOfStream, Display display) {
-      super(true, is, os, exitOnEndOfStream);
+    public SWTOutProcessSocketsMessagingInterface(Socket socket, final boolean exitOnEndOfStream, Display display) {
+      super(true, socket, exitOnEndOfStream);
       this.display = display;
     }
 
@@ -154,10 +143,10 @@ abstract class OutProcessPrintStreamMessagingInterface extends MessagingInterfac
 
   }
 
-  static class SwingOutProcessPrintStreamMessagingInterface extends OutProcessPrintStreamMessagingInterface {
+  static class SwingOutProcessSocketsMessagingInterface extends OutProcessSocketsMessagingInterface {
 
-    public SwingOutProcessPrintStreamMessagingInterface(InputStream is, OutputStream os, final boolean exitOnEndOfStream) {
-      super(false, is, os, exitOnEndOfStream);
+    public SwingOutProcessSocketsMessagingInterface(Socket socket, final boolean exitOnEndOfStream) {
+      super(false, socket, exitOnEndOfStream);
     }
 
     @Override

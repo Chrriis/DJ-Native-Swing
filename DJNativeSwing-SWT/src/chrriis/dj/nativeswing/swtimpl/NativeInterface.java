@@ -48,10 +48,10 @@ import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.NativeSwing;
 import chrriis.dj.nativeswing.swtimpl.InProcessMessagingInterface.SWTInProcessMessagingInterface;
 import chrriis.dj.nativeswing.swtimpl.InProcessMessagingInterface.SwingInProcessMessagingInterface;
-import chrriis.dj.nativeswing.swtimpl.OutProcessMessagingInterface.SWTOutProcessMessagingInterface;
-import chrriis.dj.nativeswing.swtimpl.OutProcessMessagingInterface.SwingOutProcessMessagingInterface;
-import chrriis.dj.nativeswing.swtimpl.OutProcessPrintStreamMessagingInterface.SWTOutProcessPrintStreamMessagingInterface;
-import chrriis.dj.nativeswing.swtimpl.OutProcessPrintStreamMessagingInterface.SwingOutProcessPrintStreamMessagingInterface;
+import chrriis.dj.nativeswing.swtimpl.OutProcessIOMessagingInterface.SWTOutProcessIOMessagingInterface;
+import chrriis.dj.nativeswing.swtimpl.OutProcessIOMessagingInterface.SwingOutProcessIOMessagingInterface;
+import chrriis.dj.nativeswing.swtimpl.OutProcessSocketsMessagingInterface.SWTOutProcessSocketsMessagingInterface;
+import chrriis.dj.nativeswing.swtimpl.OutProcessSocketsMessagingInterface.SwingOutProcessSocketsMessagingInterface;
 
 /**
  * The native interface, which establishes the link between the peer VM (native side) and the local side.
@@ -299,14 +299,20 @@ public class NativeInterface {
       SwingInProcessMessagingInterface swingInProcessMessagingInterface = (SwingInProcessMessagingInterface)messagingInterface;
       return swingInProcessMessagingInterface;
     }
-    // TODO: check cast?
-    return messagingInterface;
-//    if(isNativeSide) {
-//      SWTOutProcessMessagingInterface swtOutProcessMessagingInterface = (SWTOutProcessMessagingInterface)messagingInterface;
-//      return swtOutProcessMessagingInterface;
-//    }
-//    SwingOutProcessMessagingInterface swingOutProcessMessagingInterface = (SwingOutProcessMessagingInterface)messagingInterface;
-//    return swingOutProcessMessagingInterface;
+    if(isNativeSide) {
+      if(messagingInterface instanceof SWTOutProcessSocketsMessagingInterface) {
+        SWTOutProcessSocketsMessagingInterface swtOutProcessSocketsMessagingInterface = (SWTOutProcessSocketsMessagingInterface)messagingInterface;
+        return swtOutProcessSocketsMessagingInterface;
+      }
+      SWTOutProcessIOMessagingInterface swtOutProcessIOMessagingInterface = (SWTOutProcessIOMessagingInterface)messagingInterface;
+      return swtOutProcessIOMessagingInterface;
+    }
+    if(messagingInterface instanceof SwingOutProcessSocketsMessagingInterface) {
+      SwingOutProcessSocketsMessagingInterface swingOutProcessSocketsMessagingInterface = (SwingOutProcessSocketsMessagingInterface)messagingInterface;
+      return swingOutProcessSocketsMessagingInterface;
+    }
+    SwingOutProcessIOMessagingInterface swingOutProcessIOMessagingInterface = (SwingOutProcessIOMessagingInterface)messagingInterface;
+    return swingOutProcessIOMessagingInterface;
   }
 
   private static Display display;
@@ -669,7 +675,7 @@ public class NativeInterface {
       return p;
     }
 
-    private static final boolean IS_PRINT_STREAM_CHANNEL_MODE = false;
+    private static final boolean IS_PROCESS_IO_CHANNEL_MODE = "processio".equals(System.getProperty("nativeswing.interface.outprocess.communication"));
 
     private static MessagingInterface createOutProcessMessagingInterface() {
       String localHostAddress = Utils.getLocalHostAddress();
@@ -678,8 +684,8 @@ public class NativeInterface {
       }
       boolean isCreatingProcess = Boolean.parseBoolean(System.getProperty("nativeswing.peervm.create", "true"));
       int port;
-      boolean isPrintStreamChannelMode = IS_PRINT_STREAM_CHANNEL_MODE && isCreatingProcess;
-      if(isPrintStreamChannelMode) {
+      boolean isProcessIOChannelMode = IS_PROCESS_IO_CHANNEL_MODE && isCreatingProcess;
+      if(isProcessIOChannelMode) {
         port = 0;
       } else {
         port = Integer.parseInt(System.getProperty("nativeswing.interface.port", "-1"));
@@ -702,31 +708,15 @@ public class NativeInterface {
       Process p;
       if(isCreatingProcess) {
         p = createProcess(localHostAddress, port);
-        if(!isPrintStreamChannelMode) {
+        if(!isProcessIOChannelMode) {
           connectStream(System.out, p.getInputStream());
         }
         connectStream(System.err, p.getErrorStream());
       } else {
         p = null;
       }
-      if(isPrintStreamChannelMode) {
-        final SwingOutProcessPrintStreamMessagingInterface swingOutProcessPrintStreamMessagingInterface = new SwingOutProcessPrintStreamMessagingInterface(p.getInputStream(), p.getOutputStream(), false);
-        // TODO: remove this thread when SWT bug 270364 is fixed.
-        if(Utils.IS_WINDOWS) {
-          new Thread("System.in unlocker") {
-            @Override
-            public void run() {
-              while(swingOutProcessPrintStreamMessagingInterface.isAlive()) {
-                try {
-                  asyncSend(true, new Message());
-                  sleep(200);
-                } catch (Exception e) {
-                }
-              }
-            }
-          }.start();
-        }
-        return swingOutProcessPrintStreamMessagingInterface;
+      if(isProcessIOChannelMode) {
+        return new SwingOutProcessIOMessagingInterface(p.getInputStream(), p.getOutputStream(), false);
       }
       Socket socket = null;
       for(int i=99; i>=0; i--) {
@@ -749,32 +739,39 @@ public class NativeInterface {
         }
         throw new IllegalStateException("Failed to connect to spawned VM!");
       }
-      return new SwingOutProcessMessagingInterface(socket, false);
+      return new SwingOutProcessSocketsMessagingInterface(socket, false);
+    }
+
+    private static class IOStreamFormatter {
+      private ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      private byte lastByte = (byte)Utils.LINE_SEPARATOR.charAt(Utils.LINE_SEPARATOR.length() - 1);
+      private boolean isAddingMessage = true;
+      public byte[] process(byte[] bytes, int offset, int length) throws IOException {
+        baos.reset();
+        for(int i=offset; i<length; i++) {
+          byte b = bytes[i];
+          if(isAddingMessage) {
+            baos.write("NativeSwing: ".getBytes());
+          }
+          isAddingMessage = b == lastByte;
+          baos.write(b);
+        }
+        return baos.toByteArray();
+      }
     }
 
     private static void connectStream(final PrintStream out, InputStream in) {
       final BufferedInputStream bin = new BufferedInputStream(in);
       Thread streamThread = new Thread("NativeSwing Stream Connector") {
+        private IOStreamFormatter byteProcessor = new IOStreamFormatter();
         @Override
         public void run() {
           try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            String lineSeparator = Utils.LINE_SEPARATOR;
-            byte lastByte = (byte)lineSeparator.charAt(lineSeparator.length() - 1);
-            boolean isAddingMessage = true;
             byte[] bytes = new byte[1024];
             for(int i; (i=bin.read(bytes)) != -1; ) {
-              baos.reset();
-              for(int j=0; j<i; j++) {
-                byte b = bytes[j];
-                if(isAddingMessage) {
-                  baos.write("NativeSwing: ".getBytes());
-                }
-                isAddingMessage = b == lastByte;
-                baos.write(b);
-              }
+              byte[] result = byteProcessor.process(bytes, 0, i);
               try {
-                out.write(baos.toByteArray());
+                out.write(result);
               } catch(Exception e) {
                 e.printStackTrace();
               }
@@ -787,15 +784,27 @@ public class NativeInterface {
       streamThread.start();
     }
 
+    private static class CMJ_systemOut extends CommandMessage {
+      @Override
+      public Object run(Object[] args) {
+        try {
+          System.out.write((byte[])args[0]);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+        return null;
+      }
+    }
+
     static void runNativeSide(String[] args) throws IOException {
       if(Boolean.parseBoolean(System.getProperty("nativeswing.peervm.debug.printstartmessage"))) {
         System.err.println("Starting spawned VM");
       }
       isOpen = true;
       int port = Integer.parseInt(args[0]);
-      boolean isPrintStreamChannelMode = port <= 0;
+      boolean isProcessIOChannelMode = port <= 0;
       Socket socket = null;
-      if(!isPrintStreamChannelMode) {
+      if(!isProcessIOChannelMode) {
         ServerSocket serverSocket = null;
         for(int i=19; i>=0; i--) {
           try {
@@ -872,10 +881,10 @@ public class NativeInterface {
       data.tracking = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.tracking"));
       display = new Display(data);
       Display.setAppName("DJ Native Swing");
-      if(isPrintStreamChannelMode) {
+      if(isProcessIOChannelMode) {
         PrintStream sysout = System.out;
         InputStream sysin = System.in;
-        messagingInterface = new SWTOutProcessPrintStreamMessagingInterface(sysin, sysout, true, display);
+        messagingInterface = new SWTOutProcessIOMessagingInterface(sysin, sysout, true, display);
         System.setIn(new InputStream() {
           @Override
           public int read() throws IOException {
@@ -887,12 +896,27 @@ public class NativeInterface {
           }
         });
         System.setOut(new PrintStream(new OutputStream() {
+          private IOStreamFormatter byteProcessor = new IOStreamFormatter();
           @Override
           public void write(int b) throws IOException {
+            sendBytes(new byte[] {(byte)b}, 0, 1);
+          }
+          @Override
+          public void write(byte[] b) throws IOException {
+            sendBytes(b, 0, b.length);
+          }
+          @Override
+          public void write(byte[] b, int off, int len) throws IOException {
+            sendBytes(b, off, len);
+          }
+          private void sendBytes(byte[] bytes, int offset, int length) {
+            try {
+              new CMJ_systemOut().asyncExec(false, byteProcessor.process(bytes, offset, length));
+            } catch(Exception e) {}
           }
         }));
       } else {
-        messagingInterface = new SWTOutProcessMessagingInterface(socket, true, display);
+        messagingInterface = new SWTOutProcessSocketsMessagingInterface(socket, true, display);
       }
       while(display != null && !display.isDisposed()) {
         try {
