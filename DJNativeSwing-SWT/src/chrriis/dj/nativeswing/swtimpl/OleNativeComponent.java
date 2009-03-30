@@ -261,7 +261,7 @@ public abstract class OleNativeComponent extends NativeComponent {
         for(int j=0; j<index; j++) {
           sb.append("  ");
         }
-        sb.append(getTypeDescription(functionDescription.returnType)).append(' ').append(functionDescription.name).append("(");
+        sb.append(functionDescription.name).append("(");
         for(int i=0; i<functionDescription.args.length; i++) {
           OleParameterDescription param = functionDescription.args[i];
           if(i > 0) {
@@ -269,7 +269,7 @@ public abstract class OleNativeComponent extends NativeComponent {
           }
           sb.append(getTypeDescription(param.type)).append(' ').append(param.name == null? "arg" + i: param.name);
         }
-        sb.append(")").append(Utils.LINE_SEPARATOR);
+        sb.append("): ").append(getTypeDescription(functionDescription.returnType)).append(Utils.LINE_SEPARATOR);
       }
       List<String> propertyList = new ArrayList<String>();
       for(int i=1; ; i++) {
