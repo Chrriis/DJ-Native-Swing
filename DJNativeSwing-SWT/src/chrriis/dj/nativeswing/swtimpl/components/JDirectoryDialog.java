@@ -8,7 +8,6 @@
 package chrriis.dj.nativeswing.swtimpl.components;
 
 import java.awt.Component;
-import java.awt.Window;
 import java.io.Serializable;
 import java.util.HashMap;
 
@@ -74,11 +73,11 @@ public class JDirectoryDialog {
 
   /**
    * Show the directory selection dialog, which is a blocking call until the user has made a choice.
-   * @param window The parent window.
+   * @param component The parent component.
    */
-  public void show(Window window) {
+  public void show(Component component) {
     final NativeDirectoryDialogContainer nativeComponent = new NativeDirectoryDialogContainer();
-    ModalDialogUtils.showModalDialog(window, nativeComponent, new Runnable() {
+    ModalDialogUtils.showModalDialog(component, nativeComponent, new Runnable() {
       public void run() {
         data = nativeComponent.open(data);
       }

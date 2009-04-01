@@ -11,6 +11,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Frame;
+import java.awt.Point;
 import java.awt.Window;
 import java.awt.Dialog.ModalityType;
 import java.awt.event.WindowAdapter;
@@ -31,7 +32,8 @@ class ModalDialogUtils {
     }
   }
 
-  static void showModalDialog(Window window, final NativeModalComponent nativeModalComponent, final Runnable runnable) {
+  static void showModalDialog(Component component, final NativeModalComponent nativeModalComponent, final Runnable runnable) {
+    Window window = SwingUtilities.getWindowAncestor(component);
     final JDialog dialog;
     if(Utils.IS_JAVA_6_OR_GREATER) {
       dialog = new JDialog(window, ModalityType.APPLICATION_MODAL);
@@ -44,7 +46,11 @@ class ModalDialogUtils {
     }
     dialog.setUndecorated(true);
     dialog.setSize(0, 0);
-    dialog.setLocationRelativeTo(window);
+    Point location = component.getLocationOnScreen();
+    location.x += component.getWidth() / 2 - 280;
+    location.y += component.getHeight() / 2 - 200;
+    dialog.setLocation(location);
+//    dialog.setLocationRelativeTo(window);
     dialog.addWindowListener(new WindowAdapter() {
       @Override
       public void windowOpened(WindowEvent e) {
