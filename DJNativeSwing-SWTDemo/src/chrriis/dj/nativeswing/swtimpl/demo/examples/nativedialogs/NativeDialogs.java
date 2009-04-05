@@ -64,46 +64,46 @@ public class NativeDialogs extends JPanel {
     cons.fill = GridBagConstraints.NONE;
     cons.anchor = GridBagConstraints.CENTER;
     cons.gridy++;
-    JButton showDialogButton = new JButton("Show Dialog");
+    final JButton showDialogButton = new JButton("Show Dialog");
     showDialogButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         if(basicRadioButton.isSelected()) {
           JFileDialog fileDialog = new JFileDialog();
-          fileDialog.show(basicRadioButton);
-          JOptionPane.showMessageDialog(basicRadioButton, "Selected file: " + fileDialog.getSelectedFileName());
+          fileDialog.show(NativeDialogs.this);
+          JOptionPane.showMessageDialog(NativeDialogs.this, "Selected file: " + fileDialog.getSelectedFileName());
           return;
         }
         if(multiSelectionRadioButton.isSelected()) {
           JFileDialog fileDialog = new JFileDialog();
           fileDialog.setSelectionMode(SelectionMode.MULTIPLE_SELECTION);
-          fileDialog.show(multiSelectionRadioButton);
+          fileDialog.show(NativeDialogs.this);
           String fileNames = Arrays.toString(fileDialog.getSelectedFileNames());
           if(fileNames.length() > 100) {
             fileNames = fileNames.substring(0, 100) + "...";
           }
-          JOptionPane.showMessageDialog(multiSelectionRadioButton, "Selected files: " + fileNames);
+          JOptionPane.showMessageDialog(NativeDialogs.this, "Selected files: " + fileNames);
           return;
         }
         if(filtersRadioButton.isSelected()) {
           JFileDialog fileDialog = new JFileDialog();
           fileDialog.setDialogType(DialogType.SAVE_DIALOG_TYPE);
           fileDialog.setExtensionFilters(new String[] {"*.*", "*.mp3;*.avi", "*.txt;*.doc"}, new String[] {"All files", "Multimedia file (*.mp3, *.avi)", "Text document (*.txt, *.doc)"}, 1);
-          fileDialog.show(filtersRadioButton);
-          JOptionPane.showMessageDialog(filtersRadioButton, "Selected file: " + fileDialog.getSelectedFileName());
+          fileDialog.show(NativeDialogs.this);
+          JOptionPane.showMessageDialog(NativeDialogs.this, "Selected file: " + fileDialog.getSelectedFileName());
           return;
         }
         if(directoryRadioButton.isSelected()) {
           JDirectoryDialog directoryDialog = new JDirectoryDialog();
-          directoryDialog.show(directoryRadioButton);
-          JOptionPane.showMessageDialog(directoryRadioButton, "Selected directory: " + directoryDialog.getSelectedDirectory());
+          directoryDialog.show(NativeDialogs.this);
+          JOptionPane.showMessageDialog(NativeDialogs.this, "Selected directory: " + directoryDialog.getSelectedDirectory());
           return;
         }
         if(customizedDirectoryRadioButton.isSelected()) {
           JDirectoryDialog directoryDialog = new JDirectoryDialog();
           directoryDialog.setTitle("This is a GREAT dialog!");
           directoryDialog.setMessage("Choose a directory NOW!");
-          directoryDialog.show(customizedDirectoryRadioButton);
-          JOptionPane.showMessageDialog(customizedDirectoryRadioButton, "Selected directory: " + directoryDialog.getSelectedDirectory());
+          directoryDialog.show(NativeDialogs.this);
+          JOptionPane.showMessageDialog(NativeDialogs.this, "Selected directory: " + directoryDialog.getSelectedDirectory());
           return;
         }
       }
