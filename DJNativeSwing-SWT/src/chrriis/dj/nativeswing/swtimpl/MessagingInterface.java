@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
 
 import chrriis.common.ObjectRegistry;
 
@@ -243,9 +244,20 @@ abstract class MessagingInterface {
             }
           } else {
             synchronized(RECEIVER_LOCK) {
-              if(receivedMessageList.isEmpty()) {
+              boolean isFirst = true;
+              while(receivedMessageList.isEmpty()) {
+                if(!isFirst && isNativeSide) {
+                  // Sometimes, AWT is synchronously waiting for the native side to pump some event.
+                  // The native side is currently waiting, so we set a timeout and do some pumping.
+                  Display.getDefault().readAndDispatch();
+                }
+                isFirst = false;
                 isWaitingResponse = true;
-                RECEIVER_LOCK.wait();
+                if(isNativeSide) {
+                  RECEIVER_LOCK.wait(500);
+                } else {
+                  RECEIVER_LOCK.wait();
+                }
                 isWaitingResponse = false;
               }
             }
