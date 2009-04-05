@@ -46,11 +46,14 @@ class ModalDialogUtils {
     }
     dialog.setUndecorated(true);
     dialog.setSize(0, 0);
-    Point location = component.getLocationOnScreen();
-    location.x += component.getWidth() / 2 - 280;
-    location.y += component.getHeight() / 2 - 200;
-    dialog.setLocation(location);
-//    dialog.setLocationRelativeTo(window);
+    if(Utils.IS_WINDOWS) {
+      Point location = component.getLocationOnScreen();
+      location.x += component.getWidth() / 2 - 280;
+      location.y += component.getHeight() / 2 - 200;
+      dialog.setLocation(location);
+    } else {
+      dialog.setLocationRelativeTo(window);
+    }
     dialog.addWindowListener(new WindowAdapter() {
       @Override
       public void windowOpened(WindowEvent e) {
