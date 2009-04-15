@@ -9,6 +9,9 @@ package chrriis.dj.nativeswing.swtimpl.components;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GraphicsConfiguration;
+import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -162,6 +165,42 @@ public class JWebBrowserWindow extends JFrame {
    */
   public boolean isLocationBarVisisble() {
     return webBrowser.isLocationBarVisible();
+  }
+
+  @SuppressWarnings("deprecation")
+  @Override
+  public void show() {
+    boolean isLocationByPlatform = isLocationByPlatform();
+    super.show();
+    if(isLocationByPlatform) {
+      adjustInScreen();
+    }
+  }
+
+  private void adjustInScreen() {
+    GraphicsConfiguration gc = getGraphicsConfiguration();
+    Rectangle gcBounds = gc.getBounds();
+    Insets screenInsets = Toolkit.getDefaultToolkit().getScreenInsets(gc);
+    gcBounds.x += screenInsets.left;
+    gcBounds.width -= screenInsets.left + screenInsets.right;
+    gcBounds.y += screenInsets.top;
+    gcBounds.height -= screenInsets.top + screenInsets.bottom;
+    Rectangle bounds = getBounds();
+    if(gcBounds.x + gcBounds.width < bounds.x + bounds.width) {
+      bounds.x = gcBounds.x + gcBounds.width - bounds.width;
+    }
+    if(bounds.x < gcBounds.x) {
+      bounds.x = gcBounds.x;
+    }
+    if(gcBounds.y + gcBounds.height < bounds.y + bounds.height) {
+      bounds.y = gcBounds.y + gcBounds.height - bounds.height;
+    }
+    if(bounds.y < gcBounds.y) {
+      bounds.y = gcBounds.y;
+    }
+    if(!getBounds().equals(bounds)) {
+      setBounds(bounds);
+    }
   }
 
 }

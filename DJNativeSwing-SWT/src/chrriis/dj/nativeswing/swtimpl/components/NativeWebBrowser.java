@@ -116,8 +116,7 @@ class NativeWebBrowser extends NativeComponent {
       if(!jWebBrowser.isNativePeerInitialized()) {
         Window windowAncestor = SwingUtilities.getWindowAncestor(jWebBrowser);
         if(windowAncestor == null) {
-          final JWebBrowserWindow webBrowserWindow = new JWebBrowserWindow(jWebBrowser);
-          windowAncestor = webBrowserWindow;
+          windowAncestor = new JWebBrowserWindow(jWebBrowser);
         } else {
         }
         jWebBrowser.getNativeComponent().initializeNativePeer();
