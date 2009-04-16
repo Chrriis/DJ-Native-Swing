@@ -147,11 +147,11 @@ class NativeWebBrowser extends NativeComponent {
           browserWindow.validate();
           Dimension windowSize = browserWindow.getSize();
           Dimension webBrowserSize = browserWindow.getWebBrowser().getNativeWebBrowserContainerPane().getSize();
-          if(size.width != 0) {
+          if(size.width > 0) {
             windowSize.width -= webBrowserSize.width;
             windowSize.width += size.width;
           }
-          if(size.height != 0) {
+          if(size.height > 0) {
             windowSize.height -= webBrowserSize.height;
             windowSize.height += size.height;
           }
