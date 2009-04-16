@@ -335,10 +335,8 @@ public class Utils {
         NetworkInterface networkInterface = en.nextElement();
         for(Enumeration<InetAddress> en2=networkInterface.getInetAddresses(); en2.hasMoreElements(); ) {
           InetAddress inetAddress = en2.nextElement();
-          if(inetAddress.isLoopbackAddress() || inetAddress.isSiteLocalAddress()) {
-            if(!loopbackAddress.equals(inetAddress.getHostAddress())) {
-              inetAddressList.add(inetAddress);
-            }
+          if(!loopbackAddress.equals(inetAddress.getHostAddress())) {
+            inetAddressList.add(inetAddress);
           }
         }
       }
@@ -346,14 +344,19 @@ public class Utils {
     }
     Collections.sort(inetAddressList, new Comparator<InetAddress>() {
       public int compare(InetAddress o1, InetAddress o2) {
-        if(o1.isLoopbackAddress()) {
-          if(o2.isLoopbackAddress()) {
-            return o1.getHostAddress().compareTo(o2.getHostAddress());
+        if(o1.isLoopbackAddress() != o2.isLoopbackAddress() && o1.isSiteLocalAddress() != o2.isSiteLocalAddress()) {
+          if(o1.isLoopbackAddress()) {
+            return -1;
           }
-          return 1;
-        }
-        if(o2.isLoopbackAddress()) {
-          return -1;
+          if(o2.isLoopbackAddress()) {
+            return 1;
+          }
+          if(o1.isSiteLocalAddress()) {
+            return -1;
+          }
+          if(o2.isSiteLocalAddress()) {
+            return 1;
+          }
         }
         return o1.getHostAddress().compareTo(o2.getHostAddress());
       }
@@ -363,6 +366,11 @@ public class Utils {
       if(isLocalHostAddressReachable(hostAddress, port)) {
         return hostAddress;
       }
+    }
+    try {
+      // This call can take some time.
+      return InetAddress.getLocalHost().getHostAddress();
+    } catch(Exception e) {
     }
     return null;
   }
@@ -375,7 +383,7 @@ public class Utils {
       port = serverSocket.getLocalPort();
       try {
         Socket socket = new Socket();
-        socket.connect(new InetSocketAddress(hostAddress, port), 200);
+        socket.connect(new InetSocketAddress(hostAddress, port), 500);
         isReachable = true;
         socket.close();
       } catch (Exception e) {

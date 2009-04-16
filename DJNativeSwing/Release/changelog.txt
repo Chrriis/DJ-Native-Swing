@@ -5,6 +5,11 @@ Licence terms: LGPL (see licence.txt)
 
 ---------------------------------- Change log ----------------------------------
 
+* Version 0.9.9 (xxxxxxxxxxxxxx):
+
+- Local address resolution is improved.
+
+
 * Version 0.9.8 (March 24, 2009):
 
 - Default web server can be stopped.
