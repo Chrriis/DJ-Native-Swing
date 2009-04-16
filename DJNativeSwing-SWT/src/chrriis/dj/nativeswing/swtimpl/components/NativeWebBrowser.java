@@ -141,16 +141,20 @@ class NativeWebBrowser extends NativeComponent {
       newWebBrowser.setStatusBarVisible((Boolean)args[4]);
       Point location = (Point)args[5];
       Dimension size = (Dimension)args[6];
-      JWebBrowserWindow browserWindow = newWebBrowser.getWebBrowserWindow();;
+      JWebBrowserWindow browserWindow = newWebBrowser.getWebBrowserWindow();
       if(browserWindow != null) {
         if(size != null) {
           browserWindow.validate();
           Dimension windowSize = browserWindow.getSize();
           Dimension webBrowserSize = browserWindow.getWebBrowser().getNativeWebBrowserContainerPane().getSize();
-          windowSize.width -= webBrowserSize.width;
-          windowSize.height -= webBrowserSize.height;
-          windowSize.width += size.width;
-          windowSize.height += size.height;
+          if(size.width != 0) {
+            windowSize.width -= webBrowserSize.width;
+            windowSize.width += size.width;
+          }
+          if(size.height != 0) {
+            windowSize.height -= webBrowserSize.height;
+            windowSize.height += size.height;
+          }
           browserWindow.setSize(windowSize);
         }
         if(location != null) {
