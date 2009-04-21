@@ -109,7 +109,12 @@ public class JWebBrowser extends NSPanelComponent {
     NativeWebBrowser.setCookie(url, value);
   }
 
-  private final ResourceBundle RESOURCES = ResourceBundle.getBundle(JWebBrowser.class.getPackage().getName().replace('.', '/') + "/resource/WebBrowser");
+  private final ResourceBundle RESOURCES;
+
+  {
+    String className = JWebBrowser.class.getName();
+    RESOURCES = ResourceBundle.getBundle(className.substring(0, className.lastIndexOf('.')).replace('.', '/') + "/resource/WebBrowser");
+  }
 
   private NativeWebBrowser nativeWebBrowser;
 

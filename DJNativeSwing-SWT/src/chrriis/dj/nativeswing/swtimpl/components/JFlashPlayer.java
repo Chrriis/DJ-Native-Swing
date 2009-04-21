@@ -53,7 +53,12 @@ public class JFlashPlayer extends NSPanelComponent {
     };
   }
 
-  private final ResourceBundle RESOURCES = ResourceBundle.getBundle(JFlashPlayer.class.getPackage().getName().replace('.', '/') + "/resource/FlashPlayer");
+  private final ResourceBundle RESOURCES;
+
+  {
+    String className = JFlashPlayer.class.getName();
+    RESOURCES = ResourceBundle.getBundle(className.substring(0, className.lastIndexOf('.')).replace('.', '/') + "/resource/FlashPlayer");
+  }
 
   private JPanel webBrowserPanel;
   private JWebBrowser webBrowser;

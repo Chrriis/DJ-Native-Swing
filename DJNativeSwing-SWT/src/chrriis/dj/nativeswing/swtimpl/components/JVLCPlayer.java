@@ -46,7 +46,12 @@ import chrriis.dj.nativeswing.swtimpl.components.VLCInput.VLCMediaState;
  */
 public class JVLCPlayer extends NSPanelComponent {
 
-  private final ResourceBundle RESOURCES = ResourceBundle.getBundle(JVLCPlayer.class.getPackage().getName().replace('.', '/') + "/resource/VLCPlayer");
+  private final ResourceBundle RESOURCES;
+
+  {
+    String className = JVLCPlayer.class.getName();
+    RESOURCES = ResourceBundle.getBundle(className.substring(0, className.lastIndexOf('.')).replace('.', '/') + "/resource/VLCPlayer");
+  }
 
   private JPanel webBrowserPanel;
   private JWebBrowser webBrowser;

@@ -34,7 +34,12 @@ import chrriis.dj.nativeswing.NSOption;
  */
 public class JWebBrowserWindow extends JFrame {
 
-  private final ResourceBundle RESOURCES = ResourceBundle.getBundle(JWebBrowserWindow.class.getPackage().getName().replace('.', '/') + "/resource/WebBrowser");
+  private final ResourceBundle RESOURCES;
+
+  {
+    String className = JWebBrowser.class.getName();
+    RESOURCES = ResourceBundle.getBundle(className.substring(0, className.lastIndexOf('.')).replace('.', '/') + "/resource/WebBrowser");
+  }
 
   private JWebBrowser webBrowser;
 
