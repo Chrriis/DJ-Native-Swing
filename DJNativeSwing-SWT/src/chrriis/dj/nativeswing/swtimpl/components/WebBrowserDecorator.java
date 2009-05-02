@@ -13,6 +13,10 @@ import javax.swing.JPanel;
 
 
 /**
+ * A web browser decorator is a component that wraps the rendering component and is added to the web browser
+ * to provide the various button bars, fields and menus.<br>
+ * Generally, it is not needed to create a custom subclass: it is usually enough to subclass a default web
+ * browser decorator and override certain methods.
  * @author Christopher Deckers
  */
 public abstract class WebBrowserDecorator extends JPanel {

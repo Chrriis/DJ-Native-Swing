@@ -155,6 +155,10 @@ public class DefaultWebBrowserDecorator extends WebBrowserDecorator {
     }
   };
 
+  /**
+   * The menu bar.
+   * @author Christopher Deckers
+   */
   public class WebBrowserMenuBar extends JMenuBar {
 
     private JMenu fileMenu;
