@@ -146,7 +146,7 @@ class NativeWebBrowser extends NativeComponent {
         if(size != null) {
           browserWindow.validate();
           Dimension windowSize = browserWindow.getSize();
-          Dimension webBrowserSize = browserWindow.getWebBrowser().getNativeWebBrowserContainerPane().getSize();
+          Dimension webBrowserSize = browserWindow.getWebBrowser().getEmbeddableComponent().getSize();
           if(size.width > 0) {
             windowSize.width -= webBrowserSize.width;
             windowSize.width += size.width;

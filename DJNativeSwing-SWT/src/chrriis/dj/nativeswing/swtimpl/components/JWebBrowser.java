@@ -8,48 +8,16 @@
 package chrriis.dj.nativeswing.swtimpl.components;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Insets;
 import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.ResourceBundle;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JTextField;
-import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
-import javax.swing.border.AbstractBorder;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.Border;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
 
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.NSOption;
@@ -82,6 +50,51 @@ public class JWebBrowser extends NSPanelComponent {
   }
 
   /**
+   * A factory that creates the decorators for web browsers.
+   * @author Christopher Deckers
+   */
+  public static interface WebBrowserDecoratorFactory {
+    /**
+     * Create the decorator for a web browser, which adds the rendering component to its component hierarchy and will itself be added to the web browser.
+     * @param webBrowser the webbrowser for which to create the decorator.
+     * @param renderingComponent the component that renders the web browser's content.
+     * @return the decorator.
+     */
+    public WebBrowserDecorator createWebBrowserDecorator(JWebBrowser webBrowser, Component renderingComponent);
+  }
+
+  private static WebBrowserDecoratorFactory webBrowserDecoratorFactory;
+
+  /**
+   * Set the decorator that will be used for future web browser instances.
+   * @param webBrowserDecoratorFactory the factory that creates the decorators, or null for default decorators.
+   */
+  public static void setWebBrowserDecoratorFactory(WebBrowserDecoratorFactory webBrowserDecoratorFactory) {
+    JWebBrowser.webBrowserDecoratorFactory = webBrowserDecoratorFactory;
+  }
+
+  private WebBrowserDecorator webBrowserDecorator;
+
+  WebBrowserDecorator getWebBrowserDecorator() {
+    return webBrowserDecorator;
+  }
+
+  /**
+   * Create a decorator for this web browser.
+   * @param renderingComponent the component to add to the decorator's component hierarchy.
+   * @return the decorator that was created.
+   */
+  protected WebBrowserDecorator createWebBrowserDecorator(Component renderingComponent) {
+    if(webBrowserDecoratorFactory != null) {
+      WebBrowserDecorator webBrowserDecorator = webBrowserDecoratorFactory.createWebBrowserDecorator(this, renderingComponent);
+      if(webBrowserDecorator != null) {
+        return webBrowserDecorator;
+      }
+    }
+    return new DefaultWebBrowserDecorator(this, renderingComponent);
+  }
+
+  /**
    * Clear all session cookies from all web browser instances.
    */
   public static void clearSessionCookies() {
@@ -109,106 +122,7 @@ public class JWebBrowser extends NSPanelComponent {
     NativeWebBrowser.setCookie(url, value);
   }
 
-  private final ResourceBundle RESOURCES;
-
-  {
-    String className = JWebBrowser.class.getName();
-    RESOURCES = ResourceBundle.getBundle(className.substring(0, className.lastIndexOf('.')).replace('.', '/') + "/resource/WebBrowser");
-  }
-
   private NativeWebBrowser nativeWebBrowser;
-
-  private JPanel menuToolAndLocationBarPanel;
-  private JMenuBar menuBar;
-  private JMenu fileMenu;
-  private JMenu viewMenu;
-  private ButtonBarPane buttonBarPane;
-  private JCheckBoxMenuItem buttonBarCheckBoxMenuItem;
-  private LocationBarPane locationBarPane;
-  private JCheckBoxMenuItem locationBarCheckBoxMenuItem;
-  private StatusBarPane statusBarPane;
-  private JCheckBoxMenuItem statusBarCheckBoxMenuItem;
-  private JPanel nativeWebBrowserBorderContainerPane;
-  private JPanel nativeWebBrowserContainerPane;
-
-  private JMenuItem backMenuItem;
-  private JMenuItem forwardMenuItem;
-  private JMenuItem reloadMenuItem;
-  private JMenuItem stopMenuItem;
-
-  private static class NWebBrowserListener extends WebBrowserAdapter {
-    @Override
-    public void locationChanged(WebBrowserNavigationEvent e) {
-      JWebBrowser webBrowser = e.getWebBrowser();
-      updateStopButton(webBrowser, false);
-      if(e.isTopFrame()) {
-        if(webBrowser.locationBarPane != null) {
-          webBrowser.locationBarPane.updateLocation();
-        }
-      }
-      webBrowser.updateNavigationButtons();
-    }
-    @Override
-    public void locationChanging(WebBrowserNavigationEvent e) {
-      JWebBrowser webBrowser = e.getWebBrowser();
-      if(e.isTopFrame()) {
-        if(webBrowser.locationBarPane != null) {
-          webBrowser.locationBarPane.updateLocation(e.getNewResourceLocation());
-        }
-      }
-      updateStopButton(webBrowser, true);
-    }
-    @Override
-    public void locationChangeCanceled(WebBrowserNavigationEvent e) {
-      JWebBrowser webBrowser = e.getWebBrowser();
-      updateStopButton(webBrowser, false);
-      if(e.isTopFrame()) {
-        if(webBrowser.locationBarPane != null) {
-          webBrowser.locationBarPane.updateLocation();
-        }
-      }
-      webBrowser.updateNavigationButtons();
-    }
-    @Override
-    public void statusChanged(WebBrowserEvent e) {
-      JWebBrowser webBrowser = e.getWebBrowser();
-      if(webBrowser.statusBarPane != null) {
-        webBrowser.statusBarPane.updateStatus();
-      }
-    }
-    @Override
-    public void loadingProgressChanged(WebBrowserEvent e) {
-      JWebBrowser webBrowser = e.getWebBrowser();
-      if(webBrowser.statusBarPane != null) {
-        webBrowser.statusBarPane.updateProgressValue();
-      }
-      updateStopButton(webBrowser, false);
-    }
-    private void updateStopButton(JWebBrowser webBrowser, boolean isForcedOn) {
-      boolean isStopEnabled = isForcedOn || webBrowser.getLoadingProgress() != 100;
-      if(webBrowser.buttonBarPane != null) {
-        webBrowser.buttonBarPane.stopButton.setEnabled(isStopEnabled);
-      }
-      webBrowser.stopMenuItem.setEnabled(isStopEnabled);
-    }
-  }
-
-  private boolean isViewMenuVisible;
-
-  private void updateNavigationButtons() {
-    if(isViewMenuVisible || isButtonBarVisible()) {
-      boolean isBackEnabled = nativeWebBrowser.isNativePeerInitialized()? nativeWebBrowser.isBackNavigationEnabled(): false;
-      if(buttonBarPane != null) {
-        buttonBarPane.backButton.setEnabled(isBackEnabled);
-      }
-      backMenuItem.setEnabled(isBackEnabled);
-      boolean isForwardEnabled = nativeWebBrowser.isNativePeerInitialized()? nativeWebBrowser.isForwardNavigationEnabled(): false;
-      if(buttonBarPane != null) {
-        buttonBarPane.forwardButton.setEnabled(isForwardEnabled);
-      }
-      forwardMenuItem.setEnabled(isForwardEnabled);
-    }
-  }
 
   /**
    * Copy the appearance, the visibility of the various bars, from one web browser to another.
@@ -236,160 +150,7 @@ public class JWebBrowser extends NSPanelComponent {
     }
   }
 
-  private static final Border STATUS_BAR_BORDER = new AbstractBorder() {
-    @Override
-    public Insets getBorderInsets(Component c) {
-      return new Insets(1, 1, 1, 1);
-    }
-    @Override
-    public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-      Color background = c.getBackground();
-      g.setColor(background == null? Color.LIGHT_GRAY: background.darker());
-      g.drawLine(0, 0, width-1, 0);
-      g.drawLine(width-1, 0, width-1, height-1);
-      g.drawLine(0, height-1, width-1, height-1);
-      g.drawLine(0, 0, 0, height-1);
-    }
-  };
-
-  private class ButtonBarPane extends JPanel {
-
-    private JButton backButton;
-    private JButton forwardButton;
-    private JButton reloadButton;
-    private JButton stopButton;
-
-    public ButtonBarPane() {
-      super(new BorderLayout());
-      JToolBar buttonToolBar = new JToolBar();
-      buttonToolBar.add(Box.createHorizontalStrut(2));
-      buttonToolBar.setFloatable(false);
-      backButton = new JButton(createIcon("BackIcon"));
-      backButton.setEnabled(backMenuItem.isEnabled());
-      backButton.setToolTipText(RESOURCES.getString("BackText"));
-      backButton.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          navigateBack();
-          nativeWebBrowser.requestFocus();
-        }
-      });
-      buttonToolBar.add(backButton);
-      forwardButton = new JButton(createIcon("ForwardIcon"));
-      forwardButton.setToolTipText(RESOURCES.getString("ForwardText"));
-      forwardButton.setEnabled(forwardMenuItem.isEnabled());
-      forwardButton.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          navigateForward();
-          nativeWebBrowser.requestFocus();
-        }
-      });
-      buttonToolBar.add(forwardButton);
-      reloadButton = new JButton(createIcon("ReloadIcon"));
-      reloadButton.setToolTipText(RESOURCES.getString("ReloadText"));
-      reloadButton.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          reloadPage();
-          nativeWebBrowser.requestFocus();
-        }
-      });
-      buttonToolBar.add(reloadButton);
-      stopButton = new JButton(createIcon("StopIcon"));
-      stopButton.setToolTipText(RESOURCES.getString("StopText"));
-      stopButton.setEnabled(stopMenuItem.isEnabled());
-      stopButton.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          stopLoading();
-        }
-      });
-      buttonToolBar.add(stopButton);
-      add(buttonToolBar, BorderLayout.CENTER);
-    }
-
-  }
-
-  private class LocationBarPane extends JPanel {
-
-    private JTextField locationField;
-
-    public LocationBarPane() {
-      super(new BorderLayout());
-      JToolBar locationToolBar = new JToolBar();
-      // We have to force the layout manager because in Synth L&F the text field does not take the full available width.
-      locationToolBar.setLayout(new BoxLayout(locationToolBar, BoxLayout.LINE_AXIS));
-      JPanel locationToolBarInnerPanel = new JPanel(new BorderLayout());
-      locationToolBarInnerPanel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-      locationToolBarInnerPanel.setOpaque(false);
-      locationToolBar.setFloatable(false);
-      locationField = new JTextField();
-      locationField.addKeyListener(new KeyAdapter() {
-        @Override
-        public void keyPressed(KeyEvent e) {
-          if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-            updateLocation();
-            locationField.selectAll();
-          }
-        }
-      });
-      ActionListener goActionListener = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          navigate(locationField.getText());
-          nativeWebBrowser.requestFocus();
-        }
-      };
-      locationField.addActionListener(goActionListener);
-      updateLocation();
-      locationToolBarInnerPanel.add(locationField, BorderLayout.CENTER);
-      JButton goButton = new JButton(createIcon("GoIcon"));
-      goButton.setToolTipText(RESOURCES.getString("GoText"));
-      goButton.addActionListener(goActionListener);
-      locationToolBar.add(locationToolBarInnerPanel);
-      locationToolBar.add(goButton);
-      add(locationToolBar, BorderLayout.CENTER);
-    }
-
-    public void updateLocation(String location) {
-      locationField.setText(location);
-    }
-
-    public void updateLocation() {
-      locationField.setText(nativeWebBrowser.isNativePeerInitialized()? nativeWebBrowser.getResourceLocation(): "");
-    }
-
-  }
-
-  private class StatusBarPane extends JPanel {
-
-    private JLabel statusLabel;
-    private JProgressBar progressBar;
-
-    public StatusBarPane() {
-      super(new BorderLayout());
-      setBorder(BorderFactory.createCompoundBorder(STATUS_BAR_BORDER, BorderFactory.createEmptyBorder(2, 2, 2, 2)));
-      statusLabel = new JLabel();
-      updateStatus();
-      add(statusLabel, BorderLayout.CENTER);
-      progressBar = new JProgressBar() {
-        @Override
-        public Dimension getPreferredSize() {
-          return new Dimension(getParent().getWidth() / 10, 0);
-        }
-      };
-      updateProgressValue();
-      add(progressBar, BorderLayout.EAST);
-    }
-
-    public void updateProgressValue() {
-      int loadingProgress = nativeWebBrowser.isNativePeerInitialized()? nativeWebBrowser.getLoadingProgress(): 100;
-      progressBar.setValue(loadingProgress);
-      progressBar.setVisible(loadingProgress < 100);
-    }
-
-    public void updateStatus() {
-      String status = nativeWebBrowser.isNativePeerInitialized()? nativeWebBrowser.getStatusText(): "";
-      statusLabel.setText(status.length() == 0? " ": status);
-    }
-
-  }
+  private Component embeddableComponent;
 
   /**
    * Construct a new web browser.
@@ -399,136 +160,9 @@ public class JWebBrowser extends NSPanelComponent {
     Map<Object, Object> optionMap = NSOption.createOptionMap(options);
     nativeWebBrowser = new NativeWebBrowser(this, optionMap.get(USE_XULRUNNER_RUNTIME_OPTION_KEY) != null);
     initialize(nativeWebBrowser);
-    menuToolAndLocationBarPanel = new JPanel(new BorderLayout());
-    menuBar = new JMenuBar();
-    menuToolAndLocationBarPanel.add(menuBar, BorderLayout.NORTH);
-    add(menuToolAndLocationBarPanel, BorderLayout.NORTH);
-    nativeWebBrowserBorderContainerPane = new JPanel(new BorderLayout());
-    nativeWebBrowserContainerPane = new JPanel(new BorderLayout());
-    nativeWebBrowserContainerPane.add(nativeWebBrowser.createEmbeddableComponent(optionMap), BorderLayout.CENTER);
-    nativeWebBrowserBorderContainerPane.add(nativeWebBrowserContainerPane, BorderLayout.CENTER);
-    add(nativeWebBrowserBorderContainerPane, BorderLayout.CENTER);
-    nativeWebBrowser.addWebBrowserListener(new NWebBrowserListener());
-    adjustBorder();
-    fileMenu = new JMenu(RESOURCES.getString("FileMenu"));
-    JMenuItem fileNewWindowMenuItem = new JMenuItem(RESOURCES.getString("FileNewWindowMenu"));
-    fileNewWindowMenuItem.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        JWebBrowser webBrowser;
-        if(((NativeWebBrowser)JWebBrowser.this.getNativeComponent()).isXULRunnerRuntime()) {
-          webBrowser = new JWebBrowser(useXULRunnerRuntime());
-        } else {
-          webBrowser = new JWebBrowser();
-        }
-        JWebBrowser.copyAppearance(JWebBrowser.this, webBrowser);
-        JWebBrowser.copyContent(JWebBrowser.this, webBrowser);
-        JWebBrowserWindow webBrowserWindow = new JWebBrowserWindow(webBrowser);
-        webBrowserWindow.setVisible(true);
-      }
-    });
-    fileMenu.add(fileNewWindowMenuItem);
-    final JMenuItem fileOpenLocationMenuItem = new JMenuItem(RESOURCES.getString("FileOpenLocationMenu"));
-    fileOpenLocationMenuItem.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        String path = JOptionPane.showInputDialog(JWebBrowser.this, RESOURCES.getString("FileOpenLocationDialogMessage"), RESOURCES.getString("FileOpenLocationDialogTitle"), JOptionPane.QUESTION_MESSAGE);
-        if(path != null) {
-          navigate(path);
-        }
-      }
-    });
-    fileMenu.add(fileOpenLocationMenuItem);
-    final JMenuItem fileOpenFileMenuItem = new JMenuItem(RESOURCES.getString("FileOpenFileMenu"));
-    fileOpenFileMenuItem.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        JFileChooser fileChooser = new JFileChooser();
-        if(fileChooser.showOpenDialog(JWebBrowser.this) == JFileChooser.APPROVE_OPTION) {
-          try {
-            navigate(fileChooser.getSelectedFile().getAbsolutePath());
-          } catch(Exception ex) {
-            ex.printStackTrace();
-          }
-        }
-      }
-    });
-    fileMenu.add(fileOpenFileMenuItem);
-    menuBar.add(fileMenu);
-    viewMenu = new JMenu(RESOURCES.getString("ViewMenu"));
-    JMenu viewToolbarsMenu = new JMenu(RESOURCES.getString("ViewToolbarsMenu"));
-    buttonBarCheckBoxMenuItem = new JCheckBoxMenuItem(RESOURCES.getString("ViewToolbarsButtonBarMenu"));
-    buttonBarCheckBoxMenuItem.setSelected(isButtonBarVisible());
-    buttonBarCheckBoxMenuItem.addItemListener(new ItemListener() {
-      public void itemStateChanged(ItemEvent e) {
-        setButtonBarVisible(e.getStateChange() == ItemEvent.SELECTED);
-      }
-    });
-    viewToolbarsMenu.add(buttonBarCheckBoxMenuItem);
-    locationBarCheckBoxMenuItem = new JCheckBoxMenuItem(RESOURCES.getString("ViewToolbarsLocationBarMenu"));
-    locationBarCheckBoxMenuItem.setSelected(isLocationBarVisible());
-    locationBarCheckBoxMenuItem.addItemListener(new ItemListener() {
-      public void itemStateChanged(ItemEvent e) {
-        setLocationBarVisible(e.getStateChange() == ItemEvent.SELECTED);
-      }
-    });
-    viewToolbarsMenu.add(locationBarCheckBoxMenuItem);
-    viewMenu.add(viewToolbarsMenu);
-    statusBarCheckBoxMenuItem = new JCheckBoxMenuItem(RESOURCES.getString("ViewStatusBarMenu"));
-    statusBarCheckBoxMenuItem.setSelected(isStatusBarVisible());
-    statusBarCheckBoxMenuItem.addItemListener(new ItemListener() {
-      public void itemStateChanged(ItemEvent e) {
-        setStatusBarVisible(e.getStateChange() == ItemEvent.SELECTED);
-      }
-    });
-    viewMenu.add(statusBarCheckBoxMenuItem);
-    viewMenu.addSeparator();
-    backMenuItem = new JMenuItem(RESOURCES.getString("ViewMenuBack"), createIcon("ViewMenuBackIcon"));
-    backMenuItem.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        navigateBack();
-        nativeWebBrowser.requestFocus();
-      }
-    });
-    backMenuItem.setEnabled(false);
-    viewMenu.add(backMenuItem);
-    forwardMenuItem = new JMenuItem(RESOURCES.getString("ViewMenuForward"), createIcon("ViewMenuForwardIcon"));
-    forwardMenuItem.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        navigateForward();
-        nativeWebBrowser.requestFocus();
-      }
-    });
-    forwardMenuItem.setEnabled(false);
-    viewMenu.add(forwardMenuItem);
-    reloadMenuItem = new JMenuItem(RESOURCES.getString("ViewMenuReload"), createIcon("ViewMenuReloadIcon"));
-    reloadMenuItem.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        reloadPage();
-        nativeWebBrowser.requestFocus();
-      }
-    });
-    reloadMenuItem.setEnabled(false);
-    viewMenu.add(reloadMenuItem);
-    stopMenuItem = new JMenuItem(RESOURCES.getString("ViewMenuStop"), createIcon("ViewMenuStopIcon"));
-    stopMenuItem.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        stopLoading();
-      }
-    });
-    stopMenuItem.setEnabled(false);
-    viewMenu.add(stopMenuItem);
-    menuBar.add(viewMenu);
-    viewMenu.getPopupMenu().addPopupMenuListener(new PopupMenuListener() {
-      public void popupMenuCanceled(PopupMenuEvent e) {
-      }
-      public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-        isViewMenuVisible = false;
-      }
-      public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-        isViewMenuVisible = true;
-        if(!isButtonBarVisible()) {
-          updateNavigationButtons();
-        }
-      }
-    });
+    embeddableComponent = nativeWebBrowser.createEmbeddableComponent(optionMap);
+    webBrowserDecorator = createWebBrowserDecorator(embeddableComponent);
+    add(webBrowserDecorator, BorderLayout.CENTER);
     setButtonBarVisible(true);
     setLocationBarVisible(true);
     setStatusBarVisible(true);
@@ -539,20 +173,7 @@ public class JWebBrowser extends NSPanelComponent {
    * @param isStatusBarVisible true if the status bar should be visible, false otherwise.
    */
   public void setStatusBarVisible(boolean isStatusBarVisible) {
-    if(isStatusBarVisible == isStatusBarVisible()) {
-      return;
-    }
-    if(isStatusBarVisible) {
-      statusBarPane = new StatusBarPane();
-      add(statusBarPane, BorderLayout.SOUTH);
-    } else {
-      remove(statusBarPane);
-      statusBarPane = null;
-    }
-    revalidate();
-    repaint();
-    statusBarCheckBoxMenuItem.setSelected(isStatusBarVisible);
-    adjustBorder();
+    webBrowserDecorator.setStatusBarVisible(isStatusBarVisible);
   }
 
   /**
@@ -560,7 +181,7 @@ public class JWebBrowser extends NSPanelComponent {
    * @return true if the status bar is visible.
    */
   public boolean isStatusBarVisible() {
-    return statusBarPane != null;
+    return webBrowserDecorator.isStatusBarVisible();
   }
 
   /**
@@ -568,11 +189,7 @@ public class JWebBrowser extends NSPanelComponent {
    * @param isMenuBarVisible true if the menu bar should be visible, false otherwise.
    */
   public void setMenuBarVisible(boolean isMenuBarVisible) {
-    if(isMenuBarVisible == isMenuBarVisible()) {
-      return;
-    }
-    menuBar.setVisible(isMenuBarVisible);
-    adjustBorder();
+    webBrowserDecorator.setMenuBarVisible(isMenuBarVisible);
   }
 
   /**
@@ -580,7 +197,7 @@ public class JWebBrowser extends NSPanelComponent {
    * @return true if the menu bar is visible.
    */
   public boolean isMenuBarVisible() {
-    return menuBar.isVisible();
+    return webBrowserDecorator.isMenuBarVisible();
   }
 
   /**
@@ -588,23 +205,7 @@ public class JWebBrowser extends NSPanelComponent {
    * @param isButtonBarVisible true if the button bar should be visible, false otherwise.
    */
   public void setButtonBarVisible(boolean isButtonBarVisible) {
-    if(isButtonBarVisible == isButtonBarVisible()) {
-      return;
-    }
-    if(isButtonBarVisible) {
-      buttonBarPane = new ButtonBarPane();
-      menuToolAndLocationBarPanel.add(buttonBarPane, BorderLayout.WEST);
-    } else {
-      menuToolAndLocationBarPanel.remove(buttonBarPane);
-      buttonBarPane = null;
-    }
-    menuToolAndLocationBarPanel.revalidate();
-    menuToolAndLocationBarPanel.repaint();
-    buttonBarCheckBoxMenuItem.setSelected(isButtonBarVisible);
-    adjustBorder();
-    if(isButtonBarVisible && !isViewMenuVisible) {
-      updateNavigationButtons();
-    }
+    webBrowserDecorator.setButtonBarVisible(isButtonBarVisible);
   }
 
   /**
@@ -612,7 +213,7 @@ public class JWebBrowser extends NSPanelComponent {
    * @return true if the button bar is visible.
    */
   public boolean isButtonBarVisible() {
-    return buttonBarPane != null;
+    return webBrowserDecorator.isButtonBarVisible();
   }
 
   /**
@@ -620,20 +221,7 @@ public class JWebBrowser extends NSPanelComponent {
    * @param isLocationBarVisible true if the location bar should be visible, false otherwise.
    */
   public void setLocationBarVisible(boolean isLocationBarVisible) {
-    if(isLocationBarVisible == isLocationBarVisible()) {
-      return;
-    }
-    if(isLocationBarVisible) {
-      locationBarPane = new LocationBarPane();
-      menuToolAndLocationBarPanel.add(locationBarPane, BorderLayout.CENTER);
-    } else {
-      menuToolAndLocationBarPanel.remove(locationBarPane);
-      locationBarPane = null;
-    }
-    menuToolAndLocationBarPanel.revalidate();
-    menuToolAndLocationBarPanel.repaint();
-    locationBarCheckBoxMenuItem.setSelected(isLocationBarVisible);
-    adjustBorder();
+    webBrowserDecorator.setLocationBarVisible(isLocationBarVisible);
   }
 
   /**
@@ -641,7 +229,7 @@ public class JWebBrowser extends NSPanelComponent {
    * @return true if the location bar is visible.
    */
   public boolean isLocationBarVisible() {
-    return locationBarPane != null;
+    return webBrowserDecorator.isLocationBarVisible();
   }
 
   /**
@@ -1051,35 +639,6 @@ public class JWebBrowser extends NSPanelComponent {
     setStatusBarVisible(areBarsVisible);
   }
 
-  private void adjustBorder() {
-    if(isMenuBarVisible() || isButtonBarVisible() || isLocationBarVisible() || isStatusBarVisible()) {
-      nativeWebBrowserBorderContainerPane.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-    } else {
-      nativeWebBrowserBorderContainerPane.setBorder(null);
-    }
-  }
-
-  /**
-   * Get the menu bar, which allows to modify the items.
-   * @return the menu bar.
-   */
-  public JMenuBar getMenuBar() {
-    return menuBar;
-  }
-
-  /**
-   * Get the file menu, which allows to modify the items.
-   * @return the file menu.
-   */
-  public JMenu getFileMenu() {
-    return fileMenu;
-  }
-
-  private Icon createIcon(String resourceKey) {
-    String value = RESOURCES.getString(resourceKey);
-    return value.length() == 0? null: new ImageIcon(JWebBrowser.class.getResource(value));
-  }
-
   /**
    * Get the web browser window if the web browser is contained in one.
    * @return the web browser Window, or null.
@@ -1100,8 +659,8 @@ public class JWebBrowser extends NSPanelComponent {
     nativeWebBrowser.setDefaultPopupMenuRegistered(isDefaultPopupMenuRegistered);
   }
 
-  JPanel getNativeWebBrowserContainerPane() {
-    return nativeWebBrowserContainerPane;
+  JPanel getEmbeddableComponent() {
+    return (JPanel)embeddableComponent;
   }
 
 }

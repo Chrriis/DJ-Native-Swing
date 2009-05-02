@@ -13,8 +13,6 @@ import java.awt.GraphicsConfiguration;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.MessageFormat;
@@ -22,8 +20,6 @@ import java.util.ResourceBundle;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 
 import chrriis.dj.nativeswing.NSOption;
 
@@ -58,15 +54,7 @@ public class JWebBrowserWindow extends JFrame {
   public JWebBrowserWindow(JWebBrowser webBrowser) {
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     this.webBrowser = webBrowser;
-    JMenu fileMenu = webBrowser.getFileMenu();
-    fileMenu.addSeparator();
-    JMenuItem fileCloseMenuItem = new JMenuItem(RESOURCES.getString("FileCloseMenu"));
-    fileCloseMenuItem.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        dispose();
-      }
-    });
-    fileMenu.add(fileCloseMenuItem);
+    webBrowser.getWebBrowserDecorator().configureForWebBrowserWindow(this);
     webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
       @Override
       public void titleChanged(WebBrowserEvent e) {
