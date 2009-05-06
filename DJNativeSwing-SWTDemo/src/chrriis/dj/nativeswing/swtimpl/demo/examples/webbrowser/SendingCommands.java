@@ -47,14 +47,14 @@ public class SendingCommands extends JPanel {
     webBrowser.setStatusBarVisible(true);
     webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
       @Override
-      public void commandReceived(WebBrowserEvent e, String command, String[] args) {
+      public void commandReceived(WebBrowserEvent e, String command, Object[] args) {
         String commandText = command;
         if(args.length > 0) {
           commandText += " " + Arrays.toString(args);
         }
         receivedCommandTextField.setText(commandText);
         if("store".equals(command)) {
-          String data = args[0];
+          String data = (String)args[0];
           if(JOptionPane.showConfirmDialog(webBrowser, "Do you want to store \"" + data + "\" in a database?\n(Not for real of course!)", "Data received from the web browser", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             // Data should be used here
           }

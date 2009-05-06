@@ -476,7 +476,7 @@ public class JWebBrowser extends NSPanelComponent {
       this.resultArray = resultArray;
     }
     @Override
-    public void commandReceived(WebBrowserEvent e, String command, String[] args) {
+    public void commandReceived(WebBrowserEvent e, String command, Object[] args) {
       if(this.command.equals(command)) {
         resultArray[0] = args;
         ((NativeWebBrowser)e.getWebBrowser().getNativeComponent()).removeWebBrowserListener(this);
@@ -520,7 +520,7 @@ public class JWebBrowser extends NSPanelComponent {
       this.webBrowserListener = new WeakReference<WebBrowserListener>(webBrowserListener);
     }
 
-    public void commandReceived(WebBrowserEvent e, String command, String[] args) {
+    public void commandReceived(WebBrowserEvent e, String command, Object[] args) {
       WebBrowserListener webBrowserListener = this.webBrowserListener.get();
       if(webBrowserListener != null) {
         boolean isInternal = command.startsWith("[Chrriis]");

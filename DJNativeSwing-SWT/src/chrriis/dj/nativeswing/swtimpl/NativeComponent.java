@@ -1032,6 +1032,7 @@ public abstract class NativeComponent extends Canvas {
       gc.setClipping(region);
       if("win32".equals(SWT.getPlatform()) && control instanceof Browser) {
         // TODO: remove this hack once it is fixed in SWT (https://bugs.eclipse.org/bugs/show_bug.cgi?id=223590)
+        // Note: the bug is marked as fixed, but preliminary testing shows some other bugs. Have to test more before removing this hack.
         printRemoveClip(control, gc);
       } else {
         control.print(gc);

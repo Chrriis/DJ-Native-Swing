@@ -43,7 +43,7 @@ public abstract class WebBrowserObject {
     webBrowser.setBarsVisible(false);
     webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
       @Override
-      public void commandReceived(WebBrowserEvent e, String command, String[] args) {
+      public void commandReceived(WebBrowserEvent e, String command, Object[] args) {
         if("[Chrriis]WB_setLoaded".equals(command)) {
           Object[] listeners = listenerList.getListenerList();
           for(int i=listeners.length-2; i>=0; i-=2) {

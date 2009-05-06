@@ -88,7 +88,7 @@ public class FunctionCalls extends JPanel {
       }
     });
     flashPlayer.addFlashPlayerListener(new FlashPlayerListener() {
-      public void commandReceived(String command, String[] args) {
+      public void commandReceived(String command, Object[] args) {
         if("sendCommandTest".equals(command)) {
           StringBuilder sb = new StringBuilder();
           for(int i=0; i<args.length; i++) {

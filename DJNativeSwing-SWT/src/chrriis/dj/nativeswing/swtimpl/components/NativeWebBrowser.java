@@ -24,6 +24,7 @@ import javax.swing.SwingUtilities;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.browser.CloseWindowListener;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
@@ -56,6 +57,7 @@ import chrriis.dj.nativeswing.swtimpl.NativeComponent;
  */
 class NativeWebBrowser extends NativeComponent {
 
+  public static final String COMMAND_FUNCTION = "sendNSCommand";
   public static final String COMMAND_LOCATION_PREFIX = "command://";
   public static final String COMMAND_STATUS_PREFIX = "scommand://";
 
@@ -227,7 +229,7 @@ class NativeWebBrowser extends NativeComponent {
       Object[] listeners = nativeWebBrowser.listenerList.getListenerList();
       WebBrowserEvent e = null;
       String command = (String)args[0];
-      String[] arguments = (String[])args[1];
+      Object[] arguments = (Object[])args[1];
       boolean isInternal = command.startsWith("[Chrriis]");
       for(int i=listeners.length-2; i>=0; i-=2) {
         if(listeners[i] == WebBrowserListener.class) {
@@ -392,7 +394,7 @@ class NativeWebBrowser extends NativeComponent {
       style |= SWT.MOZILLA;
     }
     final Browser browser = new Browser(shell, style);
-//    configureBrowserFunction(browser);
+    configureBrowserFunction(browser);
     browser.addCloseWindowListener(new CloseWindowListener() {
       public void close(WindowEvent event) {
         new CMJ_closeWindow().asyncExec(browser);
@@ -409,7 +411,7 @@ class NativeWebBrowser extends NativeComponent {
           isDisposed = true;
           Shell shell = new Shell();
           newWebBrowser = new Browser(shell, browser.getStyle());
-//          configureBrowserFunction(newWebBrowser);
+          configureBrowserFunction(newWebBrowser);
         } else {
           isDisposed = false;
           newWebBrowser = (Browser)NativeComponent.getControlRegistry().get(componentID);
@@ -556,30 +558,29 @@ class NativeWebBrowser extends NativeComponent {
     return browser;
   }
 
-  // This does not work it seems... let's see in a future update of SWT.
-//  private static class NSCommandBrowserFunction extends BrowserFunction {
-//    public NSCommandBrowserFunction(Browser browser) {
-//      super(browser, "sendNSCommand");
-//    }
-//    @Override
-//    public Object function(Object[] args) {
-//      String command = args.length >= 1? args[0] instanceof String? (String)args[0]: "": "";
-//      Object[] commandArgs;
-//      if(args.length > 1) {
-//        commandArgs = new Object[args.length - 1];
-//        System.arraycopy(args, 1, commandArgs, 0, commandArgs.length);
-//        args = commandArgs;
-//      } else {
-//        commandArgs = new Object[0];
-//      }
-//      new CMJ_commandReceived().asyncExec(getBrowser(), command, commandArgs);
-//      return null;
-//    }
-//  }
-//
-//  private static void configureBrowserFunction(final Browser browser) {
-//    new NSCommandBrowserFunction(browser);
-//  }
+  private static class NSCommandBrowserFunction extends BrowserFunction {
+    public NSCommandBrowserFunction(Browser browser) {
+      super(browser, COMMAND_FUNCTION);
+    }
+    @Override
+    public Object function(Object[] args) {
+      String command = args.length >= 1? args[0] instanceof String? (String)args[0]: "": "";
+      Object[] commandArgs;
+      if(args.length > 1) {
+        commandArgs = new Object[args.length - 1];
+        System.arraycopy(args, 1, commandArgs, 0, commandArgs.length);
+        args = commandArgs;
+      } else {
+        commandArgs = new Object[0];
+      }
+      new CMJ_commandReceived().asyncExec(getBrowser(), command, commandArgs);
+      return null;
+    }
+  }
+
+  private static void configureBrowserFunction(final Browser browser) {
+    new NSCommandBrowserFunction(browser);
+  }
 
   private Reference<JWebBrowser> webBrowser;
 

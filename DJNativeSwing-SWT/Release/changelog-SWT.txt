@@ -7,6 +7,7 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.9 (xxxxxxxxxxxxxx):
 
+- Web browser and flash player commands now take Object[] as params.
 - Implementation of web browser decorators.
 - Resource bundles are loaded without using the package.
 - Browser window size was incorrectly set if JS specified only width or height.

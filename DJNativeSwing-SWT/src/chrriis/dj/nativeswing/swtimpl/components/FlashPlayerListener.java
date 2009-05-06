@@ -14,6 +14,6 @@ import java.util.EventListener;
  */
 public interface FlashPlayerListener extends EventListener {
 
-  public void commandReceived(String command, String[] args);
+  public void commandReceived(String command, Object[] args);
 
 }
