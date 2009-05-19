@@ -57,7 +57,7 @@ import chrriis.dj.nativeswing.swtimpl.NativeComponent;
  */
 class NativeWebBrowser extends NativeComponent {
 
-  public static final String COMMAND_FUNCTION = "sendNSCommand";
+  public static final String COMMAND_FUNCTION = "top.sendNSCommand";
   public static final String COMMAND_LOCATION_PREFIX = "command://";
   public static final String COMMAND_STATUS_PREFIX = "scommand://";
 

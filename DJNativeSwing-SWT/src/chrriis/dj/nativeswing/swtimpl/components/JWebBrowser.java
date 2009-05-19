@@ -32,6 +32,9 @@ import chrriis.dj.nativeswing.swtimpl.NSPanelComponent;
  */
 public class JWebBrowser extends NSPanelComponent {
 
+  /** The function to use when sending a command from some web content using Javascript. */
+  public static final String COMMAND_FUNCTION = NativeWebBrowser.COMMAND_FUNCTION;
+
   /** The prefix to use when sending a command from some web content, using a static link or by setting window.location from Javascript. */
   public static final String COMMAND_LOCATION_PREFIX = NativeWebBrowser.COMMAND_LOCATION_PREFIX;
 
