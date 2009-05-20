@@ -73,7 +73,6 @@ public class JVLCPlayer extends NSPanelComponent {
     @Override
     protected ObjectHTMLConfiguration getObjectHtmlConfiguration() {
       ObjectHTMLConfiguration objectHTMLConfiguration = new ObjectHTMLConfiguration();
-      objectHTMLConfiguration.setHTMLLoadingMessage(vlcPlayer.RESOURCES.getString("LoadingMessage"));
       objectHTMLConfiguration.setHTMLParameters(vlcPlayer.options.getParameters());
       objectHTMLConfiguration.setWindowsClassID("9BE31822-FDAD-461B-AD51-BE1D1C159921");
       objectHTMLConfiguration.setWindowsInstallationURL("http://downloads.videolan.org/pub/videolan/vlc/latest/win32/axvlc.cab");

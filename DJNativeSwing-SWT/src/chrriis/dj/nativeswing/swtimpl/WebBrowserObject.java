@@ -262,8 +262,6 @@ public abstract class WebBrowserObject {
             "window.document.write('  <embed" + embedParameters + " name=\"" + embeddedObjectJavascriptName + "\"" + (paramName == null? "": " " + paramName + "=\"" + escapedURL + "\"") + " type=\"" + objectHtmlConfiguration.getMimeType() + "\" pluginspage=\"" + objectHtmlConfiguration.getInstallationURL() + "\"" + versionParameter+ ">');" + LS +
             "window.document.write('  </embed>');" + LS +
             "window.document.write('</object>');" + LS +
-            "window.document.write('<div id=\"messageDiv\" style=\"display:none;\"><table><tr><td>" + objectHtmlConfiguration.getHTMLLoadingMessage() + "</td></tr></table></div>');" + LS +
-            "setTimeout('document.getElementById(\\'messageDiv\\').style.display = \\'inline\\'', 200);" + LS +
             "var embeddedObject = getEmbeddedObject();" + LS +
             "embeddedObject.style.width = '100%';" + LS +
             "embeddedObject.style.height = '100%';" + LS +
@@ -317,16 +315,6 @@ public abstract class WebBrowserObject {
   }
 
   public static class ObjectHTMLConfiguration {
-
-    private String htmlLoadingMessage;
-
-    public void setHTMLLoadingMessage(String htmlLoadingMessage) {
-      this.htmlLoadingMessage = htmlLoadingMessage;
-    }
-
-    public String getHTMLLoadingMessage() {
-      return htmlLoadingMessage;
-    }
 
     private String windowsClassID;
 
