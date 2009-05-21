@@ -693,14 +693,22 @@ class NativeWebBrowser extends NativeComponent {
 
   private static Pattern JAVASCRIPT_LINE_COMMENT_PATTERN = Pattern.compile("^\\s*//.*$", Pattern.MULTILINE);
 
+  private static volatile Boolean isFixedJS;
+
   private static String fixJavascript(Browser browser, String script) {
     if("mozilla".equals(browser.getBrowserType())) {
-      // Remove line comments, because it does not work properly on Mozilla.
-      // cf. bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=215335
-      script = JAVASCRIPT_LINE_COMMENT_PATTERN.matcher(script).replaceAll("");
-      // encode the script, because it is passed as a URL in Mozilla and gets URI-decoded.
-      // cf. bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=255462
-      script = Utils.encodeURL(script);
+      if(isFixedJS == null) {
+        isFixedJS = "%25".equals(browser.evaluate("return '%25'"));
+      }
+      if(!isFixedJS) {
+        // 2 workaround for issues that seem to be happening with XULRunner < 1.9.
+        // Remove line comments, because it does not work properly on Mozilla.
+        // cf. bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=215335
+        script = JAVASCRIPT_LINE_COMMENT_PATTERN.matcher(script).replaceAll("");
+        // encode the script, because it is passed as a URL in Mozilla and gets URI-decoded.
+        // cf. bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=255462
+        script = Utils.encodeURL(script);
+      }
     }
     return script;
   }
