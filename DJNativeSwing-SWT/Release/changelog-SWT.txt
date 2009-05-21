@@ -10,6 +10,7 @@ Licence terms: LGPL (see licence.txt)
 - VLC and Flash player do not have a loading message (was causing problems).
 - Web browser and flash player commands now take Object[] as params.
 - Implementation of web browser decorators.
+- JS line comments and escaping are removed for browsers where it is not needed.
 - Resource bundles are loaded without using the package.
 - Browser window size was incorrectly set if JS specified only width or height.
 - Browser windows do not open outside of the screen bounds.
