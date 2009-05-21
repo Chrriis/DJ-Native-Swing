@@ -701,7 +701,7 @@ class NativeWebBrowser extends NativeComponent {
         isFixedJS = "%25".equals(browser.evaluate("return '%25'"));
       }
       if(!isFixedJS) {
-        // 2 workaround for issues that seem to be happening with XULRunner < 1.9.
+        // 2 workarounds for issues that seem to be happening with XULRunner < 1.9.
         // Remove line comments, because it does not work properly on Mozilla.
         // cf. bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=215335
         script = JAVASCRIPT_LINE_COMMENT_PATTERN.matcher(script).replaceAll("");
