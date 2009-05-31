@@ -7,6 +7,7 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.9 (xxxxxxxxxxxxxx):
 
+- Mozilla XPCOM missing interface methods are added.
 - VLC and Flash player do not have a loading message (was causing problems).
 - Web browser and flash player commands now take Object[] as params.
 - Implementation of web browser decorators.

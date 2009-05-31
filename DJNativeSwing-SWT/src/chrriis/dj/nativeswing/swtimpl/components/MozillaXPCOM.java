@@ -20,7 +20,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.swt.browser.Browser;
+import org.mozilla.interfaces.nsIComponentManager;
 import org.mozilla.interfaces.nsIComponentRegistrar;
+import org.mozilla.interfaces.nsIServiceManager;
 import org.mozilla.interfaces.nsIWebBrowser;
 
 import chrriis.dj.nativeswing.swtimpl.CommandMessage;
@@ -73,6 +75,51 @@ public class MozillaXPCOM {
    */
   public static nsIWebBrowser getWebBrowser(JWebBrowser webBrowser) {
     return (nsIWebBrowser)unpack(webBrowser.getNativeComponent().runSync(new CMN_getWebBrowser()));
+  }
+
+  private static class CMN_getComponentRegistrar extends CommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      return pack(org.mozilla.xpcom.Mozilla.getInstance().getComponentRegistrar(), true);
+    }
+  }
+
+  /**
+   * Get the Mozilla JavaXPCOM component registrar.
+   * @return the Mozilla JavaXPCOM component registrar.
+   */
+  public static nsIComponentRegistrar getComponentRegistrar() {
+    return (nsIComponentRegistrar)unpack(new CMN_getComponentRegistrar().syncExec(true));
+  }
+
+  private static class CMN_getComponentManager extends CommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      return pack(org.mozilla.xpcom.Mozilla.getInstance().getComponentManager(), true);
+    }
+  }
+
+  /**
+   * Get the Mozilla JavaXPCOM component manager.
+   * @return the Mozilla JavaXPCOM component manager.
+   */
+  public static nsIComponentManager getComponentManager() {
+    return (nsIComponentManager)unpack(new CMN_getComponentManager().syncExec(true));
+  }
+
+  private static class CMN_getServiceManager extends CommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      return pack(org.mozilla.xpcom.Mozilla.getInstance().getServiceManager(), true);
+    }
+  }
+
+  /**
+   * Get the Mozilla JavaXPCOM service manager.
+   * @return the Mozilla JavaXPCOM service manager.
+   */
+  public static nsIServiceManager getServiceManager() {
+    return (nsIServiceManager)unpack(new CMN_getServiceManager().syncExec(true));
   }
 
   private static Map<Integer, Object> idToNativeInterfaceMap = new HashMap<Integer, Object>();
