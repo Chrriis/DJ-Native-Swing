@@ -30,7 +30,7 @@ import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
  */
 public class SettingContent extends JPanel {
 
-  protected static final String LS = System.getProperty("line.separator");
+  private static final String LS = System.getProperty("line.separator");
 
   public SettingContent() {
     super(new BorderLayout());

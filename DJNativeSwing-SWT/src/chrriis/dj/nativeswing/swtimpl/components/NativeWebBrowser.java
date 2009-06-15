@@ -14,6 +14,7 @@ import java.awt.Window;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -918,6 +919,87 @@ class NativeWebBrowser extends NativeComponent {
    */
   public int getLoadingProgress() {
     return loadingProgress;
+  }
+
+  private static class CMJ_invokeFunction extends ControlCommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
+      JWebBrowser webBrowser = nativeWebBrowser == null? null: nativeWebBrowser.webBrowser.get();
+      if(webBrowser == null) {
+        return null;
+      }
+      if(nativeWebBrowser.nameToFunctionMap != null) {
+        WebBrowserFunction function = nativeWebBrowser.nameToFunctionMap.get(args[0]);
+        if(function != null) {
+          return function.invoke(webBrowser, (Object[])args[1]);
+        }
+      }
+      return null;
+    }
+  }
+
+  private static class CMN_registerFunction extends ControlCommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      Browser browser = (Browser)getControl();
+      String functionName = (String)args[0];
+      BrowserFunction browserFunction = new BrowserFunction(browser, functionName) {
+        @Override
+        public Object function(Object[] arguments) {
+          return new CMJ_invokeFunction().syncExec(getBrowser(), getName(), arguments);
+        }
+      };
+      browser.setData("nsFunction_" + functionName, browserFunction);
+      return null;
+    }
+  }
+
+  private Map<String, WebBrowserFunction> nameToFunctionMap;
+
+  public void registerFunction(WebBrowserFunction function) {
+    String functionName = function.getName();
+    if(nameToFunctionMap == null) {
+      nameToFunctionMap = new HashMap<String, WebBrowserFunction>();
+    } else {
+      WebBrowserFunction oldFunction = nameToFunctionMap.get(functionName);
+      if(oldFunction == function) {
+        return;
+      }
+      if(oldFunction != null) {
+        unregisterFunction(oldFunction);
+      }
+    }
+    nameToFunctionMap.put(functionName, function);
+    runAsync(new CMN_registerFunction(), functionName);
+  }
+
+  private static class CMN_unregisterFunction extends ControlCommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      Browser browser = (Browser)getControl();
+      String key = "nsFunction_" + (String)args[0];
+      BrowserFunction browserFunction = (BrowserFunction)browser.getData(key);
+      browser.setData(key, null);
+      browserFunction.dispose();
+      return null;
+    }
+  }
+
+  public void unregisterFunction(WebBrowserFunction function) {
+    if(nameToFunctionMap == null) {
+      return;
+    }
+    String functionName = function.getName();
+    WebBrowserFunction currentFunction = nameToFunctionMap.get(functionName);
+    if(currentFunction != function) {
+      return;
+    }
+    nameToFunctionMap.remove(function);
+    if(nameToFunctionMap.isEmpty()) {
+      nameToFunctionMap = null;
+    }
+    runAsync(new CMN_unregisterFunction(), functionName);
   }
 
   public void addWebBrowserListener(WebBrowserListener listener) {

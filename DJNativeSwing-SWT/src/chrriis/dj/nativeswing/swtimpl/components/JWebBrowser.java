@@ -662,6 +662,14 @@ public class JWebBrowser extends NSPanelComponent {
     nativeWebBrowser.setDefaultPopupMenuRegistered(isDefaultPopupMenuRegistered);
   }
 
+  void registerFunction(WebBrowserFunction function) {
+    nativeWebBrowser.registerFunction(function);
+  }
+
+  void unregisterFunction(WebBrowserFunction function) {
+    nativeWebBrowser.unregisterFunction(function);
+  }
+
   JPanel getEmbeddableComponent() {
     return (JPanel)embeddableComponent;
   }
