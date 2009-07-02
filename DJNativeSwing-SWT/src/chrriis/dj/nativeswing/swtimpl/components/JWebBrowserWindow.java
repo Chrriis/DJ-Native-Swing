@@ -15,10 +15,7 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.text.MessageFormat;
-import java.util.ResourceBundle;
 
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
 import chrriis.dj.nativeswing.NSOption;
@@ -29,13 +26,6 @@ import chrriis.dj.nativeswing.NSOption;
  * @author Christopher Deckers
  */
 public class JWebBrowserWindow extends JFrame {
-
-  private final ResourceBundle RESOURCES;
-
-  {
-    String className = JWebBrowser.class.getName();
-    RESOURCES = ResourceBundle.getBundle(className.substring(0, className.lastIndexOf('.')).replace('.', '/') + "/resource/WebBrowser");
-  }
 
   private JWebBrowser webBrowser;
 
@@ -55,17 +45,6 @@ public class JWebBrowserWindow extends JFrame {
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     this.webBrowser = webBrowser;
     webBrowser.getWebBrowserDecorator().configureForWebBrowserWindow(this);
-    webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
-      @Override
-      public void titleChanged(WebBrowserEvent e) {
-        MessageFormat mf = new MessageFormat(RESOURCES.getString("BrowserTitle"));
-        setTitle(mf.format(new Object[] {e.getWebBrowser().getPageTitle()}));
-      }
-    });
-    String value = RESOURCES.getString("BrowserIcon");
-    if(value.length() > 0) {
-      setIconImage(new ImageIcon(JWebBrowserWindow.class.getResource(value)).getImage());
-    }
     getContentPane().add(webBrowser, BorderLayout.CENTER);
     Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
     size.width = size.width * 80 / 100;
