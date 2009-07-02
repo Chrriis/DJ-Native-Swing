@@ -21,6 +21,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -524,6 +525,10 @@ public class DefaultWebBrowserDecorator extends WebBrowserDecorator {
     adjustBorder();
   }
 
+  protected JWebBrowser getWebBrowser() {
+    return webBrowser;
+  }
+
   private Icon createIcon(String resourceKey) {
     String value = RESOURCES.getString(resourceKey);
     return value.length() == 0? null: new ImageIcon(JWebBrowser.class.getResource(value));
@@ -670,6 +675,24 @@ public class DefaultWebBrowserDecorator extends WebBrowserDecorator {
       }
     });
     fileMenu.add(fileCloseMenuItem);
+    webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
+      @Override
+      public void titleChanged(WebBrowserEvent e) {
+        setWebBrowserWindowTitle(webBrowserWindow, e.getWebBrowser().getPageTitle());
+      }
+    });
+    setWebBrowserWindowIcon(webBrowserWindow);
+  }
+
+  protected void setWebBrowserWindowTitle(JWebBrowserWindow webBrowserWindow, String pageTitle) {
+    webBrowserWindow.setTitle(new MessageFormat(RESOURCES.getString("BrowserTitle")).format(new Object[] {pageTitle}));
+  }
+
+  protected void setWebBrowserWindowIcon(JWebBrowserWindow webBrowserWindow) {
+    String value = RESOURCES.getString("BrowserIcon");
+    if(value.length() > 0) {
+      webBrowserWindow.setIconImage(new ImageIcon(JWebBrowserWindow.class.getResource(value)).getImage());
+    }
   }
 
 }
