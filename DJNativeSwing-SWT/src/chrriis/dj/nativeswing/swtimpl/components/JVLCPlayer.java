@@ -87,7 +87,7 @@ public class JVLCPlayer extends NSPanelComponent {
 
     @Override
     public String getLocalFileURL(File localFile) {
-      return "file://" + localFile.getAbsolutePath();
+      return "file:///" + localFile.getAbsolutePath();
     }
 
   }
