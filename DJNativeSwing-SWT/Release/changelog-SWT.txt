@@ -10,6 +10,7 @@ Licence terms: LGPL (see licence.txt)
 - VLC API improved to work with 1.0.0.
 - Mozilla XPCOM missing interface methods are added.
 - VLC and Flash player do not have a loading message (was causing problems).
+- F5 is blocked for plugin based objects to avoid page reload.
 - Web browser and flash player commands now take Object[] as params.
 - Implementation of web browser decorators.
 - JS line comments and escaping are removed for browsers where it is not needed.
