@@ -14,6 +14,10 @@ import java.util.EventListener;
  */
 public interface FlashPlayerListener extends EventListener {
 
+  /**
+   * The Flash player can invoke special commands to the application simply by calling:<br>
+   * <code>ExternalInterface.call("sendCommand", commandName, arg1, arg2, ...);</code>
+   */
   public void commandReceived(String command, Object[] args);
 
 }
