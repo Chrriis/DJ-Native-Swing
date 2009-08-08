@@ -66,6 +66,7 @@ public class JFileDialog {
       }
     }
 
+    @SuppressWarnings("unused")
     protected static Control createControl(Shell shell, Object[] parameters) {
       return new Composite(shell, SWT.NONE);
     }

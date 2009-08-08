@@ -58,7 +58,7 @@ import chrriis.dj.nativeswing.swtimpl.NativeComponent;
  */
 class NativeWebBrowser extends NativeComponent {
 
-  public static final String COMMAND_FUNCTION = "top.sendNSCommand";
+  public static final String COMMAND_FUNCTION = "sendNSCommand";
   public static final String COMMAND_LOCATION_PREFIX = "command://";
   public static final String COMMAND_STATUS_PREFIX = "scommand://";
 
@@ -499,7 +499,7 @@ class NativeWebBrowser extends NativeComponent {
           // XULRunner on Linux: "window" is not defined when synchronous... so we defer.
           e.display.asyncExec(new Runnable() {
             public void run() {
-              browser.execute(fixJavascript(browser, ("if(decodeURIComponent('" + Utils.encodeURL(newStatus) + "') == window.status) {window.status = decodeURIComponent('" + Utils.encodeURL(oldStatus == null? "": oldStatus) + "');}")));
+              browser.execute(fixJavascript(browser, "if(decodeURIComponent('" + Utils.encodeURL(newStatus) + "') == window.status) {window.status = decodeURIComponent('" + Utils.encodeURL(oldStatus == null? "": oldStatus) + "');}"));
             }
           });
           String query = newStatus.substring(COMMAND_STATUS_PREFIX.length());

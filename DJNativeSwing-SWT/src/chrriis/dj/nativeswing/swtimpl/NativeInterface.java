@@ -521,7 +521,7 @@ public class NativeInterface {
       if(!isProxyClassLoaderUsed) {
         for(Object o: referenceList) {
           File clazzClassPath;
-          if(o instanceof Class) {
+          if(o instanceof Class<?>) {
             clazzClassPath = Utils.getClassPathFile((Class<?>)o);
           } else {
             clazzClassPath = Utils.getClassPathFile((String)o);
@@ -529,7 +529,7 @@ public class NativeInterface {
               throw new IllegalStateException("A resource that is needed in the classpath is missing: " + o);
             }
           }
-          clazzClassPath = o instanceof Class? Utils.getClassPathFile((Class<?>)o): Utils.getClassPathFile((String)o);
+          clazzClassPath = o instanceof Class<?>? Utils.getClassPathFile((Class<?>)o): Utils.getClassPathFile((String)o);
           if(clazzClassPath != null) {
             String path = clazzClassPath.getAbsolutePath();
             if(!classPathList.contains(path)) {

@@ -60,7 +60,7 @@ public class DemoExampleDefinitionLoader {
         new Example("Setting Content", SettingContent.class, "Set any HTML content to the web browser.", true),
         new Example("Javascript Execution", JavascriptExecution.class, "Execute some Javascript code in the current web browser page.", true),
         new Example("Navigation Control", NavigationControl.class, "Control the navigation happening in the web browser from the Java application.\nThis allows to block certain links and/or the creation of new windows, or to open links and/or new windows elsewhere.", true),
-        new Example("Sending Commands", SendingCommands.class, "Use static links or simple Javascript to send some commands with arguments to the application:\n    function sendCommand(command) {\n      var s = 'command://' + encodeURIComponent(command);\n      for(var i=1; i<arguments.length; s+='&'+encodeURIComponent(arguments[i++]));\n      window.location = s;\n    }", true),
+        new Example("Sending Commands", SendingCommands.class, "Use static links or the Javascript sendNSCommand(name, arg1, arg2, ...) function to send commands to the Java application.", true),
         new Example("Cookies", Cookies.class, "Access and modify the cookies set by the various browser instances.", true),
         new Example("Classpath pages", ClasspathPages.class, "Load web pages from the classpath with the help of the embedded simple web server.", true),
         new Example("Mozilla XPCOM Page Edition", XPCOMToggleEditionMode.class, "Toggle edition mode of a web page by accessing the Mozilla interfaces using XPCOM.", true, isXULRunnerPresent, xulRunnerErrorMessage),

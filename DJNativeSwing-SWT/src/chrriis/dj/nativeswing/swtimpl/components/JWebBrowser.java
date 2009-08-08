@@ -377,25 +377,16 @@ public class JWebBrowser extends NSPanelComponent {
 //        "} catch(exxxxx) {" +
 //        "  return null;" +
 //        "}");
-    String[] result = executeJavascriptWithCommandResult("[[getScriptResult]]",
+    Object[] result = executeJavascriptWithCommandResult("[[getScriptResult]]",
         "try {" +
-        "  var result = function() {" + javascript + "}();" +
-        "  var type = result? typeof(result): '';" +
-        "  if('string' == type) {" +
-        "    window.location = '" + JWebBrowser.COMMAND_LOCATION_PREFIX + "' + encodeURIComponent('[[getScriptResult]]') + '&' + encodeURIComponent(result);" +
-        "  } else {" +
-        "    window.location = '" + JWebBrowser.COMMAND_LOCATION_PREFIX + "' + encodeURIComponent('[[getScriptResult]]') + '&' + encodeURIComponent(type) + '&' + encodeURIComponent(result);" +
-        "  }" +
+        "  " + COMMAND_FUNCTION + "('[[getScriptResult]]', function() {" + javascript + "}());" +
         "} catch(exxxxx) {" +
-        "  window.location = '" + JWebBrowser.COMMAND_LOCATION_PREFIX + "' + encodeURIComponent('[[getScriptResult]]') + '&&'" +
+        "  " + COMMAND_FUNCTION + "('[[getScriptResult]]');" +
         "}");
     if(result == null) {
       return null;
     }
-    if(result.length == 1) {
-      return convertJavascriptObjectToJava("string", result[0]);
-    }
-    return convertJavascriptObjectToJava(result[0], result[1]);
+    return result.length == 0? null: result[0];
   }
 
   /**
@@ -449,27 +440,27 @@ public class JWebBrowser extends NSPanelComponent {
     return "decodeURIComponent('" + encodedArg + "')";
   }
 
-  private static Object convertJavascriptObjectToJava(String type, String value) {
-    if(type.length() == 0) {
-      return null;
-    }
-    if("boolean".equals(type)) {
-      return Boolean.parseBoolean(value);
-    }
-    if("number".equals(type)) {
-      try {
-        return Integer.parseInt(value);
-      } catch(Exception e) {}
-      try {
-        return Float.parseFloat(value);
-      } catch(Exception e) {}
-      try {
-        return Long.parseLong(value);
-      } catch(Exception e) {}
-      throw new IllegalStateException("Could not convert number: " + value);
-    }
-    return value;
-  }
+//  private static Object convertJavascriptObjectToJava(String type, String value) {
+//    if(type.length() == 0) {
+//      return null;
+//    }
+//    if("boolean".equals(type)) {
+//      return Boolean.parseBoolean(value);
+//    }
+//    if("number".equals(type)) {
+//      try {
+//        return Integer.parseInt(value);
+//      } catch(Exception e) {}
+//      try {
+//        return Float.parseFloat(value);
+//      } catch(Exception e) {}
+//      try {
+//        return Long.parseLong(value);
+//      } catch(Exception e) {}
+//      throw new IllegalStateException("Could not convert number: " + value);
+//    }
+//    return value;
+//  }
 
   private static class NCommandListener extends WebBrowserAdapter {
     private String command;
@@ -487,7 +478,7 @@ public class JWebBrowser extends NSPanelComponent {
     }
   }
 
-  private String[] executeJavascriptWithCommandResult(final String command, String script) {
+  private Object[] executeJavascriptWithCommandResult(final String command, String script) {
     if(!nativeWebBrowser.isNativePeerInitialized()) {
       return null;
     }
@@ -504,7 +495,7 @@ public class JWebBrowser extends NSPanelComponent {
       }
     }
     nativeWebBrowser.removeWebBrowserListener(webBrowserListener);
-    return (String[])resultArray[0];
+    return (Object[])resultArray[0];
   }
 
   /**

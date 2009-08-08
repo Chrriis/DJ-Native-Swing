@@ -7,11 +7,13 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.9 (xxxxxxxxxxxxxx):
 
+- Commands can be sent from browser using sendNSCommand JS function.
+- Browser/Flash player commands and arguments do not have a size limit.
+- Browser/Flash player commands now take Object[] as params.
 - VLC API improved to work with 1.0.0.
 - Mozilla XPCOM missing interface methods are added.
 - VLC and Flash player do not have a loading message (was causing problems).
 - F5 is blocked for plugin based objects to avoid page reload.
-- Web browser and flash player commands now take Object[] as params.
 - Implementation of web browser decorators.
 - JS line comments and escaping are removed for browsers where it is not needed.
 - Resource bundles are loaded without using the package.

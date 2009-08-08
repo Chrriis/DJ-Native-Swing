@@ -48,6 +48,7 @@ public class JDirectoryDialog {
       }
     }
 
+    @SuppressWarnings("unused")
     protected static Control createControl(Shell shell, Object[] parameters) {
       return new Composite(shell, SWT.NONE);
     }

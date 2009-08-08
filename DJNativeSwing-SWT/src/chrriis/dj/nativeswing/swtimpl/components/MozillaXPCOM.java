@@ -173,11 +173,11 @@ public class MozillaXPCOM {
    */
   private static class InterfaceInfo {
 
-    private WeakReference<Object> interfaceReference;
+//    private WeakReference<Object> interfaceReference;
     private int id;
 
     public InterfaceInfo(Object intrface) {
-      interfaceReference = new WeakReference<Object>(intrface);
+//      interfaceReference = new WeakReference<Object>(intrface);
       id = System.identityHashCode(intrface);
     }
 
@@ -186,9 +186,9 @@ public class MozillaXPCOM {
       return id;
     }
 
-    public Object getInterface() {
-      return interfaceReference.get();
-    }
+//    public Object getInterface() {
+//      return interfaceReference.get();
+//    }
 
     @Override
     public boolean equals(Object o) {

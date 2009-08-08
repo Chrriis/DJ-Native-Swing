@@ -152,11 +152,7 @@ public abstract class WebBrowserObject {
             "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>" + LS +
             "    <script language=\"JavaScript\" type=\"text/javascript\">" + LS +
             "      <!--" + LS +
-            "      function sendCommand(command) {" + LS +
-            "        var s = '" + JWebBrowser.COMMAND_LOCATION_PREFIX + "' + encodeURIComponent(command);" + LS +
-            "        for(var i=1; i<arguments.length; s+='&'+encodeURIComponent(arguments[i++]));" + LS +
-            "        window.location = s;" + LS +
-            "      }" + LS +
+            "      var sendCommand = sendNSCommand;" + LS +
             "      function postCommand(command) {" + LS +
             "        var elements = new Array();" + LS +
             "        for(var i=1; i<arguments.length; i++) {" + LS +
