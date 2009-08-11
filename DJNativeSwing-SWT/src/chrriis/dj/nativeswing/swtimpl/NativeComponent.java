@@ -879,7 +879,7 @@ public abstract class NativeComponent extends Canvas {
   }
 
   private String getComponentDescription() {
-    return getClass().getName() + "[" + getComponentID() + "/" + hashCode() + "]";
+    return getClass().getName() + "[" + getComponentID() + "," + hashCode() + "]";
   }
 
   @Override
