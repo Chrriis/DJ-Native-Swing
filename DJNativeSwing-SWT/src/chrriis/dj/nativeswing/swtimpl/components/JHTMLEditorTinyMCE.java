@@ -77,7 +77,7 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
             "        }" + LS +
             "        debug (text);" + LS +
             "      };" + LS +
-            "      var sendCommand = sendNSCommand;" + LS +
+            "      var sendCommand = " + JWebBrowser.COMMAND_FUNCTION + ";" + LS +
             "      function JH_setData (html) {" + LS +
             "        tinyMCE.get ('" + EDITOR_INSTANCE + "').setContent (decodeURIComponent (html));" + LS +
             "      }" + LS +

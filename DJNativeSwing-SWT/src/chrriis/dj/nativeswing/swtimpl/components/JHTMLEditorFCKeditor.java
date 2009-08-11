@@ -67,7 +67,7 @@ class JHTMLEditorFCKeditor implements JHTMLEditorImplementation {
             "      function FCKeditor_IsCompatibleBrowser() {" + LS +
             "        return true;" + LS +
             "      }" + LS +
-            "      var sendCommand = sendNSCommand;" + LS +
+            "      var sendCommand = " + JWebBrowser.COMMAND_FUNCTION + ";" + LS +
             "      function JH_setData(html) {" + LS +
             "        var inst = FCKeditorAPI.GetInstance('" + EDITOR_INSTANCE + "');" + LS +
             "        inst.SetHTML(decodeURIComponent(html));" + LS +

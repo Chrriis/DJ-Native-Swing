@@ -152,7 +152,7 @@ public abstract class WebBrowserObject {
             "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>" + LS +
             "    <script language=\"JavaScript\" type=\"text/javascript\">" + LS +
             "      <!--" + LS +
-            "      var sendCommand = sendNSCommand;" + LS +
+            "      var sendCommand = " + JWebBrowser.COMMAND_FUNCTION + ";" + LS +
             "      function postCommand(command) {" + LS +
             "        var elements = new Array();" + LS +
             "        for(var i=1; i<arguments.length; i++) {" + LS +
