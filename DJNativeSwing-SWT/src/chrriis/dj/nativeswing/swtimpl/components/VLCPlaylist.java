@@ -45,13 +45,23 @@ public class VLCPlaylist {
   }
 
   /**
-   * Add an item from the classpath to the playlist and get its ID for future manipulation.
+   * Add an item from the classpath to the playlist.
    * @param clazz the reference clazz of the file to load.
    * @param resourcePath the path to the file.
    */
   public void addItem(Class<?> clazz, String resourcePath) {
+    addItem(clazz, resourcePath, null);
+  }
+
+  /**
+   * Add an item from the classpath to the playlist.
+   * @param clazz the reference clazz of the file to load.
+   * @param resourcePath the path to the file.
+   * @param options VLC options, for example ":start-time=30 :no-audio".
+   */
+  public void addItem(Class<?> clazz, String resourcePath, String options) {
     vlcPlayer.addReferenceClassLoader(clazz.getClassLoader());
-    addItem(WebServer.getDefaultWebServer().getClassPathResourceURL(clazz.getName(), resourcePath));
+    addItem(WebServer.getDefaultWebServer().getClassPathResourceURL(clazz.getName(), resourcePath), options);
   }
 
   /**
@@ -59,6 +69,15 @@ public class VLCPlaylist {
    * @param resourcePath the path or URL to the file.
    */
   public void addItem(String resourcePath) {
+    addItem(resourcePath, null);
+  }
+
+  /**
+   * Add an item to the playlist.
+   * @param resourcePath the path or URL to the file.
+   * @param options VLC options, for example ":start-time=30 :no-audio".
+   */
+  public void addItem(String resourcePath, String options) {
     if(!webBrowserObject.hasContent()) {
       vlcPlayer.load();
       clear();
@@ -67,7 +86,7 @@ public class VLCPlaylist {
     if(file != null) {
       resourcePath = webBrowserObject.getLocalFileURL(file);
     }
-    webBrowserObject.invokeObjectFunction("playlist.add", resourcePath);
+    webBrowserObject.invokeObjectFunction("playlist.add", resourcePath, resourcePath, options);
   }
 
   /**

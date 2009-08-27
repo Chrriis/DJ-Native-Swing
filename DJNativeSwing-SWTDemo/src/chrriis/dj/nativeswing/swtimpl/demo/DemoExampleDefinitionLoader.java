@@ -28,6 +28,7 @@ import chrriis.dj.nativeswing.swtimpl.demo.examples.introduction.TheSolution;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.nativedialogs.NativeDialogs;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.syntaxhighlighter.SimpleSyntaxHighlighterExample;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.utilities.FileAssociations;
+import chrriis.dj.nativeswing.swtimpl.demo.examples.vlcplayer.OptionsAndPlaylistExample;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.vlcplayer.SimpleVLCPlayerExample;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.ClasspathPages;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.Cookies;
@@ -74,6 +75,7 @@ public class DemoExampleDefinitionLoader {
     }));
     exampleGroupList.add(new ExampleGroup("JVLCPlayer", new Example[] {
         new Example("Simple Example", SimpleVLCPlayerExample.class, "Load a movie/sound file to an embedded VLC player.", true),
+        new Example("Options and Playlist", OptionsAndPlaylistExample.class, "Load a file to VLC player, passing certain options (start time to 30 and no audio) using the playlist.", true),
     }));
     exampleGroupList.add(new ExampleGroup("JHTMLEditor", new Example[] {
         new Example("Simple Example", SimpleHTMLEditorExample.class, "Graphically edit some HTML, get and set the HTML content.", true),
