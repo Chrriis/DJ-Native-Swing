@@ -73,7 +73,10 @@ public class JVLCPlayer extends NSPanelComponent {
     @Override
     protected ObjectHTMLConfiguration getObjectHtmlConfiguration() {
       ObjectHTMLConfiguration objectHTMLConfiguration = new ObjectHTMLConfiguration();
-      objectHTMLConfiguration.setHTMLParameters(vlcPlayer.options.getParameters());
+      if(vlcPlayer.options != null) {
+        // Possible when debugging and calling the same URL again. No options but better than nothing.
+        objectHTMLConfiguration.setHTMLParameters(vlcPlayer.options.getParameters());
+      }
       objectHTMLConfiguration.setWindowsClassID("9BE31822-FDAD-461B-AD51-BE1D1C159921");
       objectHTMLConfiguration.setWindowsInstallationURL("http://downloads.videolan.org/pub/videolan/vlc/latest/win32/axvlc.cab");
       objectHTMLConfiguration.setMimeType("application/x-vlc-plugin");
@@ -390,7 +393,7 @@ public class JVLCPlayer extends NSPanelComponent {
     load(WebServer.getDefaultWebServer().getClassPathResourceURL(clazz.getName(), resourcePath), options);
   }
 
-  private VLCPluginOptions options;
+  private volatile VLCPluginOptions options;
 
   /**
    * Load a file.

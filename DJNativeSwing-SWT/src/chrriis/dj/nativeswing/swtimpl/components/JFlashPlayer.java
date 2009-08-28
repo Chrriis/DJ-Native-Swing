@@ -186,7 +186,7 @@ public class JFlashPlayer extends NSPanelComponent {
     return value.length() == 0? null: new ImageIcon(JWebBrowser.class.getResource(value));
   }
 
-  private String customJavascriptDefinitions;
+  private volatile String customJavascriptDefinitions;
 
 //  public String getLoadedResource() {
 //    return webBrowserObject.getLoadedResource();
@@ -220,7 +220,7 @@ public class JFlashPlayer extends NSPanelComponent {
     load(resourceLocation, null);
   }
 
-  private FlashPluginOptions options;
+  private volatile FlashPluginOptions options;
 
   /**
    * Load a file.
