@@ -372,13 +372,15 @@ class NativeWebBrowser extends NativeComponent {
     return isXULRunnerRuntime;
   }
 
+  private String xulRunnerHome;
+
   @Override
   protected Object[] getNativePeerCreationParameters() {
-    return new Object[] {isXULRunnerRuntime};
+    return new Object[] {xulRunnerHome, isXULRunnerRuntime};
   }
 
   protected static Control createControl(Shell shell, Object[] parameters) {
-    String xulRunnerPath = System.getProperty("nativeswing.webbrowser.xulrunner.home");
+    String xulRunnerPath = (String)parameters[0];
     if(xulRunnerPath != null) {
       System.setProperty("org.eclipse.swt.browser.XULRunnerPath", xulRunnerPath);
     } else {
@@ -391,7 +393,7 @@ class NativeWebBrowser extends NativeComponent {
       }
     }
     int style = SWT.NONE;
-    if(((Boolean)parameters[0])) {
+    if(((Boolean)parameters[1])) {
       style |= SWT.MOZILLA;
     }
     final Browser browser = new Browser(shell, style);
@@ -588,6 +590,7 @@ class NativeWebBrowser extends NativeComponent {
   public NativeWebBrowser(JWebBrowser webBrowser, boolean isXULRunnerRuntime) {
     this.webBrowser = new WeakReference<JWebBrowser>(webBrowser);
     this.isXULRunnerRuntime = isXULRunnerRuntime || "xulrunner".equals(System.getProperty("nativeswing.webbrowser.runtime"));
+    xulRunnerHome = System.getProperty("nativeswing.webbrowser.xulrunner.home");
   }
 
   private static class CMN_clearSessionCookies extends CommandMessage {
