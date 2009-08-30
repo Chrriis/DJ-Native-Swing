@@ -24,6 +24,8 @@ import java.util.regex.Pattern;
 import javax.swing.SwingUtilities;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.AuthenticationEvent;
+import org.eclipse.swt.browser.AuthenticationListener;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.browser.CloseWindowListener;
@@ -1003,6 +1005,73 @@ class NativeWebBrowser extends NativeComponent {
       nameToFunctionMap = null;
     }
     runAsync(new CMN_unregisterFunction(), functionName);
+  }
+
+  private static class CMJ_getCredentials extends ControlCommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
+      JWebBrowser webBrowser = nativeWebBrowser == null? null: nativeWebBrowser.webBrowser.get();
+      if(webBrowser == null) {
+        return null;
+      }
+      WebBrowserAuthenticationHandler authenticationHandler = nativeWebBrowser.getAuthenticationHandler();
+      if(authenticationHandler == null) {
+        return new Object[] {true, null, null};
+      }
+      String resourceLocation = (String)args[0];
+      Credentials credentials = authenticationHandler.getCredentials(webBrowser, resourceLocation);
+      if(credentials == null) {
+        return new Object[] {false, null, null};
+      }
+      return new Object[] {true, credentials.getUserName(), credentials.getPassword()};
+    }
+  }
+
+  private static class CMN_setAuthenticationHandler extends ControlCommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      final Browser browser = (Browser)getControl();
+      boolean isActive = (Boolean)args[0];
+      if(isActive) {
+        AuthenticationListener authenticationListener = new AuthenticationListener() {
+          public void authenticate(AuthenticationEvent e) {
+            Object[] result = (Object[])new CMJ_getCredentials().syncExec(browser, e.location);
+            boolean doIt = (Boolean)result[0];
+            if(doIt) {
+              e.user = (String)result[1];
+              e.password = (String)result[2];
+            } else {
+              e.doit = false;
+            }
+          }
+        };
+        browser.setData("Browser.authenticationListener", authenticationListener);
+        browser.addAuthenticationListener(authenticationListener);
+      } else {
+        browser.removeAuthenticationListener((AuthenticationListener)browser.getData("Browser.authenticationListener"));
+        browser.setData("Browser.authenticationListener", null);
+      }
+      return null;
+    }
+  }
+
+  private WebBrowserAuthenticationHandler authenticationHandler;
+
+  public void setAuthenticationHandler(WebBrowserAuthenticationHandler authenticationHandler) {
+    if(this.authenticationHandler == authenticationHandler) {
+      return;
+    }
+    boolean isActivated = this.authenticationHandler == null;
+    boolean isDeactivated = authenticationHandler == null;
+    this.authenticationHandler = authenticationHandler;
+    if(isActivated || isDeactivated) {
+      runAsync(new CMN_setAuthenticationHandler(), isActivated);
+    }
+  }
+
+  public WebBrowserAuthenticationHandler getAuthenticationHandler() {
+    return authenticationHandler;
   }
 
   public void addWebBrowserListener(WebBrowserListener listener) {

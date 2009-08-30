@@ -589,6 +589,22 @@ public class JWebBrowser extends NSPanelComponent {
 
   }
 
+  /**
+   * Set the authentication handler.
+   * @param authenticationHandler The authentication handler, or null to remove the current one.
+   */
+  public void setAuthenticationHandler(WebBrowserAuthenticationHandler authenticationHandler) {
+    nativeWebBrowser.setAuthenticationHandler(authenticationHandler);
+  }
+
+  /**
+   * Get the authentication handler or null if none is set.
+   * @return the authentication handler.
+   */
+  public WebBrowserAuthenticationHandler getAuthenticationHandler() {
+    return nativeWebBrowser.getAuthenticationHandler();
+  }
+
   private Map<WebBrowserListener, NativeWebBrowserListener> webBrowserListenerToNativeWebBrowserListenerMap = new HashMap<WebBrowserListener, NativeWebBrowserListener>();
 
   /**
