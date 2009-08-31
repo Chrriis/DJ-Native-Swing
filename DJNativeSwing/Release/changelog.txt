@@ -7,6 +7,7 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.9 (xxxxxxxxxxxxxx):
 
+- Web server allows to plug content providers.
 - Fixed a bug in back buffer overlay calculation.
 - Local address resolution is improved.
 
