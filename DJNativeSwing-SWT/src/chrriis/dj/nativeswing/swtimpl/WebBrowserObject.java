@@ -9,6 +9,7 @@ package chrriis.dj.nativeswing.swtimpl;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
@@ -82,7 +83,7 @@ public abstract class WebBrowserObject {
       return;
     }
     instanceID = ObjectRegistry.getInstance().add(this);
-    String resourceLocation = WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "html/" + instanceID);
+    String resourceLocation = WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), String.valueOf(instanceID), "html");
     final boolean[] resultArray = new boolean[1];
     InitializationListener initializationListener = new InitializationListener() {
       public void objectInitialized() {
@@ -125,13 +126,14 @@ public abstract class WebBrowserObject {
   protected static WebServerContent getWebServerContent(HTTPRequest httpRequest) {
     String resourcePath = httpRequest.getResourcePath();
     int index = resourcePath.indexOf('/');
-    if(index == -1) {
+    final int instanceID = Integer.parseInt(resourcePath.substring(0, index));
+    final WebBrowserObject webBrowserObject = (WebBrowserObject)ObjectRegistry.getInstance().get(instanceID);
+    if(webBrowserObject == null) {
       return null;
     }
-    String type = resourcePath.substring(0, index);
     resourcePath = resourcePath.substring(index + 1);
+    String type = resourcePath;
     if("html".equals(type)) {
-      final int instanceID = Integer.parseInt(resourcePath);
       final WebBrowserObject component = (WebBrowserObject)ObjectRegistry.getInstance().get(instanceID);
       if(component == null) {
         return new WebServerContent() {
@@ -197,7 +199,7 @@ public abstract class WebBrowserObject {
             "    <form style=\"display:none;\" name=\"j_form\" action=\"" + WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "postCommand/" + instanceID) + "\" method=\"POST\" target=\"j_iframe\">" + LS +
             "      <input name=\"j_command\" type=\"text\"></input>" + LS +
             "    </form>" + LS +
-            "    <script src=\"" + WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), "js/" + instanceID) + "\"></script>" + LS +
+            "    <script src=\"" + WebServer.getDefaultWebServer().getDynamicContentURL(WebBrowserObject.class.getName(), String.valueOf(instanceID), "js") + "\"></script>" + LS +
             "  </body>" + LS +
             "</html>" + LS;
           return getInputStream(content);
@@ -205,11 +207,6 @@ public abstract class WebBrowserObject {
       };
     }
     if("js".equals(type)) {
-      final int instanceID = Integer.parseInt(resourcePath);
-      final WebBrowserObject webBrowserObject = (WebBrowserObject)ObjectRegistry.getInstance().get(instanceID);
-      if(webBrowserObject == null) {
-        return null;
-      }
       String url = webBrowserObject.resourcePath;
       // local files may have some security restrictions depending on the plugin, so let's ask the plugin for a valid URL.
       File file = Utils.getLocalFile(url);
@@ -277,11 +274,6 @@ public abstract class WebBrowserObject {
       };
     }
     if("postCommand".equals(type)) {
-      final int instanceID = Integer.parseInt(resourcePath);
-      final WebBrowserObject webBrowserObject = (WebBrowserObject)ObjectRegistry.getInstance().get(instanceID);
-      if(webBrowserObject == null) {
-        return null;
-      }
       HTTPData postData = httpRequest.getHTTPPostDataArray()[0];
       Map<String, String> headerMap = postData.getHeaderMap();
       int size = headerMap.size();
@@ -316,7 +308,24 @@ public abstract class WebBrowserObject {
         }
       };
     }
-    return null;
+    final String resource = resourcePath;
+    return new WebServerContent() {
+      @Override
+      public InputStream getInputStream() {
+        try {
+          String url = webBrowserObject.resourcePath;
+          // local files may have some security restrictions depending on the plugin, so let's ask the plugin for a valid URL.
+          File file = Utils.getLocalFile(url);
+          if(file != null) {
+            url = webBrowserObject.getLocalFileURL(file);
+          }
+          url = url.substring(0, url.lastIndexOf('/')) + "/" + resource;
+          return new URL(url).openStream();
+        } catch (Exception e) {
+        }
+        return null;
+      }
+    };
   }
 
   public static class ObjectHTMLConfiguration {

@@ -12,6 +12,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,9 @@ import javax.swing.border.BevelBorder;
 
 import chrriis.common.Utils;
 import chrriis.common.WebServer;
+import chrriis.common.WebServer.HTTPRequest;
+import chrriis.common.WebServer.WebServerContent;
+import chrriis.common.WebServer.WebServerContentProvider;
 import chrriis.dj.nativeswing.NSOption;
 import chrriis.dj.nativeswing.swtimpl.NSPanelComponent;
 import chrriis.dj.nativeswing.swtimpl.WebBrowserObject;
@@ -51,6 +55,30 @@ public class JFlashPlayer extends NSPanelComponent {
         return javascript;
       }
     };
+  }
+
+  static {
+    WebServer.getDefaultWebServer().addContentProvider(new WebServerContentProvider() {
+      public WebServerContent getWebServerContent(HTTPRequest httpRequest) {
+        // When the Flash player wants to access the host files, it asks for this one...
+        if("/crossdomain.xml".equals(httpRequest.getResourcePath())) {
+          return new WebServerContent() {
+            @Override
+            public InputStream getInputStream() {
+              return getInputStream("<?xml version=\"1.0\"?>" + Utils.LINE_SEPARATOR +
+                                    "<!DOCTYPE cross-domain-policy SYSTEM \"http://www.adobe.com/xml/dtds/cross-domain-policy.dtd\">" + Utils.LINE_SEPARATOR +
+                                    "<cross-domain-policy>" + Utils.LINE_SEPARATOR +
+                                    "  <site-control permitted-cross-domain-policies=\"all\"/>" + Utils.LINE_SEPARATOR +
+                                    "  <allow-access-from domain=\"*\" secure=\"false\"/>" + Utils.LINE_SEPARATOR +
+                                    "  <allow-http-request-headers-from domain=\"*\" headers=\"*\" secure=\"false\"/>" + Utils.LINE_SEPARATOR +
+                                    "</cross-domain-policy>"
+              );
+            }
+          };
+        }
+        return null;
+      }
+    });
   }
 
   private final ResourceBundle RESOURCES;
