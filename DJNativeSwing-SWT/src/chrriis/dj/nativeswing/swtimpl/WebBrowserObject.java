@@ -7,11 +7,13 @@
  */
 package chrriis.dj.nativeswing.swtimpl;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.EventListener;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -40,6 +42,7 @@ public abstract class WebBrowserObject {
 
   public WebBrowserObject(JWebBrowser webBrowser) {
     this.webBrowser = webBrowser;
+    webBrowser.getNativeComponent().setBackground(Color.WHITE);
     webBrowser.setDefaultPopupMenuRegistered(false);
     webBrowser.setBarsVisible(false);
     webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
@@ -73,7 +76,10 @@ public abstract class WebBrowserObject {
     super.finalize();
   }
 
+  private volatile String backgroundColor;
+
   public void load(String resourcePath) {
+    backgroundColor = getHexStringColor(webBrowser.getNativeComponent().getBackground());
     this.resourcePath = resourcePath;
     ObjectRegistry.getInstance().remove(instanceID);
     if(resourcePath == null) {
@@ -189,7 +195,8 @@ public abstract class WebBrowserObject {
             "      //-->" + LS +
             "    </script>" + LS +
             "    <style type=\"text/css\">" + LS +
-            "      html, object, embed, div, body, table { width: 100%; height: 100%; min-height: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #FFFFFF; text-align: center; }" + LS +
+            "      html { background-color: " + webBrowserObject.backgroundColor + "; }" + LS +
+            "      html, object, embed, div, body, table { width: 100%; height: 100%; min-height: 100%; margin: 0; padding: 0; overflow: hidden; text-align: center; }" + LS +
             "      object, embed, div { position: absolute; left:0; top:0;}" + LS +
             "      td { vertical-align: middle; }" + LS +
             "    </style>" + LS +
@@ -281,7 +288,6 @@ public abstract class WebBrowserObject {
       final String[] arguments = new String[size - 1];
       for(int i=0; i<arguments.length; i++) {
         arguments[i] = headerMap.get("j_arg" + i);
-        System.err.println(arguments[i]);
       }
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
@@ -463,6 +469,21 @@ public abstract class WebBrowserObject {
    */
   public Object invokeObjectFunctionWithResult(String functionName, Object... args) {
     return webBrowser.executeJavascriptWithResult("return getEmbeddedObject()." + JWebBrowser.createJavascriptFunctionCall(functionName, args));
+  }
+
+  /**
+   * Set the background color of the object, which by default is the color of the native component.
+   * @param background The background to set.
+   */
+  public void setBackground(Color background) {
+    backgroundColor = getHexStringColor(background);
+    webBrowser.executeJavascript("document.bgColor = '" + backgroundColor + "';");
+  }
+
+  private static String getHexStringColor(Color background) {
+    String backgroundColor = Integer.toHexString(background.getRGB() & 0xFFFFFF).toUpperCase(Locale.ENGLISH);
+    backgroundColor = '#' + "000000".substring(backgroundColor.length()) + backgroundColor;
+    return backgroundColor;
   }
 
 }

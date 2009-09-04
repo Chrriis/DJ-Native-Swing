@@ -12,6 +12,7 @@ Licence terms: LGPL (see licence.txt)
 - Browser/Flash player commands now take Object[] as params.
 - JWebBrowser.setAuthenticationHandler(handler) is added.
 - JFlashPlayer content can access host files.
+- Browser-based object can have their background set (for transparent content).
 - VLC player now allows VLC options.
 - VLC API improved to work with 1.0.0.
 - Mozilla XPCOM missing interface methods are added.
