@@ -776,7 +776,7 @@ public class WebServer {
 
   public String getResourcePathURL(String codeBase, String resourcePath) {
     if(codeBase == null) {
-      codeBase = ".";
+      codeBase = new File(System.getProperty("user.dir")).getAbsolutePath();
     }
     return getURLPrefix() + "/resource/" + Utils.encodeURL(codeBase) + "/" + Utils.encodeURL(resourcePath);
   }
