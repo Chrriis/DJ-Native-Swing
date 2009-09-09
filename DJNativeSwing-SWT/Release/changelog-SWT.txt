@@ -13,6 +13,7 @@ Licence terms: LGPL (see licence.txt)
 - JWebBrowser.setAuthenticationHandler(handler) is added.
 - JFlashPlayer content can access host files.
 - Browser-based object can have their background set (for transparent content).
+- Native component generated mouse events set the popup trigger flag correctly.
 - VLC player now allows VLC options.
 - VLC API improved to work with 1.0.0.
 - Mozilla XPCOM missing interface methods are added.

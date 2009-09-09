@@ -347,13 +347,15 @@ public abstract class NativeComponent extends Canvas {
         if(type == MouseEvent.MOUSE_WHEEL) {
           me = new MouseWheelEvent(nativeComponent, type, System.currentTimeMillis(), SWTUtils.translateSWTModifiers(e_stateMask), e_x, e_y, e_cursorLocation.x, e_cursorLocation.y, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, Math.abs(e_count), e_count < 0? 1: -1);
         } else {
-          me = new MouseEvent(nativeComponent, type, System.currentTimeMillis(), SWTUtils.translateSWTModifiers(e_stateMask), e_x, e_y, e_cursorLocation.x, e_cursorLocation.y, e_count, false, button);
+          boolean isPopupTrigger = type == MouseEvent.MOUSE_RELEASED && button == MouseEvent.BUTTON3;
+          me = new MouseEvent(nativeComponent, type, System.currentTimeMillis(), SWTUtils.translateSWTModifiers(e_stateMask), e_x, e_y, e_cursorLocation.x, e_cursorLocation.y, e_count, isPopupTrigger, button);
         }
       } else {
         if(type == MouseEvent.MOUSE_WHEEL) {
           me = new MouseWheelEvent(nativeComponent, type, System.currentTimeMillis(), SWTUtils.translateSWTModifiers(e_stateMask), e_x, e_y, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, Math.abs(e_count), e_count < 0? 1: -1);
         } else {
-          me = new MouseEvent(nativeComponent, type, System.currentTimeMillis(), SWTUtils.translateSWTModifiers(e_stateMask), e_x, e_y, e_count, false, button);
+          boolean isPopupTrigger = type == MouseEvent.MOUSE_RELEASED && button == MouseEvent.BUTTON3;
+          me = new MouseEvent(nativeComponent, type, System.currentTimeMillis(), SWTUtils.translateSWTModifiers(e_stateMask), e_x, e_y, e_count, isPopupTrigger, button);
         }
       }
       nativeComponent.dispatchEvent(me);
