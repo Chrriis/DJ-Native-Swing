@@ -267,7 +267,6 @@ public class DefaultWebBrowserDecorator extends WebBrowserDecorator {
           nativeWebBrowser.requestFocus();
         }
       });
-      reloadMenuItem.setEnabled(false);
       viewMenu.add(reloadMenuItem);
       stopMenuItem = new JMenuItem(RESOURCES.getString("ViewMenuStop"), createIcon("ViewMenuStopIcon"));
       stopMenuItem.addActionListener(new ActionListener() {
