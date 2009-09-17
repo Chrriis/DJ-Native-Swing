@@ -940,7 +940,8 @@ public abstract class NativeComponent extends Canvas {
   private static class CMN_hasFocus extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
-      return getControl().isFocusControl();
+      Control control = getControl();
+      return control.isDisposed()? false: control.isFocusControl();
     }
   }
 
