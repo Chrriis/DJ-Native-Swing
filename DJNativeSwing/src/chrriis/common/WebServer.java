@@ -248,6 +248,7 @@ public class WebServer {
       extensionToMimeTypeMap.put("pml", "application/x-perfmon");
       extensionToMimeTypeMap.put("pmr", "application/x-perfmon");
       extensionToMimeTypeMap.put("pmw", "application/x-perfmon");
+      extensionToMimeTypeMap.put("png", "image/png");
       extensionToMimeTypeMap.put("pnm", "image/x-portable-anymap");
       extensionToMimeTypeMap.put("pot,", "application/vnd.ms-powerpoint");
       extensionToMimeTypeMap.put("ppm", "image/x-portable-pixmap");
