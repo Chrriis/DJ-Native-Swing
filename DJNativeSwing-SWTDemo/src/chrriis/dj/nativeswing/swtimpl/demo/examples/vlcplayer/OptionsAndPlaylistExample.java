@@ -70,7 +70,7 @@ public class OptionsAndPlaylistExample extends JPanel {
         // Thus, we stop any previously running item, clear the playlist and add our item
         playlist.stop();
         playlist.clear();
-        playlist.addItem(playerFileTextField.getText(), ":start-time=30 :no-audio");
+        playlist.addItem(playerFileTextField.getText(), ":start-time=30 :no-audio :no-video-title-show");
         playlist.play();
       }
     };
