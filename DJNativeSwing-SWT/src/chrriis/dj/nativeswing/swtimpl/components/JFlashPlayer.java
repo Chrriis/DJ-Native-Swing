@@ -98,7 +98,7 @@ public class JFlashPlayer extends NSPanelComponent {
 
   private static class NWebBrowserObject extends WebBrowserObject {
 
-    private JFlashPlayer flashPlayer;
+    private final JFlashPlayer flashPlayer;
 
     NWebBrowserObject(JFlashPlayer flashPlayer) {
       super(flashPlayer.webBrowser);

@@ -25,6 +25,7 @@ Licence terms: LGPL (see licence.txt)
 - Resource bundles are loaded without using the package.
 - Browser window size was incorrectly set if JS specified only width or height.
 - Browser windows do not open outside of the screen bounds.
+- Some threading issues are fixed.
 - Fixed a freeze when AWT required native pumping but SWT was in a sync call. 
 - Native File dialog and Directory dialog are added.
 - Internal web browser commands are not visible from external listeners.

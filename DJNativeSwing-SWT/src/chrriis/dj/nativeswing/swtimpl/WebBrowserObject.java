@@ -37,8 +37,8 @@ import chrriis.dj.nativeswing.swtimpl.components.WebBrowserListener;
  */
 public abstract class WebBrowserObject {
 
-  private JWebBrowser webBrowser;
-  private int instanceID;
+  private final JWebBrowser webBrowser;
+  private volatile int instanceID;
 
   public WebBrowserObject(JWebBrowser webBrowser) {
     this.webBrowser = webBrowser;

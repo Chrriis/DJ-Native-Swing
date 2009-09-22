@@ -188,7 +188,7 @@ public class NativeSwing {
     return windowList == null? new Window[0]: windowList.toArray(new Window[0]);
   }
 
-  private static boolean isInitialized;
+  private static volatile boolean isInitialized;
 
   private static boolean isInitialized() {
     return isInitialized;

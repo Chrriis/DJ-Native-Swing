@@ -65,7 +65,7 @@ public class NativeInterface {
     return isOpen() && messagingInterface.isAlive();
   }
 
-  private static boolean isOpen;
+  private static volatile boolean isOpen;
 
   private static boolean isOpen() {
     return isOpen;
@@ -131,7 +131,7 @@ public class NativeInterface {
     }
   }
 
-  private static boolean isInitialized;
+  private static volatile boolean isInitialized;
 
   private static boolean isInitialized() {
     return isInitialized;
