@@ -92,7 +92,7 @@ public class NativeInterface {
     }
   }
 
-  private static NativeInterfaceConfiguration nativeInterfaceConfiguration;
+  private static volatile NativeInterfaceConfiguration nativeInterfaceConfiguration;
 
   /**
    * Get the configuration, which allows to modify some parameters.
@@ -137,7 +137,7 @@ public class NativeInterface {
     return isInitialized;
   }
 
-  private static boolean isInProcess;
+  private static volatile boolean isInProcess;
 
   static boolean isInProcess() {
     return isInProcess;
