@@ -69,6 +69,7 @@ import org.eclipse.swt.widgets.Shell;
 import chrriis.common.ObjectRegistry;
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.NativeComponentWrapper;
+import chrriis.dj.nativeswing.swtimpl.ControlCommandMessage.DisposedControlException;
 
 import com.sun.jna.Native;
 
@@ -142,7 +143,17 @@ public abstract class NativeComponent extends Canvas {
       printFailedInvocation(commandMessage);
       return null;
     }
-    return commandMessage.syncExec(true, args);
+    try {
+      return commandMessage.syncExec(true, args);
+    } catch(RuntimeException e) {
+      for(Throwable ex=e; ex != null; ex = ex.getCause()) {
+        if(ex instanceof DisposedControlException) {
+          printFailedInvocation(commandMessage);
+          return null;
+        }
+      }
+      throw e;
+    }
   }
 
   /**

@@ -9,6 +9,8 @@ package chrriis.dj.nativeswing.swtimpl;
 
 import org.eclipse.swt.widgets.Control;
 
+import chrriis.common.ObjectRegistry;
+
 /**
  * A message that makes the link between a native component on the local side and its native peer control.
  * @author Christopher Deckers
@@ -67,7 +69,8 @@ public abstract class ControlCommandMessage extends CommandMessage {
    * @return the control, or null.
    */
   public Control getControl() {
-    return (Control)NativeComponent.getControlRegistry().get(componentID);
+    ObjectRegistry controlRegistry = NativeComponent.getControlRegistry();
+    return controlRegistry == null? null: (Control)controlRegistry.get(componentID);
   }
 
   /**
@@ -75,7 +78,8 @@ public abstract class ControlCommandMessage extends CommandMessage {
    * @return the native component, or null.
    */
   public NativeComponent getNativeComponent() {
-    return (NativeComponent)NativeComponent.getNativeComponentRegistry().get(componentID);
+    ObjectRegistry nativeComponentRegistry = NativeComponent.getNativeComponentRegistry();
+    return nativeComponentRegistry == null? null: (NativeComponent)nativeComponentRegistry.get(componentID);
   }
 
   /**
@@ -144,6 +148,18 @@ public abstract class ControlCommandMessage extends CommandMessage {
     if(componentID == 0) {
       throw new IllegalStateException("The component was not specified!");
     }
+  }
+
+  static class DisposedControlException extends IllegalStateException {
+  }
+
+  @Override
+  Object runCommand() throws Exception {
+    Control control = getControl();
+    if(control != null && control.isDisposed()) {
+      throw new DisposedControlException();
+    }
+    return super.runCommand();
   }
 
   @Override
