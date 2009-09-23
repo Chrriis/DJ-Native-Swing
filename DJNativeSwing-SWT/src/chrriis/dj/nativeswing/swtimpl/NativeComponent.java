@@ -969,6 +969,9 @@ public abstract class NativeComponent extends Canvas {
     @Override
     public Object run(Object[] args) {
       Control control = getControl();
+      if(control.isDisposed()) {
+        return null;
+      }
       Point cSize = control.computeSize(SWT.DEFAULT, SWT.DEFAULT);
       return new Dimension(cSize.x, cSize.y);
     }

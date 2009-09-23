@@ -33,6 +33,9 @@ public class JDirectoryDialog {
       public Object run(Object[] args) {
         Data data = (Data)args[0];
         Control control = getControl();
+        if(control.isDisposed()) {
+          return data;
+        }
         DirectoryDialog directoryDialog = new DirectoryDialog(control.getShell(), SWT.NONE);
         if(data.title != null) {
           directoryDialog.setText(data.title);

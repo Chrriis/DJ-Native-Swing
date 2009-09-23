@@ -33,6 +33,9 @@ public class JFileDialog {
       public Object run(Object[] args) {
         Data data = (Data)args[0];
         Control control = getControl();
+        if(control.isDisposed()) {
+          return data;
+        }
         int style = 0;
         if(data.isSave) {
           style |= SWT.SAVE;
