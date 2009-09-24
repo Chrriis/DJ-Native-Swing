@@ -7,6 +7,8 @@
  */
 package chrriis.dj.nativeswing.swtimpl;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.widgets.Control;
 
 import chrriis.common.ObjectRegistry;
@@ -151,15 +153,23 @@ public abstract class ControlCommandMessage extends CommandMessage {
   }
 
   static class DisposedControlException extends IllegalStateException {
+    public DisposedControlException(Throwable t) {
+      super("Widget is disposed", t);
+    }
   }
 
   @Override
   Object runCommand() throws Exception {
-    Control control = getControl();
-    if(control != null && control.isDisposed()) {
-      throw new DisposedControlException();
+    try {
+      return super.runCommand();
+    } catch(RuntimeException e) {
+      for(Throwable ex=e; ex != null; ex = ex.getCause()) {
+        if(ex instanceof SWTException && ((SWTException)ex).code == SWT.ERROR_WIDGET_DISPOSED) {
+          throw new DisposedControlException(ex);
+        }
+      }
+      throw e;
     }
-    return super.runCommand();
   }
 
   @Override
