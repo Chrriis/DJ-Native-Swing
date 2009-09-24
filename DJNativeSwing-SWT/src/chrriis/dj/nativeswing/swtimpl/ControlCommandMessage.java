@@ -163,9 +163,11 @@ public abstract class ControlCommandMessage extends CommandMessage {
     try {
       return super.runCommand();
     } catch(RuntimeException e) {
-      for(Throwable ex=e; ex != null; ex = ex.getCause()) {
-        if(ex instanceof SWTException && ((SWTException)ex).code == SWT.ERROR_WIDGET_DISPOSED) {
-          throw new DisposedControlException(ex);
+      if(NativeInterface.isInProcess() || NativeInterface.OutProcess.isNativeSide()) {
+        for(Throwable ex=e; ex != null; ex = ex.getCause()) {
+          if(ex instanceof SWTException && ((SWTException)ex).code == SWT.ERROR_WIDGET_DISPOSED) {
+            throw new DisposedControlException(ex);
+          }
         }
       }
       throw e;
