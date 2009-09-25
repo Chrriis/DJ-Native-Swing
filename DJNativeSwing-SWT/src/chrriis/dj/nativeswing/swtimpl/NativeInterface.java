@@ -384,6 +384,13 @@ public class NativeInterface {
     private static volatile boolean isEventPumpRunning;
 
     static void runEventPump() {
+      if(isEventPumpRunning) {
+        throw new IllegalStateException("runEventPump was already called!");
+      }
+      if(!isInitialized) {
+        throw new IllegalStateException("Cannot run the event pump when the interface is not initialized!");
+      }
+      isEventPumpRunning = true;
       if(!isInProcess) {
         return;
       }
@@ -403,7 +410,6 @@ public class NativeInterface {
     static void createInProcessCommunicationChannel() {
       messagingInterface = createInProcessMessagingInterface();
       isOpen = true;
-      isEventPumpRunning = true;
     }
 
     private static void initialize() {
