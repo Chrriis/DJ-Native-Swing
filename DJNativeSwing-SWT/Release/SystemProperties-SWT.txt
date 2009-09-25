@@ -73,6 +73,13 @@ are using them get loaded.
   Set whether the messages that did not reach the native component should be
   printed.
 
+* nativeswing.components.swallowruntimeexceptions
+  = true/false (default: false)
+  Set whether synchronous component methods should swallow runtime
+  exceptions and return dummy results. This is a sort of paranoid mode since
+  such exceptions are not supposed to happen. Moreover, there is no guarantee
+  that user code can recover from all dummy results.
+
 --------------------------------------------------------------------------------
 
 * nativeswing.webbrowser.runtime
