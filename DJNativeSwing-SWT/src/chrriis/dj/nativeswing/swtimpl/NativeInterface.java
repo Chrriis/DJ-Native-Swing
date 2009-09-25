@@ -344,10 +344,19 @@ public class NativeInterface {
     getMessagingInterface(isNativeSide).checkUIThread();
   }
 
+  private static volatile boolean isEventPumpRunning;
+
   /**
    * Run the native event pump. Certain platforms require this method call at the end of the main method to function properly, so it is suggested to always add it.
    */
   public static void runEventPump() {
+    if(!isInitialized) {
+      throw new IllegalStateException("Cannot run the event pump when the interface is not initialized!");
+    }
+    if(isEventPumpRunning) {
+      throw new IllegalStateException("runEventPump was already called and can only be called once (the first call should be at the end of the main method)!");
+    }
+    isEventPumpRunning = true;
     if(isInProcess) {
       InProcess.runEventPump();
     }
@@ -381,32 +390,6 @@ public class NativeInterface {
 
   static class InProcess {
 
-    private static volatile boolean isEventPumpRunning;
-
-    static void runEventPump() {
-      if(isEventPumpRunning) {
-        throw new IllegalStateException("runEventPump was already called!");
-      }
-      if(!isInitialized) {
-        throw new IllegalStateException("Cannot run the event pump when the interface is not initialized!");
-      }
-      isEventPumpRunning = true;
-      if(!isInProcess) {
-        return;
-      }
-      while(isEventPumpRunning) {
-        try {
-          if(!display.readAndDispatch()) {
-            if(isEventPumpRunning) {
-              display.sleep();
-            }
-          }
-        } catch(Exception e) {
-          e.printStackTrace();
-        }
-      }
-    }
-
     static void createInProcessCommunicationChannel() {
       messagingInterface = createInProcessMessagingInterface();
       isOpen = true;
@@ -418,41 +401,58 @@ public class NativeInterface {
       data.debug = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.debug"));
       data.tracking = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.tracking"));
       display = new Display(data);
-      startAutoShutdownThread();
     }
 
     private static MessagingInterface createInProcessMessagingInterface() {
       return new SWTInProcessMessagingInterface(display).getMirrorMessagingInterface();
     }
 
+    static void runEventPump() {
+      startAutoShutdownThread();
+      while(isEventPumpRunning) {
+        try {
+          if(!display.readAndDispatch()) {
+            if(isEventPumpRunning) {
+              display.sleep();
+            }
+          }
+        } catch(Exception e) {
+          e.printStackTrace();
+        }
+      }
+      display.dispose();
+    }
+
     static void startAutoShutdownThread() {
+      final Thread displayThread = display.getThread();
       Thread autoShutdownThread = new Thread("NativeSwing Auto-Shutdown") {
         protected Thread[] activeThreads = new Thread[1024];
         @Override
         public void run() {
-          while(true) {
+          boolean isAlive = true;
+          while(isAlive) {
             try {
-              Thread.sleep(500);
+              Thread.sleep(1000);
             } catch(Exception e) {
             }
             ThreadGroup group = Thread.currentThread().getThreadGroup();
             for(ThreadGroup parentGroup = group; (parentGroup = parentGroup.getParent()) != null; group = parentGroup) {
             }
-            boolean isAlive = display == null;
-            if(!isAlive) {
-              for(int i=group.enumerate(activeThreads, true)-1; i>=0; i--) {
-                Thread t = activeThreads[i];
-                if(t != display.getThread() && !t.isDaemon() && t.isAlive()) {
-                  isAlive = true;
-                  break;
-                }
+            isAlive = false;
+            for(int i=group.enumerate(activeThreads, true)-1; i>=0; i--) {
+              Thread t = activeThreads[i];
+              if(t != displayThread && !t.isDaemon() && t.isAlive()) {
+                isAlive = true;
+                break;
               }
             }
-            if(!isAlive) {
-              isEventPumpRunning = false;
-              display.wake();
-            }
           }
+          // Shutdown procedure
+          display.asyncExec(new Runnable() {
+            public void run() {
+              isEventPumpRunning = false;
+            }
+          });
         }
       };
       autoShutdownThread.setDaemon(true);
