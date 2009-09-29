@@ -13,6 +13,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.MenuComponent;
 import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.ComponentListener;
@@ -412,6 +413,16 @@ public abstract class NativeComponent extends Canvas {
   private static class CKeyEvent extends KeyEvent {
     public CKeyEvent(Component source, int id, long when, int modifiers, int keyCode, char keyChar) {
       super(source, id, when, modifiers, keyCode, keyChar);
+    }
+    @Override
+    public String toString() {
+      String srcName = null;
+      if (source instanceof Component) {
+        srcName = ((Component)source).getName();
+      } else if (source instanceof MenuComponent) {
+        srcName = ((MenuComponent)source).getName();
+      }
+      return KeyEvent.class.getName() + "[" + paramString() + "] on " + (srcName != null? srcName : source);
     }
   }
 
