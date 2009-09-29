@@ -8,6 +8,7 @@
 package chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -66,7 +67,7 @@ public class InputEventsExample extends JPanel {
     // Create an area that shows the various input events the web browser can send.
     JPanel southPanel = new JPanel(new BorderLayout());
     southPanel.setBorder(BorderFactory.createTitledBorder("Key and mouse events from the web browser"));
-    textArea = new JTextArea(5, 1);
+    textArea = new JTextArea();
     textArea.setEditable(false);
     webBrowser.getNativeComponent().addMouseListener(new MouseAdapter() {
       @Override
@@ -88,7 +89,9 @@ public class InputEventsExample extends JPanel {
         textArea.append(e.toString() + "\n");
       }
     });
-    southPanel.add(new JScrollPane(textArea));
+    JScrollPane scrollPane = new JScrollPane(textArea);
+    scrollPane.setPreferredSize(new Dimension(0, 120));
+    southPanel.add(scrollPane);
     add(southPanel, BorderLayout.SOUTH);
   }
 
