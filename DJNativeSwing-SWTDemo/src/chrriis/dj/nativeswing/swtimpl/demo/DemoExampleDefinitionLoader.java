@@ -14,6 +14,7 @@ import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.Component
 import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.ConstrainVisibility;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.DeferredDestruction;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.HierarchyProxying;
+import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.InputEventsExample;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.PseudoTransparency;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.ThumbnailCreation;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.flashplayer.FunctionCalls;
@@ -98,6 +99,7 @@ public class DemoExampleDefinitionLoader {
         new Example("Thumbnail Creation", ThumbnailCreation.class, "Create a thumbnail by painting a native component to an image.", true),
         new Example("Pseudo Transparency", PseudoTransparency.class, "Simulate alpha blending of a Swing component over a native component. This works rather well over static content.", true),
         new Example("Component Life Cycle", ComponentLifeCycle.class, "Present the life cycle of a component and when method calls happen.\nAlso highlight how runInSequence(Runnable) can be useful, and for special needs how to use initializeNativePeer().", true),
+        new Example("Mouse & key events", InputEventsExample.class, "Attach a listener for key and mouse events, and go as far as replacing the web browser popup menu with a Swing one.", true),
     }));
     exampleGroupList.add(new ExampleGroup("Utilities", new Example[] {
         new Example("File Associations", FileAssociations.class, "Get the file type associations, and use them to launch files.", true),
