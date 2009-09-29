@@ -34,6 +34,7 @@ import chrriis.dj.nativeswing.swtimpl.demo.examples.vlcplayer.SimpleVLCPlayerExa
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.ClasspathPages;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.Cookies;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.CustomDecorators;
+import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.FullPageCaptureExample;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.JavascriptExecution;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.NavigationControl;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.SendingCommands;
@@ -68,6 +69,7 @@ public class DemoExampleDefinitionLoader {
         new Example("Mozilla XPCOM Page Edition", XPCOMToggleEditionMode.class, "Toggle edition mode of a web page by accessing the Mozilla interfaces using XPCOM.", true, isXULRunnerPresent, xulRunnerErrorMessage),
         new Example("Mozilla XPCOM Download Manager", XPCOMDownloadManager.class, "Modify the browser's download manager using Mozilla XPCOM.", true, isXULRunnerPresent, xulRunnerErrorMessage),
         new Example("Custom Decorators", CustomDecorators.class, "Modify the browser's decorator, to add our own menus and buttons.", true),
+        new Example("Full-page capture", FullPageCaptureExample.class, "Capture the image of the page, including the portions that are outside of the viewport of the main document.", true),
     }));
     exampleGroupList.add(new ExampleGroup("JFlashPlayer", new Example[] {
         new Example("Simple Example", SimpleFlashExample.class, "Display a Flash application.", true),

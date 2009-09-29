@@ -294,10 +294,7 @@ public abstract class NativeComponent extends Canvas {
           }
           SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-              resizeThread = null;
-              if(isNativePeerValid()) {
-                new CMN_reshape().asyncExec(NativeComponent.this, getWidth(), getHeight());
-              }
+              applyPendingReshape();
             }
           });
         }
@@ -305,6 +302,16 @@ public abstract class NativeComponent extends Canvas {
       resizeThread.start();
     }
     super.reshape(x, y, width, height);
+  }
+
+  private void applyPendingReshape() {
+    if(resizeThread == null) {
+      return;
+    }
+    resizeThread = null;
+    if(isNativePeerValid()) {
+      new CMN_reshape().asyncExec(NativeComponent.this, getWidth(), getHeight());
+    }
   }
 
   private static class CMJ_dispatchMouseEvent extends ControlCommandMessage {
@@ -1195,6 +1202,7 @@ public abstract class NativeComponent extends Canvas {
     if(image == null || !isNativePeerValid() || isNativePeerDisposed) {
       return;
     }
+    applyPendingReshape();
     int width = Math.min(getWidth(), image.getWidth());
     int height = Math.min(getHeight(), image.getHeight());
     if(width <= 0 || height <= 0) {
