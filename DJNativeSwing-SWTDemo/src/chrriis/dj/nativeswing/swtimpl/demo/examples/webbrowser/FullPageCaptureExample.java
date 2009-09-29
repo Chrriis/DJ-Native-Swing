@@ -37,6 +37,7 @@ import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
  */
 public class FullPageCaptureExample extends JPanel {
 
+  private static final String LS = System.getProperty("line.separator");
   private static final Dimension THUMBNAIL_SIZE = new Dimension(400, 300);
 
   public FullPageCaptureExample() {
@@ -52,7 +53,22 @@ public class FullPageCaptureExample extends JPanel {
     JButton captureButton = new JButton("Full-page capture");
     captureButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        String result = (String)webBrowser.executeJavascriptWithResult("return document.body.scrollWidth + '/' + document.body.scrollHeight;");
+        String result = (String)webBrowser.executeJavascriptWithResult(
+        		"var width = 0;" + LS +
+        		"var height = 0;" + LS +
+        		"if(document.documentElement) {" + LS +
+        		"  width = Math.max(width, document.documentElement.scrollWidth);" + LS +
+        		"  height = Math.max(height, document.documentElement.scrollHeight);" + LS +
+        		"}" + LS +
+        		"if(self.innerWidth) {" + LS +
+        		"  width = Math.max(width, self.innerWidth);" + LS +
+        		"  height = Math.max(height, self.innerHeight);" + LS +
+        		"}" + LS +
+        		"if(document.body.scrollWidth) {" + LS +
+        		"  width = Math.max(width, document.body.scrollWidth);" + LS +
+        		"  height = Math.max(height, document.body.scrollHeight);" + LS +
+        		"}" + LS +
+        		"return width + '/' + height;");
         // This may happen from time to time so we have to fail gracefully.
         int index = result == null? -1: result.indexOf("/");
         if(index < 0) {
