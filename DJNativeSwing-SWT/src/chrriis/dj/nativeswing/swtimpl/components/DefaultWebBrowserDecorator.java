@@ -537,15 +537,22 @@ public class DefaultWebBrowserDecorator extends WebBrowserDecorator {
 
   private JPanel nativeWebBrowserBorderContainerPane;
 
+  private void adjustBorder() {
+    nativeWebBrowserBorderContainerPane.setBorder(getInnerAreaBorder());
+  }
+
   /**
-   * Adjust the border, which by default sets a border if at least one of the bars is visible.
+   * Return the border to use for the inner area, which by default return a border if at least one of the bars is visible.
+   * Note that this method is called every time the visibility of a bar changes.
    */
-  protected void adjustBorder() {
+  protected Border getInnerAreaBorder() {
+    Border border;
     if(isMenuBarVisible() || isButtonBarVisible() || isLocationBarVisible() || isStatusBarVisible()) {
-      nativeWebBrowserBorderContainerPane.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+      border = BorderFactory.createBevelBorder(BevelBorder.LOWERED);
     } else {
-      nativeWebBrowserBorderContainerPane.setBorder(null);
+      border = null;
     }
+    return border;
   }
 
   /**
