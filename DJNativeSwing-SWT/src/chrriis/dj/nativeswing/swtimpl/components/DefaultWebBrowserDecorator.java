@@ -537,7 +537,10 @@ public class DefaultWebBrowserDecorator extends WebBrowserDecorator {
 
   private JPanel nativeWebBrowserBorderContainerPane;
 
-  private void adjustBorder() {
+  /**
+   * Adjust the border, which by default sets a border if at least one of the bars is visible.
+   */
+  protected void adjustBorder() {
     if(isMenuBarVisible() || isButtonBarVisible() || isLocationBarVisible() || isStatusBarVisible()) {
       nativeWebBrowserBorderContainerPane.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
     } else {
