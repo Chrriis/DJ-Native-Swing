@@ -7,7 +7,11 @@
  */
 package chrriis.dj.nativeswing.swtimpl;
 
+import java.awt.AWTEvent;
+import java.awt.EventQueue;
+import java.awt.Toolkit;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -245,17 +249,38 @@ abstract class MessagingInterface {
             synchronized(RECEIVER_LOCK) {
               boolean isFirst = true;
               while(receivedMessageList.isEmpty()) {
-                if(!isFirst && isNativeSide) {
-                  // Sometimes, AWT is synchronously waiting for the native side to pump some event.
-                  // The native side is currently waiting, so we set a timeout and do some pumping.
-                  NativeInterface.getDisplay().readAndDispatch();
+                if(!isFirst) {
+                  isFirst = true;
+                  if(isNativeSide) {
+                    if(Boolean.parseBoolean(System.getProperty("NSForcedDispatch"))) {
+                      System.err.println("Force native dispatch");
+                    }
+                    // Sometimes, AWT is synchronously waiting for the native side to pump some event.
+                    // The native side is currently waiting, so we set a timeout and do some pumping.
+                    NativeInterface.getDisplay().readAndDispatch();
+                  } else {
+                    if(Boolean.parseBoolean(System.getProperty("NSForcedDispatch"))) {
+                      EventQueue eventQueue = Toolkit.getDefaultToolkit().getSystemEventQueue();
+                      AWTEvent nextEvent = eventQueue.peekEvent();
+                      if(nextEvent != null) {
+                        nextEvent = eventQueue.getNextEvent();
+                        if(nextEvent != null) {
+                          System.err.println("Force Swing dispatch: nextEvent");
+                          Method dispatchMethod = EventQueue.class.getDeclaredMethod("dispatchEvent", AWTEvent.class);
+                          dispatchMethod.setAccessible(true);
+                          dispatchMethod.invoke(eventQueue, nextEvent);
+                        }
+                      }
+                    }
+                  }
                 }
                 isFirst = false;
                 isWaitingResponse = true;
                 if(isNativeSide) {
                   RECEIVER_LOCK.wait(500);
                 } else {
-                  RECEIVER_LOCK.wait();
+                  // We will have to check the timeouts that make sense, which may depend on the platform
+                  RECEIVER_LOCK.wait(500);
                 }
                 isWaitingResponse = false;
               }
