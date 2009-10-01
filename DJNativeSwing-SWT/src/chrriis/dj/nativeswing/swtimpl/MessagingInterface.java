@@ -265,7 +265,7 @@ abstract class MessagingInterface {
                       if(nextEvent != null) {
                         nextEvent = eventQueue.getNextEvent();
                         if(nextEvent != null) {
-                          System.err.println("Force Swing dispatch: nextEvent");
+                          System.err.println("Force Swing dispatch: " + nextEvent);
                           Method dispatchMethod = EventQueue.class.getDeclaredMethod("dispatchEvent", AWTEvent.class);
                           dispatchMethod.setAccessible(true);
                           dispatchMethod.invoke(eventQueue, nextEvent);
