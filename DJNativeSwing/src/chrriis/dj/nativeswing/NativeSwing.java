@@ -55,7 +55,8 @@ public class NativeSwing {
 
     @Override
     public Rectangle getBounds() {
-      return getOwner().getBounds();
+      Window owner = getOwner();
+      return owner == null? super.getBounds(): owner.getBounds();
     }
 
     private int count;
