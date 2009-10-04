@@ -822,7 +822,7 @@ class NativeWebBrowser extends NativeComponent {
     if(oldMenu != null) {
       oldMenu.dispose();
     }
-    if("ie".equals(browser.getBrowserType())) {
+    if(!"mozilla".equals(browser.getBrowserType())) {
       browser.setMenu(null);
       return;
     }
