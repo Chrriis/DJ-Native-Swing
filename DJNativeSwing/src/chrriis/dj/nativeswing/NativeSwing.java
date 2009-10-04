@@ -330,9 +330,11 @@ public class NativeSwing {
         boolean isBlocked = blockedWindowSet.contains(embedderWindowAncestor);
         final boolean isShowing = c.isShowing();
         nativeComponentWrapper.setNativeComponentEnabled(!isBlocked && isShowing);
-        boolean hasFocus = component.hasFocus();
-        if(!isShowing && hasFocus) {
-          component.transferFocus();
+        if(!Utils.IS_MAC) {
+          // This causes serious freezes with Mac.
+          if(!isShowing && component.hasFocus()) {
+            component.transferFocus();
+          }
         }
       }
     }
