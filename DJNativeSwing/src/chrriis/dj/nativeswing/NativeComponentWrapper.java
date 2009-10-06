@@ -201,8 +201,6 @@ public class NativeComponentWrapper {
     }
     if(componentHierarchyProxying != null) {
       return new NativeComponentProxyPanel(this, Boolean.TRUE.equals(visibilityConstraint), Boolean.TRUE.equals(deferredDestruction), Boolean.TRUE.equals(componentHierarchyProxying));
-      // If for some reasons component-based proxying has some issues, consider using the window-based proxying.
-      //return new NativeComponentProxyWindow(this, visibilityConstraint, destructionTime);
     }
     if(visibilityConstraint == null) {
       return new SimpleNativeComponentHolder(this);
