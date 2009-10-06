@@ -22,7 +22,7 @@ import chrriis.dj.nativeswing.NativeComponentWrapper.NativeComponentHolder;
 /**
  * @author Christopher Deckers
  */
-public class NativeComponentProxyFinalizationPanel extends NativeComponentProxy {
+class NativeComponentProxyFinalizationPanel extends NativeComponentProxy {
 
   NativeComponentProxyFinalizationPanel(NativeComponentWrapper nativeComponentWrapper) {
     super(nativeComponentWrapper);
