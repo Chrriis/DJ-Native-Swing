@@ -162,7 +162,7 @@ public class NativeSwing {
       nativeComponentWrapperList = new ArrayList<NativeComponentWrapper>();
     }
     nativeComponentWrapperList.add(nativeComponentWrapper);
-    if(!isDefaultClippingEnabled) {
+    if(!isHeavyWeightForcerEnabled) {
       HeavyweightForcer.activate(nativeComponentWrapper.getNativeComponent());
     }
   }
@@ -394,7 +394,7 @@ public class NativeSwing {
 
   }
 
-  private static boolean isDefaultClippingEnabled;
+  private static volatile boolean isHeavyWeightForcerEnabled;
 
   /**
    * Initialize the Native Swing framework. This method sets some properties and registers a few listeners to keep track of certain states.<br/>
@@ -415,8 +415,10 @@ public class NativeSwing {
     if(System.getProperty("sun.awt.disableMixing") == null) {
       System.setProperty("sun.awt.disableMixing", "true");
     }
-    isDefaultClippingEnabled = !"true".equals(System.getProperty("sun.awt.disableMixing")) && System.getProperty("java.version").compareTo("1.6.0_12") >= 0;
-    System.setProperty("nativeswing.integration.useDefaultClipping", String.valueOf(isDefaultClippingEnabled));
+    boolean isSunMixingEnabled = !"true".equals(System.getProperty("sun.awt.disableMixing")) && System.getProperty("java.version").compareTo("1.6.0_12") >= 0;
+    isHeavyWeightForcerEnabled = isSunMixingEnabled;
+    // Mac does not support shaping: we are not going to activate our algorithm.
+    System.setProperty("nativeswing.integration.useDefaultClipping", String.valueOf(Utils.IS_MAC || isSunMixingEnabled));
     // Create window monitor
     Toolkit.getDefaultToolkit().addAWTEventListener(new NIAWTEventListener(), WindowEvent.WINDOW_EVENT_MASK | ComponentEvent.COMPONENT_EVENT_MASK);
     isInitialized = true;
