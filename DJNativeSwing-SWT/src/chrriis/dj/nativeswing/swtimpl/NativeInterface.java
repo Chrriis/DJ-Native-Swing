@@ -67,7 +67,11 @@ public class NativeInterface {
 
   private static volatile boolean isOpen;
 
-  private static boolean isOpen() {
+  /**
+   * Indicate whether the native interface is open.
+   * @return true if the native interface is open, false otherwise.
+   */
+  public static boolean isOpen() {
     return isOpen;
   }
 
@@ -133,7 +137,11 @@ public class NativeInterface {
 
   private static volatile boolean isInitialized;
 
-  private static boolean isInitialized() {
+  /**
+   * Indicate whether the native interface is initialized.
+   * @return true if the native interface is initialized, false otherwise.
+   */
+  public static boolean isInitialized() {
     return isInitialized;
   }
 
