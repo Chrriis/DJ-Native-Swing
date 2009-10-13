@@ -408,7 +408,10 @@ public class NativeInterface {
       DeviceData data = new DeviceData();
       data.debug = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.debug"));
       data.tracking = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.tracking"));
-      display = new Display(data);
+      display = Display.getCurrent();
+      if(display == null) {
+        display = new Display(data);
+      }
     }
 
     private static MessagingInterface createInProcessMessagingInterface() {
