@@ -215,22 +215,6 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
         return isAccepted;
       }
     }, false);
-    if(shape.length == 0) {
-      return shape;
-    }
-    Window windowAncestor = SwingUtilities.getWindowAncestor(this);
-    Rectangle tempRectangle = new Rectangle();
-    for(Window window: NativeSwing.getWindows()) {
-      if(window.isVisible()) {
-        for(Window owner = window; (owner=owner.getOwner()) != null; ) {
-          if(owner == windowAncestor) {
-            tempRectangle.setBounds(0, 0, window.getWidth(), window.getHeight());
-            shape = UIUtils.subtract(shape, SwingUtilities.convertRectangle(window, tempRectangle, this));
-            break;
-          }
-        }
-      }
-    }
     return shape;
   }
 
