@@ -252,24 +252,20 @@ abstract class MessagingInterface {
                 if(!isFirst) {
                   isFirst = true;
                   if(isNativeSide) {
-                    if(Boolean.parseBoolean(System.getProperty("NSForcedDispatch"))) {
-                      System.err.println("Force native dispatch");
-                    }
                     // Sometimes, AWT is synchronously waiting for the native side to pump some event.
                     // The native side is currently waiting, so we set a timeout and do some pumping.
                     NativeInterface.getDisplay().readAndDispatch();
                   } else {
-                    if(Boolean.parseBoolean(System.getProperty("NSForcedDispatch"))) {
-                      EventQueue eventQueue = Toolkit.getDefaultToolkit().getSystemEventQueue();
-                      AWTEvent nextEvent = eventQueue.peekEvent();
+                    // On Mac OS, under rare circumstances, we have a situation where SWT is waiting synchronously on AWT, while AWT is blocked here.
+                    // We have to use a similar forced dispatching trick.
+                    EventQueue eventQueue = Toolkit.getDefaultToolkit().getSystemEventQueue();
+                    AWTEvent nextEvent = eventQueue.peekEvent();
+                    if(nextEvent != null) {
+                      nextEvent = eventQueue.getNextEvent();
                       if(nextEvent != null) {
-                        nextEvent = eventQueue.getNextEvent();
-                        if(nextEvent != null) {
-                          System.err.println("Force Swing dispatch: " + nextEvent);
-                          Method dispatchMethod = EventQueue.class.getDeclaredMethod("dispatchEvent", AWTEvent.class);
-                          dispatchMethod.setAccessible(true);
-                          dispatchMethod.invoke(eventQueue, nextEvent);
-                        }
+                        Method dispatchMethod = EventQueue.class.getDeclaredMethod("dispatchEvent", AWTEvent.class);
+                        dispatchMethod.setAccessible(true);
+                        dispatchMethod.invoke(eventQueue, nextEvent);
                       }
                     }
                   }
@@ -279,8 +275,8 @@ abstract class MessagingInterface {
                 if(isNativeSide) {
                   RECEIVER_LOCK.wait(500);
                 } else {
-                  // We will have to check the timeouts that make sense, which may depend on the platform
-                  RECEIVER_LOCK.wait(500);
+                  // The Mac OS case is very rare, so we set a long timeout.
+                  RECEIVER_LOCK.wait(5000);
                 }
                 isWaitingResponse = false;
               }
