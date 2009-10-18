@@ -406,9 +406,6 @@ public class NativeInterface {
     private static void initialize() {
       Device.DEBUG = Boolean.parseBoolean(System.getProperty("nativeswing.swt.debug.device"));
       display = Display.getCurrent();
-      if(display == null) {
-        display = Display.getDefault();
-      }
       if(display == null && Boolean.parseBoolean(System.getProperty("nativeswing.interface.inprocess.useExternalDisplay"))) {
         display = Display.getDefault();
         if(display.getThread() == Thread.currentThread()) {
