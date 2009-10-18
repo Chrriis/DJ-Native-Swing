@@ -406,7 +406,7 @@ public class NativeInterface {
     private static void initialize() {
       Device.DEBUG = Boolean.parseBoolean(System.getProperty("nativeswing.swt.debug.device"));
       display = Display.getCurrent();
-      if(display == null && Boolean.parseBoolean(System.getProperty("nativeswing.interface.inprocess.useExternalDisplay"))) {
+      if(display == null && Boolean.parseBoolean(System.getProperty("nativeswing.interface.inprocess.useExternalSWTDisplay"))) {
         display = Display.getDefault();
         if(display.getThread() == Thread.currentThread()) {
           // The display was created by us, so we dispose it and create it properly.
