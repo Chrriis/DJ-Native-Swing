@@ -405,11 +405,23 @@ public class NativeInterface {
 
     private static void initialize() {
       Device.DEBUG = Boolean.parseBoolean(System.getProperty("nativeswing.swt.debug.device"));
-      DeviceData data = new DeviceData();
-      data.debug = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.debug"));
-      data.tracking = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.tracking"));
       display = Display.getCurrent();
       if(display == null) {
+        display = Display.getDefault();
+      }
+      if(display == null && Boolean.parseBoolean(System.getProperty("nativeswing.interface.inprocess.useExternalDisplay"))) {
+        display = Display.getDefault();
+        if(display.getThread() == Thread.currentThread()) {
+          // The display was created by us, so we dispose it and create it properly.
+          display.dispose();
+          display = null;
+          System.setProperty("nativeswing.interface.inprocess.useExternalSWTDisplay", "false");
+        }
+      }
+      if(display == null) {
+        DeviceData data = new DeviceData();
+        data.debug = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.debug"));
+        data.tracking = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.tracking"));
         display = new Display(data);
       }
     }
@@ -419,6 +431,10 @@ public class NativeInterface {
     }
 
     static void runEventPump() {
+      if(Boolean.parseBoolean(System.getProperty("nativeswing.interface.inprocess.useExternalSWTDisplay")) && display.getThread() != Thread.currentThread()) {
+        // If we recycle the display thread (we haven't created it) and runEventPump is called, we just return.
+        return;
+      }
       startAutoShutdownThread();
       while(isEventPumpRunning) {
         try {
