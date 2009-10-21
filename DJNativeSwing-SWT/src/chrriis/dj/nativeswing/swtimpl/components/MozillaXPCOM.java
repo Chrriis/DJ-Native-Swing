@@ -7,6 +7,7 @@
  */
 package chrriis.dj.nativeswing.swtimpl.components;
 
+import java.io.File;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
@@ -24,6 +25,7 @@ import org.mozilla.interfaces.nsIComponentManager;
 import org.mozilla.interfaces.nsIComponentRegistrar;
 import org.mozilla.interfaces.nsIServiceManager;
 import org.mozilla.interfaces.nsIWebBrowser;
+import org.mozilla.xpcom.XPCOMInitializationException;
 
 import chrriis.dj.nativeswing.swtimpl.CommandMessage;
 import chrriis.dj.nativeswing.swtimpl.ControlCommandMessage;
@@ -36,20 +38,42 @@ public class MozillaXPCOM {
 
   public static class Mozilla {
 
-//    private static boolean isInitialized;
-//    private static void initialize() {
-//      if(isInitialized) {
-//        return;
-//      }
-//      isInitialized = true;
-//      org.mozilla.xpcom.Mozilla.getInstance().initialize(new File(System.getProperty("org.eclipse.swt.browser.XULRunnerPath")));
-//    }
+    private static boolean isInitialized;
+
+    /**
+     * @return false is the initialization did not occur.
+     */
+    private static boolean initialize() {
+      if(isInitialized) {
+        return false;
+      }
+      isInitialized = true;
+      String path = System.getProperty("nativeswing.webbrowser.xulrunner.home");
+      if(path == null) {
+        path = System.getProperty("org.eclipse.swt.browser.XULRunnerPath");
+      }
+      if(path == null) {
+        return false;
+      }
+      File file = new File(path);
+      if(!file.exists()) {
+        return false;
+      }
+      org.mozilla.xpcom.Mozilla.getInstance().initialize(file);
+      return true;
+    }
 
     private static class CMN_getComponentRegistrar extends CommandMessage {
       @Override
       public Object run(Object[] args) {
-//        initialize();
-        return pack(org.mozilla.xpcom.Mozilla.getInstance().getComponentRegistrar(), true);
+        try {
+          return pack(org.mozilla.xpcom.Mozilla.getInstance().getComponentRegistrar(), true);
+        } catch (XPCOMInitializationException e) {
+          if(!initialize()) {
+            throw e;
+          }
+          return pack(org.mozilla.xpcom.Mozilla.getInstance().getComponentRegistrar(), true);
+        }
       }
     }
 
