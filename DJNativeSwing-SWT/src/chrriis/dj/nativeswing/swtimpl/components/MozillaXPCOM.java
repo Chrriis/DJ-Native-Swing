@@ -57,6 +57,9 @@ public class MozillaXPCOM {
         path = System.getProperty("org.eclipse.swt.browser.XULRunnerPath");
       }
       if(path == null) {
+        path = System.getenv("XULRUNNER_HOME");
+      }
+      if(path == null) {
         return false;
       }
       File file = new File(path);
