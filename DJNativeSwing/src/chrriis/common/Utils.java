@@ -107,14 +107,25 @@ public class Utils {
     if(path.startsWith("file:")) {
       File file = new File(path.substring("file:".length()));
       if(file.exists()) {
-        return file;
+        return simplifyLocalFile(file);
       }
     }
     File file = new File(path);
     if(file.exists()) {
-      return file;
+      return simplifyLocalFile(file);
     }
     return null;
+  }
+
+  private static File simplifyLocalFile(File localFile) {
+    try {
+      File cFile = localFile.getCanonicalFile();
+      if(cFile.exists()) {
+        return cFile;
+      }
+    } catch(Exception e) {
+    }
+    return localFile;
   }
 
   public static File getClassPathFile(String resourcePath) {
