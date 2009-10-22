@@ -36,6 +36,10 @@ import chrriis.dj.nativeswing.swtimpl.ControlCommandMessage;
  */
 public class MozillaXPCOM {
 
+  /**
+   * A class that gives access to the functionalities of <code>org.mozilla.xpcom.Mozilla</code>.
+   * @author Christopher Deckers
+   */
   public static class Mozilla {
 
     private static boolean isInitialized;
@@ -77,8 +81,56 @@ public class MozillaXPCOM {
       }
     }
 
+    /**
+     * Get the Mozilla JavaXPCOM component registrar.
+     * @return the Mozilla JavaXPCOM component registrar.
+     */
     public static nsIComponentRegistrar getComponentRegistrar() {
-      return (nsIComponentRegistrar)unpack(new CMN_getComponentRegistrar().syncSend(true));
+      return (nsIComponentRegistrar)unpack(new CMN_getComponentRegistrar().syncExec(true));
+    }
+
+    private static class CMN_getComponentManager extends CommandMessage {
+      @Override
+      public Object run(Object[] args) {
+        try {
+          return pack(org.mozilla.xpcom.Mozilla.getInstance().getComponentManager(), true);
+        } catch (XPCOMInitializationException e) {
+          if(!initialize()) {
+            throw e;
+          }
+          return pack(org.mozilla.xpcom.Mozilla.getInstance().getComponentManager(), true);
+        }
+      }
+    }
+
+    /**
+     * Get the Mozilla JavaXPCOM component manager.
+     * @return the Mozilla JavaXPCOM component manager.
+     */
+    public static nsIComponentManager getComponentManager() {
+      return (nsIComponentManager)unpack(new CMN_getComponentManager().syncExec(true));
+    }
+
+    private static class CMN_getServiceManager extends CommandMessage {
+      @Override
+      public Object run(Object[] args) {
+        try {
+          return pack(org.mozilla.xpcom.Mozilla.getInstance().getServiceManager(), true);
+        } catch (XPCOMInitializationException e) {
+          if(!initialize()) {
+            throw e;
+          }
+          return pack(org.mozilla.xpcom.Mozilla.getInstance().getServiceManager(), true);
+        }
+      }
+    }
+
+    /**
+     * Get the Mozilla JavaXPCOM service manager.
+     * @return the Mozilla JavaXPCOM service manager.
+     */
+    public static nsIServiceManager getServiceManager() {
+      return (nsIServiceManager)unpack(new CMN_getServiceManager().syncExec(true));
     }
 
   }
@@ -99,51 +151,6 @@ public class MozillaXPCOM {
    */
   public static nsIWebBrowser getWebBrowser(JWebBrowser webBrowser) {
     return (nsIWebBrowser)unpack(webBrowser.getNativeComponent().runSync(new CMN_getWebBrowser()));
-  }
-
-  private static class CMN_getComponentRegistrar extends CommandMessage {
-    @Override
-    public Object run(Object[] args) {
-      return pack(org.mozilla.xpcom.Mozilla.getInstance().getComponentRegistrar(), true);
-    }
-  }
-
-  /**
-   * Get the Mozilla JavaXPCOM component registrar.
-   * @return the Mozilla JavaXPCOM component registrar.
-   */
-  public static nsIComponentRegistrar getComponentRegistrar() {
-    return (nsIComponentRegistrar)unpack(new CMN_getComponentRegistrar().syncExec(true));
-  }
-
-  private static class CMN_getComponentManager extends CommandMessage {
-    @Override
-    public Object run(Object[] args) {
-      return pack(org.mozilla.xpcom.Mozilla.getInstance().getComponentManager(), true);
-    }
-  }
-
-  /**
-   * Get the Mozilla JavaXPCOM component manager.
-   * @return the Mozilla JavaXPCOM component manager.
-   */
-  public static nsIComponentManager getComponentManager() {
-    return (nsIComponentManager)unpack(new CMN_getComponentManager().syncExec(true));
-  }
-
-  private static class CMN_getServiceManager extends CommandMessage {
-    @Override
-    public Object run(Object[] args) {
-      return pack(org.mozilla.xpcom.Mozilla.getInstance().getServiceManager(), true);
-    }
-  }
-
-  /**
-   * Get the Mozilla JavaXPCOM service manager.
-   * @return the Mozilla JavaXPCOM service manager.
-   */
-  public static nsIServiceManager getServiceManager() {
-    return (nsIServiceManager)unpack(new CMN_getServiceManager().syncExec(true));
   }
 
   private static Map<Integer, Object> idToNativeInterfaceMap = new HashMap<Integer, Object>();
@@ -197,11 +204,9 @@ public class MozillaXPCOM {
    */
   private static class InterfaceInfo {
 
-//    private WeakReference<Object> interfaceReference;
     private int id;
 
     public InterfaceInfo(Object intrface) {
-//      interfaceReference = new WeakReference<Object>(intrface);
       id = System.identityHashCode(intrface);
     }
 
@@ -209,10 +214,6 @@ public class MozillaXPCOM {
     public int hashCode() {
       return id;
     }
-
-//    public Object getInterface() {
-//      return interfaceReference.get();
-//    }
 
     @Override
     public boolean equals(Object o) {
