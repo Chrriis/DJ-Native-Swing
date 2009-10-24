@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
@@ -1116,22 +1117,22 @@ public abstract class NativeComponent extends Canvas {
         region.add(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
       }
       if(!NativeInterface.isUIThread(true)) {
-        final Exception[] eArray = new Exception[1];
-        final ImageData[] resultArray = new ImageData[1];
+        final AtomicReference<Exception> exception = new AtomicReference<Exception>();
+        final AtomicReference<ImageData> result = new AtomicReference<ImageData>();
         control.getDisplay().syncExec(new Runnable() {
           public void run() {
             try {
-              resultArray[0] = getImageData(control, region);
+              result.set(getImageData(control, region));
             } catch (Exception e) {
-              eArray[0] = e;
+              exception.set(e);
             }
           }
         });
-        if(eArray[0] != null) {
+        if(exception.get() != null) {
           new Socket(hostAddress, port).close();
-          throw eArray[0];
+          throw exception.get();
         }
-        imageData = resultArray[0];
+        imageData = result.get();
       } else {
         imageData = getImageData(control, region);
       }

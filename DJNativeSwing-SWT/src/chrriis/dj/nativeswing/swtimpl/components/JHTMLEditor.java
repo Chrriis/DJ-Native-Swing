@@ -12,6 +12,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.util.EventListener;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -130,11 +131,11 @@ public class JHTMLEditor extends NSPanelComponent {
     webBrowser.setBarsVisible(false);
     add(webBrowser, BorderLayout.CENTER);
     instanceID = ObjectRegistry.getInstance().add(this);
-    final boolean[] resultArray = new boolean[1];
+    final AtomicBoolean result = new AtomicBoolean();
     InitializationListener initializationListener = new InitializationListener() {
       public void objectInitialized() {
         removeInitializationListener(this);
-        resultArray[0] = true;
+        result.set(true);
       }
     };
     addInitializationListener(initializationListener);
@@ -143,16 +144,16 @@ public class JHTMLEditor extends NSPanelComponent {
       @Override
       public Object run(Object[] args) {
         InitializationListener initializationListener = (InitializationListener)args[0];
-        final boolean[] resultArray = (boolean[])args[1];
+        final AtomicBoolean result = (AtomicBoolean)args[1];
         EventDispatchUtils.sleepWithEventDispatch(new EventDispatchUtils.Condition() {
           public boolean getValue() {
-            return resultArray[0];
+            return result.get();
           }
         }, 4000);
         removeInitializationListener(initializationListener);
         return null;
       }
-    }, initializationListener, resultArray);
+    }, initializationListener, result);
   }
 
   /**

@@ -15,6 +15,7 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -464,15 +465,15 @@ public class JWebBrowser extends NSPanelComponent {
 
   private static class NCommandListener extends WebBrowserAdapter {
     private String command;
-    private Object[] resultArray;
-    private NCommandListener(String command, Object[] resultArray) {
+    private AtomicReference<Object[]> result;
+    private NCommandListener(String command, AtomicReference<Object[]> result) {
       this.command = command;
-      this.resultArray = resultArray;
+      this.result = result;
     }
     @Override
     public void commandReceived(WebBrowserEvent e, String command, Object[] args) {
       if(this.command.equals(command)) {
-        resultArray[0] = args;
+        result.set(args);
         ((NativeWebBrowser)e.getWebBrowser().getNativeComponent()).removeWebBrowserListener(this);
       }
     }
@@ -482,20 +483,20 @@ public class JWebBrowser extends NSPanelComponent {
     if(!nativeWebBrowser.isNativePeerInitialized()) {
       return null;
     }
-    final Object[] resultArray = new Object[] {null};
-    WebBrowserAdapter webBrowserListener = new NCommandListener(command, resultArray);
+    final AtomicReference<Object[]> result = new AtomicReference<Object[]>();
+    WebBrowserAdapter webBrowserListener = new NCommandListener(command, result);
     nativeWebBrowser.addWebBrowserListener(webBrowserListener);
     if(nativeWebBrowser.executeJavascriptAndWait(script)) {
       for(int i=0; i<20; i++) {
         EventDispatchUtils.sleepWithEventDispatch(new EventDispatchUtils.Condition() {
           public boolean getValue() {
-            return resultArray[0] != null;
+            return result.get() != null;
           }
         }, 50);
       }
     }
     nativeWebBrowser.removeWebBrowserListener(webBrowserListener);
-    return (Object[])resultArray[0];
+    return result.get();
   }
 
   /**
