@@ -126,7 +126,7 @@ public class JFlashPlayer extends NSPanelComponent {
       objectHTMLConfiguration.setInstallationURL("http://www.adobe.com/go/getflashplayer");
       objectHTMLConfiguration.setWindowsParamName("movie");
       objectHTMLConfiguration.setParamName("src");
-      flashPlayer.options = null;
+//      flashPlayer.options = null;
       return objectHTMLConfiguration;
     }
 

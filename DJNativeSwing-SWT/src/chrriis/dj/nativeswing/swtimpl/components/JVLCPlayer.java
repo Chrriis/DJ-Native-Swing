@@ -84,7 +84,7 @@ public class JVLCPlayer extends NSPanelComponent {
 //      objectHTMLConfiguration.setWindowsParamName("Src");
 //      objectHTMLConfiguration.setParamName("target");
       objectHTMLConfiguration.setVersion("VideoLAN.VLCPlugin.2");
-      vlcPlayer.options = null;
+//      vlcPlayer.options = null;
       return objectHTMLConfiguration;
     }
 

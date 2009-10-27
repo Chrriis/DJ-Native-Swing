@@ -14,6 +14,7 @@ Licence terms: LGPL (see licence.txt)
 - JFlashPlayer content can access host files.
 - Browser-based object can have their background set (for transparent content).
 - Native component generated mouse events set the popup trigger flag correctly.
+- Flash/VLC options are not set to null after load to support multiple requests.
 - VLC player now allows VLC options.
 - VLC API improved to work with 1.0.0.
 - Mozilla XPCOM missing interface methods are added.
