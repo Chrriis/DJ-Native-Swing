@@ -678,6 +678,22 @@ public class JWebBrowser extends NSPanelComponent {
     nativeWebBrowser.unregisterFunction(function);
   }
 
+  /**
+   * Get the type of browser (ie, mozilla, etc.).
+   * @return the browser type.
+   */
+  public String getBrowserType() {
+    return nativeWebBrowser.getBrowserType();
+  }
+
+  /**
+   * Get the version of the browser. This is mainly for troubleshooting and may even return null if it fails to detect it.
+   * @return the version or null if it could not be obtained.
+   */
+  public String getBrowserVersion() {
+    return nativeWebBrowser.getBrowserVersion();
+  }
+
   JPanel getEmbeddableComponent() {
     return (JPanel)embeddableComponent;
   }

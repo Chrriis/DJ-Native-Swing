@@ -1074,6 +1074,28 @@ class NativeWebBrowser extends NativeComponent {
     return authenticationHandler;
   }
 
+  private static class CMN_getBrowserType extends ControlCommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      return ((Browser)getControl()).getBrowserType();
+    }
+  }
+
+  public String getBrowserType() {
+    return (String)runSync(new CMN_getBrowserType());
+  }
+
+  private static class CMN_getBrowserVersion extends ControlCommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      return new JSBrowserDetection((Browser)getControl()).browserVersion;
+    }
+  }
+
+  public String getBrowserVersion() {
+    return (String)runSync(new CMN_getBrowserVersion());
+  }
+
   public void addWebBrowserListener(WebBrowserListener listener) {
     listenerList.add(WebBrowserListener.class, listener);
   }

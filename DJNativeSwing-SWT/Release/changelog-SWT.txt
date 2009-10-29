@@ -7,6 +7,7 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.9 (xxxxxxxxxxxxxx):
 
+- Web Browser type and version are accessible.
 - Commands can be sent from browser using sendNSCommand JS function.
 - Browser/Flash player commands and arguments do not have a size limit.
 - Browser/Flash player commands now take Object[] as params.
