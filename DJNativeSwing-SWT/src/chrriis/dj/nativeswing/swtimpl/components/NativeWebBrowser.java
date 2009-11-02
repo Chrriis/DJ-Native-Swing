@@ -644,12 +644,12 @@ class NativeWebBrowser extends NativeComponent {
   private static class CMN_navigate extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
-      return ((Browser)getControl()).setUrl((String)args[0]);
+      return ((Browser)getControl()).setUrl((String)args[0], (String)args[1], (String[])args[2]);
     }
   }
 
-  public boolean navigate(String resourceLocation) {
-    return Boolean.TRUE.equals(runSync(new CMN_navigate(), resourceLocation));
+  public boolean navigate(String resourceLocation, WebBrowserNavigationParameters parameters) {
+    return Boolean.TRUE.equals(runSync(new CMN_navigate(), resourceLocation, parameters == null? null: parameters.getPostData(), parameters == null? null: parameters.getHeaders()));
   }
 
   private static class CMN_getHTMLContent extends ControlCommandMessage {

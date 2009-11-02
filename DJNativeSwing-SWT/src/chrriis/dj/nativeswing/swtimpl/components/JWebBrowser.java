@@ -282,7 +282,17 @@ public class JWebBrowser extends NSPanelComponent {
    * @return true if the navigation was successful.
    */
   public boolean navigate(String resourceLocation) {
-    return nativeWebBrowser.navigate(resourceLocation);
+    return navigate(resourceLocation, null);
+  }
+
+  /**
+   * Navigate to a resource, with its location specified as a URL or path.
+   * @param resourceLocation the URL or path.
+   * @param parameters the parameters (headers and POST data) to send with the navigation request.
+   * @return true if the navigation was successful.
+   */
+  public boolean navigate(String resourceLocation, WebBrowserNavigationParameters parameters) {
+    return nativeWebBrowser.navigate(resourceLocation, parameters);
   }
 
   /**

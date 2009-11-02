@@ -37,6 +37,7 @@ import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.CustomDecorators;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.FullPageCaptureExample;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.JavascriptExecution;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.NavigationControl;
+import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.NavigationParameters;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.SendingCommands;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.SettingContent;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.SimpleWebBrowserExample;
@@ -65,11 +66,12 @@ public class DemoExampleDefinitionLoader {
         new Example("Navigation Control", NavigationControl.class, "Control the navigation happening in the web browser from the Java application.\nThis allows to block certain links and/or the creation of new windows, or to open links and/or new windows elsewhere.", true),
         new Example("Sending Commands", SendingCommands.class, "Use static links or the Javascript sendNSCommand(name, arg1, arg2, ...) function to send commands to the Java application.", true),
         new Example("Cookies", Cookies.class, "Access and modify the cookies set by the various browser instances.", true),
-        new Example("Classpath pages", ClasspathPages.class, "Load web pages from the classpath with the help of the embedded simple web server.", true),
+        new Example("Navigation Parameters", NavigationParameters.class, "Define HTTP headers and/or POST data to send along with the HTTP navigation request.", true),
+        new Example("Classpath Pages", ClasspathPages.class, "Load web pages from the classpath with the help of the embedded simple web server.", true),
         new Example("Mozilla XPCOM Page Edition", XPCOMToggleEditionMode.class, "Toggle edition mode of a web page by accessing the Mozilla interfaces using XPCOM.", true, isXULRunnerPresent, xulRunnerErrorMessage),
         new Example("Mozilla XPCOM Download Manager", XPCOMDownloadManager.class, "Modify the browser's download manager using Mozilla XPCOM.", true, isXULRunnerPresent, xulRunnerErrorMessage),
         new Example("Custom Decorators", CustomDecorators.class, "Modify the browser's decorator, to add our own menus and buttons.", true),
-        new Example("Full-page capture", FullPageCaptureExample.class, "Capture the image of the page, including the portions that are outside of the viewport of the main document.", true),
+        new Example("Full-page Capture", FullPageCaptureExample.class, "Capture the image of the page, including the portions that are outside of the viewport of the main document.", true),
     }));
     exampleGroupList.add(new ExampleGroup("JFlashPlayer", new Example[] {
         new Example("Simple Example", SimpleFlashExample.class, "Display a Flash application.", true),
