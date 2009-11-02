@@ -174,8 +174,8 @@ public class NativeInterface {
       return;
     }
     // Check the versions of the libraries.
-    if(SWT.getVersion() < 3606) {
-      throw new IllegalStateException("The version of SWT that is required is 3.6M1 or later!");
+    if(SWT.getVersion() < 3617) {
+      throw new IllegalStateException("The version of SWT that is required is 3.6M3 or later!");
     }
     if(nativeInterfaceConfiguration == null) {
       nativeInterfaceConfiguration = new NativeInterfaceConfiguration();

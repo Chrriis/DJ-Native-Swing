@@ -47,15 +47,12 @@ import javax.swing.event.EventListenerList;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
-import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.MouseWheelListener;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
@@ -63,7 +60,6 @@ import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -1036,48 +1032,48 @@ public abstract class NativeComponent extends Canvas {
 
   private static class CMN_getComponentImage extends ControlCommandMessage {
 
-    private void printRemoveClip(Control control, GC gc) {
-      Point size = control.getSize();
-      Display display = control.getDisplay();
-      Composite oldParent = control.getShell();
-      Shell tmpHiddenParentShell = new Shell();
-      Shell tmpParentShell = new Shell(tmpHiddenParentShell, SWT.NO_TRIM | SWT.NO_FOCUS | SWT.NO_BACKGROUND);
-      Point location = display.map(control, null, control.getLocation());
-      tmpParentShell.setLocation(location);
-      tmpParentShell.setSize(size);
-      org.eclipse.swt.widgets.Canvas screenshotCanvas = new org.eclipse.swt.widgets.Canvas(tmpParentShell, SWT.NO_BACKGROUND);
-      screenshotCanvas.setSize(size);
-      GC displayGC = new GC(display);
-      final Image screenshot = new Image(display, size.x, size.y);
-      displayGC.copyArea(screenshot, location.x, location.y);
-      displayGC.dispose();
-      PaintListener paintListener = new PaintListener() {
-        public void paintControl(PaintEvent e) {
-          e.gc.drawImage(screenshot, 0, 0);
-        }
-      };
-      tmpParentShell.addPaintListener(paintListener);
-      screenshotCanvas.addPaintListener(paintListener);
-      oldParent.addPaintListener(paintListener);
-      org.eclipse.swt.widgets.Canvas controlReplacementCanvas = new org.eclipse.swt.widgets.Canvas(oldParent, SWT.NO_BACKGROUND);
-      controlReplacementCanvas.setSize(size);
-      controlReplacementCanvas.addPaintListener(paintListener);
-      control.setRedraw(false);
-      oldParent.setRedraw(false);
-      control.setParent(tmpParentShell);
-      control.moveBelow(screenshotCanvas);
-      tmpParentShell.setVisible(true);
-      control.print(gc);
-      control.setParent(oldParent);
-      control.moveAbove(controlReplacementCanvas);
-      controlReplacementCanvas.dispose();
-      oldParent.removePaintListener(paintListener);
-      tmpParentShell.dispose();
-      tmpHiddenParentShell.dispose();
-      oldParent.setRedraw(true);
-      control.setRedraw(true);
-      screenshot.dispose();
-    }
+//    private void printRemoveClip(Control control, GC gc) {
+//      Point size = control.getSize();
+//      Display display = control.getDisplay();
+//      Composite oldParent = control.getShell();
+//      Shell tmpHiddenParentShell = new Shell();
+//      Shell tmpParentShell = new Shell(tmpHiddenParentShell, SWT.NO_TRIM | SWT.NO_FOCUS | SWT.NO_BACKGROUND);
+//      Point location = display.map(control, null, control.getLocation());
+//      tmpParentShell.setLocation(location);
+//      tmpParentShell.setSize(size);
+//      org.eclipse.swt.widgets.Canvas screenshotCanvas = new org.eclipse.swt.widgets.Canvas(tmpParentShell, SWT.NO_BACKGROUND);
+//      screenshotCanvas.setSize(size);
+//      GC displayGC = new GC(display);
+//      final Image screenshot = new Image(display, size.x, size.y);
+//      displayGC.copyArea(screenshot, location.x, location.y);
+//      displayGC.dispose();
+//      PaintListener paintListener = new PaintListener() {
+//        public void paintControl(PaintEvent e) {
+//          e.gc.drawImage(screenshot, 0, 0);
+//        }
+//      };
+//      tmpParentShell.addPaintListener(paintListener);
+//      screenshotCanvas.addPaintListener(paintListener);
+//      oldParent.addPaintListener(paintListener);
+//      org.eclipse.swt.widgets.Canvas controlReplacementCanvas = new org.eclipse.swt.widgets.Canvas(oldParent, SWT.NO_BACKGROUND);
+//      controlReplacementCanvas.setSize(size);
+//      controlReplacementCanvas.addPaintListener(paintListener);
+//      control.setRedraw(false);
+//      oldParent.setRedraw(false);
+//      control.setParent(tmpParentShell);
+//      control.moveBelow(screenshotCanvas);
+//      tmpParentShell.setVisible(true);
+//      control.print(gc);
+//      control.setParent(oldParent);
+//      control.moveAbove(controlReplacementCanvas);
+//      controlReplacementCanvas.dispose();
+//      oldParent.removePaintListener(paintListener);
+//      tmpParentShell.dispose();
+//      tmpHiddenParentShell.dispose();
+//      oldParent.setRedraw(true);
+//      control.setRedraw(true);
+//      screenshot.dispose();
+//    }
 
     private ImageData getImageData(Control control, Region region) {
       if(control.isDisposed()) {
@@ -1092,13 +1088,14 @@ public abstract class NativeComponent extends Canvas {
       final Image image = new Image(display, bounds.x + bounds.width, bounds.y + bounds.height);
       GC gc = new GC(image);
       gc.setClipping(region);
-      if("win32".equals(SWT.getPlatform()) && control instanceof Browser) {
-        // TODO: remove this hack once it is fixed in SWT (https://bugs.eclipse.org/bugs/show_bug.cgi?id=223590)
-        // Note: the bug is marked as fixed, but preliminary testing shows some other bugs. Have to test more before removing this hack.
-        printRemoveClip(control, gc);
-      } else {
+//      if("win32".equals(SWT.getPlatform()) && control instanceof Browser) {
+//        // https://bugs.eclipse.org/bugs/show_bug.cgi?id=223590
+//        // Note 1: the bug is marked as fixed, but preliminary testing shows some other bugs. Have to test more before removing this hack.
+//        // Note 2: 3.6M3 seems to fix this bug, so I comment the implementation.
+//        printRemoveClip(control, gc);
+//      } else {
         control.print(gc);
-      }
+//      }
       gc.dispose();
       ImageData imageData = image.getImageData();
       image.dispose();
