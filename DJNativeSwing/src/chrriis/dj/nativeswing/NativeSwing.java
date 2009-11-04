@@ -417,8 +417,7 @@ public class NativeSwing {
     }
     boolean isSunMixingEnabled = !"true".equals(System.getProperty("sun.awt.disableMixing")) && System.getProperty("java.version").compareTo("1.6.0_12") >= 0;
     isHeavyWeightForcerEnabled = isSunMixingEnabled;
-    // Mac does not support shaping: we are not going to activate our algorithm.
-    System.setProperty("nativeswing.integration.useDefaultClipping", String.valueOf(Utils.IS_MAC || isSunMixingEnabled));
+    System.setProperty("nativeswing.integration.useDefaultClipping", String.valueOf(isSunMixingEnabled));
     // Create window monitor
     Toolkit.getDefaultToolkit().addAWTEventListener(new NIAWTEventListener(), WindowEvent.WINDOW_EVENT_MASK | ComponentEvent.COMPONENT_EVENT_MASK);
     isInitialized = true;
