@@ -7,6 +7,7 @@
  */
 package chrriis.dj.nativeswing.swtimpl.components;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,9 +21,10 @@ public class VLCPluginOptions {
    * Construct new VLC options.
    */
   public VLCPluginOptions() {
+    setParameters(null);
   }
 
-  private Map<String, String> keyToValueParameterMap = new HashMap<String, String>();
+  private Map<String, String> keyToValueParameterMap;
 
   /**
    * Get the VLC plugin HTML parameters.
@@ -38,9 +40,10 @@ public class VLCPluginOptions {
    */
   public void setParameters(Map<String, String> keyToValueParameterMap) {
     if(keyToValueParameterMap == null) {
-      keyToValueParameterMap = new HashMap<String, String>();
+      this.keyToValueParameterMap = Collections.synchronizedMap(new HashMap<String, String>());
+    } else {
+      this.keyToValueParameterMap = Collections.synchronizedMap(new HashMap<String, String>(keyToValueParameterMap));
     }
-    this.keyToValueParameterMap = keyToValueParameterMap;
   }
 
 }

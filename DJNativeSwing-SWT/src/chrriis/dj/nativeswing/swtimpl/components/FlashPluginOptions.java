@@ -7,6 +7,7 @@
  */
 package chrriis.dj.nativeswing.swtimpl.components;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,9 +24,11 @@ public class FlashPluginOptions {
    * Construct new Flash plugin options.
    */
   public FlashPluginOptions() {
+    setParameters(null);
+    setVariables(null);
   }
 
-  private Map<String, String> keyToValueVariableMap = new HashMap<String, String>();
+  private Map<String, String> keyToValueVariableMap;
 
   /**
    * Get the Flash plugin variables.
@@ -41,12 +44,13 @@ public class FlashPluginOptions {
    */
   public void setVariables(Map<String, String> keyToValueVariableMap) {
     if(keyToValueVariableMap == null) {
-      keyToValueVariableMap = new HashMap<String, String>();
+      this.keyToValueVariableMap = Collections.synchronizedMap(new HashMap<String, String>());
+    } else {
+      this.keyToValueVariableMap = Collections.synchronizedMap(new HashMap<String, String>(keyToValueVariableMap));
     }
-    this.keyToValueVariableMap = keyToValueVariableMap;
   }
 
-  private Map<String, String> keyToValueParameterMap = new HashMap<String, String>();
+  private Map<String, String> keyToValueParameterMap;
 
   /**
    * Get the Flash plugin HTML parameters.
@@ -62,9 +66,10 @@ public class FlashPluginOptions {
    */
   public void setParameters(Map<String, String> keyToValueParameterMap) {
     if(keyToValueParameterMap == null) {
-      keyToValueParameterMap = new HashMap<String, String>();
+      this.keyToValueParameterMap = Collections.synchronizedMap(new HashMap<String, String>());
+    } else {
+      this.keyToValueParameterMap = Collections.synchronizedMap(new HashMap<String, String>(keyToValueParameterMap));
     }
-    this.keyToValueParameterMap = keyToValueParameterMap;
   }
 
   Map<String, String> getHTMLParameters() {
