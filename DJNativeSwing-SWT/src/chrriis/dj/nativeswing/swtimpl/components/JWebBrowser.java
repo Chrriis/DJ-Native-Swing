@@ -708,4 +708,17 @@ public class JWebBrowser extends NSPanelComponent {
     return (JPanel)embeddableComponent;
   }
 
+  /**
+   * Dispose the native peer but potentially allows confirmation dialog to the user.
+   * @param isConfirmationDialogAllowed true if the component is allowed to ask confirmation to the user, false otherwise.
+   * @return true if the component was disposed, false otherwise.
+   */
+  public boolean disposeNativePeer(boolean isConfirmationDialogAllowed) {
+    if(isConfirmationDialogAllowed) {
+      return nativeWebBrowser.unloadAndDispose();
+    }
+    disposeNativePeer();
+    return true;
+  }
+
 }

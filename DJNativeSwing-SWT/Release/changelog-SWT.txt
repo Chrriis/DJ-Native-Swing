@@ -9,6 +9,7 @@ Licence terms: LGPL (see licence.txt)
 
 - Mac OS X is supported, except "constrainVisibility"/"proxyComponentHierarchy".
 - Web Browser allows passing HTTP headers and POST data.
+- Web Browser allows vetoable disposal with page unloading confirmation dialog.
 - Web Browser type and version are accessible.
 - Commands can be sent from browser using sendNSCommand JS function.
 - Browser/Flash player commands and arguments do not have a size limit.

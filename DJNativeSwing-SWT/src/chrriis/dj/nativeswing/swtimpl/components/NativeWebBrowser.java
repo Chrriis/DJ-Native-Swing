@@ -1114,4 +1114,36 @@ class NativeWebBrowser extends NativeComponent {
     super.disposeNativePeer();
   }
 
+  private static class CMN_disposeWebBrowser extends ControlCommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      boolean isAlive = true;
+      Browser browser = (Browser)getControl();
+      if(browser != null) {
+        if(!browser.isDisposed()) {
+          Shell shell = browser.getShell();
+          if(browser.close()) {
+            isAlive = false;
+            if(shell != null) {
+              shell.dispose();
+            }
+          }
+        }
+      }
+      return isAlive;
+    }
+  }
+
+  protected boolean unloadAndDispose() {
+    if(isNativePeerInitialized()) {
+      // We return "isAlive" (and not "isDisposed") because if the call fails it would return false by default.
+      if((Boolean)runSync(new CMN_disposeWebBrowser())) {
+        return false;
+      }
+    }
+    disposeNativePeer();
+    return true;
+
+  }
+
 }
