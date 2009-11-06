@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import chrriis.common.UIUtils;
+import chrriis.common.Utils;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
 
@@ -66,23 +67,24 @@ public class ConfirmedDisposal extends JPanel {
     add(buttonPanel, BorderLayout.SOUTH);
   }
 
+  private static final String LS = Utils.LINE_SEPARATOR;
+
   private void createWebBrowser() {
     webBrowserPanel.removeAll();
     webBrowser = new JWebBrowser();
     webBrowser.setBarsVisible(false);
     webBrowser.setHTMLContent(
-        "<html>" +
-        "  <head>" +
-        "    <script>" +
-        "      function doit() {" +
-        "        return 'The box may contain some unsaved text.';" +
-        "      }" +
-        "      window.onbeforeunload = doit;" +
-        "    </script>" +
-        "  </head>" +
-        "  <body>" +
-        "    <textarea rows=\"5\" cols=\"22\">some text</textarea>" +
-        "  </body>" +
+        "<html>" + LS +
+        "  <head>" + LS +
+        "    <script>" + LS +
+        "      window.onbeforeunload = function() {" + LS +
+        "        return 'Here, a normal page would tell you there is some unsaved data.';" + LS +
+        "      };" + LS +
+        "    </script>" + LS +
+        "  </head>" + LS +
+        "  <body>" + LS +
+        "    <textarea rows=\"5\" cols=\"25\">A bogus editor...</textarea>" + LS +
+        "  </body>" + LS +
         "</html>");
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
     webBrowserPanel.revalidate();
