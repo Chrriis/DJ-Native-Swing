@@ -1114,7 +1114,7 @@ class NativeWebBrowser extends NativeComponent {
     super.disposeNativePeer();
   }
 
-  private static class CMN_disposeWebBrowser extends ControlCommandMessage {
+  private static class CMN_unloadAndDispose extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       boolean isAlive = true;
@@ -1136,8 +1136,8 @@ class NativeWebBrowser extends NativeComponent {
 
   protected boolean unloadAndDispose() {
     if(isNativePeerInitialized()) {
-      // We return "isAlive" (and not "isDisposed") because if the call fails it would return false by default.
-      if((Boolean)runSync(new CMN_disposeWebBrowser())) {
+      // We return "isAlive" (and not "isDisposed") because it is easier to test the returned value.
+      if(Boolean.TRUE.equals(runSync(new CMN_unloadAndDispose()))) {
         return false;
       }
     }
