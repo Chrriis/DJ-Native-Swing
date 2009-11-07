@@ -509,7 +509,16 @@ public class NativeInterface {
     }
 
     static void createOutProcessCommunicationChannel() {
-      messagingInterface = createOutProcessMessagingInterface();
+      for(int i=2; i>=0; i--) {
+        try {
+          messagingInterface = createOutProcessMessagingInterface();
+          break;
+        } catch(RuntimeException e) {
+          if(i == 0) {
+            throw e;
+          }
+        }
+      }
       isOpen = true;
       Properties nativeProperties = new Properties();
       Properties properties = System.getProperties();
@@ -748,14 +757,15 @@ public class NativeInterface {
       if(isProcessIOChannelMode) {
         return new SwingOutProcessIOMessagingInterface(p.getInputStream(), p.getOutputStream(), false);
       }
+      Exception exception = null;
       Socket socket = null;
-      for(int i=99; i>=0; i--) {
+      for(int i=14; i>=0; i--) {
         try {
           socket = new Socket(localHostAddress, port);
           break;
-        } catch(IOException e) {
+        } catch(Exception e) {
           if(i == 0) {
-            throw new RuntimeException(e);
+            exception = e;
           }
         }
         try {
@@ -767,7 +777,7 @@ public class NativeInterface {
         if(p != null) {
           p.destroy();
         }
-        throw new IllegalStateException("Failed to connect to spawned VM!");
+        throw new IllegalStateException("Failed to connect to spawned VM!", exception);
       }
       return new SwingOutProcessSocketsMessagingInterface(socket, false);
     }
