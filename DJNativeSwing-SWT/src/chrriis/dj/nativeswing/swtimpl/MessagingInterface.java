@@ -186,7 +186,7 @@ abstract class MessagingInterface {
       message.setSyncExec(false);
       MessagingInterface messagingInterface = NativeInterface.getMessagingInterface(!isOriginatorNativeSide);
       CM_asyncExecResponse asyncExecResponse = new CM_asyncExecResponse();
-      asyncExecResponse.setArgs(args[0], messagingInterface.runMessage(message), messagingInterface.isNativeSide);
+      asyncExecResponse.setArgs(args[0], messagingInterface.runMessage(message), messagingInterface.isNativeSide());
       messagingInterface.asyncSend(asyncExecResponse);
       return null;
     }
@@ -198,7 +198,7 @@ abstract class MessagingInterface {
     Thread thread = Thread.currentThread();
     final int instanceID = syncThreadRegistry.add(Thread.currentThread());
     CM_asyncExec asyncExec = new CM_asyncExec();
-    asyncExec.setArgs(instanceID, message, isNativeSide);
+    asyncExec.setArgs(instanceID, message, isNativeSide());
     asyncSend(asyncExec);
     synchronized(thread) {
       while(syncThreadRegistry.get(instanceID) instanceof Thread) {
@@ -221,7 +221,7 @@ abstract class MessagingInterface {
   private final Object LOCK = new Object();
 
   public Object syncSend(Message message) {
-    message.computeId(!isNativeSide);
+    message.computeId(!isNativeSide());
     if(!isUIThread()) {
       return nonUISyncExec(message);
     }
@@ -251,7 +251,7 @@ abstract class MessagingInterface {
               while(receivedMessageList.isEmpty()) {
                 if(!isFirst) {
                   isFirst = true;
-                  if(isNativeSide) {
+                  if(isNativeSide()) {
                     // Sometimes, AWT is synchronously waiting for the native side to pump some event.
                     // The native side is currently waiting, so we set a timeout and do some pumping.
                     NativeInterface.getDisplay().readAndDispatch();
@@ -272,7 +272,7 @@ abstract class MessagingInterface {
                 }
                 isFirst = false;
                 isWaitingResponse = true;
-                if(isNativeSide) {
+                if(isNativeSide()) {
                   RECEIVER_LOCK.wait(500);
                 } else {
                   // The Mac OS case is very rare, so we set a long timeout.
@@ -322,7 +322,7 @@ abstract class MessagingInterface {
   }
 
   public void asyncSend(Message message) {
-    message.computeId(!isNativeSide);
+    message.computeId(!isNativeSide());
     message.setUI(isUIThread());
     message.setSyncExec(false);
     try {
