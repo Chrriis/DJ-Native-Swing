@@ -36,7 +36,7 @@ abstract class MessagingInterface {
 
   public abstract boolean isUIThread();
 
-  private boolean isAlive;
+  private volatile boolean isAlive;
 
   protected void setAlive(boolean isAlive) {
     this.isAlive = isAlive;
@@ -54,9 +54,9 @@ abstract class MessagingInterface {
 
   private static class CommandResultMessage extends Message {
 
-    private int originalID;
-    private Object result;
-    private Throwable exception;
+    private final int originalID;
+    private final Object result;
+    private final Throwable exception;
 
     CommandResultMessage(int originalID, Object result, Throwable exception) {
       this.originalID = originalID;
@@ -140,7 +140,7 @@ abstract class MessagingInterface {
 
   protected abstract void asyncUIExec(Runnable runnable);
 
-  private boolean isNativeSide;
+  private final boolean isNativeSide;
 
   protected boolean isNativeSide() {
     return isNativeSide;
