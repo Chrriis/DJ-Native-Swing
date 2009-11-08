@@ -145,8 +145,11 @@ abstract class OutProcessSocketsMessagingInterface extends MessagingInterface {
 
   static class SwingOutProcessSocketsMessagingInterface extends OutProcessSocketsMessagingInterface {
 
-    public SwingOutProcessSocketsMessagingInterface(Socket socket, final boolean exitOnEndOfStream) {
+    private final Process process;
+
+    public SwingOutProcessSocketsMessagingInterface(Socket socket, final boolean exitOnEndOfStream, Process process) {
       super(false, socket, exitOnEndOfStream);
+      this.process = process;
     }
 
     @Override
@@ -157,6 +160,20 @@ abstract class OutProcessSocketsMessagingInterface extends MessagingInterface {
     @Override
     public boolean isUIThread() {
       return SwingUtilities.isEventDispatchThread();
+    }
+
+    @Override
+    public void destroy() {
+      super.destroy();
+      if(process != null) {
+        while(true) {
+          try {
+            process.waitFor();
+            break;
+          } catch (InterruptedException e) {
+          }
+        }
+      }
     }
 
   }

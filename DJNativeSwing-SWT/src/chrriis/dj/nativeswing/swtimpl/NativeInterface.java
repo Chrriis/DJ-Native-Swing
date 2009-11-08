@@ -62,17 +62,21 @@ public class NativeInterface {
   private static final boolean IS_SYNCING_MESSAGES = Boolean.parseBoolean(System.getProperty("nativeswing.interface.syncmessages"));
 
   static boolean isAlive() {
-    return isOpen() && messagingInterface.isAlive();
+    synchronized(OPEN_STATE_LOCK) {
+      return isOpen() && messagingInterface.isAlive();
+    }
   }
 
-  private static volatile boolean isOpen;
+  private static boolean isOpen;
 
   /**
    * Indicate whether the native interface is open.
    * @return true if the native interface is open, false otherwise.
    */
   public static boolean isOpen() {
-    return isOpen;
+    synchronized(OPEN_STATE_LOCK) {
+      return isOpen;
+    }
   }
 
   private static void checkOpen() {
@@ -85,14 +89,18 @@ public class NativeInterface {
    * Close the native interface, which destroys the native side (peer VM). Note that the native interface can be re-opened later.
    */
   public static void close() {
-    if(!isOpen) {
-      return;
-    }
-    isOpen = false;
-    messagingInterface.destroy();
-    messagingInterface = null;
-    for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
-      listener.nativeInterfaceClosed();
+    synchronized(OPEN_CLOSE_SYNC_LOCK) {
+      if(!isOpen()) {
+        return;
+      }
+      synchronized(OPEN_STATE_LOCK) {
+        isOpen = false;
+        messagingInterface.destroy();
+        messagingInterface = null;
+      }
+      for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
+        listener.nativeInterfaceClosed();
+      }
     }
   }
 
@@ -145,10 +153,12 @@ public class NativeInterface {
     return isInitialized;
   }
 
-  private static volatile boolean isInProcess;
+  private static boolean isInProcess;
 
   static boolean isInProcess() {
-    return isInProcess;
+    synchronized(OPEN_STATE_LOCK) {
+      return isInProcess;
+    }
   }
 
   private static class CMN_dumpStackTraces extends CommandMessage {
@@ -170,80 +180,89 @@ public class NativeInterface {
    * This method is automatically called if open() is used. It should be called early in the program, the best place being as the first call in the main method.
    */
   public static void initialize() {
-    if(isInitialized()) {
-      return;
-    }
-    // Check the versions of the libraries.
-    if(SWT.getVersion() < 3617) {
-      throw new IllegalStateException("The version of SWT that is required is 3.6M3 or later!");
-    }
-    if(nativeInterfaceConfiguration == null) {
-      nativeInterfaceConfiguration = new NativeInterfaceConfiguration();
-    }
-    NativeSwing.initialize();
-    Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
-      public void eventDispatched(AWTEvent e) {
-        KeyEvent ke = (KeyEvent)e;
-        if(ke.getID() == KeyEvent.KEY_PRESSED && ke.getKeyCode() == KeyEvent.VK_F3 && ke.isControlDown() && ke.isAltDown() && ke.isShiftDown()) {
-          new Thread("Dump stack traces") {
-            @Override
-            public void run() {
-              CMN_dumpStackTraces cmnDumpStackTraces = new CMN_dumpStackTraces();
-              cmnDumpStackTraces.run(null);
-              if(!isInProcess && isOpen) {
-                syncSend(true, cmnDumpStackTraces);
+    synchronized(OPEN_CLOSE_SYNC_LOCK) {
+      if(isInitialized()) {
+        return;
+      }
+      // Check the versions of the libraries.
+      if(SWT.getVersion() < 3617) {
+        throw new IllegalStateException("The version of SWT that is required is 3.6M3 or later!");
+      }
+      if(nativeInterfaceConfiguration == null) {
+        nativeInterfaceConfiguration = new NativeInterfaceConfiguration();
+      }
+      NativeSwing.initialize();
+      Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
+        public void eventDispatched(AWTEvent e) {
+          KeyEvent ke = (KeyEvent)e;
+          if(ke.getID() == KeyEvent.KEY_PRESSED && ke.getKeyCode() == KeyEvent.VK_F3 && ke.isControlDown() && ke.isAltDown() && ke.isShiftDown()) {
+            new Thread("Dump stack traces") {
+              @Override
+              public void run() {
+                CMN_dumpStackTraces cmnDumpStackTraces = new CMN_dumpStackTraces();
+                cmnDumpStackTraces.run(null);
+                if(!isInProcess() && isOpen()) {
+                  syncSend(true, cmnDumpStackTraces);
+                }
               }
-            }
-          }.start();
+            }.start();
+          }
         }
+      }, AWTEvent.KEY_EVENT_MASK);
+      String inProcessProperty = System.getProperty("nativeswing.interface.inprocess");
+      if(inProcessProperty != null) {
+        isInProcess = Boolean.parseBoolean(inProcessProperty);
+      } else {
+        isInProcess = Utils.IS_MAC;
       }
-    }, AWTEvent.KEY_EVENT_MASK);
-    String inProcessProperty = System.getProperty("nativeswing.interface.inprocess");
-    if(inProcessProperty != null) {
-      isInProcess = Boolean.parseBoolean(inProcessProperty);
-    } else {
-      isInProcess = Utils.IS_MAC;
-    }
-    try {
-      for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
-        listener.nativeInterfaceInitialized();
+      try {
+        for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
+          listener.nativeInterfaceInitialized();
+        }
+      } catch(Exception e) {
+        e.printStackTrace();
       }
-    } catch(Exception e) {
-      e.printStackTrace();
+      if(isInProcess()) {
+        InProcess.initialize();
+      }
+      isInitialized = true;
     }
-    if(isInProcess) {
-      InProcess.initialize();
-    }
-    isInitialized = true;
   }
+
+  private static final Object OPEN_CLOSE_SYNC_LOCK = new Object();
+  private static final Object OPEN_STATE_LOCK = new Object();
 
   /**
    * Open the native interface, which creates the peer VM that handles the native side of the native integration.<br/>
    * Initialization takes place if the interface was not already initialized. If initialization was not explicitely performed, this method should be called early in the program, the best place being as the first call in the main method.
    */
   public static void open() {
-    if(isOpen()) {
-      return;
-    }
-    initialize();
-    loadClipboardDebuggingProperties();
-    if(isInProcess) {
-      InProcess.createInProcessCommunicationChannel();
-    } else {
-      OutProcess.createOutProcessCommunicationChannel();
-    }
-    try {
-      for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
-        listener.nativeInterfaceOpened();
+    synchronized(OPEN_CLOSE_SYNC_LOCK) {
+      if(isOpen()) {
+        return;
       }
-    } catch(Exception e) {
-      e.printStackTrace();
+      initialize();
+      loadClipboardDebuggingProperties();
+      if(isInProcess()) {
+        InProcess.createInProcessCommunicationChannel();
+      } else {
+        OutProcess.createOutProcessCommunicationChannel();
+      }
+      try {
+        for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
+          listener.nativeInterfaceOpened();
+        }
+      } catch(Exception e) {
+        e.printStackTrace();
+      }
     }
   }
 
   static boolean notifyKilled() {
-    isOpen = false;
-    messagingInterface = null;
+    synchronized(OPEN_STATE_LOCK) {
+      isOpen = false;
+      messagingInterface = null;
+    }
     try {
       for(NativeInterfaceListener listener: getNativeInterfaceListeners()) {
         listener.nativeInterfaceClosed();
@@ -296,31 +315,33 @@ public class NativeInterface {
     }
   }
 
-  private static volatile MessagingInterface messagingInterface;
+  private static MessagingInterface messagingInterface;
 
   static MessagingInterface getMessagingInterface(boolean isNativeSide) {
-    if(isInProcess()) {
+    synchronized(OPEN_STATE_LOCK) {
+      if(isInProcess()) {
+        if(isNativeSide) {
+          SWTInProcessMessagingInterface swtInProcessMessagingInterface = (SWTInProcessMessagingInterface)((SwingInProcessMessagingInterface)messagingInterface).getMirrorMessagingInterface();
+          return swtInProcessMessagingInterface;
+        }
+        SwingInProcessMessagingInterface swingInProcessMessagingInterface = (SwingInProcessMessagingInterface)messagingInterface;
+        return swingInProcessMessagingInterface;
+      }
       if(isNativeSide) {
-        SWTInProcessMessagingInterface swtInProcessMessagingInterface = (SWTInProcessMessagingInterface)((SwingInProcessMessagingInterface)messagingInterface).getMirrorMessagingInterface();
-        return swtInProcessMessagingInterface;
+        if(messagingInterface instanceof SWTOutProcessSocketsMessagingInterface) {
+          SWTOutProcessSocketsMessagingInterface swtOutProcessSocketsMessagingInterface = (SWTOutProcessSocketsMessagingInterface)messagingInterface;
+          return swtOutProcessSocketsMessagingInterface;
+        }
+        SWTOutProcessIOMessagingInterface swtOutProcessIOMessagingInterface = (SWTOutProcessIOMessagingInterface)messagingInterface;
+        return swtOutProcessIOMessagingInterface;
       }
-      SwingInProcessMessagingInterface swingInProcessMessagingInterface = (SwingInProcessMessagingInterface)messagingInterface;
-      return swingInProcessMessagingInterface;
-    }
-    if(isNativeSide) {
-      if(messagingInterface instanceof SWTOutProcessSocketsMessagingInterface) {
-        SWTOutProcessSocketsMessagingInterface swtOutProcessSocketsMessagingInterface = (SWTOutProcessSocketsMessagingInterface)messagingInterface;
-        return swtOutProcessSocketsMessagingInterface;
+      if(messagingInterface instanceof SwingOutProcessSocketsMessagingInterface) {
+        SwingOutProcessSocketsMessagingInterface swingOutProcessSocketsMessagingInterface = (SwingOutProcessSocketsMessagingInterface)messagingInterface;
+        return swingOutProcessSocketsMessagingInterface;
       }
-      SWTOutProcessIOMessagingInterface swtOutProcessIOMessagingInterface = (SWTOutProcessIOMessagingInterface)messagingInterface;
-      return swtOutProcessIOMessagingInterface;
+      SwingOutProcessIOMessagingInterface swingOutProcessIOMessagingInterface = (SwingOutProcessIOMessagingInterface)messagingInterface;
+      return swingOutProcessIOMessagingInterface;
     }
-    if(messagingInterface instanceof SwingOutProcessSocketsMessagingInterface) {
-      SwingOutProcessSocketsMessagingInterface swingOutProcessSocketsMessagingInterface = (SwingOutProcessSocketsMessagingInterface)messagingInterface;
-      return swingOutProcessSocketsMessagingInterface;
-    }
-    SwingOutProcessIOMessagingInterface swingOutProcessIOMessagingInterface = (SwingOutProcessIOMessagingInterface)messagingInterface;
-    return swingOutProcessIOMessagingInterface;
   }
 
   private static Display display;
@@ -358,14 +379,14 @@ public class NativeInterface {
    * Run the native event pump. Certain platforms require this method call at the end of the main method to function properly, so it is suggested to always add it.
    */
   public static void runEventPump() {
-    if(!isInitialized) {
+    if(!isInitialized()) {
       throw new IllegalStateException("Cannot run the event pump when the interface is not initialized!");
     }
     if(isEventPumpRunning) {
       throw new IllegalStateException("runEventPump was already called and can only be called once (the first call should be at the end of the main method)!");
     }
     isEventPumpRunning = true;
-    if(isInProcess) {
+    if(isInProcess()) {
       InProcess.runEventPump();
     }
   }
@@ -399,8 +420,10 @@ public class NativeInterface {
   static class InProcess {
 
     static void createInProcessCommunicationChannel() {
-      messagingInterface = createInProcessMessagingInterface();
-      isOpen = true;
+      synchronized(OPEN_STATE_LOCK) {
+        messagingInterface = createInProcessMessagingInterface();
+        isOpen = true;
+      }
     }
 
     private static void initialize() {
@@ -509,17 +532,19 @@ public class NativeInterface {
     }
 
     static void createOutProcessCommunicationChannel() {
-      for(int i=2; i>=0; i--) {
-        try {
-          messagingInterface = createOutProcessMessagingInterface();
-          break;
-        } catch(RuntimeException e) {
-          if(i == 0) {
-            throw e;
+      synchronized(OPEN_STATE_LOCK) {
+        for(int i=2; i>=0; i--) {
+          try {
+            messagingInterface = createOutProcessMessagingInterface();
+            break;
+          } catch(RuntimeException e) {
+            if(i == 0) {
+              throw e;
+            }
           }
         }
+        isOpen = true;
       }
-      isOpen = true;
       Properties nativeProperties = new Properties();
       Properties properties = System.getProperties();
       for(Object key: properties.keySet()) {
@@ -755,7 +780,7 @@ public class NativeInterface {
         p = null;
       }
       if(isProcessIOChannelMode) {
-        return new SwingOutProcessIOMessagingInterface(p.getInputStream(), p.getOutputStream(), false);
+        return new SwingOutProcessIOMessagingInterface(p.getInputStream(), p.getOutputStream(), false, p);
       }
       Exception exception = null;
       Socket socket = null;
@@ -779,7 +804,7 @@ public class NativeInterface {
         }
         throw new IllegalStateException("Failed to connect to spawned VM!", exception);
       }
-      return new SwingOutProcessSocketsMessagingInterface(socket, false);
+      return new SwingOutProcessSocketsMessagingInterface(socket, false, p);
     }
 
     private static class IOStreamFormatter {
@@ -840,7 +865,9 @@ public class NativeInterface {
       if(Boolean.parseBoolean(System.getProperty("nativeswing.peervm.debug.printstartmessage"))) {
         System.err.println("Starting spawned VM");
       }
-      isOpen = true;
+      synchronized(OPEN_STATE_LOCK) {
+        isOpen = true;
+      }
       int port = Integer.parseInt(args[0]);
       boolean isProcessIOChannelMode = port <= 0;
       Socket socket = null;
@@ -871,7 +898,11 @@ public class NativeInterface {
                 sleep(10000);
               } catch(Exception e) {
               }
-              if(messagingInterface == null) {
+              boolean isNull;
+              synchronized(OPEN_STATE_LOCK) {
+                isNull = messagingInterface == null;
+              }
+              if(isNull) {
                 try {
                   serverSocket_.close();
                 } catch(Exception e) {
@@ -924,7 +955,10 @@ public class NativeInterface {
       if(isProcessIOChannelMode) {
         PrintStream sysout = System.out;
         InputStream sysin = System.in;
-        messagingInterface = new SWTOutProcessIOMessagingInterface(sysin, sysout, true, display);
+        SWTOutProcessIOMessagingInterface outInterface = new SWTOutProcessIOMessagingInterface(sysin, sysout, true, display);
+        synchronized(OPEN_STATE_LOCK) {
+          messagingInterface = outInterface;
+        }
         System.setIn(new InputStream() {
           @Override
           public int read() throws IOException {
@@ -957,7 +991,10 @@ public class NativeInterface {
         }));
         if(Utils.IS_WINDOWS) {
           // TODO: remove when SWT bug 270364 is fixed.
-          final MessagingInterface messagingInterface_ = messagingInterface;
+          final MessagingInterface messagingInterface_;
+          synchronized(OPEN_STATE_LOCK) {
+            messagingInterface_ = messagingInterface;
+          }
           new Thread("System.in unlocker") {
             @Override
             public void run() {
@@ -975,7 +1012,10 @@ public class NativeInterface {
           }.start();
         }
       } else {
-        messagingInterface = new SWTOutProcessSocketsMessagingInterface(socket, true, display);
+        SWTOutProcessSocketsMessagingInterface outInterface = new SWTOutProcessSocketsMessagingInterface(socket, true, display);
+        synchronized(OPEN_STATE_LOCK) {
+          messagingInterface = outInterface;
+        }
       }
       while(display != null && !display.isDisposed()) {
         try {
