@@ -11,6 +11,7 @@ import java.awt.BorderLayout;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.util.EventListener;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
@@ -45,8 +46,68 @@ public class JHTMLEditor extends NSPanelComponent {
 
   }
 
+  public static class TinyMCEOptions {
+
+    private TinyMCEOptions() {}
+
+    static final String SET_CUSTOM_HTML_HEADERS_OPTION_KEY = "TinyMCE Custom HTML Headers";
+
+    /**
+     * Set custom HTML headers, which is mostly useful when integrating certain TinyMCE plugins.
+     */
+    public static NSOption setCustomHTMLHeaders(final String customHTMLHeaders) {
+      return new NSOption(SET_CUSTOM_HTML_HEADERS_OPTION_KEY) {
+        @Override
+        public Object getOptionValue() {
+          return customHTMLHeaders;
+        }
+      };
+    }
+
+    static final String SET_OPTIONS_OPTION_KEY = "TinyMCE Options";
+
+    /**
+     * Create an option to set TinyMCE editor options.<br/>
+     * The list of possible options to set for TinyMCE can be found here: <a href="http://wiki.moxiecode.com/index.php/TinyMCE:Configuration">http://wiki.moxiecode.com/index.php/TinyMCE:Configuration</a>.
+     * @param optionMap a map containing the key/value pairs accepted by TinyMCE.
+     * @return the option to set the options.
+     */
+    public static NSOption setOptions(Map<String, String> optionMap) {
+      final Map<String, String> optionMap_ = new HashMap<String, String>(optionMap);
+      return new NSOption(SET_OPTIONS_OPTION_KEY) {
+        @Override
+        public Object getOptionValue() {
+          return optionMap_;
+        }
+      };
+    }
+
+  }
+
+  public static class FCKEditorOptions {
+
+    private FCKEditorOptions() {}
+
+    static final String SET_CUSTOM_JAVASCRIPT_CONFIGURATION_OPTION_KEY = "FCKEditor Custom Configuration Script";
+
+    /**
+     * Create an option to set custom Javascript configuration for the FCKeditor editor.<br/>
+     * The list of possible options to set for FCKeditor can be found here: <a href="http://docs.fckeditor.net/FCKeditor_2.x/Developers_Guide/Configuration/Configuration_Options">http://docs.fckeditor.net/FCKeditor_2.x/Developers_Guide/Configuration/Configuration_Options</a>.<br/>
+     * @param javascriptConfiguration the javascript configuration.
+     * @return the option to set a custom configuration.
+     */
+    public static NSOption setCustomJavascriptConfiguration(final String javascriptConfiguration) {
+      return new NSOption(SET_CUSTOM_JAVASCRIPT_CONFIGURATION_OPTION_KEY) {
+        @Override
+        public Object getOptionValue() {
+          return javascriptConfiguration;
+        }
+      };
+    }
+
+  }
+
   private static final String HTML_EDITOR_COMPONENT_OPTION_KEY = "HTML Editor";
-  static final String SET_CUSTOM_JAVASCRIPT_CONFIGURATION_OPTION_KEY = "HTML Editor Custom Configuration Script";
 
   public static enum HTMLEditorImplementation { FCKEditor, TinyMCE };
 
@@ -55,21 +116,6 @@ public class JHTMLEditor extends NSPanelComponent {
       @Override
       public Object getOptionValue () {
         return comp;
-      }
-    };
-  }
-
-  /**
-   * Create an option to set custom configuration for the FCKeditor or the TinyMCE editor.<br/>
-   * The list of possible options to set for FCKeditor can be found here: <a href="http://docs.fckeditor.net/FCKeditor_2.x/Developers_Guide/Configuration/Configuration_Options">http://docs.fckeditor.net/FCKeditor_2.x/Developers_Guide/Configuration/Configuration_Options</a>.<br/>
-   * The list of possible options to set for TinyMCE can be found here: <a href="http://wiki.moxiecode.com/index.php/TinyMCE:Configuration">http://wiki.moxiecode.com/index.php/TinyMCE:Configuration</a>.
-   * @return the option to set a custom configuration.
-   */
-  public static NSOption setCustomJavascriptConfiguration(final String javascript) {
-    return new NSOption(SET_CUSTOM_JAVASCRIPT_CONFIGURATION_OPTION_KEY) {
-      @Override
-      public Object getOptionValue() {
-        return javascript;
       }
     };
   }

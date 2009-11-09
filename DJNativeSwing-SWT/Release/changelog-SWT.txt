@@ -11,6 +11,7 @@ Licence terms: LGPL (see licence.txt)
 - Web Browser allows passing HTTP headers and POST data.
 - Web Browser allows vetoable disposal with page unloading confirmation dialog.
 - Web Browser type and version are accessible.
+- HTML Editor options format is changed (cf demo application for new format).
 - Commands can be sent from browser using sendNSCommand JS function.
 - Browser/Flash player commands and arguments do not have a size limit.
 - Browser/Flash player commands now take Object[] as params.

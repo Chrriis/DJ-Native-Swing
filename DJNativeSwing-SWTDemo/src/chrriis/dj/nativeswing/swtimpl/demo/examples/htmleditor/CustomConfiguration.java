@@ -29,7 +29,7 @@ public class CustomConfiguration extends JPanel {
       "['Source','DocProps','-','Save','NewPage','Preview','-','Templates']\n" +
       "];\n" +
       "FCKConfig.ToolbarCanCollapse = false;\n";
-    JHTMLEditor htmlEditor = new JHTMLEditor(JHTMLEditor.setCustomJavascriptConfiguration(configurationScript));
+    JHTMLEditor htmlEditor = new JHTMLEditor(JHTMLEditor.FCKEditorOptions.setCustomJavascriptConfiguration(configurationScript));
     htmlEditor.setHTMLContent("<p>The toolbar was modified using custom configuration.</p>");
     add(htmlEditor, BorderLayout.CENTER);
   }

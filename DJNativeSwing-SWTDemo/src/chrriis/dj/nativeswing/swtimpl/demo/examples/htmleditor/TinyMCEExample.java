@@ -12,6 +12,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -37,18 +39,19 @@ public class TinyMCEExample extends JPanel {
 
   public TinyMCEExample() {
     super(new BorderLayout());
-    String configurationScript =
-      "theme_advanced_buttons1: 'bold,italic,underline,strikethrough,sub,sup,|,charmap,|,justifyleft,justifycenter,justifyright,justifyfull,|,hr,removeformat'," +
-      "theme_advanced_buttons2: 'undo,redo,|,cut,copy,paste,pastetext,pasteword,|,search,replace,|,forecolor,backcolor,bullist,numlist,|,outdent,indent,blockquote,|,table'," +
-      "theme_advanced_buttons3: ''," +
-      "theme_advanced_toolbar_location: 'top'," +
-      "theme_advanced_toolbar_align: 'left'," +
-      // Language can be configured when language packs are added to the classpath. Language packs can be found here: http://tinymce.moxiecode.com/download_i18n.php
-//      "language: 'de'," +
-      "plugins: 'table,paste,contextmenu'";
+    Map<String, String> optionMap = new HashMap<String, String>();
+    optionMap.put("theme_advanced_buttons1", "bold,italic,underline,strikethrough,sub,sup,|,charmap,|,justifyleft,justifycenter,justifyright,justifyfull,|,hr,removeformat");
+    optionMap.put("theme_advanced_buttons2", "undo,redo,|,cut,copy,paste,pastetext,pasteword,|,search,replace,|,forecolor,backcolor,bullist,numlist,|,outdent,indent,blockquote,|,table");
+    optionMap.put("theme_advanced_buttons3", "");
+    optionMap.put("theme_advanced_toolbar_location", "top");
+    optionMap.put("theme_advanced_toolbar_align", "left");
+    // Language can be configured when language packs are added to the classpath. Language packs can be found here: http://tinymce.moxiecode.com/download_i18n.php
+    optionMap.put("language", "de");
+    optionMap.put("plugins", "table,paste,contextmenu");
     final JHTMLEditor htmlEditor = new JHTMLEditor(
         JHTMLEditor.setEditorImplementation(JHTMLEditor.HTMLEditorImplementation.TinyMCE),
-        JHTMLEditor.setCustomJavascriptConfiguration (configurationScript));
+        JHTMLEditor.TinyMCEOptions.setOptions(optionMap)
+    );
     htmlEditor.addHTMLEditorListener(new HTMLEditorListener() {
       public void saveHTML(HTMLEditorSaveEvent e) {
         JOptionPane.showMessageDialog(TinyMCEExample.this, "The data of the HTML editor could be saved anywhere...");

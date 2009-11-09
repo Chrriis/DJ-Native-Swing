@@ -39,7 +39,7 @@ class JHTMLEditorFCKeditor implements JHTMLEditorImplementation {
       throw new IllegalStateException("The FCKEditor distribution is missing from the classpath!");
     }
     this.htmlEditor = htmlEditor;
-    customJavascriptConfiguration = (String)optionMap.get(JHTMLEditor.SET_CUSTOM_JAVASCRIPT_CONFIGURATION_OPTION_KEY);
+    customJavascriptConfiguration = (String)optionMap.get(JHTMLEditor.FCKEditorOptions.SET_CUSTOM_JAVASCRIPT_CONFIGURATION_OPTION_KEY);
   }
 
   private static final String LS = Utils.LINE_SEPARATOR;

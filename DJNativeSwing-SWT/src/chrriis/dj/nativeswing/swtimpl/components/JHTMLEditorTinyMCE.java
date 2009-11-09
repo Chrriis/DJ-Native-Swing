@@ -31,14 +31,26 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
   private static final String EDITOR_INSTANCE = "HTMLeditor1";
 
   private JHTMLEditor htmlEditor;
-  private String customJavascriptConfiguration;
+  private final String customOptions;
+  private final String customHTMLHeaders;
 
+  @SuppressWarnings("unchecked")
   public JHTMLEditorTinyMCE(JHTMLEditor htmlEditor, Map<Object, Object> optionMap) {
     if(getClass().getResource(PACKAGE_PREFIX + "tiny_mce.js") == null) {
       throw new IllegalStateException("The TinyMCE distribution is missing from the classpath!");
     }
     this.htmlEditor = htmlEditor;
-    customJavascriptConfiguration = (String)optionMap.get(JHTMLEditor.SET_CUSTOM_JAVASCRIPT_CONFIGURATION_OPTION_KEY);
+    Map<String, String> customOptionsMap = (Map<String, String>)optionMap.get(JHTMLEditor.TinyMCEOptions.SET_OPTIONS_OPTION_KEY);
+    StringBuilder sb = new StringBuilder();
+    for(String key: customOptionsMap.keySet()) {
+      if(sb.length() > 0) {
+        sb.append(',');
+      }
+      String value = customOptionsMap.get(key);
+      sb.append(key + ": decodeURIComponent('" + (value == null? "": Utils.encodeURL(value)) + "')");
+    }
+    customOptions = sb.toString();
+    customHTMLHeaders = (String)optionMap.get(JHTMLEditor.TinyMCEOptions.SET_CUSTOM_HTML_HEADERS_OPTION_KEY);
   }
 
   private static final String LS = Utils.LINE_SEPARATOR;
@@ -61,6 +73,7 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
             "    <style type=\"text/css\">" + LS +
             "      body, form {margin: 0; padding: 0; overflow: auto;}" + LS +
             "    </style>" + LS +
+            (customHTMLHeaders != null? customHTMLHeaders + LS: "") +
             "    <script type=\"text/javascript\" src=\"tiny_mce.js\"></script>" + LS +
             "    <script type=\"text/javascript\">" + LS +
             "      function debug (text) {" + LS +
@@ -103,7 +116,7 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
             "          })" + LS +
             "        }" + LS +
             "      };" + LS +
-            (customJavascriptConfiguration != null? "      var addOpts = {" + customJavascriptConfiguration + "};" + LS + "      for (var x in addOpts) {" + LS + "        opts[x] = addOpts[x];" + LS + "      }" + LS: "") +
+            (customOptions != null? "      var addOpts = {" + customOptions + "};" + LS + "      for (var x in addOpts) {" + LS + "        opts[x] = addOpts[x];" + LS + "      }" + LS: "") +
             "      tinyMCE.init (opts);" + LS +
             "    </script>" + LS +
             "  </head>" + LS +
