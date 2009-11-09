@@ -34,6 +34,8 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
   private final String customOptions;
   private final String customHTMLHeaders;
 
+  private static final String LS = Utils.LINE_SEPARATOR;
+
   @SuppressWarnings("unchecked")
   public JHTMLEditorTinyMCE(JHTMLEditor htmlEditor, Map<Object, Object> optionMap) {
     if(getClass().getResource(PACKAGE_PREFIX + "tiny_mce.js") == null) {
@@ -44,16 +46,14 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
     StringBuilder sb = new StringBuilder();
     for(String key: customOptionsMap.keySet()) {
       if(sb.length() > 0) {
-        sb.append(',');
+        sb.append(',' + LS);
       }
       String value = customOptionsMap.get(key);
-      sb.append(key + ": decodeURIComponent('" + (value == null? "": Utils.encodeURL(value)) + "')");
+      sb.append("        " + key + ": decodeURIComponent('" + (value == null? "": Utils.encodeURL(value)) + "')");
     }
     customOptions = sb.toString();
     customHTMLHeaders = (String)optionMap.get(JHTMLEditor.TinyMCEOptions.SET_CUSTOM_HTML_HEADERS_OPTION_KEY);
   }
-
-  private static final String LS = Utils.LINE_SEPARATOR;
 
   public WebServerContent getWebServerContent(final HTTPRequest httpRequest, final String resourcePath, final int instanceID) {
     if ("index.html".equals (resourcePath)) {
@@ -116,7 +116,7 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
             "          })" + LS +
             "        }" + LS +
             "      };" + LS +
-            (customOptions != null? "      var addOpts = {" + customOptions + "};" + LS + "      for (var x in addOpts) {" + LS + "        opts[x] = addOpts[x];" + LS + "      }" + LS: "") +
+            (customOptions != null? "      var addOpts = {" + LS + customOptions + LS + "      };" + LS + "      for (var x in addOpts) {" + LS + "        opts[x] = addOpts[x];" + LS + "      }" + LS: "") +
             "      tinyMCE.init (opts);" + LS +
             "    </script>" + LS +
             "  </head>" + LS +
