@@ -19,7 +19,7 @@ import java.net.URL;
  */
 public class NetworkURLClassLoader extends ClassLoader {
 
-  private URL codebaseURL;
+  private final URL codebaseURL;
 
   /**
    * Construct a network URL classloader, that will load resources from the given codebase.
