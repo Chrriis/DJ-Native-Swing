@@ -20,8 +20,8 @@ import chrriis.dj.nativeswing.swtimpl.demo.examples.additionalfeatures.Thumbnail
 import chrriis.dj.nativeswing.swtimpl.demo.examples.flashplayer.FunctionCalls;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.flashplayer.SimpleFlashExample;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.flashplayer.VariablesAndFlow;
-import chrriis.dj.nativeswing.swtimpl.demo.examples.htmleditor.CustomConfiguration;
-import chrriis.dj.nativeswing.swtimpl.demo.examples.htmleditor.SimpleHTMLEditorExample;
+import chrriis.dj.nativeswing.swtimpl.demo.examples.htmleditor.CKEditorExample;
+import chrriis.dj.nativeswing.swtimpl.demo.examples.htmleditor.FCKEditorExample;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.htmleditor.TinyMCEExample;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.introduction.Codewise;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.introduction.NativeIntegration;
@@ -85,9 +85,9 @@ public class DemoExampleDefinitionLoader {
         new Example("Options and Playlist", OptionsAndPlaylistExample.class, "Load a file to VLC player, passing certain options (start time to 30, no audio and no title) using the playlist.", true),
     }));
     exampleGroupList.add(new ExampleGroup("JHTMLEditor", new Example[] {
-        new Example("Simple Example", SimpleHTMLEditorExample.class, "Graphically edit some HTML, get and set the HTML content.", true),
-        new Example("Custom Configuration", CustomConfiguration.class, "Modify default behaviors with custom configuration script.", true),
-        new Example("TinyMCE implementation", TinyMCEExample.class, "Use the TinyMCE editor implementation instead of the default FCKeditor.", true),
+        new Example("FCKEditor Example", FCKEditorExample.class, "Graphically edit some HTML, get and set the HTML content, using the FCKEditor implementation.", true),
+        new Example("CKEditor Example", CKEditorExample.class, "Graphically edit some HTML, get and set the HTML content, using the CKEditor implementation.", true),
+        new Example("TinyMCE Example", TinyMCEExample.class, "Graphically edit some HTML, get and set the HTML content, using the TinyMCE implementation.", true),
     }));
     exampleGroupList.add(new ExampleGroup("JSyntaxHighlighter", new Example[] {
         new Example("Simple Example", SimpleSyntaxHighlighterExample.class, "Display some content with syntax highlighting from one of the available languages (C++, C#, css, Delphi, Java, JS, PHP, Python, Ruby, SQL, VB, XML, HTML).", true),

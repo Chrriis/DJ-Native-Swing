@@ -33,27 +33,37 @@ import chrriis.dj.nativeswing.swtimpl.components.JHTMLEditor;
 /**
  * @author Christopher Deckers
  */
-public class TinyMCEExample extends JPanel {
+public class CKEditorExample extends JPanel {
 
   protected static final String LS = System.getProperty("line.separator");
 
-  public TinyMCEExample() {
+  public CKEditorExample() {
     super(new BorderLayout());
     Map<String, String> optionMap = new HashMap<String, String>();
-    optionMap.put("theme_advanced_buttons1", "'bold,italic,underline,strikethrough,sub,sup,|,charmap,|,justifyleft,justifycenter,justifyright,justifyfull,|,hr,removeformat'");
-    optionMap.put("theme_advanced_buttons2", "'undo,redo,|,cut,copy,paste,pastetext,pasteword,|,search,replace,|,forecolor,backcolor,bullist,numlist,|,outdent,indent,blockquote,|,table'");
-    optionMap.put("theme_advanced_buttons3", "''");
-    optionMap.put("theme_advanced_toolbar_location", "'top'");
-    optionMap.put("theme_advanced_toolbar_align", "'left'");
-    // Language can be configured when language packs are added to the classpath. Language packs can be found here: http://tinymce.moxiecode.com/download_i18n.php
-    optionMap.put("language", "'de'");
-    optionMap.put("plugins", "'table,paste,contextmenu'");
-    final JHTMLEditor htmlEditor = new JHTMLEditor(JHTMLEditor.HTMLEditorImplementation.TinyMCE,
-        JHTMLEditor.TinyMCEOptions.setOptions(optionMap)
+    optionMap.put("toolbar", "[" +
+        "  ['Source','-','Save','NewPage','Preview','-','Templates']," +
+        "  ['Cut','Copy','Paste','PasteText','PasteFromWord','-','Print', 'SpellChecker', 'Scayt']," +
+        "  ['Undo','Redo','-','Find','Replace','-','SelectAll','RemoveFormat']," +
+        "  ['Form', 'Checkbox', 'Radio', 'TextField', 'Textarea', 'Select', 'Button', 'ImageButton', 'HiddenField']," +
+        "  '/'," +
+        "  ['Bold','Italic','Underline','Strike','-','Subscript','Superscript']," +
+        "  ['NumberedList','BulletedList','-','Outdent','Indent','Blockquote']," +
+        "  ['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock']," +
+        "  ['Link','Unlink','Anchor']," +
+        "  ['Image','Flash','Table','HorizontalRule','Smiley','SpecialChar','PageBreak']," +
+        "  '/'," +
+        "  ['Styles','Format','Font','FontSize']," +
+        "  ['TextColor','BGColor']," +
+        "  ['Maximize', 'ShowBlocks','-','About']" +
+    "]");
+//    optionMap.put("uiColor", "'#9AB8F3'");
+//    optionMap.put("toolbarCanCollapse", "false");
+    final JHTMLEditor htmlEditor = new JHTMLEditor(JHTMLEditor.HTMLEditorImplementation.CKEditor,
+        JHTMLEditor.CKEditorOptions.setOptions(optionMap)
     );
     htmlEditor.addHTMLEditorListener(new HTMLEditorListener() {
       public void saveHTML(HTMLEditorSaveEvent e) {
-        JOptionPane.showMessageDialog(TinyMCEExample.this, "The data of the HTML editor could be saved anywhere...");
+        JOptionPane.showMessageDialog(CKEditorExample.this, "The data of the HTML editor could be saved anywhere...");
       }
     });
     add(htmlEditor, BorderLayout.CENTER);
@@ -98,7 +108,7 @@ public class TinyMCEExample extends JPanel {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new TinyMCEExample(), BorderLayout.CENTER);
+        frame.getContentPane().add(new CKEditorExample(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

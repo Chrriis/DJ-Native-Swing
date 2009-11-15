@@ -27,20 +27,39 @@ import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.components.HTMLEditorListener;
 import chrriis.dj.nativeswing.swtimpl.components.HTMLEditorSaveEvent;
 import chrriis.dj.nativeswing.swtimpl.components.JHTMLEditor;
+import chrriis.dj.nativeswing.swtimpl.components.JHTMLEditor.HTMLEditorImplementation;
 
 /**
  * @author Christopher Deckers
  */
-public class SimpleHTMLEditorExample extends JPanel {
+public class FCKEditorExample extends JPanel {
 
   protected static final String LS = System.getProperty("line.separator");
 
-  public SimpleHTMLEditorExample() {
+  public FCKEditorExample() {
     super(new BorderLayout());
-    final JHTMLEditor htmlEditor = new JHTMLEditor();
+    // Replace certain default options.
+    String configurationScript =
+      "FCKConfig.ToolbarSets[\"Default\"] = [\n" +
+      "['Source','DocProps','-','Save','NewPage','Preview','-','Templates'],\n" +
+      "['Cut','Copy','Paste','PasteText','PasteWord','-','Print','SpellCheck'],\n" +
+      "['Undo','Redo','-','Find','Replace','-','SelectAll','RemoveFormat'],\n" +
+      "['Form','Checkbox','Radio','TextField','Textarea','Select','Button','ImageButton','HiddenField'],\n" +
+      "'/',\n" +
+      "['Style','FontFormat','FontName','FontSize'],\n" +
+      "['TextColor','BGColor'],\n" +
+      "'/',\n" +
+      "['Bold','Italic','Underline','StrikeThrough','-','Subscript','Superscript'],\n" +
+      "['OrderedList','UnorderedList','-','Outdent','Indent','Blockquote'],\n" +
+      "['JustifyLeft','JustifyCenter','JustifyRight','JustifyFull'],\n" +
+      "['Link','Unlink','Anchor'],\n" +
+      "['Image','Flash','Table','Rule','Smiley','SpecialChar','PageBreak', '-', 'ShowBlocks'],\n" +
+      "];\n" +
+      "FCKConfig.ToolbarCanCollapse = false;\n";
+    final JHTMLEditor htmlEditor = new JHTMLEditor(HTMLEditorImplementation.FCKEditor, JHTMLEditor.FCKEditorOptions.setCustomJavascriptConfiguration(configurationScript));
     htmlEditor.addHTMLEditorListener(new HTMLEditorListener() {
       public void saveHTML(HTMLEditorSaveEvent e) {
-        JOptionPane.showMessageDialog(SimpleHTMLEditorExample.this, "The data of the HTML editor could be saved anywhere...");
+        JOptionPane.showMessageDialog(FCKEditorExample.this, "The data of the HTML editor could be saved anywhere...");
       }
     });
     add(htmlEditor, BorderLayout.CENTER);
@@ -85,7 +104,7 @@ public class SimpleHTMLEditorExample extends JPanel {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new SimpleHTMLEditorExample(), BorderLayout.CENTER);
+        frame.getContentPane().add(new FCKEditorExample(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

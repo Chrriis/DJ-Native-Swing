@@ -28,7 +28,7 @@ import chrriis.dj.nativeswing.swtimpl.LocalMessage;
 import chrriis.dj.nativeswing.swtimpl.NSPanelComponent;
 
 /**
- * An HTML editor. It is a browser-based component, which relies on the FCKeditor (the default) or the TinyMCE editor.<br/>
+ * An HTML editor. It is a browser-based component, which relies on the FCKeditor, CKEditor or the TinyMCE editor.<br/>
  * Methods execute when this component is initialized. If the component is not initialized, methods will be executed as soon as it gets initialized.
  * If the initialization fails, the methods will not have any effect. The results from methods have relevant values only when the component is valid.
  * @author Christopher Deckers
@@ -107,9 +107,33 @@ public class JHTMLEditor extends NSPanelComponent {
 
   }
 
+  public static class CKEditorOptions {
+
+    private CKEditorOptions() {}
+
+    static final String SET_OPTIONS_OPTION_KEY = "CKEditor Options";
+
+    /**
+     * Create an option to set CKEditor editor options.<br/>
+     * The list of possible options to set for CKEditor can be found here: <a href="http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html">http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html</a>.
+     * @param optionMap a map containing the key/value pairs accepted by CKEditor.
+     * @return the option to set the options.
+     */
+    public static NSOption setOptions(Map<String, String> optionMap) {
+      final Map<String, String> optionMap_ = new HashMap<String, String>(optionMap);
+      return new NSOption(SET_OPTIONS_OPTION_KEY) {
+        @Override
+        public Object getOptionValue() {
+          return optionMap_;
+        }
+      };
+    }
+
+  }
+
   private static final String HTML_EDITOR_COMPONENT_OPTION_KEY = "HTML Editor";
 
-  public static enum HTMLEditorImplementation { FCKEditor, TinyMCE };
+  public static enum HTMLEditorImplementation { FCKEditor, CKEditor, TinyMCE };
 
   public static NSOption setEditorImplementation(final HTMLEditorImplementation comp) {
     return new NSOption (HTML_EDITOR_COMPONENT_OPTION_KEY) {
@@ -133,16 +157,26 @@ public class JHTMLEditor extends NSPanelComponent {
    * Construct an HTML editor.
    * @param options the options to configure the behavior of this component.
    */
-  public JHTMLEditor(NSOption... options) {
+  public JHTMLEditor(final HTMLEditorImplementation editorImplementation, NSOption... options) {
+    if(editorImplementation == null) {
+      throw new NullPointerException("The editor implementation cannot be null!");
+    }
     Map<Object, Object> optionMap = NSOption.createOptionMap(options);
     webBrowser = new JWebBrowser(options);
     initialize(webBrowser.getNativeComponent());
-    HTMLEditorImplementation editorImplementation = (HTMLEditorImplementation)optionMap.get(HTML_EDITOR_COMPONENT_OPTION_KEY);
-    HTMLEditorImplementation editorImplementation_ = editorImplementation == null? HTMLEditorImplementation.FCKEditor: editorImplementation;
-    switch(editorImplementation_) {
+    switch(editorImplementation) {
       case FCKEditor:
         try {
           implementation = new JHTMLEditorFCKeditor(this, optionMap);
+          break;
+        } catch(RuntimeException e) {
+          if(editorImplementation != null) {
+            throw e;
+          }
+        }
+      case CKEditor:
+        try {
+          implementation = new JHTMLEditorCKeditor(this, optionMap);
           break;
         } catch(RuntimeException e) {
           if(editorImplementation != null) {
@@ -159,7 +193,7 @@ public class JHTMLEditor extends NSPanelComponent {
           }
         }
       default:
-        throw new IllegalStateException("A suitable HTML editor (FCKeditor, TinyMCE) distribution could not be found on the classpath!");
+        throw new IllegalStateException("A suitable HTML editor (FCKeditor, CKeditor, TinyMCE) distribution could not be found on the classpath!");
     }
     webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
       @Override

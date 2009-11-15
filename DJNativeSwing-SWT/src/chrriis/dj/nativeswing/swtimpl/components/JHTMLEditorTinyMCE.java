@@ -45,13 +45,15 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
     Map<String, String> customOptionsMap = (Map<String, String>)optionMap.get(JHTMLEditor.TinyMCEOptions.SET_OPTIONS_OPTION_KEY);
     StringBuilder sb = new StringBuilder();
     for(String key: customOptionsMap.keySet()) {
-      if(sb.length() > 0) {
-        sb.append(',' + LS);
-      }
       String value = customOptionsMap.get(key);
-      sb.append("        " + key + ": decodeURIComponent('" + (value == null? "": Utils.encodeURL(value)) + "')");
+      if(value != null && value.length() > 0) {
+        if(sb.length() > 0) {
+          sb.append(',' + LS);
+        }
+        sb.append("        " + key + ": " + value);
+      }
     }
-    customOptions = sb.toString();
+    customOptions = sb.length() > 0? sb.toString(): null;
     customHTMLHeaders = (String)optionMap.get(JHTMLEditor.TinyMCEOptions.SET_CUSTOM_HTML_HEADERS_OPTION_KEY);
   }
 
