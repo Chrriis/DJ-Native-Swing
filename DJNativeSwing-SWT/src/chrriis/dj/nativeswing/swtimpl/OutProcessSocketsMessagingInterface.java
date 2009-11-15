@@ -165,7 +165,9 @@ abstract class OutProcessSocketsMessagingInterface extends MessagingInterface {
     @Override
     public void destroy() {
       super.destroy();
-      if(process != null) {
+      // It is unclear whether there is any benefit in waiting for the peer VM to be closed (I don't think of any conceptually).
+      // However, a user seems to have an issue that is improved when doing so, so let's have this waiting conditional.
+      if(process != null && Boolean.parseBoolean(System.getProperty("nativeswing.interface.outprocess.syncclosing"))) {
         while(true) {
           try {
             process.waitFor();

@@ -622,6 +622,7 @@ public class NativeInterface {
             in.close();
             out.close();
           } catch(Exception e) {
+            e.printStackTrace();
 //            throw new IllegalStateException("Cannot find a suitable classpath to spawn VM!");
           }
           mainClassFile.deleteOnExit();
@@ -780,27 +781,40 @@ public class NativeInterface {
         p = null;
       }
       if(isProcessIOChannelMode) {
+        // We need the process in this mode, so it cannot be null.
         return new SwingOutProcessIOMessagingInterface(p.getInputStream(), p.getOutputStream(), false, p);
       }
       Exception exception = null;
       Socket socket = null;
-      for(int i=14; i>=0; i--) {
+      long startTime = System.currentTimeMillis();
+      do {
+        if(p != null) {
+          try {
+            p.exitValue();
+            // The process is terminated so no need to try to connect to it.
+            break;
+          } catch(IllegalThreadStateException e) {
+            // Process is not terminated, which means no error
+          }
+        }
         try {
           socket = new Socket(localHostAddress, port);
+          exception = null;
           break;
         } catch(Exception e) {
-          if(i == 0) {
-            exception = e;
-          }
+          exception = e;
         }
         try {
           Thread.sleep(200);
         } catch(Exception e) {
         }
-      }
+      } while(System.currentTimeMillis() - startTime < 10000);
       if(socket == null) {
         if(p != null) {
           p.destroy();
+        }
+        if(exception == null) {
+          throw new IllegalStateException("Failed to connect to spawned VM! The native side process was already terminated.");
         }
         throw new IllegalStateException("Failed to connect to spawned VM!", exception);
       }
@@ -873,21 +887,35 @@ public class NativeInterface {
       Socket socket = null;
       if(!isProcessIOChannelMode) {
         ServerSocket serverSocket = null;
-        for(int i=19; i>=0; i--) {
+        long startTime = System.currentTimeMillis();
+        IOException exception;
+        do {
           try {
             serverSocket = new ServerSocket();
             serverSocket.setReuseAddress(true);
             serverSocket.bind(new InetSocketAddress(Utils.getLocalHostAddress(), port));
+            exception = null;
             break;
           } catch(IOException e) {
-            if(i == 0) {
-              throw e;
+            exception = e;
+            if(serverSocket != null) {
+              try {
+                serverSocket.close();
+              } catch(Exception ex) {
+              }
             }
+            serverSocket = null;
           }
           try {
-            Thread.sleep(100);
+            Thread.sleep(200);
           } catch(Exception e) {
           }
+        } while(System.currentTimeMillis() - startTime < 5000);
+        if(serverSocket == null) {
+          if(exception == null) {
+            throw new IllegalStateException("Failed to create the server socket for native side communication!");
+          }
+          throw exception;
         }
         final ServerSocket serverSocket_ = serverSocket;
         if(!Boolean.parseBoolean(System.getProperty("nativeswing.peervm.keepalive"))) {
