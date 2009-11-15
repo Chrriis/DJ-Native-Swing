@@ -46,6 +46,8 @@ public class JHTMLEditor extends NSPanelComponent {
 
   }
 
+  public static enum HTMLEditorImplementation { FCKEditor, CKEditor, TinyMCE };
+
   public static class TinyMCEOptions {
 
     private TinyMCEOptions() {}
@@ -131,19 +133,6 @@ public class JHTMLEditor extends NSPanelComponent {
 
   }
 
-  private static final String HTML_EDITOR_COMPONENT_OPTION_KEY = "HTML Editor";
-
-  public static enum HTMLEditorImplementation { FCKEditor, CKEditor, TinyMCE };
-
-  public static NSOption setEditorImplementation(final HTMLEditorImplementation comp) {
-    return new NSOption (HTML_EDITOR_COMPONENT_OPTION_KEY) {
-      @Override
-      public Object getOptionValue () {
-        return comp;
-      }
-    };
-  }
-
   private JWebBrowser webBrowser;
   private int instanceID;
 
@@ -157,7 +146,7 @@ public class JHTMLEditor extends NSPanelComponent {
    * Construct an HTML editor.
    * @param options the options to configure the behavior of this component.
    */
-  public JHTMLEditor(final HTMLEditorImplementation editorImplementation, NSOption... options) {
+  public JHTMLEditor(HTMLEditorImplementation editorImplementation, NSOption... options) {
     if(editorImplementation == null) {
       throw new NullPointerException("The editor implementation cannot be null!");
     }
