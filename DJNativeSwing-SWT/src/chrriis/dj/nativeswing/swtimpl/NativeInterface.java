@@ -558,7 +558,7 @@ public class NativeInterface {
       new CMN_setProperties().syncExec(true, nativeProperties);
     }
 
-    private static Process createProcess(String localHostAddress, int port) {
+    private static Process createProcess(String localHostAddress, int port, int pid) {
       List<String> classPathList = new ArrayList<String>();
       String pathSeparator = System.getProperty("path.separator");
       List<Object> referenceList = new ArrayList<Object>();
@@ -645,7 +645,10 @@ public class NativeInterface {
       Process p = null;
       // Create the argument list for the Java process that will be created
       List<String> argList = new ArrayList<String>();
+      // The first argument will be the binary
       argList.add(null);
+      argList.add("-Dnativeswing.peervm.pid=" + pid);
+//      argList.add("-Dvisualvm.display.name=NativeSwingPeer#" + pid);
       String[] peerVMParams = nativeInterfaceConfiguration.getPeerVMParams();
       if(peerVMParams != null) {
         for(String param: peerVMParams) {
@@ -742,6 +745,8 @@ public class NativeInterface {
 
     private static final boolean IS_PROCESS_IO_CHANNEL_MODE = "processio".equals(System.getProperty("nativeswing.interface.outprocess.communication"));
 
+    private static volatile int pid;
+
     private static MessagingInterface createOutProcessMessagingInterface() {
       String localHostAddress = Utils.getLocalHostAddress();
       if(localHostAddress == null) {
@@ -772,11 +777,12 @@ public class NativeInterface {
       }
       Process p;
       if(isCreatingProcess) {
-        p = createProcess(localHostAddress, port);
+        pid++;
+        p = createProcess(localHostAddress, port, pid);
         if(!isProcessIOChannelMode) {
-          connectStream(System.out, p.getInputStream());
+          connectStream(System.out, p.getInputStream(), pid);
         }
-        connectStream(System.err, p.getErrorStream());
+        connectStream(System.err, p.getErrorStream(), pid);
       } else {
         p = null;
       }
@@ -822,27 +828,35 @@ public class NativeInterface {
     }
 
     private static class IOStreamFormatter {
+
       private ByteArrayOutputStream baos = new ByteArrayOutputStream();
       private byte lastByte = (byte)Utils.LINE_SEPARATOR.charAt(Utils.LINE_SEPARATOR.length() - 1);
       private boolean isAddingMessage = true;
+      private final byte[] prefixBytes;
+
+      public IOStreamFormatter(int pid) {
+        prefixBytes = ("NativeSwing[" + pid + "]: ").getBytes();
+      }
+
       public byte[] process(byte[] bytes, int offset, int length) throws IOException {
         baos.reset();
         for(int i=offset; i<length; i++) {
           byte b = bytes[i];
           if(isAddingMessage) {
-            baos.write("NativeSwing: ".getBytes());
+            baos.write(prefixBytes);
           }
           isAddingMessage = b == lastByte;
           baos.write(b);
         }
         return baos.toByteArray();
       }
+
     }
 
-    private static void connectStream(final PrintStream out, InputStream in) {
+    private static void connectStream(final PrintStream out, InputStream in, final int pid) {
       final BufferedInputStream bin = new BufferedInputStream(in);
       Thread streamThread = new Thread("NativeSwing Stream Connector") {
-        private IOStreamFormatter byteProcessor = new IOStreamFormatter();
+        private IOStreamFormatter byteProcessor = new IOStreamFormatter(pid);
         @Override
         public void run() {
           try {
@@ -876,8 +890,9 @@ public class NativeInterface {
     }
 
     static void runNativeSide(String[] args) throws IOException {
+      final int pid = Integer.parseInt(System.getProperty("nativeswing.peervm.pid"));
       if(Boolean.parseBoolean(System.getProperty("nativeswing.peervm.debug.printstartmessage"))) {
-        System.err.println("Starting spawned VM");
+        System.err.println("Starting peer VM #" + pid);
       }
       synchronized(OPEN_STATE_LOCK) {
         isOpen = true;
@@ -998,7 +1013,7 @@ public class NativeInterface {
           }
         });
         System.setOut(new PrintStream(new OutputStream() {
-          private IOStreamFormatter byteProcessor = new IOStreamFormatter();
+          private IOStreamFormatter byteProcessor = new IOStreamFormatter(pid);
           @Override
           public void write(int b) throws IOException {
             sendBytes(new byte[] {(byte)b}, 0, 1);
