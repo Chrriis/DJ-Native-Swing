@@ -730,7 +730,7 @@ public class WebServer {
             }
             WebServerConnectionThread webServerConnectionThread = new WebServerConnectionThread(socket);
             webServerConnectionThread.start();
-          } catch(IOException e) {
+          } catch(Exception e) {
             if(serverSocket != null) {
               e.printStackTrace();
             }
