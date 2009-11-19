@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Properties;
 
 import javax.swing.event.EventListenerList;
@@ -164,13 +163,7 @@ public class NativeInterface {
   private static class CMN_dumpStackTraces extends CommandMessage {
     @Override
     public Object run(Object[] args) {
-      Map<Thread, StackTraceElement[]> allStackTraces = Thread.getAllStackTraces();
-      for(Thread th: allStackTraces.keySet()) {
-        System.err.println("Thread " + th.getName());
-        for(StackTraceElement s: allStackTraces.get(th)) {
-          System.err.println("\t at " + s);
-        }
-      }
+      Utils.dumpStackTraces();
       return null;
     }
   }

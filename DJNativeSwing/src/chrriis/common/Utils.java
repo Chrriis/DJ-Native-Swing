@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Christopher Deckers
@@ -300,6 +301,23 @@ public class Utils {
       sb.append('/');
     }
     return sb.toString();
+  }
+
+  public static void dumpStackTraces() {
+    Map<Thread, StackTraceElement[]> allStackTraces = Thread.getAllStackTraces();
+    Thread[] threads = allStackTraces.keySet().toArray(new Thread[0]);
+    Arrays.sort(threads, new Comparator<Thread>() {
+      public int compare(Thread o1, Thread o2) {
+        return o1.getName().compareToIgnoreCase(o2.getName());
+      }
+    });
+    for(Thread t: threads) {
+      System.err.println((t.isDaemon()? "Daemon Thread [": "Thread [") + t.getName() + "] (" + t.getState() + ")");
+      StackTraceElement[] stackTraceElements = allStackTraces.get(t);
+      for (StackTraceElement stackTraceElement: stackTraceElements) {
+        System.err.println("\tat " + stackTraceElement);
+      }
+    }
   }
 
   private static String localHostAddress;
