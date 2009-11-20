@@ -1009,7 +1009,8 @@ public class WebServer {
       }
       webServer = new WebServer();
       try {
-        webServer.start();
+        boolean isApplet = "applet".equals(System.getProperty("nativeswing.deployment.type"));
+        webServer.start(!isApplet);
       } catch(Exception e) {
         e.printStackTrace();
       }

@@ -45,7 +45,8 @@ public class ObjectRegistry {
         }
       }
     };
-    cleanUpThread.setDaemon(true);
+    boolean isApplet = "applet".equals(System.getProperty("nativeswing.deployment.type"));
+    cleanUpThread.setDaemon(!isApplet);
     cleanUpThread.start();
   }
 
