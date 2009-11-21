@@ -43,17 +43,21 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
     }
     this.htmlEditor = htmlEditor;
     Map<String, String> customOptionsMap = (Map<String, String>)optionMap.get(JHTMLEditor.TinyMCEOptions.SET_OPTIONS_OPTION_KEY);
-    StringBuilder sb = new StringBuilder();
-    for(String key: customOptionsMap.keySet()) {
-      String value = customOptionsMap.get(key);
-      if(value != null && value.length() > 0) {
-        if(sb.length() > 0) {
-          sb.append(',' + LS);
+    if(customOptionsMap != null) {
+      StringBuilder sb = new StringBuilder();
+      for(String key: customOptionsMap.keySet()) {
+        String value = customOptionsMap.get(key);
+        if(value != null && value.length() > 0) {
+          if(sb.length() > 0) {
+            sb.append(',' + LS);
+          }
+          sb.append("        " + key + ": " + value);
         }
-        sb.append("        " + key + ": " + value);
       }
+      customOptions = sb.length() > 0? sb.toString(): null;
+    } else {
+      customOptions = null;
     }
-    customOptions = sb.length() > 0? sb.toString(): null;
     customHTMLHeaders = (String)optionMap.get(JHTMLEditor.TinyMCEOptions.SET_CUSTOM_HTML_HEADERS_OPTION_KEY);
   }
 
