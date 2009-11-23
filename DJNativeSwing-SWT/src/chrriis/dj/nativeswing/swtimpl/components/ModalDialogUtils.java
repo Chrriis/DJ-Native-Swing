@@ -33,7 +33,7 @@ class ModalDialogUtils {
   }
 
   static void showModalDialog(Component component, final NativeModalComponent nativeModalComponent, final Runnable runnable) {
-    Window window = SwingUtilities.getWindowAncestor(component);
+    Window window = component instanceof Window? (Window)component: SwingUtilities.getWindowAncestor(component);
     final JDialog dialog;
     if(Utils.IS_JAVA_6_OR_GREATER) {
       dialog = new JDialog(window, ModalityType.APPLICATION_MODAL);
