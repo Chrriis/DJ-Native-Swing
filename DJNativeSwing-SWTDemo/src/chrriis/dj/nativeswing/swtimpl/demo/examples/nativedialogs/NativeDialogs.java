@@ -88,6 +88,7 @@ public class NativeDialogs extends JPanel {
           JFileDialog fileDialog = new JFileDialog();
           fileDialog.setDialogType(DialogType.SAVE_DIALOG_TYPE);
           fileDialog.setExtensionFilters(new String[] {"*.*", "*.mp3;*.avi", "*.txt;*.doc"}, new String[] {"All files", "Multimedia file (*.mp3, *.avi)", "Text document (*.txt, *.doc)"}, 1);
+          fileDialog.setConfirmedOverwrite(true);
           fileDialog.show(NativeDialogs.this);
           JOptionPane.showMessageDialog(NativeDialogs.this, "Selected file: " + fileDialog.getSelectedFileName());
           return;

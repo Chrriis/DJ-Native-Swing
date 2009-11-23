@@ -47,6 +47,7 @@ public class JFileDialog {
         if(data.title != null) {
           fileDialog.setText(data.title);
         }
+        fileDialog.setOverwrite(data.isConfirmedOverwrite);
         if(data.parentDirectory != null) {
           fileDialog.setFilterPath(data.parentDirectory);
         }
@@ -89,6 +90,7 @@ public class JFileDialog {
     public String title;
     public boolean isSave;
     public boolean isMulti;
+    public boolean isConfirmedOverwrite;
     public String[] selectedFileNames;
     public String[] extensionFiltersNames;
     public String[] extensionFilters;
@@ -189,6 +191,22 @@ public class JFileDialog {
    */
   public void setDialogType(DialogType dialogType) {
     data.isSave = dialogType == DialogType.SAVE_DIALOG_TYPE;
+  }
+
+  /**
+   * For save dialogs, indicates whether the selection of a file should confirm the selection of an existing file.
+   * @param isConfirmedOverwrite indicate whether selecting an existing file should confirm overwriting it.
+   */
+  public void setConfirmedOverwrite(boolean isConfirmedOverwrite) {
+    data.isConfirmedOverwrite = isConfirmedOverwrite;
+  }
+
+  /**
+   * Indicate whether save dialogs should ask for confirmation when the file that is selected already exists.
+   * @return true when the dialog should ask for confirmation, false otherwise.
+   */
+  public boolean isConfirmedOverwrite() {
+    return data.isConfirmedOverwrite;
   }
 
   /**
