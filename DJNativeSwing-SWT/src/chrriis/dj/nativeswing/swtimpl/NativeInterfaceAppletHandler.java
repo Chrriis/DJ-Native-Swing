@@ -25,7 +25,6 @@ public class NativeInterfaceAppletHandler {
   private static Set<Applet> activeAppletSet = new HashSet<Applet>();
 
   public static void activateAppletMode() {
-    checkAppletMode();
     System.setProperty("nativeswing.deployment.type", "applet");
     NativeInterface.initialize();
   }
