@@ -34,18 +34,18 @@ public class Utils {
 
   private Utils() {}
 
-  public static final boolean IS_JAVA_6_OR_GREATER = System.getProperty("java.version").compareTo("1.6") >= 0;
+  public static final boolean IS_JAVA_6_OR_GREATER = SystemProperty.JAVA_VERSION.get().compareTo("1.6") >= 0;
 
   public static final boolean IS_MAC;
   public static final boolean IS_WINDOWS;
 
   static {
-    String os = System.getProperty("os.name");
+    String os = SystemProperty.OS_NAME.get();
     IS_MAC = os.startsWith("Mac") || os.startsWith("Darwin");
     IS_WINDOWS = os.startsWith("Windows");
   }
 
-  public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+  public static final String LINE_SEPARATOR = SystemProperty.LINE_SEPARATOR.get();
 
   public static String decodeURL(String s) {
     try {

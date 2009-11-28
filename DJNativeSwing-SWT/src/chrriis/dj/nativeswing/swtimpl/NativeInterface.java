@@ -42,6 +42,7 @@ import org.eclipse.swt.graphics.DeviceData;
 import org.eclipse.swt.widgets.Display;
 
 import chrriis.common.NetworkURLClassLoader;
+import chrriis.common.SystemProperty;
 import chrriis.common.Utils;
 import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.NativeSwing;
@@ -553,7 +554,7 @@ public class NativeInterface {
 
     private static Process createProcess(String localHostAddress, int port, int pid) {
       List<String> classPathList = new ArrayList<String>();
-      String pathSeparator = System.getProperty("path.separator");
+      String pathSeparator = SystemProperty.PATH_SEPARATOR.get();
       List<Object> referenceList = new ArrayList<Object>();
       List<String> optionalReferenceList = new ArrayList<String>();
       referenceList.add(NativeSwing.class);
@@ -600,7 +601,7 @@ public class NativeInterface {
       if(isProxyClassLoaderUsed) {
         // We set only one item in the classpath: the path to the proxy class loader.
         classPathList.clear();
-        File classPathFile = new File(System.getProperty("java.io.tmpdir"), ".djnativeswing/classpath");
+        File classPathFile = new File(SystemProperty.JAVA_IO_TMPDIR.get(), ".djnativeswing/classpath");
         Utils.deleteAll(classPathFile);
         String classPath = NetworkURLClassLoader.class.getName().replace('.', '/') + ".class";
         File mainClassFile = new File(classPathFile, classPath);
@@ -629,7 +630,7 @@ public class NativeInterface {
         }
         sb.append(classPathList.get(i));
       }
-      String javaHome = System.getProperty("java.home");
+      String javaHome = SystemProperty.JAVA_HOME.get();
       String[] candidateBinaries = new String[] {
           new File(javaHome, "bin/java").getAbsolutePath(),
           new File("/usr/lib/java").getAbsolutePath(),
@@ -671,8 +672,8 @@ public class NativeInterface {
       argList.add(NativeInterface.class.getName());
       argList.add(String.valueOf(port));
       // Try compatibility with Java applets on update 10.
-      String javaVersion = System.getProperty("java.version");
-      if(javaVersion != null && javaVersion.compareTo("1.6.0_10") >= 0 && "Sun Microsystems Inc.".equals(System.getProperty("java.vendor"))) {
+      String javaVersion = SystemProperty.JAVA_VERSION.get();
+      if(javaVersion != null && javaVersion.compareTo("1.6.0_10") >= 0 && "Sun Microsystems Inc.".equals(SystemProperty.JAVA_VENDOR.get())) {
         boolean isTryingAppletCompatibility = true;
         if(peerVMParams != null) {
           for(String peerVMParam: peerVMParams) {

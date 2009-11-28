@@ -30,6 +30,7 @@ import java.util.Set;
 
 import javax.swing.SwingUtilities;
 
+import chrriis.common.SystemProperty;
 import chrriis.common.Utils;
 
 /**
@@ -406,16 +407,16 @@ public class NativeSwing {
     }
     loadClipboardDebuggingProperties();
     // Specific Sun property to prevent heavyweight components from erasing their background.
-    System.setProperty("sun.awt.noerasebackground", "true");
+    SystemProperty.SUN_AWT_NOERASEBACKGROUND.set("true");
     // It seems on Linux this is required to get the component visible.
-    System.setProperty("sun.awt.xembedserver", "true");
+    SystemProperty.SUN_AWT_XEMBEDSERVER.set("true");
     // We use our own HW forcing, so we disable the one from JNA
     System.setProperty("jna.force_hw_popups", "false");
     // We have to disable mixing until all bahaviors can be implemented using the JDK features.
-    if(System.getProperty("sun.awt.disableMixing") == null) {
-      System.setProperty("sun.awt.disableMixing", "true");
+    if(SystemProperty.SUN_AWT_DISABLEMIXING.get() == null) {
+      SystemProperty.SUN_AWT_DISABLEMIXING.set("true");
     }
-    boolean isSunMixingEnabled = !"true".equals(System.getProperty("sun.awt.disableMixing")) && System.getProperty("java.version").compareTo("1.6.0_12") >= 0;
+    boolean isSunMixingEnabled = !"true".equals(SystemProperty.SUN_AWT_DISABLEMIXING.get()) && SystemProperty.JAVA_VERSION.get().compareTo("1.6.0_12") >= 0;
     isHeavyWeightForcerEnabled = isSunMixingEnabled;
     System.setProperty("nativeswing.integration.useDefaultClipping", String.valueOf(isSunMixingEnabled));
     // Create window monitor
