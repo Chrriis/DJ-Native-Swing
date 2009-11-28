@@ -65,7 +65,7 @@ public class NavigationParameters extends JPanel {
         headersMap.put("User-agent", "Native Swing Browser");
         headersMap.put(testHeaderKeyTextField.getText(), testHeaderValueTextField.getText());
         parameters.setHeaders(headersMap);
-        webBrowser.navigate("http://www.httpviewer.net", parameters);
+        webBrowser.navigate("http://www.ericgiguere.com/tools/http-header-viewer.html", parameters);
         webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
         webBrowserPanel.revalidate();
         webBrowserPanel.repaint();
