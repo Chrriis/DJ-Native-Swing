@@ -77,7 +77,7 @@ import com.sun.jna.Native;
  */
 public abstract class NativeComponent extends Canvas {
 
-  private static final boolean IS_PRINTING_FAILED_MESSAGES = Boolean.parseBoolean(NSSystemPropertySWT.NATIVESWING_COMPONENTS_DEBUG_PRINTFAILEDMESSAGES.get());
+  private static final boolean IS_PRINTING_FAILED_MESSAGES = Boolean.parseBoolean(NSSystemPropertySWT.COMPONENTS_DEBUG_PRINTFAILEDMESSAGES.get());
 
   private NativeComponentWrapper nativeComponentWrapper = new NativeComponentWrapper(this) {
 
@@ -838,7 +838,7 @@ public abstract class NativeComponent extends Canvas {
         break;
       }
     }
-    if(!isCatchingException && Boolean.parseBoolean(NSSystemPropertySWT.NATIVESWING_COMPONENTS_SWALLOWRUNTIMEEXCEPTIONS.get())) {
+    if(!isCatchingException && Boolean.parseBoolean(NSSystemPropertySWT.COMPONENTS_SWALLOWRUNTIMEEXCEPTIONS.get())) {
       // When the exception is not because of a disposal, we print the exception to the console.
       e.printStackTrace();
       isCatchingException = true;

@@ -53,7 +53,7 @@ public class MozillaXPCOM {
         return false;
       }
       isInitialized = true;
-      String path = NSSystemPropertySWT.NATIVESWING_WEBBROWSER_XULRUNNER_HOME.get();
+      String path = NSSystemPropertySWT.WEBBROWSER_XULRUNNER_HOME.get();
       if(path == null) {
         path = System.getProperty("org.eclipse.swt.browser.XULRunnerPath");
       }

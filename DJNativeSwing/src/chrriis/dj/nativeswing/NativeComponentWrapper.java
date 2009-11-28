@@ -29,7 +29,7 @@ import chrriis.common.Utils;
  */
 public class NativeComponentWrapper {
 
-  private static final boolean IS_DEBUGGING_OPTIONS = Boolean.parseBoolean(NSSystemProperty.NATIVESWING_COMPONENTS_DEBUG_PRINTOPTIONS.get());
+  private static final boolean IS_DEBUGGING_OPTIONS = Boolean.parseBoolean(NSSystemProperty.COMPONENTS_DEBUG_PRINTOPTIONS.get());
 
   private boolean isRegistered;
 
@@ -170,7 +170,7 @@ public class NativeComponentWrapper {
       }
       System.err.println(sb);
     }
-    String isActive = NSSystemProperty.NATIVESWING_INTEGRATION_ACTIVE.get();
+    String isActive = NSSystemProperty.INTEGRATION_ACTIVE.get();
     if(optionMap.get(NSComponentOptions.DEACTIVATE_NATIVE_INTEGRATION_OPTION_KEY) != null || isActive != null && !Boolean.parseBoolean(isActive)) {
       isRegistered = true;
       return new SimpleNativeComponentHolder(this);

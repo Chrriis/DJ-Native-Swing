@@ -22,21 +22,21 @@ public enum NSSystemProperty {
    * Set the address that is used as the local host address for all the internal
    * communication channels that require a sockets (local web server, etc.).
    */
-  NATIVESWING_LOCALHOSTADDRESS("nativeswing.localhostaddress", Type.READ_WRITE),
+  LOCALHOSTADDRESS("nativeswing.localhostaddress", Type.READ_WRITE),
 
   /**
    * nativeswing.debug.printlocalhostaddressdetection
    * = true/false (default: false)<br/>
    * Set whether to print the steps of local host address detection.
    */
-  NATIVESWING_DEBUG_PRINTLOCALHOSTADDRESSDETECTION("nativeswing.debug.printlocalhostaddressdetection", Type.READ_WRITE),
+  DEBUG_PRINTLOCALHOSTADDRESSDETECTION("nativeswing.debug.printlocalhostaddressdetection", Type.READ_WRITE),
 
   /**
    * nativeswing.debug.printlocalhostaddress
    * = true/false (default: false)<br/>
    * Set whether the address found as the local host address should be printed.
    */
-  NATIVESWING_DEBUG_PRINTLOCALHOSTADDRESS("nativeswing.debug.printlocalhostaddress", Type.READ_WRITE),
+  DEBUG_PRINTLOCALHOSTADDRESS("nativeswing.debug.printlocalhostaddress", Type.READ_WRITE),
 
 
   /**
@@ -45,7 +45,7 @@ public enum NSSystemProperty {
    * Set whether the port that is used by the embedded web server should be
    * printed.
    */
-  NATIVESWING_WEBSERVER_DEBUG_PRINTREQUESTS("nativeswing.webserver.debug.printrequests", Type.READ_WRITE),
+  WEBSERVER_DEBUG_PRINTREQUESTS("nativeswing.webserver.debug.printrequests", Type.READ_WRITE),
 
   /**
    * nativeswing.webserver.debug.printrequests
@@ -53,7 +53,7 @@ public enum NSSystemProperty {
    * Set whether the web server should print the requests it receives, along with
    * the result (200 or 404).
    */
-  NATIVESWING_WEBSERVER_DEBUG_PRINTPORT("nativeswing.webserver.debug.printport", Type.READ_WRITE),
+  WEBSERVER_DEBUG_PRINTPORT("nativeswing.webserver.debug.printport", Type.READ_WRITE),
 
 
   /**
@@ -61,7 +61,7 @@ public enum NSSystemProperty {
    * = true/false (default: false)<br/>
    * Set whether the options used to create a component should be printed.
    */
-  NATIVESWING_COMPONENTS_DEBUG_PRINTSHAPECOMPUTING("nativeswing.components.debug.printshapecomputing", Type.READ_WRITE),
+  COMPONENTS_DEBUG_PRINTSHAPECOMPUTING("nativeswing.components.debug.printshapecomputing", Type.READ_WRITE),
 
   /**
    * nativeswing.components.debug.printshapecomputing
@@ -69,7 +69,7 @@ public enum NSSystemProperty {
    * Set whether the computation of the shape applied to the native component (when
    * the visibility constraint option is active) should be printed.
    */
-  NATIVESWING_COMPONENTS_DEBUG_PRINTOPTIONS("nativeswing.components.debug.printoptions", Type.READ_WRITE),
+  COMPONENTS_DEBUG_PRINTOPTIONS("nativeswing.components.debug.printoptions", Type.READ_WRITE),
 
 
   /**
@@ -77,7 +77,7 @@ public enum NSSystemProperty {
    * = true/false (default: true)<br/>
    * Set whether native integration should be active.
    */
-  NATIVESWING_INTEGRATION_ACTIVE("nativeswing.integration.active", Type.READ_WRITE),
+  INTEGRATION_ACTIVE("nativeswing.integration.active", Type.READ_WRITE),
 
   ;
 

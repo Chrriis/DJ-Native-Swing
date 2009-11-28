@@ -508,7 +508,7 @@ public class WebServer {
       }
     }
 
-    private static final boolean DEBUG_PRINT_REQUESTS = Boolean.parseBoolean(NSSystemProperty.NATIVESWING_WEBSERVER_DEBUG_PRINTREQUESTS.get());
+    private static final boolean DEBUG_PRINT_REQUESTS = Boolean.parseBoolean(NSSystemProperty.WEBSERVER_DEBUG_PRINTREQUESTS.get());
 
     @Override
     public void run() {
@@ -711,7 +711,7 @@ public class WebServer {
     serverSocket = new ServerSocket();
     serverSocket.bind(new InetSocketAddress(InetAddress.getByName(getHostAddress()), port));
     port = serverSocket.getLocalPort();
-    if(Boolean.parseBoolean(NSSystemProperty.NATIVESWING_WEBSERVER_DEBUG_PRINTPORT.get())) {
+    if(Boolean.parseBoolean(NSSystemProperty.WEBSERVER_DEBUG_PRINTPORT.get())) {
       System.err.println("Web Server port: " + port);
     }
     Thread listenerThread = new Thread("WebServer") {

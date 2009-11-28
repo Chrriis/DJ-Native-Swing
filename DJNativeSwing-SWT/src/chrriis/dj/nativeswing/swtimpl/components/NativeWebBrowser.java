@@ -592,8 +592,8 @@ class NativeWebBrowser extends NativeComponent {
 
   public NativeWebBrowser(JWebBrowser webBrowser, boolean isXULRunnerRuntime) {
     this.webBrowser = new WeakReference<JWebBrowser>(webBrowser);
-    this.isXULRunnerRuntime = isXULRunnerRuntime || "xulrunner".equals(NSSystemPropertySWT.NATIVESWING_WEBBROWSER_RUNTIME.get());
-    xulRunnerHome = NSSystemPropertySWT.NATIVESWING_WEBBROWSER_XULRUNNER_HOME.get();
+    this.isXULRunnerRuntime = isXULRunnerRuntime || "xulrunner".equals(NSSystemPropertySWT.WEBBROWSER_RUNTIME.get());
+    xulRunnerHome = NSSystemPropertySWT.WEBBROWSER_XULRUNNER_HOME.get();
   }
 
   private static class CMN_clearSessionCookies extends CommandMessage {

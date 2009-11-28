@@ -93,6 +93,6 @@ are using them get loaded.
 
 --------------------------------------------------------------------------------
 
-* nativeswing.swt.debug.device
+* nativeswing.swt.device.debug
   = true/false (default: false)
   Set whether the SWT Device debugging is active.

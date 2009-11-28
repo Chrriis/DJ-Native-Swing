@@ -333,7 +333,7 @@ public class Utils {
       if(localHostAddress != null) {
         return "".equals(localHostAddress)? null: localHostAddress;
       }
-      String localHostAddress = NSSystemProperty.NATIVESWING_LOCALHOSTADDRESS.get();
+      String localHostAddress = NSSystemProperty.LOCALHOSTADDRESS.get();
       if("_localhost_".equals(localHostAddress)) {
         try {
           localHostAddress = InetAddress.getLocalHost().getHostAddress();
@@ -342,10 +342,10 @@ public class Utils {
         }
       }
       if(localHostAddress == null) {
-        boolean isDebugging = Boolean.parseBoolean(NSSystemProperty.NATIVESWING_DEBUG_PRINTLOCALHOSTADDRESSDETECTION.get());
+        boolean isDebugging = Boolean.parseBoolean(NSSystemProperty.DEBUG_PRINTLOCALHOSTADDRESSDETECTION.get());
         localHostAddress = getLocalHostAddress(0, isDebugging);
       }
-      if(Boolean.parseBoolean(NSSystemProperty.NATIVESWING_DEBUG_PRINTLOCALHOSTADDRESS.get())) {
+      if(Boolean.parseBoolean(NSSystemProperty.DEBUG_PRINTLOCALHOSTADDRESS.get())) {
         System.err.println("Local host address: " + localHostAddress);
       }
       Utils.localHostAddress = localHostAddress == null? "": localHostAddress;

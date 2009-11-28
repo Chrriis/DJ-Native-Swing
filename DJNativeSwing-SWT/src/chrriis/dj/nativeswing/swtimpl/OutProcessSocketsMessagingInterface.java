@@ -85,7 +85,7 @@ abstract class OutProcessSocketsMessagingInterface extends MessagingInterface {
   private static final int OOS_RESET_THRESHOLD;
 
   static {
-    String maxByteCountProperty = NSSystemPropertySWT.NATIVESWING_INTERFACE_STREAMRESETTHRESHOLD.get();
+    String maxByteCountProperty = NSSystemPropertySWT.INTERFACE_STREAMRESETTHRESHOLD.get();
     if(maxByteCountProperty != null) {
       OOS_RESET_THRESHOLD = Integer.parseInt(maxByteCountProperty);
     } else {
