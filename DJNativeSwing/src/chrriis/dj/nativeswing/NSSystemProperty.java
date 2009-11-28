@@ -18,59 +18,59 @@ import java.security.PrivilegedAction;
 public enum NSSystemProperty {
 
   /**
-   * nativeswing.localhostaddress
+   * nativeswing.localhostAddress
    * = &lt;String&gt; or "_localhost_" (default: auto-detect, usually 127.0.0.1)<br/>
    * Set the address that is used as the local host address for all the internal
    * communication channels that require a sockets (local web server, etc.).
    */
-  LOCALHOSTADDRESS("nativeswing.localhostaddress", Type.READ_WRITE),
+  LOCALHOSTADDRESS("nativeswing.localhostAddress", Type.READ_WRITE),
 
   /**
-   * nativeswing.localhostaddress.debug.printdetection
+   * nativeswing.localhostAddress.debug.printDetection
    * = true/false (default: false)<br/>
    * Set whether to print the steps of local host address detection.
    */
-  LOCALHOSTADDRESS_DEBUG_PRINTDETECTION("nativeswing.localhostaddress.debug.printdetection", Type.READ_WRITE),
+  LOCALHOSTADDRESS_DEBUG_PRINTDETECTION("nativeswing.localhostAddress.debug.printDetection", Type.READ_WRITE),
 
   /**
-   * nativeswing.localhostaddress.debug.print
+   * nativeswing.localhostaAddress.debug.print
    * = true/false (default: false)<br/>
    * Set whether the address found as the local host address should be printed.
    */
-  LOCALHOSTADDRESS_DEBUG_PRINT("nativeswing.localhostaddress.debug.print", Type.READ_WRITE),
+  LOCALHOSTADDRESS_DEBUG_PRINT("nativeswing.localhostAddress.debug.print", Type.READ_WRITE),
 
 
   /**
-   * nativeswing.webserver.debug.printport
+   * nativeswing.webserver.debug.printPort
    * = true/false (default: false)<br/>
    * Set whether the port that is used by the embedded web server should be
    * printed.
    */
-  WEBSERVER_DEBUG_PRINTREQUESTS("nativeswing.webserver.debug.printrequests", Type.READ_WRITE),
+  WEBSERVER_DEBUG_PRINTPORT("nativeswing.webserver.debug.printPort", Type.READ_WRITE),
 
   /**
-   * nativeswing.webserver.debug.printrequests
+   * nativeswing.webserver.debug.printRequests
    * = true/false (default: false)<br/>
    * Set whether the web server should print the requests it receives, along with
    * the result (200 or 404).
    */
-  WEBSERVER_DEBUG_PRINTPORT("nativeswing.webserver.debug.printport", Type.READ_WRITE),
+  WEBSERVER_DEBUG_PRINTREQUESTS("nativeswing.webserver.debug.printRequests", Type.READ_WRITE),
 
 
   /**
-   * nativeswing.components.debug.printoptions
+   * nativeswing.components.debug.printOptions
    * = true/false (default: false)<br/>
    * Set whether the options used to create a component should be printed.
    */
-  COMPONENTS_DEBUG_PRINTSHAPECOMPUTING("nativeswing.components.debug.printshapecomputing", Type.READ_WRITE),
+  COMPONENTS_DEBUG_PRINTOPTIONS("nativeswing.components.debug.printOptions", Type.READ_WRITE),
 
   /**
-   * nativeswing.components.debug.printshapecomputing
+   * nativeswing.components.debug.printShapeComputing
    * = true/false (default: false)<br/>
    * Set whether the computation of the shape applied to the native component (when
    * the visibility constraint option is active) should be printed.
    */
-  COMPONENTS_DEBUG_PRINTOPTIONS("nativeswing.components.debug.printoptions", Type.READ_WRITE),
+  COMPONENTS_DEBUG_PRINTSHAPECOMPUTING("nativeswing.components.debug.printShapeComputing", Type.READ_WRITE),
 
 
   /**

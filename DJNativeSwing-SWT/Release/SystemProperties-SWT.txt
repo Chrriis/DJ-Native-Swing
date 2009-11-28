@@ -10,30 +10,30 @@ are using them get loaded.
   = <integer> (default: -1)
   Force the port to use to communicate with the spawned VM.
 
-* nativeswing.interface.streamresetthreshold
+* nativeswing.interface.streamResetThreshold
   = <integer> (default: 500000)
   Set the number of bytes that need to be exchanged to trigger a reset of the
   Object communication stream.
 
-* nativeswing.interface.syncmessages
+* nativeswing.interface.syncMessages
   = true/false (default: false)
   Set whether all asynchronous messages should be sent synchronously.
 
-* nativeswing.interface.debug.printmessages
+* nativeswing.interface.debug.printMessages
   = true/false (default: false)
   Set whether to print the messages that are exchanged.
 
-* nativeswing.interface.inprocess
+* nativeswing.interface.inProcess
   = true/false (default: platform-dependant)
   Set whether the interface should be in-process or out-process. Platforms which
   use out-process may be switched to in-process, but this may affect stability.
   Change this setting only when you need to debug sequences in a single VM.
 
-* nativeswing.interface.outprocess.communication
+* nativeswing.interface.outProcess.communication
   = sockets/processio (default: sockets)
   Set whether the communication interface should use sockets or the process IO.
 
-* nativeswing.interface.inprocess.printnonserializablemessages
+* nativeswing.interface.inProcess.printNonSerializableMessages
   = true/false (default: false)
   When in-process, set whether messages should be artificially serialized to
   check whether they would be compatible with the out-process mode.
@@ -45,35 +45,35 @@ are using them get loaded.
   Set whether the peer VM should be created. Setting it to false and forcing the
   port allows to connect to a separately launched peer VM.
 
-* nativeswing.peervm.keepalive
+* nativeswing.peervm.keepAlive
   = true/false (default: false)
   Set whether the peer VM should die after a timeout. This is useful when
   launching the peer VM separately.
   
-* nativeswing.peervm.forceproxyclassloader
+* nativeswing.peervm.forceProxyClassLoader
   = true/false (default: false)
   Force the use of the proxy class loader. This specific class loader is
   automatically used in the peer VM when some resources cannot be located when
   spawning the VM.
 
-* nativeswing.peervm.debug.printstartmessage
+* nativeswing.peervm.debug.printStartMessage
   = true/false (default: false)
   Set whether a message should be printed when the peer VM is launched, in order
   to check that the peer VM could be created.
  
-* nativeswing.peervm.debug.printcommandline
+* nativeswing.peervm.debug.printCommandLine
   = true/false (default: false)
   Set whether the command line that is used to spawn the peer VM should be
   printed.
 
 --------------------------------------------------------------------------------
 
-* nativeswing.components.debug.printfailedmessages
+* nativeswing.components.debug.printFailedMessages
   = true/false (default: false)
   Set whether the messages that did not reach the native component should be
   printed.
 
-* nativeswing.components.swallowruntimeexceptions
+* nativeswing.components.swallowRuntimeExceptions
   = true/false (default: false)
   Set whether synchronous component methods should swallow runtime
   exceptions and return dummy results. This is a sort of paranoid mode since

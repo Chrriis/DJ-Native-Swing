@@ -5,38 +5,38 @@ are using them get loaded.
 
 --------------------------------------------------------------------------------
 
-* nativeswing.localhostaddress
+* nativeswing.localhostAddress
   = <String> or "_localhost_" (default: auto-detect, usually 127.0.0.1)
   Set the address that is used as the local host address for all the internal
   communication channels that require a socket (local web server, etc.).
 
-* nativeswing.localhostaddress.debug.printdetection
+* nativeswing.localhostAddress.debug.printDetection
   = true/false (default: false)
   Set whether to print the steps of local host address detection.
 
-* nativeswing.localhostaddress.debug.print
+* nativeswing.localhostAddress.debug.print
   = true/false (default: false)
   Set whether the address found as the local host address should be printed.
   
 --------------------------------------------------------------------------------
 
-* nativeswing.webserver.debug.printport
+* nativeswing.webserver.debug.printPort
   = true/false (default: false)
   Set whether the port that is used by the embedded web server should be
   printed.
   
-* nativeswing.webserver.debug.printrequests
+* nativeswing.webserver.debug.printRequests
   = true/false (default: false)
   Set whether the web server should print the requests it receives, along with
   the result (200 or 404).
 
 --------------------------------------------------------------------------------
 
-* nativeswing.components.debug.printoptions
+* nativeswing.components.debug.printOptions
   = true/false (default: false)
   Set whether the options used to create a component should be printed.
 
-* nativeswing.components.debug.printshapecomputing
+* nativeswing.components.debug.printShapeComputing
   = true/false (default: false)
   Set whether the computation of the shape applied to the native component (when
   the visibility constraint option is active) should be printed.

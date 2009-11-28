@@ -22,7 +22,7 @@ public enum NSSystemPropertySWT {
   /* ----------------- NativeSwing properties ----------------- */
 
   /**
-   * nativeswing.localhostaddress
+   * nativeswing.localhostAddress
    * = &lt;String&gt; or "_localhost_" (default: auto-detect, usually 127.0.0.1)<br/>
    * Set the address that is used as the local host address for all the internal
    * communication channels that require a socket (local web server, etc.).
@@ -30,14 +30,14 @@ public enum NSSystemPropertySWT {
   LOCALHOSTADDRESS(NSSystemProperty.LOCALHOSTADDRESS),
 
   /**
-   * nativeswing.localhostaddress.debug.printdetection
+   * nativeswing.localhostAddress.debug.printDetection
    * = true/false (default: false)<br/>
    * Set whether to print the steps of local host address detection.
    */
   LOCALHOSTADDRESS_DEBUG_PRINTDETECTION(NSSystemProperty.LOCALHOSTADDRESS_DEBUG_PRINTDETECTION),
 
   /**
-   * nativeswing.localhostaddress.debug.print
+   * nativeswing.localhostAddress.debug.print
    * = true/false (default: false)<br/>
    * Set whether the address found as the local host address should be printed.
    */
@@ -45,36 +45,36 @@ public enum NSSystemPropertySWT {
 
 
   /**
-   * nativeswing.webserver.debug.printport
+   * nativeswing.webserver.debug.printPort
    * = true/false (default: false)<br/>
    * Set whether the port that is used by the embedded web server should be
    * printed.
    */
-  WEBSERVER_DEBUG_PRINTREQUESTS(NSSystemProperty.WEBSERVER_DEBUG_PRINTREQUESTS),
+  WEBSERVER_DEBUG_PRINTPORT(NSSystemProperty.WEBSERVER_DEBUG_PRINTPORT),
 
   /**
-   * nativeswing.webserver.debug.printrequests
+   * nativeswing.webserver.debug.printRequests
    * = true/false (default: false)<br/>
    * Set whether the web server should print the requests it receives, along with
    * the result (200 or 404).
    */
-  WEBSERVER_DEBUG_PRINTPORT(NSSystemProperty.WEBSERVER_DEBUG_PRINTPORT),
+  WEBSERVER_DEBUG_PRINTREQUESTS(NSSystemProperty.WEBSERVER_DEBUG_PRINTREQUESTS),
 
 
   /**
-   * nativeswing.components.debug.printoptions
+   * nativeswing.components.debug.printOptions
    * = true/false (default: false)<br/>
    * Set whether the options used to create a component should be printed.
    */
-  COMPONENTS_DEBUG_PRINTSHAPECOMPUTING(NSSystemProperty.COMPONENTS_DEBUG_PRINTSHAPECOMPUTING),
+  COMPONENTS_DEBUG_PRINTOPTIONS(NSSystemProperty.COMPONENTS_DEBUG_PRINTOPTIONS),
 
   /**
-   * nativeswing.components.debug.printshapecomputing
+   * nativeswing.components.debug.printShapeComputing
    * = true/false (default: false)<br/>
    * Set whether the computation of the shape applied to the native component (when
    * the visibility constraint option is active) should be printed.
    */
-  COMPONENTS_DEBUG_PRINTOPTIONS(NSSystemProperty.COMPONENTS_DEBUG_PRINTOPTIONS),
+  COMPONENTS_DEBUG_PRINTSHAPECOMPUTING(NSSystemProperty.COMPONENTS_DEBUG_PRINTSHAPECOMPUTING),
 
 
   /**
@@ -95,50 +95,50 @@ public enum NSSystemPropertySWT {
   INTERFACE_PORT("nativeswing.interface.port", Type.READ_WRITE),
 
   /**
-   * nativeswing.interface.streamresetthreshold
+   * nativeswing.interface.streamResetThreshold
    * = &lt;integer&gt; (default: 500000)<br/>
    * Set the number of bytes that need to be exchanged to trigger a reset of the
    * Object communication stream.
    */
-  INTERFACE_STREAMRESETTHRESHOLD("nativeswing.interface.streamresetthreshold", Type.READ_WRITE),
+  INTERFACE_STREAMRESETTHRESHOLD("nativeswing.interface.streamResetThreshold", Type.READ_WRITE),
 
   /**
-   * nativeswing.interface.syncmessages
+   * nativeswing.interface.syncMessages
    * = true/false (default: false)<br/>
    * Set whether all asynchronous messages should be sent synchronously.
    */
-  INTERFACE_SYNCMESSAGES("nativeswing.interface.syncmessages", Type.READ_WRITE),
+  INTERFACE_SYNCMESSAGES("nativeswing.interface.syncMessages", Type.READ_WRITE),
 
   /**
-   * nativeswing.interface.debug.printmessages
+   * nativeswing.interface.debug.printMessages
    * = true/false (default: false)<br/>
    * Set whether to print the messages that are exchanged.
    */
-  INTERFACE_DEBUG_PRINTMESSAGES("nativeswing.interface.debug.printmessages", Type.READ_WRITE),
+  INTERFACE_DEBUG_PRINTMESSAGES("nativeswing.interface.debug.printMessages", Type.READ_WRITE),
 
   /**
-   * nativeswing.interface.inprocess
+   * nativeswing.interface.inProcess
    * = true/false (default: platform-dependant)<br/>
    * Set whether the interface should be in-process or out-process. Platforms which
    * use out-process may be switched to in-process, but this may affect stability.
    * Change this setting only when you need to debug sequences in a single VM.
    */
-  INTERFACE_INPROCESS("nativeswing.interface.inprocess", Type.READ_WRITE),
+  INTERFACE_INPROCESS("nativeswing.interface.inProcess", Type.READ_WRITE),
 
   /**
-   * nativeswing.interface.outprocess.communication
+   * nativeswing.interface.outProcess.communication
    * = sockets/processio (default: sockets)<br/>
    * Set whether the communication interface should use sockets or the process IO.
    */
-  INTERFACE_OUTPROCESS_COMMUNICATION("nativeswing.interface.outprocess.communication", Type.READ_WRITE),
+  INTERFACE_OUTPROCESS_COMMUNICATION("nativeswing.interface.outProcess.communication", Type.READ_WRITE),
 
   /**
-   * nativeswing.interface.inprocess.printnonserializablemessages
+   * nativeswing.interface.inProcess.printNonSerializableMessages
    * = true/false (default: false)<br/>
    * When in-process, set whether messages should be artificially serialized to
    * check whether they would be compatible with the out-process mode.
    */
-  INTERFACE_INPROCESS_PRINTNONSERIALIZABLEMESSAGES("nativeswing.interface.inprocess.printnonserializablemessages", Type.READ_WRITE),
+  INTERFACE_INPROCESS_PRINTNONSERIALIZABLEMESSAGES("nativeswing.interface.inProcess.printNonSerializableMessages", Type.READ_WRITE),
 
 
   /**
@@ -150,56 +150,56 @@ public enum NSSystemPropertySWT {
   PEERVM_CREATE("nativeswing.peervm.create", Type.READ_WRITE),
 
   /**
-   * nativeswing.peervm.keepalive
+   * nativeswing.peervm.keepAlive
    * = true/false (default: false)<br/>
    * Set whether the peer VM should die after a timeout. This is useful when
    * launching the peer VM separately.
    */
-  PEERVM_KEEPALIVE("nativeswing.peervm.keepalive", Type.READ_WRITE),
+  PEERVM_KEEPALIVE("nativeswing.peervm.keepAlive", Type.READ_WRITE),
 
   /**
-   * nativeswing.peervm.forceproxyclassloader
+   * nativeswing.peervm.forceProxyClassLoader
    * = true/false (default: false)<br/>
    * Force the use of the proxy class loader. This specific class loader is
    * automatically used in the peer VM when some resources cannot be located when
    * spawning the VM.
    */
-  PEERVM_FORCEPROXYCLASSLOADER("nativeswing.peervm.forceproxyclassloader", Type.READ_WRITE),
+  PEERVM_FORCEPROXYCLASSLOADER("nativeswing.peervm.forceProxyClassLoader", Type.READ_WRITE),
 
   /**
-   * nativeswing.peervm.debug.printstartmessage
+   * nativeswing.peervm.debug.printStartMessage
    * = true/false (default: false)<br/>
    * Set whether a message should be printed when the peer VM is launched, in order
    * to check that the peer VM could be created.
    */
-  PEERVM_DEBUG_PRINTSTARTMESSAGE("nativeswing.peervm.debug.printstartmessage", Type.READ_WRITE),
+  PEERVM_DEBUG_PRINTSTARTMESSAGE("nativeswing.peervm.debug.printStartMessage", Type.READ_WRITE),
 
   /**
-   * nativeswing.peervm.debug.printcommandline
+   * nativeswing.peervm.debug.printCommandLine
    * = true/false (default: false)<br/>
    * Set whether the command line that is used to spawn the peer VM should be
    * printed.
    */
-  PEERVM_DEBUG_PRINTCOMMANDLINE("nativeswing.peervm.debug.printcommandline", Type.READ_WRITE),
+  PEERVM_DEBUG_PRINTCOMMANDLINE("nativeswing.peervm.debug.printCommandLine", Type.READ_WRITE),
 
 
   /**
-   * nativeswing.components.debug.printfailedmessages
+   * nativeswing.components.debug.printFailedMessages
    * = true/false (default: false)<br/>
    * Set whether the messages that did not reach the native component should be
    * printed.
    */
-  COMPONENTS_DEBUG_PRINTFAILEDMESSAGES("nativeswing.components.debug.printfailedmessages", Type.READ_WRITE),
+  COMPONENTS_DEBUG_PRINTFAILEDMESSAGES("nativeswing.components.debug.printFailedMessages", Type.READ_WRITE),
 
   /**
-   * nativeswing.components.swallowruntimeexceptions
+   * nativeswing.components.swallowRuntimeExceptions
    * = true/false (default: false)<br/>
    * Set whether synchronous component methods should swallow runtime
    * exceptions and return dummy results. This is a sort of paranoid mode since
    * such exceptions are not supposed to happen. Moreover, there is no guarantee
    * that user code can recover from all dummy results.
    */
-  COMPONENTS_SWALLOWRUNTIMEEXCEPTIONS("nativeswing.components.swallowruntimeexceptions", Type.READ_WRITE),
+  COMPONENTS_SWALLOWRUNTIMEEXCEPTIONS("nativeswing.components.swallowRuntimeExceptions", Type.READ_WRITE),
 
 
   /**
