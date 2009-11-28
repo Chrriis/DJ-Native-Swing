@@ -25,7 +25,7 @@ import chrriis.common.ObjectRegistry;
  */
 abstract class InProcessMessagingInterface extends MessagingInterface {
 
-  private static final boolean IS_PRINTING_NON_SERIALIZABLE_MESSAGES = Boolean.parseBoolean(System.getProperty("nativeswing.interface.inprocess.printnonserializablemessages"));
+  private static final boolean IS_PRINTING_NON_SERIALIZABLE_MESSAGES = Boolean.parseBoolean(NSSystemPropertySWT.NATIVESWING_INTERFACE_INPROCESS_PRINTNONSERIALIZABLEMESSAGES.get());
 
   public InProcessMessagingInterface(boolean isNativeSide) {
     super(isNativeSide);

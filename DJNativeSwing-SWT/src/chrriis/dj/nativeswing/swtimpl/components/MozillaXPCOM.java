@@ -29,6 +29,7 @@ import org.mozilla.xpcom.XPCOMInitializationException;
 
 import chrriis.dj.nativeswing.swtimpl.CommandMessage;
 import chrriis.dj.nativeswing.swtimpl.ControlCommandMessage;
+import chrriis.dj.nativeswing.swtimpl.NSSystemPropertySWT;
 
 /**
  * This class is meant to allow accessing the JavaXPCOM nsIWebBrowser interface, and other Mozilla XPCOM interfaces.
@@ -52,7 +53,7 @@ public class MozillaXPCOM {
         return false;
       }
       isInitialized = true;
-      String path = System.getProperty("nativeswing.webbrowser.xulrunner.home");
+      String path = NSSystemPropertySWT.NATIVESWING_WEBBROWSER_XULRUNNER_HOME.get();
       if(path == null) {
         path = System.getProperty("org.eclipse.swt.browser.XULRunnerPath");
       }

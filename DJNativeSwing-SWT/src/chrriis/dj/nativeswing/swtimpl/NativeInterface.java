@@ -59,7 +59,7 @@ import chrriis.dj.nativeswing.swtimpl.OutProcessSocketsMessagingInterface.SwingO
  */
 public class NativeInterface {
 
-  private static final boolean IS_SYNCING_MESSAGES = Boolean.parseBoolean(System.getProperty("nativeswing.interface.syncmessages"));
+  private static final boolean IS_SYNCING_MESSAGES = Boolean.parseBoolean(NSSystemPropertySWT.NATIVESWING_INTERFACE_SYNCMESSAGES.get());
 
   static boolean isAlive() {
     synchronized(OPEN_STATE_LOCK) {
@@ -203,7 +203,7 @@ public class NativeInterface {
           }
         }
       }, AWTEvent.KEY_EVENT_MASK);
-      String inProcessProperty = System.getProperty("nativeswing.interface.inprocess");
+      String inProcessProperty = NSSystemPropertySWT.NATIVESWING_INTERFACE_INPROCESS.get();
       if(inProcessProperty != null) {
         isInProcess = Boolean.parseBoolean(inProcessProperty);
       } else {
@@ -421,7 +421,7 @@ public class NativeInterface {
     }
 
     private static void initialize() {
-      Device.DEBUG = Boolean.parseBoolean(System.getProperty("nativeswing.swt.debug.device"));
+      Device.DEBUG = Boolean.parseBoolean(NSSystemPropertySWT.NATIVESWING_SWT_DEBUG_DEVICE.get());
       display = Display.getCurrent();
       if(display == null && Boolean.parseBoolean(System.getProperty("nativeswing.interface.inprocess.useExternalSWTDisplay"))) {
         display = Display.getDefault();
@@ -575,7 +575,7 @@ public class NativeInterface {
       if(nativeClassPathReferenceResources != null) {
         referenceList.addAll(Arrays.asList(nativeClassPathReferenceResources));
       }
-      boolean isProxyClassLoaderUsed = Boolean.parseBoolean(System.getProperty("nativeswing.peervm.forceproxyclassloader"));
+      boolean isProxyClassLoaderUsed = Boolean.parseBoolean(NSSystemPropertySWT.NATIVESWING_PEERVM_FORCEPROXYCLASSLOADER.get());
       if(!isProxyClassLoaderUsed) {
         for(Object o: referenceList) {
           File clazzClassPath;
@@ -641,7 +641,6 @@ public class NativeInterface {
       List<String> argList = new ArrayList<String>();
       // The first argument will be the binary
       argList.add(null);
-      argList.add("-Dnativeswing.peervm.pid=" + pid);
 //      argList.add("-Dvisualvm.display.name=NativeSwingPeer#" + pid);
       String[] peerVMParams = nativeInterfaceConfiguration.getPeerVMParams();
       if(peerVMParams != null) {
@@ -670,6 +669,7 @@ public class NativeInterface {
         argList.add(WebServer.getDefaultWebServer().getClassPathResourceURL("", ""));
       }
       argList.add(NativeInterface.class.getName());
+      argList.add(String.valueOf(pid));
       argList.add(String.valueOf(port));
       // Try compatibility with Java applets on update 10.
       String javaVersion = SystemProperty.JAVA_VERSION.get();
@@ -708,7 +708,7 @@ public class NativeInterface {
             argListX.add("-Xbootclasspath/a:" + sbX);
           }
           argListX.addAll(argList.subList(1, argList.size()));
-          if(Boolean.parseBoolean(System.getProperty("nativeswing.peervm.debug.printcommandline"))) {
+          if(Boolean.parseBoolean(NSSystemPropertySWT.NATIVESWING_PEERVM_DEBUG_PRINTCOMMANDLINE.get())) {
             System.err.println("Native Command: " + Arrays.toString(argListX.toArray()));
           }
           try {
@@ -721,7 +721,7 @@ public class NativeInterface {
         // Try these arguments with the various candidate binaries.
         for(String candidateBinary: candidateBinaries) {
           argList.set(0, candidateBinary);
-          if(Boolean.parseBoolean(System.getProperty("nativeswing.peervm.debug.printcommandline"))) {
+          if(Boolean.parseBoolean(NSSystemPropertySWT.NATIVESWING_PEERVM_DEBUG_PRINTCOMMANDLINE.get())) {
             System.err.println("Native Command: " + Arrays.toString(argList.toArray()));
           }
           try {
@@ -737,7 +737,7 @@ public class NativeInterface {
       return p;
     }
 
-    private static final boolean IS_PROCESS_IO_CHANNEL_MODE = "processio".equals(System.getProperty("nativeswing.interface.outprocess.communication"));
+    private static final boolean IS_PROCESS_IO_CHANNEL_MODE = "processio".equals(NSSystemPropertySWT.NATIVESWING_INTERFACE_OUTPROCESS_COMMUNICATION.get());
 
     private static volatile int pid;
 
@@ -746,13 +746,13 @@ public class NativeInterface {
       if(localHostAddress == null) {
         throw new IllegalStateException("Failed to find a suitable local host address to communicate with a spawned VM!");
       }
-      boolean isCreatingProcess = Boolean.parseBoolean(System.getProperty("nativeswing.peervm.create", "true"));
+      boolean isCreatingProcess = Boolean.parseBoolean(NSSystemPropertySWT.NATIVESWING_PEERVM_CREATE.get("true"));
       int port;
       boolean isProcessIOChannelMode = IS_PROCESS_IO_CHANNEL_MODE && isCreatingProcess;
       if(isProcessIOChannelMode) {
         port = 0;
       } else {
-        port = Integer.parseInt(System.getProperty("nativeswing.interface.port", "-1"));
+        port = Integer.parseInt(NSSystemPropertySWT.NATIVESWING_INTERFACE_PORT.get("-1"));
         if(port <= 0) {
           ServerSocket serverSocket;
           try {
@@ -884,14 +884,14 @@ public class NativeInterface {
     }
 
     static void runNativeSide(String[] args) throws IOException {
-      final int pid = Integer.parseInt(System.getProperty("nativeswing.peervm.pid"));
-      if(Boolean.parseBoolean(System.getProperty("nativeswing.peervm.debug.printstartmessage"))) {
+      final int pid = Integer.parseInt(args[0]);
+      if(Boolean.parseBoolean(NSSystemPropertySWT.NATIVESWING_PEERVM_DEBUG_PRINTSTARTMESSAGE.get())) {
         System.err.println("Starting peer VM #" + pid);
       }
       synchronized(OPEN_STATE_LOCK) {
         isOpen = true;
       }
-      int port = Integer.parseInt(args[0]);
+      int port = Integer.parseInt(args[1]);
       boolean isProcessIOChannelMode = port <= 0;
       Socket socket = null;
       if(!isProcessIOChannelMode) {
@@ -927,7 +927,7 @@ public class NativeInterface {
           throw exception;
         }
         final ServerSocket serverSocket_ = serverSocket;
-        if(!Boolean.parseBoolean(System.getProperty("nativeswing.peervm.keepalive"))) {
+        if(!Boolean.parseBoolean(NSSystemPropertySWT.NATIVESWING_PEERVM_KEEPALIVE.get())) {
           Thread shutdownThread = new Thread("NativeSwing Shutdown") {
             @Override
             public void run() {
@@ -983,7 +983,7 @@ public class NativeInterface {
 //      } catch(Exception e) {
 //        e.printStackTrace();
 //      }
-      Device.DEBUG = Boolean.parseBoolean(System.getProperty("nativeswing.swt.debug.device"));
+      Device.DEBUG = Boolean.parseBoolean(NSSystemPropertySWT.NATIVESWING_SWT_DEBUG_DEVICE.get());
       DeviceData data = new DeviceData();
       data.debug = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.debug"));
       data.tracking = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.tracking"));

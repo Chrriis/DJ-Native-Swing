@@ -12,6 +12,7 @@ Licence terms: LGPL (see licence.txt)
 - Relative local files can be loaded by the web server.
 - Fixed a bug in back buffer overlay calculation.
 - Local address resolution is improved.
+- Exposed System properties are in enum classes.
 
 
 * Version 0.9.8 (March 24, 2009):

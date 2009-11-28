@@ -46,7 +46,7 @@ import com.sun.jna.examples.WindowUtils;
  */
 class NativeComponentProxyPanel extends NativeComponentProxy {
 
-  private static final boolean IS_DEBUGGING_SHAPE = Boolean.parseBoolean(System.getProperty("nativeswing.components.debug.printshapecomputing"));
+  private static final boolean IS_DEBUGGING_SHAPE = Boolean.parseBoolean(NSSystemProperty.NATIVESWING_COMPONENTS_DEBUG_PRINTSHAPECOMPUTING.get());
 
   private boolean isProxiedFiliation;
 

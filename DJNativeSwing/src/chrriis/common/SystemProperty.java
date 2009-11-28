@@ -89,7 +89,7 @@ public enum SystemProperty {
       // make sure dir exists
       try {
         new File(value).mkdirs();
-      } catch (final SecurityException e) {
+      } catch (SecurityException e) {
         //log.warn("not allowed to create temporary directory: " + value, e);
       }
       return value;
@@ -193,7 +193,9 @@ public enum SystemProperty {
   /**
    * Mac only: known values: local|*.local|169.254/16|*.169.254/16
    */
-  SOCKS_NON_PROXY_HOSTS("socksNonProxyHosts");
+  SOCKS_NON_PROXY_HOSTS("socksNonProxyHosts"),
+
+  ;
 
   //private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
   //    .getLogger(SystemProperty.class);
@@ -208,11 +210,11 @@ public enum SystemProperty {
   private final String _name;
   private final boolean _readOnly;
 
-  private SystemProperty(final String name) {
+  private SystemProperty(String name) {
     this(name, Type.READ_ONLY);
   }
 
-  private SystemProperty(String name, final Type type) {
+  private SystemProperty(String name, Type type) {
     if (name == null) {
       throw new NullPointerException("name");
     }
@@ -228,13 +230,22 @@ public enum SystemProperty {
   /**
    * @see System#getProperty(String)
    * @see AccessController#doPrivileged(PrivilegedAction)
-   * @return the string value of the system property, or <code>null</code> if
-   *         there is no property with that key.
+   * @return the string value of the system property, or <code>null</code> if there is no property with that key.
    */
   public String get() {
+    return get(null);
+  }
+
+  /**
+   * @param defaultValue the default value to return if the property is not defined.
+   * @see System#getProperty(String)
+   * @see AccessController#doPrivileged(PrivilegedAction)
+   * @return the string value of the system property, or the default value if there is no property with that key.
+   */
+  public String get(final String defaultValue) {
     return AccessController.doPrivileged(new PrivilegedAction<String>() {
       public String run() {
-        return System.getProperty(getName());
+        return System.getProperty(getName(), defaultValue);
       }
     });
   }
@@ -293,7 +304,7 @@ public enum SystemProperty {
    *         "OS_NAME: os.name=Linux (read-only)")
    */
   public String toDebugString() {
-    final StringBuilder buf = new StringBuilder();
+    StringBuilder buf = new StringBuilder();
     buf.append(name()).append(": ");
     buf.append(getName()).append("=");
     buf.append(get());
@@ -312,13 +323,13 @@ public enum SystemProperty {
    * @param args
    *            arguments are ignored
    */
-  public static void main(final String[] args) {
-    final TreeMap<Object, Object> props = new TreeMap<Object, Object>();
-    final TreeSet<SystemProperty> unknown = new TreeSet<SystemProperty>();
+  public static void main(String[] args) {
+    TreeMap<Object, Object> props = new TreeMap<Object, Object>();
+    TreeSet<SystemProperty> unknown = new TreeSet<SystemProperty>();
 
     props.putAll(System.getProperties());
 
-    for (final SystemProperty p : SystemProperty.values()) {
+    for (SystemProperty p : SystemProperty.values()) {
       System.out.println(p.toDebugString());
       if (!props.containsKey(p.getName())) {
         unknown.add(p);
@@ -331,19 +342,19 @@ public enum SystemProperty {
 
     if (unknown.size() > 0) {
       System.out.println("\n\n### UNKNOWN");
-      for (final SystemProperty p : unknown) {
+      for (SystemProperty p : unknown) {
         System.out.println(p.toDebugString());
       }
     }
 
     if (props.size() > 0) {
       System.out.println("\n\n### MISSING");
-      for (final Map.Entry<Object, Object> e : props.entrySet()) {
+      for (Map.Entry<Object, Object> e : props.entrySet()) {
         System.out.println(e);
       }
 
       System.out.println("\n\n### PLEASE POST THIS AT http://j.mp/props0 or http://j.mp/props1");
-      for (final Map.Entry<Object, Object> e : props.entrySet()) {
+      for (Map.Entry<Object, Object> e : props.entrySet()) {
         System.out
             .println(String
                 .format("\t/**\n\t * %s only: known values: %s\n\t */\n\t%s(\"%s\"),", OS_NAME, e
@@ -358,8 +369,8 @@ public enum SystemProperty {
    * @param p
    *            the SytemProperty to check
    */
-  private static void checkNaming(final SystemProperty p) {
-    final String expected = toEnumName(p.getName());
+  private static void checkNaming(SystemProperty p) {
+    String expected = toEnumName(p.getName());
 
     if (!p.name().equals(expected)) {
       System.err.println("name missmatch: " + p.toDebugString() + " (expected " + expected
@@ -375,9 +386,9 @@ public enum SystemProperty {
    *
    * @return the resulting enum name (e.g. "OS_NAME")
    */
-  public static String toEnumName(final String property) {
-    final StringBuilder buf = new StringBuilder();
-    for (final char c : property.toCharArray()) {
+  private static String toEnumName(String property) {
+    StringBuilder buf = new StringBuilder();
+    for (char c : property.toCharArray()) {
       if (Character.isUpperCase(c)) {
         buf.append('_').append(c);
       } else if (c == '.') {

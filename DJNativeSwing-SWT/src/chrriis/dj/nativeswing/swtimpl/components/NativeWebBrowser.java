@@ -53,6 +53,7 @@ import org.eclipse.swt.widgets.Shell;
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.swtimpl.CommandMessage;
 import chrriis.dj.nativeswing.swtimpl.ControlCommandMessage;
+import chrriis.dj.nativeswing.swtimpl.NSSystemPropertySWT;
 import chrriis.dj.nativeswing.swtimpl.NativeComponent;
 
 /**
@@ -591,8 +592,8 @@ class NativeWebBrowser extends NativeComponent {
 
   public NativeWebBrowser(JWebBrowser webBrowser, boolean isXULRunnerRuntime) {
     this.webBrowser = new WeakReference<JWebBrowser>(webBrowser);
-    this.isXULRunnerRuntime = isXULRunnerRuntime || "xulrunner".equals(System.getProperty("nativeswing.webbrowser.runtime"));
-    xulRunnerHome = System.getProperty("nativeswing.webbrowser.xulrunner.home");
+    this.isXULRunnerRuntime = isXULRunnerRuntime || "xulrunner".equals(NSSystemPropertySWT.NATIVESWING_WEBBROWSER_RUNTIME.get());
+    xulRunnerHome = NSSystemPropertySWT.NATIVESWING_WEBBROWSER_XULRUNNER_HOME.get();
   }
 
   private static class CMN_clearSessionCookies extends CommandMessage {

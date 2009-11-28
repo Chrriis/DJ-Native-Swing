@@ -26,7 +26,7 @@ import chrriis.common.ObjectRegistry;
  */
 abstract class MessagingInterface {
 
-  protected static final boolean IS_DEBUGGING_MESSAGES = Boolean.parseBoolean(System.getProperty("nativeswing.interface.debug.printmessages"));
+  protected static final boolean IS_DEBUGGING_MESSAGES = Boolean.parseBoolean(NSSystemPropertySWT.NATIVESWING_INTERFACE_DEBUG_PRINTMESSAGES.get());
 
   public MessagingInterface(boolean isNativeSide) {
     this.isNativeSide = isNativeSide;
