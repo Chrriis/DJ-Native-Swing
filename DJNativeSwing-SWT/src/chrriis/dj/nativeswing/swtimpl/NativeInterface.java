@@ -649,10 +649,10 @@ public class NativeInterface {
         }
       }
       String[] flags = new String[] {
-          "nativeswing.interface.syncmessages",
-          "nativeswing.interface.debug.printmessages",
-          "nativeswing.peervm.debug.printstartmessage",
-          "nativeswing.swt.debug.device",
+          NSSystemPropertySWT.INTERFACE_SYNCMESSAGES.getName(),
+          NSSystemPropertySWT.INTERFACE_DEBUG_PRINTMESSAGES.getName(),
+          NSSystemPropertySWT.PEERVM_DEBUG_PRINTSTARTMESSAGE.getName(),
+          NSSystemPropertySWT.SWT_DEVICE_DEBUG.getName(),
           "nativeswing.swt.devicedata.debug",
           "nativeswing.swt.devicedata.tracking",
       };
