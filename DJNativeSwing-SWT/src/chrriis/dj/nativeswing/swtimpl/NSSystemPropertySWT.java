@@ -24,7 +24,7 @@ public enum NSSystemPropertySWT {
    * nativeswing.localhostaddress
    * = &lt;String&gt; or "_localhost_" (default: auto-detect, usually 127.0.0.1)<br/>
    * Set the address that is used as the local host address for all the internal
-   * communication channels that require a sockets (local web server, etc.).
+   * communication channels that require a socket (local web server, etc.).
    */
   LOCALHOSTADDRESS(NSSystemProperty.LOCALHOSTADDRESS),
 
