@@ -38,7 +38,7 @@ Licence terms: LGPL (see licence.txt)
 - Native File dialog and Directory dialog are added.
 - Internal web browser commands are not visible from external listeners.
 - Communication interface with peer VM now has 2 modes: process IO and sockets.
-- Exposed System properties are in enum classes.
+- Exposed System properties are in enum classes. Some system properties changed.
 - NativeInterfaceAppletHandler simplifies integration in applets (Windows).
 
 

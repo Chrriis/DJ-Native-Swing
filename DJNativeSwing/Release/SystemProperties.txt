@@ -10,11 +10,11 @@ are using them get loaded.
   Set the address that is used as the local host address for all the internal
   communication channels that require a sockets (local web server, etc.).
 
-* nativeswing.debug.printlocalhostaddressdetection
+* nativeswing.localhostaddress.debug.printdetection
   = true/false (default: false)
   Set whether to print the steps of local host address detection.
 
-* nativeswing.debug.printlocalhostaddress
+* nativeswing.localhostaddress.debug.print
   = true/false (default: false)
   Set whether the address found as the local host address should be printed.
   

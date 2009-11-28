@@ -342,10 +342,10 @@ public class Utils {
         }
       }
       if(localHostAddress == null) {
-        boolean isDebugging = Boolean.parseBoolean(NSSystemProperty.DEBUG_PRINTLOCALHOSTADDRESSDETECTION.get());
+        boolean isDebugging = Boolean.parseBoolean(NSSystemProperty.LOCALHOSTADDRESS_DEBUG_PRINTDETECTION.get());
         localHostAddress = getLocalHostAddress(0, isDebugging);
       }
-      if(Boolean.parseBoolean(NSSystemProperty.DEBUG_PRINTLOCALHOSTADDRESS.get())) {
+      if(Boolean.parseBoolean(NSSystemProperty.LOCALHOSTADDRESS_DEBUG_PRINT.get())) {
         System.err.println("Local host address: " + localHostAddress);
       }
       Utils.localHostAddress = localHostAddress == null? "": localHostAddress;

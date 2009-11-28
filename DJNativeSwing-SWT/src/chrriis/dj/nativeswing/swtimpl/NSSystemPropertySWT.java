@@ -29,18 +29,18 @@ public enum NSSystemPropertySWT {
   LOCALHOSTADDRESS(NSSystemProperty.LOCALHOSTADDRESS),
 
   /**
-   * nativeswing.debug.printlocalhostaddressdetection
+   * nativeswing.localhostaddress.debug.printdetection
    * = true/false (default: false)<br/>
    * Set whether to print the steps of local host address detection.
    */
-  DEBUG_PRINTLOCALHOSTADDRESSDETECTION(NSSystemProperty.DEBUG_PRINTLOCALHOSTADDRESSDETECTION),
+  LOCALHOSTADDRESS_DEBUG_PRINTDETECTION(NSSystemProperty.LOCALHOSTADDRESS_DEBUG_PRINTDETECTION),
 
   /**
-   * nativeswing.debug.printlocalhostaddress
+   * nativeswing.localhostaddress.debug.print
    * = true/false (default: false)<br/>
    * Set whether the address found as the local host address should be printed.
    */
-  DEBUG_PRINTLOCALHOSTADDRESS(NSSystemProperty.DEBUG_PRINTLOCALHOSTADDRESS),
+  LOCALHOSTADDRESS_DEBUG_PRINT(NSSystemProperty.LOCALHOSTADDRESS_DEBUG_PRINT),
 
 
   /**
