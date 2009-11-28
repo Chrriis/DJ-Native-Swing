@@ -33,7 +33,7 @@ public enum NSSystemProperty {
   LOCALHOSTADDRESS_DEBUG_PRINTDETECTION("nativeswing.localhostAddress.debug.printDetection", Type.READ_WRITE),
 
   /**
-   * nativeswing.localhostaAddress.debug.print
+   * nativeswing.localhostAddress.debug.print
    * = true/false (default: false)<br/>
    * Set whether the address found as the local host address should be printed.
    */
