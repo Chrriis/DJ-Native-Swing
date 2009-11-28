@@ -13,6 +13,7 @@ import java.security.PrivilegedAction;
 import chrriis.dj.nativeswing.NSSystemProperty;
 
 /**
+ * A class that exposes all the system properties used by the DJ Native Swing SWT implementation.
  * @author Christopher Deckers
  * @author Stefan Fussenegger
  */

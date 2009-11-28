@@ -11,6 +11,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 
 /**
+ * A class that exposes all the system properties used by DJ Native Swing.
  * @author Christopher Deckers
  * @author Stefan Fussenegger
  */
