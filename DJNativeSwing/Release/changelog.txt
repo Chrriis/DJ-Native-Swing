@@ -9,6 +9,7 @@ Licence terms: LGPL (see licence.txt)
 
 - Code that was applying shaping depending on sub-windows is removed.
 - Web server allows to plug content providers.
+- Web server can pass HTTP headers for dynamic content.
 - Relative local files can be loaded by the web server.
 - Fixed a bug in back buffer overlay calculation.
 - Local address resolution is improved.

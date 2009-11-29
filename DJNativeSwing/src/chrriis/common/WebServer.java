@@ -38,8 +38,13 @@ import chrriis.dj.nativeswing.NSSystemProperty;
 public class WebServer {
 
   public static class HTTPRequest implements Cloneable {
-    HTTPRequest(String urlPath) {
+    HTTPRequest(String urlPath, Map<String, String> headerMap) {
+      this.headerMap = headerMap;
       setURLPath(urlPath);
+    }
+    private Map<String, String> headerMap;
+    public Map<String, String> getHeaderMap() {
+      return headerMap;
     }
     private String endQuery = "";
     private String urlPath;
@@ -529,19 +534,20 @@ public class WebServer {
             return;
           }
           String resourcePath = request.substring((isPostMethod? "POST ": "GET ").length(), request.length() - " HTTP/1.0".length());
-          HTTPRequest httpRequest = new HTTPRequest(resourcePath);
+          Map<String, String> headerMap = new HashMap<String, String>();
+          for(String header; (header = in.readAsciiLine()).length() > 0; ) {
+            int index = header.indexOf(": ");
+            if(index > 0) {
+              headerMap.put(header.substring(0, index), header.substring(index + ": ".length()));
+            }
+          }
+          HTTPRequest httpRequest = new HTTPRequest(resourcePath, headerMap);
           httpRequest.setPostMethod(isPostMethod);
           if(isPostMethod) {
             HTTPData[] httpDataArray;
-            String contentType = null;
-            int contentLength = -1;
-            for(String header; (header = in.readAsciiLine()).length() > 0; ) {
-              if(header.startsWith("Content-Length: ")) {
-                contentLength = Integer.parseInt(header.substring("Content-Length: ".length()));
-              } else if(header.startsWith("Content-Type: ")) {
-                contentType = header.substring("Content-Type: ".length());
-              }
-            }
+            String contentType = headerMap.get("Content-Type");
+            String contentLengthString = headerMap.get("Content-Length");
+            int contentLength = contentLengthString == null? -1: Integer.parseInt(contentLengthString);
             if(contentType != null && contentType.startsWith("multipart/")) {
               byte[] dataBytes;
               if(contentLength > 0) {
@@ -578,11 +584,11 @@ public class WebServer {
                 ByteArrayInputStream bais = new ByteArrayInputStream(dataBytes, start, indexList.get(i + 1) - start - in.getLineSeparator().length());
                 HTTPInputStream din = new HTTPInputStream(bais);
                 din.readAsciiLine();
-                Map<String, String> headerMap = httpData.getHeaderMap();
+                Map<String, String> dataHeaderMap = httpData.getHeaderMap();
                 for(String header; (header = din.readAsciiLine()).length() > 0; ) {
                   String key = header.substring(header.indexOf(": "));
                   String value = header.substring(key.length() + ": ".length());
-                  headerMap.put(key, value);
+                  dataHeaderMap.put(key, value);
                 }
                 ByteArrayOutputStream aos = new ByteArrayOutputStream();
                 for(int n; (n=din.read()) != -1; aos.write(n)) {
@@ -608,15 +614,15 @@ public class WebServer {
                 dataContent = sb.toString();
               }
               HTTPData httpData = new HTTPData();
-              Map<String, String> headerMap = httpData.getHeaderMap();
+              Map<String, String> dataHeaderMap = httpData.getHeaderMap();
               for(String content: dataContent.split("&")) {
                 int eqIndex = content.indexOf('=');
                 if(eqIndex > 0) {
                   String key = content.substring(0, eqIndex);
                   String value = Utils.decodeURL(content.substring(eqIndex + 1));
-                  headerMap.put(key, value);
+                  dataHeaderMap.put(key, value);
                 } else {
-                  headerMap.put(content, "");
+                  dataHeaderMap.put(content, "");
                 }
               }
               httpDataArray = new HTTPData[] {httpData};
@@ -786,7 +792,7 @@ public class WebServer {
 
   public WebServerContent getURLContent(String resourceURL) {
     try {
-      HTTPRequest httpRequest = new HTTPRequest(new URL(resourceURL).getPath());
+      HTTPRequest httpRequest = new HTTPRequest(new URL(resourceURL).getPath(), null);
       return getWebServerContent(httpRequest);
     } catch(Exception e) {
       e.printStackTrace();
