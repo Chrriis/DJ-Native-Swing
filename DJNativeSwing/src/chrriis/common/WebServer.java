@@ -39,7 +39,7 @@ public class WebServer {
 
   public static class HTTPRequest implements Cloneable {
     HTTPRequest(String urlPath, Map<String, String> headerMap) {
-      this.headerMap = headerMap;
+      this.headerMap = headerMap == null? new HashMap<String, String>(): headerMap;
       setURLPath(urlPath);
     }
     private Map<String, String> headerMap;
