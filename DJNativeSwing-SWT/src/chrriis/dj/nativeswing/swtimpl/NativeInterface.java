@@ -37,6 +37,7 @@ import java.util.Properties;
 import javax.swing.event.EventListenerList;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.DeviceData;
 import org.eclipse.swt.widgets.Display;
@@ -436,7 +437,14 @@ public class NativeInterface {
         DeviceData data = new DeviceData();
         data.debug = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.debug"));
         data.tracking = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.tracking"));
-        display = new Display(data);
+        try {
+          display = new Display(data);
+        } catch(SWTException e) {
+          if(Utils.IS_MAC && e.code == SWT.ERROR_THREAD_INVALID_ACCESS) {
+            throw new IllegalStateException("An error occurred while creating the SWT Display! On a Mac, the Native Interface can only be initialized from the main thread and the Java process needs to be started with the \"-XstartOnFirstThread\" VM parameter.", e);
+          }
+          throw e;
+        }
       }
     }
 
