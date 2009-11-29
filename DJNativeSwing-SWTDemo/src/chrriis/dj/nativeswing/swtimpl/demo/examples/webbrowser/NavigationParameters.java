@@ -13,6 +13,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +27,9 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import chrriis.common.UIUtils;
+import chrriis.common.WebServer;
+import chrriis.common.WebServer.HTTPRequest;
+import chrriis.common.WebServer.WebServerContent;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
 import chrriis.dj.nativeswing.swtimpl.components.WebBrowserNavigationParameters;
@@ -65,7 +70,8 @@ public class NavigationParameters extends JPanel {
         headersMap.put("User-agent", "Native Swing Browser");
         headersMap.put(testHeaderKeyTextField.getText(), testHeaderValueTextField.getText());
         parameters.setHeaders(headersMap);
-        webBrowser.navigate("http://www.ericgiguere.com/tools/http-header-viewer.html", parameters);
+        // Let's generate the page with the resulting HTTP headers dynamically.
+        webBrowser.navigate(WebServer.getDefaultWebServer().getDynamicContentURL(NavigationParameters.this.getClass().getName(), "header-viewer.html"), parameters);
         webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
         webBrowserPanel.revalidate();
         webBrowserPanel.repaint();
@@ -91,6 +97,33 @@ public class NavigationParameters extends JPanel {
       }
     });
   }
+
+  protected static WebServerContent getWebServerContent(final HTTPRequest httpRequest) {
+    // We dynamically generate the page using the embedded web server.
+    if("header-viewer.html".equals(httpRequest.getResourcePath())) {
+      return new WebServerContent() {
+        @Override
+        public InputStream getInputStream() {
+          StringBuilder sb = new StringBuilder();
+          sb.append("<html><body><h1>HTTP Headers</h1><table border=\"1\">");
+          Map<String, String> headerMap = httpRequest.getHeaderMap();
+          String[] keys = headerMap.keySet().toArray(new String[0]);
+          Arrays.sort(keys, String.CASE_INSENSITIVE_ORDER);
+          for(String key: keys) {
+            sb.append("<tr><td>");
+            sb.append(key);
+            sb.append("</td><td>");
+            sb.append(headerMap.get(key));
+            sb.append("</td></tr>");
+          }
+          sb.append("</table></body></html>");
+          return getInputStream(sb.toString());
+        }
+      };
+    }
+    return null;
+  }
+
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
