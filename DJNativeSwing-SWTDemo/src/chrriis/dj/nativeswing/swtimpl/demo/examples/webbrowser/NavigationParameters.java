@@ -27,6 +27,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import chrriis.common.UIUtils;
+import chrriis.common.Utils;
 import chrriis.common.WebServer;
 import chrriis.common.WebServer.HTTPRequest;
 import chrriis.common.WebServer.WebServerContent;
@@ -111,9 +112,9 @@ public class NavigationParameters extends JPanel {
           Arrays.sort(keys, String.CASE_INSENSITIVE_ORDER);
           for(String key: keys) {
             sb.append("<tr><td>");
-            sb.append(key);
+            sb.append(Utils.escapeXML(key));
             sb.append("</td><td>");
-            sb.append(headerMap.get(key));
+            sb.append(Utils.escapeXML(headerMap.get(key)));
             sb.append("</td></tr>");
           }
           sb.append("</table></body></html>");
