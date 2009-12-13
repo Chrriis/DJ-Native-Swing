@@ -129,13 +129,18 @@ public class JSyntaxHighlighter extends NSPanelComponent {
       "      div.wrapper { width: 100%; height: 100%; min-height: 100%; padding: 0; margin: -18px 0; white-space: nowrap; }" + LS +
       "    </style>" + LS +
       "  </head>" + LS +
-      "  <body onload=\"init();\" id=\"body\">" +
+      "  <body id=\"body\">" +
       "    <div class=\"wrapper\">" +
       "      <pre name=\"code\" class=\"" + language.getLanguage() + "\">" +
       Utils.escapeXML(content) +
       "</pre>" + LS +
       "    </div>" +
       "  </body>" + LS +
+      "<script language=\"JavaScript\" type=\"text/javascript\">" + LS +
+      "  <!--" + LS +
+      "    init();" + LS +
+      "  //-->" + LS +
+      "</script>" + LS +
       "</html>";
     webBrowser.setHTMLContent(hContent);
   }
