@@ -8,6 +8,7 @@ Licence terms: LGPL (see licence.txt)
 * Version 0.9.9 (xxxxxxxxxxxxxx):
 
 - Mac OS X is supported, except "constrainVisibility"/"proxyComponentHierarchy".
+- JWebBrowserWindow is now created through a factory to support dialogs.
 - Web Browser allows passing HTTP headers and POST data.
 - Web Browser allows vetoable disposal with page unloading confirmation dialog.
 - Web Browser type and version are accessible.

@@ -59,6 +59,13 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
       customOptions = null;
     }
     customHTMLHeaders = (String)optionMap.get(JHTMLEditor.TinyMCEOptions.SET_CUSTOM_HTML_HEADERS_OPTION_KEY);
+    // We want potential dialogs to actually be dialogs.
+    htmlEditor.getWebBrowser().addWebBrowserListener(new WebBrowserAdapter() {
+      @Override
+      public void windowWillOpen(WebBrowserWindowWillOpenEvent e) {
+        e.setDialogWindow(true);
+      }
+    });
   }
 
   public WebServerContent getWebServerContent(final HTTPRequest httpRequest, final String resourcePath, final int instanceID) {

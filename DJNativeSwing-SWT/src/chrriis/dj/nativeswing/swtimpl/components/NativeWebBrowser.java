@@ -122,8 +122,8 @@ class NativeWebBrowser extends NativeComponent {
       if(!jWebBrowser.isNativePeerInitialized()) {
         Window windowAncestor = SwingUtilities.getWindowAncestor(jWebBrowser);
         if(windowAncestor == null) {
-          windowAncestor = new JWebBrowserWindow(jWebBrowser);
-        } else {
+          Window parentWindow = e.isDialogWindow()? SwingUtilities.getWindowAncestor(webBrowser): null;
+          windowAncestor = (Window)WebBrowserWindowFactory.create(parentWindow, jWebBrowser);
         }
         jWebBrowser.getNativeComponent().initializeNativePeer();
       }
@@ -150,7 +150,7 @@ class NativeWebBrowser extends NativeComponent {
       JWebBrowserWindow browserWindow = newWebBrowser.getWebBrowserWindow();
       if(browserWindow != null) {
         if(size != null) {
-          browserWindow.validate();
+          ((Window)browserWindow).validate();
           Dimension windowSize = browserWindow.getSize();
           Dimension webBrowserSize = browserWindow.getWebBrowser().getEmbeddableComponent().getSize();
           if(size.width > 0) {

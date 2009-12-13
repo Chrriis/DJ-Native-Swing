@@ -20,6 +20,7 @@ import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
 import chrriis.dj.nativeswing.swtimpl.components.JWebBrowserWindow;
 import chrriis.dj.nativeswing.swtimpl.components.WebBrowserAdapter;
 import chrriis.dj.nativeswing.swtimpl.components.WebBrowserNavigationEvent;
+import chrriis.dj.nativeswing.swtimpl.components.WebBrowserWindowFactory;
 import chrriis.dj.nativeswing.swtimpl.components.WebBrowserWindowWillOpenEvent;
 
 /**
@@ -54,8 +55,9 @@ public class NavigationControl extends JPanel {
           e.consume();
           SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-              JWebBrowserWindow webBrowserWindow = new JWebBrowserWindow();
-              webBrowserWindow.getWebBrowser().navigate(newResourceLocation);
+              JWebBrowser webBrowser = new JWebBrowser();
+              JWebBrowserWindow webBrowserWindow = WebBrowserWindowFactory.create(webBrowser);
+              webBrowser.navigate(newResourceLocation);
               webBrowserWindow.setVisible(true);
             }
           });

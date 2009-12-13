@@ -185,7 +185,7 @@ public class DefaultWebBrowserDecorator extends WebBrowserDecorator {
           }
           JWebBrowser.copyAppearance(webBrowser, newWebBrowser);
           JWebBrowser.copyContent(webBrowser, newWebBrowser);
-          JWebBrowserWindow webBrowserWindow = new JWebBrowserWindow(newWebBrowser);
+          JWebBrowserWindow webBrowserWindow = WebBrowserWindowFactory.create(newWebBrowser);
           webBrowserWindow.setVisible(true);
         }
       });

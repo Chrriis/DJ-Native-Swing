@@ -37,6 +37,24 @@ public class WebBrowserWindowWillOpenEvent extends WebBrowserEvent {
     this.newWebBrowser = newWebBrowser;
   }
 
+  private boolean isDialogWindow;
+
+  /**
+   * Set whether the new window should be opened as a dialog (instead of a frame).
+   * @param isDialogWindow true if the window is to be opened as a dialog, false otherwise.
+   */
+  public void setDialogWindow(boolean isDialogWindow) {
+    this.isDialogWindow = isDialogWindow;
+  }
+
+  /**
+   * Indicate whether the new window should be opened as a dialog (instead of a frame).
+   * @return true if the window is to be opened as a dialog, false otherwise.
+   */
+  public boolean isDialogWindow() {
+    return isDialogWindow;
+  }
+
   public void consume() {
     newWebBrowser = null;
   }
