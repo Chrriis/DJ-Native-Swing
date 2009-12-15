@@ -40,6 +40,13 @@ class JHTMLEditorFCKeditor implements JHTMLEditorImplementation {
     }
     this.htmlEditor = htmlEditor;
     customJavascriptConfiguration = (String)optionMap.get(JHTMLEditor.FCKEditorOptions.SET_CUSTOM_JAVASCRIPT_CONFIGURATION_OPTION_KEY);
+    // We want potential dialogs to actually be dialogs.
+    htmlEditor.getWebBrowser().addWebBrowserListener(new WebBrowserAdapter() {
+      @Override
+      public void windowWillOpen(WebBrowserWindowWillOpenEvent e) {
+        e.setDialogWindow(true);
+      }
+    });
   }
 
   private static final String LS = Utils.LINE_SEPARATOR;

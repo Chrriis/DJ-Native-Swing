@@ -57,6 +57,13 @@ class JHTMLEditorCKeditor implements JHTMLEditorImplementation {
     } else {
       customOptions = null;
     }
+    // We want potential dialogs to actually be dialogs.
+    htmlEditor.getWebBrowser().addWebBrowserListener(new WebBrowserAdapter() {
+      @Override
+      public void windowWillOpen(WebBrowserWindowWillOpenEvent e) {
+        e.setDialogWindow(true);
+      }
+    });
   }
 
   static final String LS = Utils.LINE_SEPARATOR;
