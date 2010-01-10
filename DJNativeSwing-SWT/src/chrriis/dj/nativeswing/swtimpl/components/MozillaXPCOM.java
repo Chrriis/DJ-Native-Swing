@@ -30,6 +30,7 @@ import org.mozilla.xpcom.XPCOMInitializationException;
 
 import chrriis.dj.nativeswing.swtimpl.CommandMessage;
 import chrriis.dj.nativeswing.swtimpl.ControlCommandMessage;
+import chrriis.dj.nativeswing.swtimpl.NSSystemPropertySWT;
 
 /**
  * This class is meant to allow accessing the JavaXPCOM nsIWebBrowser interface, and other Mozilla XPCOM interfaces.
@@ -54,6 +55,10 @@ public class MozillaXPCOM {
       }
       isInitialized = true;
       Shell shell = new Shell(SWT.NONE);
+      String path = NSSystemPropertySWT.WEBBROWSER_XULRUNNER_HOME.get();
+      if(path != null) {
+        System.setProperty("org.eclipse.swt.browser.XULRunnerPath", path);
+      }
       new Browser(shell, SWT.MOZILLA);
       shell.dispose();
       return true;
