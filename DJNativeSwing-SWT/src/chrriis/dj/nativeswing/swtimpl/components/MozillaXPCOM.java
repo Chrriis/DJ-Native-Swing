@@ -7,6 +7,7 @@
  */
 package chrriis.dj.nativeswing.swtimpl.components;
 
+import java.io.File;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
@@ -28,6 +29,7 @@ import org.mozilla.interfaces.nsIServiceManager;
 import org.mozilla.interfaces.nsIWebBrowser;
 import org.mozilla.xpcom.XPCOMInitializationException;
 
+import chrriis.common.Utils;
 import chrriis.dj.nativeswing.swtimpl.CommandMessage;
 import chrriis.dj.nativeswing.swtimpl.ControlCommandMessage;
 import chrriis.dj.nativeswing.swtimpl.NSSystemPropertySWT;
@@ -54,13 +56,27 @@ public class MozillaXPCOM {
         return false;
       }
       isInitialized = true;
-      Shell shell = new Shell(SWT.NONE);
       String path = NSSystemPropertySWT.WEBBROWSER_XULRUNNER_HOME.get();
-      if(path != null) {
-        System.setProperty("org.eclipse.swt.browser.XULRunnerPath", path);
+      if(path == null) {
+        path = System.getProperty("org.eclipse.swt.browser.XULRunnerPath");
       }
-      new Browser(shell, SWT.MOZILLA);
-      shell.dispose();
+      if (Utils.IS_MAC) {
+        if(path == null) {
+          path = System.getenv("XULRUNNER_HOME");
+        }
+        if(path == null) {
+          return false;
+        }
+        File file = new File(path);
+        if(!file.exists()) {
+          return false;
+        }
+        org.mozilla.xpcom.Mozilla.getInstance().initialize(file);
+      } else {
+        Shell shell = new Shell(SWT.NONE);
+        new Browser(shell, SWT.MOZILLA);
+        shell.dispose();
+      }
       return true;
     }
 
