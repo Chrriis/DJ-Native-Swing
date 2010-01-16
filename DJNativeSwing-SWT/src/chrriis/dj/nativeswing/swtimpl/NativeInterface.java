@@ -564,6 +564,14 @@ public class NativeInterface {
       List<String> classPathList = new ArrayList<String>();
       String pathSeparator = SystemProperty.PATH_SEPARATOR.get();
       List<Object> referenceList = new ArrayList<Object>();
+      Class<?>[] nativeClassPathReferenceClasses = nativeInterfaceConfiguration.getNativeClassPathReferenceClasses();
+      if(nativeClassPathReferenceClasses != null) {
+        referenceList.addAll(Arrays.asList(nativeClassPathReferenceClasses));
+      }
+      String[] nativeClassPathReferenceResources = nativeInterfaceConfiguration.getNativeClassPathReferenceResources();
+      if(nativeClassPathReferenceResources != null) {
+        referenceList.addAll(Arrays.asList(nativeClassPathReferenceResources));
+      }
       List<String> optionalReferenceList = new ArrayList<String>();
       referenceList.add(NativeSwing.class);
       referenceList.add(NativeInterface.class);
@@ -574,14 +582,6 @@ public class NativeInterface {
         if(NativeInterface.class.getClassLoader().getResource(optionalReference) != null) {
           referenceList.add(optionalReference);
         }
-      }
-      Class<?>[] nativeClassPathReferenceClasses = nativeInterfaceConfiguration.getNativeClassPathReferenceClasses();
-      if(nativeClassPathReferenceClasses != null) {
-        referenceList.addAll(Arrays.asList(nativeClassPathReferenceClasses));
-      }
-      String[] nativeClassPathReferenceResources = nativeInterfaceConfiguration.getNativeClassPathReferenceResources();
-      if(nativeClassPathReferenceResources != null) {
-        referenceList.addAll(Arrays.asList(nativeClassPathReferenceResources));
       }
       boolean isProxyClassLoaderUsed = Boolean.parseBoolean(NSSystemPropertySWT.PEERVM_FORCEPROXYCLASSLOADER.get());
       if(!isProxyClassLoaderUsed) {
@@ -603,6 +603,7 @@ public class NativeInterface {
             }
           } else {
             isProxyClassLoaderUsed = true;
+            // We don't break because we want to check that there are no mandatory missing resources.
           }
         }
       }
