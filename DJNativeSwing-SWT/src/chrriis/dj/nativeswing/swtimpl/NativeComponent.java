@@ -1036,7 +1036,7 @@ public abstract class NativeComponent extends Canvas {
 
   private static class CMN_getComponentImage extends ControlCommandMessage {
 
-    private void printRemoveClip(Control control, GC gc) {
+    private boolean printRemoveClip(Control control, GC gc) {
       Point size = control.getSize();
       Display display = control.getDisplay();
       Composite oldParent = control.getShell();
@@ -1067,7 +1067,7 @@ public abstract class NativeComponent extends Canvas {
       control.setParent(tmpParentShell);
       control.moveBelow(screenshotCanvas);
       tmpParentShell.setVisible(true);
-      control.print(gc);
+      boolean result = control.print(gc);
       control.setParent(oldParent);
       control.moveAbove(controlReplacementCanvas);
       controlReplacementCanvas.dispose();
@@ -1076,7 +1076,10 @@ public abstract class NativeComponent extends Canvas {
       tmpHiddenParentShell.dispose();
       oldParent.setRedraw(true);
       control.setRedraw(true);
+      control.redraw();
+      control.update();
       screenshot.dispose();
+      return result;
     }
 
     private ImageData getImageData(Control control, Region region) {
