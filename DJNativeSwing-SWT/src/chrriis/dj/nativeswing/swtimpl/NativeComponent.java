@@ -1102,6 +1102,12 @@ public abstract class NativeComponent extends Canvas {
         printRemoveClip(control, gc);
       } else {
         control.print(gc);
+        // It seems that now the code is fixed there can be painting artifacts when dragging another window slowly on top.
+        // The fix is to refresh the component.
+        if("win32".equals(SWT.getPlatform()) && control instanceof Browser) {
+          control.redraw(0, 0, control.getSize().x, control.getSize().y, true);
+          control.update();
+        }
       }
       gc.dispose();
       ImageData imageData = image.getImageData();
