@@ -1036,10 +1036,10 @@ public abstract class NativeComponent extends Canvas {
 
   private static class CMN_getComponentImage extends ControlCommandMessage {
 
-    private boolean printRemoveClip(Control control, GC gc) {
+    private static boolean printRemoveClip(Control control, GC gc) {
       Point size = control.getSize();
       Display display = control.getDisplay();
-      Composite oldParent = control.getShell();
+      Composite oldParent = control.getParent();
       Shell tmpHiddenParentShell = new Shell();
       Shell tmpParentShell = new Shell(tmpHiddenParentShell, SWT.NO_TRIM | SWT.NO_FOCUS | SWT.NO_BACKGROUND);
       Point location = display.map(control, null, control.getLocation());
