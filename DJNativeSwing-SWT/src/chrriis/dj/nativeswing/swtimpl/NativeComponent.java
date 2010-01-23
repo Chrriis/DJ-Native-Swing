@@ -280,12 +280,12 @@ public abstract class NativeComponent extends Canvas {
     super.processKeyEvent(ke);
   }
 
-  private Thread resizeThread;
+  private volatile Thread resizeThread;
 
   @SuppressWarnings("deprecation")
   @Override
   public void reshape(int x, int y, int width, int height) {
-    if(resizeThread == null && width != getWidth() || height != getHeight()) {
+    if(resizeThread == null && (width != getWidth() || height != getHeight())) {
       resizeThread = new Thread("NativeSwing Resize") {
         @Override
         public void run() {
@@ -293,11 +293,7 @@ public abstract class NativeComponent extends Canvas {
             sleep(50);
           } catch(Exception e) {
           }
-          SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-              applyPendingReshape();
-            }
-          });
+          applyPendingReshape();
         }
       };
       resizeThread.start();
@@ -306,6 +302,17 @@ public abstract class NativeComponent extends Canvas {
   }
 
   private void applyPendingReshape() {
+    if(resizeThread == null) {
+      return;
+    }
+    if(!SwingUtilities.isEventDispatchThread()) {
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          applyPendingReshape();
+        }
+      });
+      return;
+    }
     if(resizeThread == null) {
       return;
     }
