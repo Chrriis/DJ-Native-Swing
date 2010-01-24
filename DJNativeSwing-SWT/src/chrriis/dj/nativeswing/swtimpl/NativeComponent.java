@@ -1109,7 +1109,7 @@ public abstract class NativeComponent extends Canvas {
         if(control instanceof Browser && Boolean.parseBoolean(System.getProperty("nativeswing.components.printingHack"))) {
           // Note 1: bug 1 is marked as fixed, but preliminary testing shows some other bugs. Have to test more before removing this hack.
           // Note 2: 3.6M3 seems to fix this bug, so I comment the implementation.
-          // Note 3: some issues on win 7 makes me add a property to turn the old hack back on.
+          // Note 3: some issues on win 7 make me add a property to turn the old hack back on in case of future unexpected user issues.
           printRemoveClip(control, gc);
         } else {
           org.eclipse.swt.graphics.Rectangle bounds = control.getBounds();
