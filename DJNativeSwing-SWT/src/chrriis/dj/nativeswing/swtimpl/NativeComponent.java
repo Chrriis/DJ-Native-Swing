@@ -1044,18 +1044,18 @@ public abstract class NativeComponent extends Canvas {
   private static class CMN_getComponentImage extends ControlCommandMessage {
 
     private static boolean printRemoveClip(Control control, GC gc) {
-      Point size = control.getSize();
+      org.eclipse.swt.graphics.Rectangle bounds = control.getBounds();
       Display display = control.getDisplay();
       Composite oldParent = control.getParent();
       Shell tmpHiddenParentShell = new Shell();
       Shell tmpParentShell = new Shell(tmpHiddenParentShell, SWT.NO_TRIM | SWT.NO_FOCUS | SWT.NO_BACKGROUND);
       Point location = display.map(control, null, control.getLocation());
       tmpParentShell.setLocation(location);
-      tmpParentShell.setSize(size);
+      tmpParentShell.setSize(bounds.width, bounds.height);
       org.eclipse.swt.widgets.Canvas screenshotCanvas = new org.eclipse.swt.widgets.Canvas(tmpParentShell, SWT.NO_BACKGROUND);
-      screenshotCanvas.setSize(size);
+      screenshotCanvas.setSize(bounds.width, bounds.height);
       GC displayGC = new GC(display);
-      final Image screenshot = new Image(display, size.x, size.y);
+      final Image screenshot = new Image(display, bounds.width, bounds.height);
       displayGC.copyArea(screenshot, location.x, location.y);
       displayGC.dispose();
       PaintListener paintListener = new PaintListener() {
@@ -1067,15 +1067,17 @@ public abstract class NativeComponent extends Canvas {
       screenshotCanvas.addPaintListener(paintListener);
       oldParent.addPaintListener(paintListener);
       org.eclipse.swt.widgets.Canvas controlReplacementCanvas = new org.eclipse.swt.widgets.Canvas(oldParent, SWT.NO_BACKGROUND);
-      controlReplacementCanvas.setSize(size);
+      controlReplacementCanvas.setSize(bounds.width, bounds.height);
       controlReplacementCanvas.addPaintListener(paintListener);
       control.setRedraw(false);
       oldParent.setRedraw(false);
       control.setParent(tmpParentShell);
+      control.setLocation(0, 0);
       control.moveBelow(screenshotCanvas);
       tmpParentShell.setVisible(true);
       boolean result = control.print(gc);
       control.setParent(oldParent);
+      control.setLocation(bounds.x, bounds.y);
       control.moveAbove(controlReplacementCanvas);
       controlReplacementCanvas.dispose();
       oldParent.removePaintListener(paintListener);
