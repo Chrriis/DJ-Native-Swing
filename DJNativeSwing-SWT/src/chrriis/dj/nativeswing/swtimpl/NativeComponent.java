@@ -1097,24 +1097,31 @@ public abstract class NativeComponent extends Canvas {
       if(size.x <= 0 || size.y <= 0) {
         return null;
       }
-      org.eclipse.swt.graphics.Rectangle bounds = region.getBounds();
+      org.eclipse.swt.graphics.Rectangle regionBounds = region.getBounds();
       Display display = control.getDisplay();
-      final Image image = new Image(display, bounds.x + bounds.width, bounds.y + bounds.height);
+      final Image image = new Image(display, regionBounds.x + regionBounds.width, regionBounds.y + regionBounds.height);
       GC gc = new GC(image);
       gc.setClipping(region);
-      if("win32".equals(SWT.getPlatform()) && control instanceof Browser && Boolean.parseBoolean(System.getProperty("nativeswing.components.printingHack"))) {
-        // https://bugs.eclipse.org/bugs/show_bug.cgi?id=223590
-        // Note 1: the bug is marked as fixed, but preliminary testing shows some other bugs. Have to test more before removing this hack.
-        // Note 2: 3.6M3 seems to fix this bug, so I comment the implementation.
-        printRemoveClip(control, gc);
-      } else {
-        control.print(gc);
-        // It seems that now the code is fixed there can be painting artifacts when dragging another window slowly on top.
-        // The fix is to refresh the component.
-        if("win32".equals(SWT.getPlatform()) && control instanceof Browser) {
-          control.redraw(0, 0, control.getSize().x, control.getSize().y, true);
+      boolean isWin32 = "win32".equals(SWT.getPlatform());
+      if(isWin32) {
+        // 1. https://bugs.eclipse.org/bugs/show_bug.cgi?id=223590
+        // 2. https://bugs.eclipse.org/bugs/show_bug.cgi?id=299714
+        if(control instanceof Browser && Boolean.parseBoolean(System.getProperty("nativeswing.components.printingHack"))) {
+          // Note 1: bug 1 is marked as fixed, but preliminary testing shows some other bugs. Have to test more before removing this hack.
+          // Note 2: 3.6M3 seems to fix this bug, so I comment the implementation.
+          // Note 3: some issues on win 7 makes me add a property to turn the old hack back on.
+          printRemoveClip(control, gc);
+        } else {
+          org.eclipse.swt.graphics.Rectangle bounds = control.getBounds();
+          control.print(gc);
+          // If the window is moving while the component is printed, it is reparented at the wrong location: we have to restore the right location.
+          control.setLocation(bounds.x, bounds.y);
+          // There can be painting artifacts when dragging another window slowly on top: refresh the component.
+          control.redraw(0, 0, bounds.width, bounds.height, true);
           control.update();
         }
+      } else {
+        control.print(gc);
       }
       gc.dispose();
       ImageData imageData = image.getImageData();
