@@ -1102,7 +1102,8 @@ public abstract class NativeComponent extends Canvas {
       final Image image = new Image(display, regionBounds.x + regionBounds.width, regionBounds.y + regionBounds.height);
       GC gc = new GC(image);
       gc.setClipping(region);
-      boolean isWin32 = "win32".equals(SWT.getPlatform());
+      String platform = SWT.getPlatform();
+      boolean isWin32 = "win32".equals(platform);
       if(isWin32) {
         // 1. https://bugs.eclipse.org/bugs/show_bug.cgi?id=223590
         // 2. https://bugs.eclipse.org/bugs/show_bug.cgi?id=299714
@@ -1120,6 +1121,9 @@ public abstract class NativeComponent extends Canvas {
           control.redraw(0, 0, bounds.width, bounds.height, true);
           control.update();
         }
+      } else if("cocoa".equals(platform)) {
+        // Cocoa has a similar issue where it does not seem to be able to capture a component that has clipped areas.
+        printRemoveClip(control, gc);
       } else {
         control.print(gc);
       }
