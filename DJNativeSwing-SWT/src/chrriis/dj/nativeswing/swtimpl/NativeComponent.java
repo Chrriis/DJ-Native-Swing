@@ -47,7 +47,6 @@ import javax.swing.event.EventListenerList;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
-import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -1104,28 +1103,21 @@ public abstract class NativeComponent extends Canvas {
       final Image image = new Image(display, regionBounds.x + regionBounds.width, regionBounds.y + regionBounds.height);
       GC gc = new GC(image);
       gc.setClipping(region);
-      String platform = SWT.getPlatform();
-      boolean isWin32 = "win32".equals(platform);
-      if(isWin32) {
+      if(Boolean.parseBoolean(System.getProperty("nativeswing.components.printingHack"))) {
         // 1. https://bugs.eclipse.org/bugs/show_bug.cgi?id=223590
         // 2. https://bugs.eclipse.org/bugs/show_bug.cgi?id=299714
-        if(control instanceof Browser && Boolean.parseBoolean(System.getProperty("nativeswing.components.printingHack"))) {
-          // Note 1: bug 1 is marked as fixed, but preliminary testing shows some other bugs. Have to test more before removing this hack.
-          // Note 2: 3.6M3 seems to fix this bug, so I comment the implementation.
-          // Note 3: some issues on win 7 make me add a property to turn the old hack back on in case of future unexpected user issues.
-          printRemoveClip(control, gc);
-        } else {
-          org.eclipse.swt.graphics.Rectangle bounds = control.getBounds();
-          control.print(gc);
-          // If the window is moving while the component is printed, it is reparented at the wrong location: we have to restore the right location.
-          control.setLocation(bounds.x, bounds.y);
-          // There can be painting artifacts when dragging another window slowly on top: refresh the component.
-          control.redraw(0, 0, bounds.width, bounds.height, true);
-          control.update();
-        }
-      } else if("cocoa".equals(platform)) {
-        // Cocoa has a similar issue where it does not seem to be able to capture a component that has clipped areas.
+        // Note 1: bug 1 is marked as fixed, but preliminary testing shows some other bugs. Have to test more before removing this hack.
+        // Note 2: 3.6M3 seems to fix this bug, so I comment the implementation.
+        // Note 3: some issues on win 7 make me add a property to turn the old hack back on in case of future unexpected user issues.
         printRemoveClip(control, gc);
+      } else if(Utils.IS_WINDOWS) {
+        org.eclipse.swt.graphics.Rectangle bounds = control.getBounds();
+        control.print(gc);
+        // If the window is moving while the component is printed, it is reparented at the wrong location: we have to restore the right location.
+        control.setLocation(bounds.x, bounds.y);
+        // There can be painting artifacts when dragging another window slowly on top: refresh the component.
+        control.redraw(0, 0, bounds.width, bounds.height, true);
+        control.update();
       } else {
         control.print(gc);
       }
