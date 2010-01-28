@@ -30,7 +30,7 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
   private static final String PACKAGE_PREFIX = "/tiny_mce/";
   private static final String EDITOR_INSTANCE = "HTMLeditor1";
 
-  private JHTMLEditor htmlEditor;
+  private final JHTMLEditor htmlEditor;
   private final String customOptions;
   private final String customHTMLHeaders;
 

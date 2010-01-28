@@ -32,7 +32,7 @@ class JHTMLEditorCKeditor implements JHTMLEditorImplementation {
   private static final String PACKAGE_PREFIX = "/ckeditor/";
   private static final String EDITOR_INSTANCE = "HTMLeditor1";
 
-  private JHTMLEditor htmlEditor;
+  private final JHTMLEditor htmlEditor;
   private final String customOptions;
 
   @SuppressWarnings("unchecked")
@@ -78,7 +78,6 @@ class JHTMLEditorCKeditor implements JHTMLEditorImplementation {
           return getDefaultMimeType(index == -1? null: resourcePath.substring(index));
         }
         @Override
-        @SuppressWarnings("nls")
         public InputStream getInputStream() {
           String content =
             "<html>" + LS +

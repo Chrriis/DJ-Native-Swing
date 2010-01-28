@@ -245,8 +245,16 @@ public class JHTMLEditor extends NSPanelComponent {
     if(resourcePath_.startsWith("/")) {
       resourcePath_ = resourcePath_.substring(1);
     }
-    JHTMLEditorImplementation implementation = htmlEditor.getImplementation();
-    return implementation.getWebServerContent(httpRequest, resourcePath_, instanceID);
+    return htmlEditor.getWebServerContent(httpRequest, resourcePath_, instanceID);
+  }
+
+  /**
+   * Serve the HTTP content requested by the editor web page, which can be altered by subclasses.
+   * Note that altering the default content is generally not needed and is not recommended.
+   * @return the content.
+   */
+  protected WebServerContent getWebServerContent(HTTPRequest httpRequest, String resourcePath, final int instanceID) {
+    return implementation.getWebServerContent(httpRequest, resourcePath, instanceID);
   }
 
   /**

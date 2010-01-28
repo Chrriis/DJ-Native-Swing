@@ -31,8 +31,8 @@ class JHTMLEditorFCKeditor implements JHTMLEditorImplementation {
   private static final String PACKAGE_PREFIX = "/fckeditor/";
   private static final String EDITOR_INSTANCE = "HTMLeditor1";
 
-  private JHTMLEditor htmlEditor;
-  private String customJavascriptConfiguration;
+  private final JHTMLEditor htmlEditor;
+  private final String customJavascriptConfiguration;
 
   public JHTMLEditorFCKeditor(JHTMLEditor htmlEditor, Map<Object, Object> optionMap) {
     if(getClass().getResource(PACKAGE_PREFIX + "fckeditor.js") == null) {
