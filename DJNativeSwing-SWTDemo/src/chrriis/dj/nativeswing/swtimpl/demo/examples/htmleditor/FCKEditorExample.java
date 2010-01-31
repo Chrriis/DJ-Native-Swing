@@ -24,7 +24,7 @@ import javax.swing.SwingUtilities;
 
 import chrriis.common.UIUtils;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
-import chrriis.dj.nativeswing.swtimpl.components.HTMLEditorListener;
+import chrriis.dj.nativeswing.swtimpl.components.HTMLEditorAdapter;
 import chrriis.dj.nativeswing.swtimpl.components.HTMLEditorSaveEvent;
 import chrriis.dj.nativeswing.swtimpl.components.JHTMLEditor;
 import chrriis.dj.nativeswing.swtimpl.components.JHTMLEditor.HTMLEditorImplementation;
@@ -57,7 +57,8 @@ public class FCKEditorExample extends JPanel {
       "];\n" +
       "FCKConfig.ToolbarCanCollapse = false;\n";
     final JHTMLEditor htmlEditor = new JHTMLEditor(HTMLEditorImplementation.FCKEditor, JHTMLEditor.FCKEditorOptions.setCustomJavascriptConfiguration(configurationScript));
-    htmlEditor.addHTMLEditorListener(new HTMLEditorListener() {
+    htmlEditor.addHTMLEditorListener(new HTMLEditorAdapter() {
+      @Override
       public void saveHTML(HTMLEditorSaveEvent e) {
         JOptionPane.showMessageDialog(FCKEditorExample.this, "The data of the HTML editor could be saved anywhere...");
       }

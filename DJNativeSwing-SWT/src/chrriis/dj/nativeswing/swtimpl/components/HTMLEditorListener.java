@@ -20,4 +20,11 @@ public interface HTMLEditorListener extends EventListener {
    */
   public void saveHTML(HTMLEditorSaveEvent e);
 
+  /**
+   * Invoked when dirty state is changed. The editor is dirty when its content has changed.
+   * @param e the editor event.
+   * @param isDirty indicate whether it is dirty.
+   */
+  public void notifyDirtyStateChanged(HTMLEditorEvent e, boolean isDirty);
+
 }

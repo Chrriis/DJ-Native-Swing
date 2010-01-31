@@ -75,9 +75,49 @@ class JHTMLEditorFCKeditor implements JHTMLEditorImplementation {
             "        return true;" + LS +
             "      }" + LS +
             "      var sendCommand = " + JWebBrowser.COMMAND_FUNCTION + ";" + LS +
+            "      var htmlContent;" + LS +
+            "      var htmlDirtyTracker;" + LS +
+            "      var isDirtyTrackingActive = true;" + LS +
+            "      function JH_checkDirty() {" + LS +
+            "        var inst = FCKeditorAPI.GetInstance('" + EDITOR_INSTANCE + "');" + LS +
+            "        if(!htmlContent) {" + LS +
+            "          try {" + LS +
+            "            htmlContent = inst.GetHTML();" + LS +
+            "          } catch(e) {" + LS +
+            "          }" + LS +
+            "          htmlDirtyTracker = setTimeout('JH_checkDirty()', 1000);" + LS +
+            "        } else {" + LS +
+            "          try {" + LS +
+            "            var newHtmlContent = inst.GetHTML();" + LS +
+            "            if(newHtmlContent != htmlContent) {" + LS +
+            "              htmlDirtyTracker = null;" + LS +
+            "              sendCommand('[Chrriis]JH_setDirty');" + LS +
+            "            } else {" + LS +
+            "              htmlContent = newHtmlContent;" + LS +
+            "              htmlDirtyTracker = setTimeout('JH_checkDirty()', 1000);" + LS +
+            "            }" + LS +
+            "          } catch(e) {" + LS +
+            "            htmlDirtyTracker = setTimeout('JH_checkDirty()', 1000);" + LS +
+            "          }" + LS +
+            "        }" + LS +
+            "      }" + LS +
+            "      function JH_clearDirtyIndicator() {" + LS +
+            "        if(htmlDirtyTracker) {" + LS +
+            "          clearTimeout(htmlDirtyTracker);" + LS +
+            "        }" + LS +
+            "        htmlContent = null;" + LS +
+            "        if(isDirtyTrackingActive) {" + LS +
+            "          htmlDirtyTracker = setTimeout('JH_checkDirty()', 1000);" + LS +
+            "        }" + LS +
+            "      }" + LS +
+            "      function JH_setDirtyTrackingActive(isActive) {" + LS +
+            "        isDirtyTrackingActive = isActive;" + LS +
+            "        JH_clearDirtyIndicator();" + LS +
+            "      }" + LS +
             "      function JH_setData(html) {" + LS +
             "        var inst = FCKeditorAPI.GetInstance('" + EDITOR_INSTANCE + "');" + LS +
             "        inst.SetHTML(decodeURIComponent(html));" + LS +
+            "        JH_clearDirtyIndicator();" + LS +
             "      }" + LS +
             "      function JH_sendData() {" + LS +
             "        document.jhtml_form.action = 'jhtml_sendData';" + LS +
@@ -266,6 +306,14 @@ class JHTMLEditorFCKeditor implements JHTMLEditorImplementation {
       };
     }
     return WebServer.getDefaultWebServer ().getURLContent(WebServer.getDefaultWebServer ().getClassPathResourceURL(JHTMLEditor.class.getName(), PACKAGE_PREFIX + resourcePath));
+  }
+
+  public void clearDirtyIndicator() {
+    htmlEditor.getWebBrowser().executeJavascript("JH_clearDirtyIndicator();");
+  }
+
+  public void setDirtyTrackingActive(boolean isDirtyTrackingActive) {
+    htmlEditor.getWebBrowser().executeJavascript("JH_setDirtyTrackingActive(" + isDirtyTrackingActive + ");");
   }
 
   private volatile Object tempResult;

@@ -44,6 +44,10 @@ public class JHTMLEditor extends NSPanelComponent {
 
     public void setHTMLContent(String html);
 
+    public void setDirtyTrackingActive(boolean isDirtyTrackingActive);
+
+    public void clearDirtyIndicator();
+
   }
 
   public static enum HTMLEditorImplementation { FCKEditor, CKEditor, TinyMCE };
@@ -194,6 +198,8 @@ public class JHTMLEditor extends NSPanelComponent {
               ((InitializationListener)listeners[i + 1]).objectInitialized();
             }
           }
+        } else if("[Chrriis]JH_setDirty".equals(command)) {
+          setDirty(true);
         }
       }
     });
@@ -272,6 +278,42 @@ public class JHTMLEditor extends NSPanelComponent {
   public void setHTMLContent(String html) {
     html = JHTMLEditor.convertLinksFromLocal(html.replaceAll("[\r\n]", " "));
     implementation.setHTMLContent(html);
+    setDirty(false);
+  }
+
+  private boolean isDirty;
+
+  /**
+   * Indicate whether the editor is dirty, which means its content has changed since it was last set or the dirty state was cleared.
+   * @return true if the editor is dirty, false otherwise.
+   */
+  public boolean isDirty() {
+    return isDirty;
+  }
+
+  private void setDirty(boolean isDirty) {
+    if(this.isDirty == isDirty) {
+      return;
+    }
+    this.isDirty = isDirty;
+    Object[] listeners = listenerList.getListenerList();
+    HTMLEditorEvent ev = null;
+    for(int i=listeners.length-2; i>=0; i-=2) {
+      if(listeners[i] == HTMLEditorListener.class) {
+        if(ev == null) {
+          ev = new HTMLEditorEvent(JHTMLEditor.this);
+        }
+        ((HTMLEditorListener)listeners[i + 1]).notifyDirtyStateChanged(ev, isDirty);
+      }
+    }
+  }
+
+  /**
+   * Clear the dirty state.
+   */
+  public void clearDirtyState() {
+    implementation.clearDirtyIndicator();
+    setDirty(false);
   }
 
   static String convertLinksToLocal(String html) {

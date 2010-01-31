@@ -12,13 +12,11 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -27,55 +25,48 @@ import javax.swing.SwingUtilities;
 import chrriis.common.UIUtils;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.components.HTMLEditorAdapter;
-import chrriis.dj.nativeswing.swtimpl.components.HTMLEditorSaveEvent;
+import chrriis.dj.nativeswing.swtimpl.components.HTMLEditorEvent;
 import chrriis.dj.nativeswing.swtimpl.components.JHTMLEditor;
+import chrriis.dj.nativeswing.swtimpl.components.JHTMLEditor.HTMLEditorImplementation;
 
 /**
  * @author Christopher Deckers
  */
-public class CKEditorExample extends JPanel {
+public class EditorDirtyExample extends JPanel {
 
   protected static final String LS = System.getProperty("line.separator");
 
-  public CKEditorExample() {
+  public EditorDirtyExample() {
     super(new BorderLayout());
-    Map<String, String> optionMap = new HashMap<String, String>();
-    optionMap.put("toolbar", "[" +
-        "  ['Source','-','Save','NewPage','Preview','-','Templates']," +
-        "  ['Cut','Copy','Paste','PasteText','PasteFromWord','-','Print', 'SpellChecker', 'Scayt']," +
-        "  ['Undo','Redo','-','Find','Replace','-','SelectAll','RemoveFormat']," +
-        "  ['Form', 'Checkbox', 'Radio', 'TextField', 'Textarea', 'Select', 'Button', 'ImageButton', 'HiddenField']," +
-        "  '/'," +
-        "  ['Bold','Italic','Underline','Strike','-','Subscript','Superscript']," +
-        "  ['NumberedList','BulletedList','-','Outdent','Indent','Blockquote']," +
-        "  ['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock']," +
-        "  ['Link','Unlink','Anchor']," +
-        "  ['Image','Flash','Table','HorizontalRule','Smiley','SpecialChar','PageBreak']," +
-        "  '/'," +
-        "  ['Styles','Format','Font','FontSize']," +
-        "  ['TextColor','BGColor']," +
-        "  ['Maximize', 'ShowBlocks','-','About']" +
-    "]");
-//    optionMap.put("uiColor", "'#9AB8F3'");
-//    optionMap.put("toolbarCanCollapse", "false");
-    final JHTMLEditor htmlEditor = new JHTMLEditor(JHTMLEditor.HTMLEditorImplementation.CKEditor,
-        JHTMLEditor.CKEditorOptions.setOptions(optionMap)
-    );
-    htmlEditor.addHTMLEditorListener(new HTMLEditorAdapter() {
-      @Override
-      public void saveHTML(HTMLEditorSaveEvent e) {
-        JOptionPane.showMessageDialog(CKEditorExample.this, "The data of the HTML editor could be saved anywhere...");
-      }
-    });
+    final JHTMLEditor htmlEditor = new JHTMLEditor(HTMLEditorImplementation.TinyMCE);
     add(htmlEditor, BorderLayout.CENTER);
     JPanel southPanel = new JPanel(new BorderLayout());
-    southPanel.setBorder(BorderFactory.createTitledBorder("Custom Controls"));
+    JPanel dirtyPanel = new JPanel();
+    dirtyPanel.setBorder(BorderFactory.createTitledBorder("Dirty State"));
+    final JLabel dirtyLabel = new JLabel("Dirty: false");
+    dirtyPanel.add(dirtyLabel);
+    htmlEditor.addHTMLEditorListener(new HTMLEditorAdapter() {
+      @Override
+      public void notifyDirtyStateChanged(HTMLEditorEvent e, boolean isDirty) {
+        dirtyLabel.setText("Dirty: " + isDirty);
+      }
+    });
+    JButton markAsCleanButton = new JButton("Mark as clean");
+    markAsCleanButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        htmlEditor.clearDirtyState();
+      }
+    });
+    dirtyPanel.add(markAsCleanButton);
+    southPanel.add(dirtyPanel, BorderLayout.NORTH);
+    JPanel controlsPanel = new JPanel(new BorderLayout());
+    controlsPanel.setBorder(BorderFactory.createTitledBorder("Custom Controls"));
     JPanel middlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
     JButton setHTMLButton = new JButton("Set HTML");
     middlePanel.add(setHTMLButton);
     JButton getHTMLButton = new JButton("Get HTML");
     middlePanel.add(getHTMLButton);
-    southPanel.add(middlePanel, BorderLayout.NORTH);
+    controlsPanel.add(middlePanel, BorderLayout.NORTH);
     final JTextArea htmlTextArea = new JTextArea();
     htmlTextArea.setText(
         "<p style=\"text-align: center\">This is an <b>HTML editor</b>, in a <u><i>Swing</i></u> application.<br />" + LS +
@@ -85,7 +76,8 @@ public class CKEditorExample extends JPanel {
     htmlTextArea.setCaretPosition(0);
     JScrollPane scrollPane = new JScrollPane(htmlTextArea);
     scrollPane.setPreferredSize(new Dimension(0, 100));
-    southPanel.add(scrollPane, BorderLayout.CENTER);
+    controlsPanel.add(scrollPane, BorderLayout.CENTER);
+    southPanel.add(controlsPanel, BorderLayout.SOUTH);
     add(southPanel, BorderLayout.SOUTH);
     getHTMLButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -109,7 +101,7 @@ public class CKEditorExample extends JPanel {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new CKEditorExample(), BorderLayout.CENTER);
+        frame.getContentPane().add(new EditorDirtyExample(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);
