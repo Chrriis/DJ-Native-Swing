@@ -90,6 +90,7 @@ class JHTMLEditorFCKeditor implements JHTMLEditorImplementation {
             "          try {" + LS +
             "            var newHtmlContent = inst.GetHTML();" + LS +
             "            if(newHtmlContent != htmlContent) {" + LS +
+            "              htmlContent = null;" + LS +
             "              htmlDirtyTracker = null;" + LS +
             "              sendCommand('[Chrriis]JH_setDirty');" + LS +
             "            } else {" + LS +

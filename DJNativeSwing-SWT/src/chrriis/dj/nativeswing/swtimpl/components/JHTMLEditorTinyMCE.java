@@ -119,6 +119,7 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
             "          try {" + LS +
             "            var newHtmlContent = inst.getContent();" + LS +
             "            if(newHtmlContent != htmlContent) {" + LS +
+            "              htmlContent = null;" + LS +
             "              htmlDirtyTracker = null;" + LS +
             "              sendCommand('[Chrriis]JH_setDirty');" + LS +
             "            } else {" + LS +
