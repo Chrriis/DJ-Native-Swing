@@ -231,18 +231,18 @@ class NativeWebBrowser extends NativeComponent {
         return null;
       }
       Object[] listeners = nativeWebBrowser.listenerList.getListenerList();
-      WebBrowserEvent e = null;
+      WebBrowserCommandEvent e = null;
       String command = (String)args[0];
       Object[] arguments = (Object[])args[1];
       boolean isInternal = command.startsWith("[Chrriis]");
       for(int i=listeners.length-2; i>=0; i-=2) {
         if(listeners[i] == WebBrowserListener.class) {
           if(e == null) {
-            e = new WebBrowserEvent(webBrowser);
+            e = new WebBrowserCommandEvent(webBrowser, command, arguments);
           }
           WebBrowserListener webBrowserListener = (WebBrowserListener)listeners[i + 1];
           if(!isInternal || webBrowserListener.getClass().getName().startsWith("chrriis.")) {
-            webBrowserListener.commandReceived(e, command, arguments);
+            webBrowserListener.commandReceived(e);
           }
         }
       }

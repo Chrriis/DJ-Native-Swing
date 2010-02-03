@@ -13,7 +13,7 @@ import java.util.EventObject;
 /**
  * @author Christopher Deckers
  */
-public class WebBrowserEvent extends EventObject{
+public class WebBrowserEvent extends EventObject {
 
   private JWebBrowser webBrowser;
 

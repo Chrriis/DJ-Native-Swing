@@ -190,7 +190,8 @@ public class JHTMLEditor extends NSPanelComponent {
     }
     webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
       @Override
-      public void commandReceived(WebBrowserEvent e, String command, Object[] args) {
+      public void commandReceived(WebBrowserCommandEvent e) {
+        String command = e.getCommand();
         if("[Chrriis]JH_setLoaded".equals(command)) {
           Object[] listeners = listenerList.getListenerList();
           for(int i=listeners.length-2; i>=0; i-=2) {
@@ -297,13 +298,13 @@ public class JHTMLEditor extends NSPanelComponent {
     }
     this.isDirty = isDirty;
     Object[] listeners = listenerList.getListenerList();
-    HTMLEditorEvent ev = null;
+    HTMLEditorDirtyStateEvent ev = null;
     for(int i=listeners.length-2; i>=0; i-=2) {
       if(listeners[i] == HTMLEditorListener.class) {
         if(ev == null) {
-          ev = new HTMLEditorEvent(JHTMLEditor.this);
+          ev = new HTMLEditorDirtyStateEvent(JHTMLEditor.this, isDirty);
         }
-        ((HTMLEditorListener)listeners[i + 1]).notifyDirtyStateChanged(ev, isDirty);
+        ((HTMLEditorListener)listeners[i + 1]).notifyDirtyStateChanged(ev);
       }
     }
   }

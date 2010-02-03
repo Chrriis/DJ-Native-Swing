@@ -50,6 +50,6 @@ public interface WebBrowserListener extends EventListener {
    * <code>window.location = 'command://' + encodeURIComponent('somecommand') + '&' + encodeURIComponent('param1') + '&' + encodeURIComponent('param2') + ...</code><br/>
    * or as a static HREF link.
    */
-  public void commandReceived(WebBrowserEvent e, String command, Object[] args);
+  public void commandReceived(WebBrowserCommandEvent e);
 
 }

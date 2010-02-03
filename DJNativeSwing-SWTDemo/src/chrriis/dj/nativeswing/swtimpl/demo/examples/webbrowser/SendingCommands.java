@@ -22,7 +22,7 @@ import chrriis.common.UIUtils;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
 import chrriis.dj.nativeswing.swtimpl.components.WebBrowserAdapter;
-import chrriis.dj.nativeswing.swtimpl.components.WebBrowserEvent;
+import chrriis.dj.nativeswing.swtimpl.components.WebBrowserCommandEvent;
 
 /**
  * @author Christopher Deckers
@@ -47,14 +47,12 @@ public class SendingCommands extends JPanel {
     webBrowser.setStatusBarVisible(true);
     webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
       @Override
-      public void commandReceived(WebBrowserEvent e, String command, Object[] args) {
-        String commandText = command;
-        if(args.length > 0) {
-          commandText += " " + Arrays.toString(args);
-        }
-        receivedCommandTextField.setText(commandText);
+      public void commandReceived(WebBrowserCommandEvent e) {
+        String command = e.getCommand();
+        Object[] parameters = e.getParameters();
+        receivedCommandTextField.setText(command + (parameters.length > 0? " " + Arrays.toString(parameters): ""));
         if("store".equals(command)) {
-          String data = (String)args[0] + " " + (String)args[1];
+          String data = (String)parameters[0] + " " + (String)parameters[1];
           if(JOptionPane.showConfirmDialog(webBrowser, "Do you want to store \"" + data + "\" in a database?\n(Not for real of course!)", "Data received from the web browser", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             // Data should be used here
           }

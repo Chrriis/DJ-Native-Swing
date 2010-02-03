@@ -25,7 +25,7 @@ import javax.swing.SwingUtilities;
 import chrriis.common.UIUtils;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.components.HTMLEditorAdapter;
-import chrriis.dj.nativeswing.swtimpl.components.HTMLEditorEvent;
+import chrriis.dj.nativeswing.swtimpl.components.HTMLEditorDirtyStateEvent;
 import chrriis.dj.nativeswing.swtimpl.components.JHTMLEditor;
 import chrriis.dj.nativeswing.swtimpl.components.JHTMLEditor.HTMLEditorImplementation;
 
@@ -47,8 +47,8 @@ public class EditorDirtyExample extends JPanel {
     dirtyPanel.add(dirtyLabel);
     htmlEditor.addHTMLEditorListener(new HTMLEditorAdapter() {
       @Override
-      public void notifyDirtyStateChanged(HTMLEditorEvent e, boolean isDirty) {
-        dirtyLabel.setText("Dirty: " + isDirty);
+      public void notifyDirtyStateChanged(HTMLEditorDirtyStateEvent e) {
+        dirtyLabel.setText("Dirty: " + e.isDirty());
       }
     });
     JButton markAsCleanButton = new JButton("Mark as clean");

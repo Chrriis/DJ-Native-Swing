@@ -16,7 +16,7 @@ public class HTMLEditorAdapter implements HTMLEditorListener {
   public void saveHTML(HTMLEditorSaveEvent e) {
   }
 
-  public void notifyDirtyStateChanged(HTMLEditorEvent e, boolean isDirty) {
+  public void notifyDirtyStateChanged(HTMLEditorDirtyStateEvent e) {
   }
 
 }

@@ -25,6 +25,7 @@ import javax.swing.SwingUtilities;
 
 import chrriis.common.UIUtils;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
+import chrriis.dj.nativeswing.swtimpl.components.FlashPlayerCommandEvent;
 import chrriis.dj.nativeswing.swtimpl.components.FlashPlayerListener;
 import chrriis.dj.nativeswing.swtimpl.components.JFlashPlayer;
 
@@ -88,14 +89,15 @@ public class FunctionCalls extends JPanel {
       }
     });
     flashPlayer.addFlashPlayerListener(new FlashPlayerListener() {
-      public void commandReceived(String command, Object[] args) {
-        if("sendCommandTest".equals(command)) {
+      public void commandReceived(FlashPlayerCommandEvent e) {
+        if("sendCommandTest".equals(e.getCommand())) {
           StringBuilder sb = new StringBuilder();
-          for(int i=0; i<args.length; i++) {
+          Object[] parameters = e.getParameters();
+          for(int i=0; i<parameters.length; i++) {
             if(i > 0) {
               sb.append(", ");
             }
-            sb.append(args[i]);
+            sb.append(parameters[i]);
           }
           commandValueLabel.setText(sb.toString());
         }
