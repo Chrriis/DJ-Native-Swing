@@ -46,7 +46,7 @@ public class TinyMCEExample extends JPanel {
     optionMap.put("theme_advanced_toolbar_location", "'top'");
     optionMap.put("theme_advanced_toolbar_align", "'left'");
     // Language can be configured when language packs are added to the classpath. Language packs can be found here: http://tinymce.moxiecode.com/download_i18n.php
-    optionMap.put("language", "'de'");
+//    optionMap.put("language", "'de'");
     optionMap.put("plugins", "'table,paste,contextmenu'");
     final JHTMLEditor htmlEditor = new JHTMLEditor(JHTMLEditor.HTMLEditorImplementation.TinyMCE,
         JHTMLEditor.TinyMCEOptions.setOptions(optionMap)
