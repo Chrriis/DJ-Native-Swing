@@ -177,9 +177,10 @@ public class WebBrowserWindowFactory {
     Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
     size.width = size.width * 80 / 100;
     size.height = size.height * 80 / 100;
-    ((Window)webBrowserWindow).setSize(size);
-    ((Window)webBrowserWindow).setLocationByPlatform(true);
-    ((Window)webBrowserWindow).addWindowListener(new WindowAdapter() {
+    Window window = (Window)webBrowserWindow;
+    window.setSize(size);
+    window.setLocationByPlatform(true);
+    window.addWindowListener(new WindowAdapter() {
       @Override
       public void windowOpened(WindowEvent e) {
         webBrowserWindowStrategy.getWebBrowser().requestFocus();
