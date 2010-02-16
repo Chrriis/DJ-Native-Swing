@@ -635,7 +635,7 @@ public class JWebBrowser extends NSPanelComponent {
    */
   public void removeWebBrowserListener(WebBrowserListener listener) {
     listenerList.remove(WebBrowserListener.class, listener);
-    NativeWebBrowserListener nativeWebBrowserListener = webBrowserListenerToNativeWebBrowserListenerMap.get(listener);
+    NativeWebBrowserListener nativeWebBrowserListener = webBrowserListenerToNativeWebBrowserListenerMap.remove(listener);
     if(nativeWebBrowserListener != null) {
       nativeWebBrowser.removeWebBrowserListener(nativeWebBrowserListener);
     }
