@@ -687,7 +687,11 @@ public class DefaultWebBrowserDecorator extends WebBrowserDecorator {
     webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
       @Override
       public void titleChanged(WebBrowserEvent e) {
-        setWebBrowserWindowTitle(webBrowserWindow, e.getWebBrowser().getPageTitle());
+        if(webBrowser.getWebBrowserWindow() == webBrowserWindow) {
+          setWebBrowserWindowTitle(webBrowserWindow, webBrowser.getPageTitle());
+        } else {
+          webBrowser.removeWebBrowserListener(this);
+        }
       }
     });
     setWebBrowserWindowIcon(webBrowserWindow);
