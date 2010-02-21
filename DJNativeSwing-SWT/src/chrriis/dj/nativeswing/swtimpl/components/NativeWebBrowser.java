@@ -87,6 +87,7 @@ class NativeWebBrowser extends NativeComponent {
       if(browserWindow != null) {
         browserWindow.dispose();
       }
+      webBrowser.disposeNativePeer();
       return null;
     }
   }
@@ -402,7 +403,7 @@ class NativeWebBrowser extends NativeComponent {
     final Browser browser = new Browser(shell, style);
     configureBrowserFunction(browser);
     browser.addCloseWindowListener(new CloseWindowListener() {
-      public void close(WindowEvent event) {
+      public void close(WindowEvent e) {
         new CMJ_closeWindow().asyncExec(browser);
       }
     });
