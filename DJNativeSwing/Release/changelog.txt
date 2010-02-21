@@ -7,6 +7,7 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 0.9.9 (xxxxxxxxxxxxxx):
 
+- Modality improvements: new windows are not blocked by current modal dialogs.
 - Code that was applying shaping depending on sub-windows is removed.
 - Web server allows to plug content providers.
 - Web server can pass HTTP headers for dynamic content.

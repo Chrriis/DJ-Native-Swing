@@ -178,15 +178,6 @@ public class NativeSwing {
   private static List<Window> windowList;
 
   static Window[] getWindows() {
-    if(Utils.IS_JAVA_6_OR_GREATER) {
-      List<Window> windowList = new ArrayList<Window>();
-      for(Window window: Window.getWindows()) {
-        if(!(window instanceof HeavyweightForcerWindow)) {
-          windowList.add(window);
-        }
-      }
-      return windowList.toArray(new Window[0]);
-    }
     return windowList == null? new Window[0]: windowList.toArray(new Window[0]);
   }
 
@@ -246,7 +237,7 @@ public class NativeSwing {
     private void computeBlockedDialogs() {
       blockedWindowSet.clear();
       Window[] windows = getWindows();
-      Dialog applicationModalDialog = null;
+      List<Dialog> applicationModalDialogList = new ArrayList<Dialog>();
       for(Dialog dialog: dialogList) {
         if(dialog.isVisible()) {
           boolean isApplicationModal = false;
@@ -261,31 +252,39 @@ public class NativeSwing {
             isApplicationModal = true;
           }
           if(isApplicationModal) {
-            if(applicationModalDialog != null) {
-              if(isDescendant(dialog, applicationModalDialog)) {
-                applicationModalDialog = dialog;
-              }
-            } else {
-              applicationModalDialog = dialog;
-            }
+            applicationModalDialogList.add(dialog);
           }
         }
       }
-      if(applicationModalDialog != null) {
-        for(Window window: windows) {
-          if(window != applicationModalDialog && !isDescendant(window, applicationModalDialog)) {
-            boolean isIncluded = true;
-            if(Utils.IS_JAVA_6_OR_GREATER) {
-              switch(window.getModalExclusionType()) {
-                case APPLICATION_EXCLUDE:
-                case TOOLKIT_EXCLUDE:
+      if(!applicationModalDialogList.isEmpty()) {
+        for(int i=0; i<windows.length; i++) {
+          Window window = windows[i];
+          boolean isIncluded = false;
+          for(Dialog applicationModalDialog: applicationModalDialogList) {
+            if(window != applicationModalDialog && !isDescendant(window, applicationModalDialog)) {
+              isIncluded = true;
+              // if the blocking dialog was opened before that one, it does not block.
+              for(int j=0; j<i; j++) {
+                if(windows[j] == applicationModalDialog) {
                   isIncluded = false;
                   break;
+                }
+              }
+              if(isIncluded && Utils.IS_JAVA_6_OR_GREATER) {
+                switch(window.getModalExclusionType()) {
+                  case APPLICATION_EXCLUDE:
+                  case TOOLKIT_EXCLUDE:
+                    isIncluded = false;
+                    break;
+                }
               }
             }
             if(isIncluded) {
-              blockedWindowSet.add(window);
+              break;
             }
+          }
+          if(isIncluded) {
+            blockedWindowSet.add(window);
           }
         }
       }
@@ -348,7 +347,7 @@ public class NativeSwing {
           isAdjusting = true;
           break;
       }
-      if(!Utils.IS_JAVA_6_OR_GREATER && e.getSource() instanceof Window) {
+      if(e.getSource() instanceof Window) {
         if(windowList == null) {
           windowList = new ArrayList<Window>();
         }
