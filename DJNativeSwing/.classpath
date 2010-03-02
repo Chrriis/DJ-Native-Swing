@@ -3,6 +3,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jna_WindowUtils"/>
-	<classpathentry kind="lib" path="lib/jna/jna-3.0.7.jar"/>
+	<classpathentry kind="lib" path="lib/jna/jna-3.2.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
