@@ -579,12 +579,7 @@ public class NativeInterface {
       optionalReferenceList.add("org/mozilla/xpcom/Mozilla.class");
       optionalReferenceList.add("org/mozilla/interfaces/nsIWebBrowser.class");
       for(String optionalReference: optionalReferenceList) {
-        ClassLoader classLoader = NativeInterface.class.getClassLoader();
-        if(classLoader == null) {
-          if(ClassLoader.getSystemResource(optionalReference) != null) {
-            referenceList.add(optionalReference);
-          }
-        } else if(classLoader.getResource(optionalReference) != null) {
+        if(NativeInterface.class.getResource('/' + optionalReference) != null) {
           referenceList.add(optionalReference);
         }
       }
@@ -595,17 +590,12 @@ public class NativeInterface {
           if(o instanceof Class<?>) {
             clazzClassPath = Utils.getClassPathFile((Class<?>)o);
           } else {
-            clazzClassPath = Utils.getClassPathFile((String)o);
-            ClassLoader classLoader = NativeInterface.class.getClassLoader();
-            if(classLoader == null) {
-              if(ClassLoader.getSystemResource((String)o) == null) {
-                throw new IllegalStateException("A resource that is needed in the classpath is missing: " + o);
-              }
-            } else if(classLoader.getResource((String)o) == null) {
+            String resource = (String)o;
+            clazzClassPath = Utils.getClassPathFile(resource);
+            if(NativeInterface.class.getResource('/' + resource) == null) {
               throw new IllegalStateException("A resource that is needed in the classpath is missing: " + o);
             }
           }
-          clazzClassPath = o instanceof Class<?>? Utils.getClassPathFile((Class<?>)o): Utils.getClassPathFile((String)o);
           if(clazzClassPath != null) {
             String path = clazzClassPath.getAbsolutePath();
             if(!classPathList.contains(path)) {
