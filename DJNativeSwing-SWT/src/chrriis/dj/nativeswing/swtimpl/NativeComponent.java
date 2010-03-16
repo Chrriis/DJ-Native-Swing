@@ -495,7 +495,7 @@ public abstract class NativeComponent extends Canvas {
     public Object run(Object[] args) throws Exception {
       // We need to synchronize: a non-UI thread may send a message thinking the component is valid, but the message would be invalid as the control is not yet in the registry.
       synchronized(NativeComponent.getControlRegistry()) {
-        Shell shell = createShell(args[2]);
+        final Shell shell = createShell(args[2]);
         shell.addControlListener(new ControlAdapter() {
           private boolean isAdjusting;
           @Override
@@ -517,10 +517,17 @@ public abstract class NativeComponent extends Canvas {
         int componentID = (Integer)args[0];
         Method createControlMethod = Class.forName((String)args[1]).getDeclaredMethod("createControl", Shell.class, Object[].class);
         createControlMethod.setAccessible(true);
-        Control control = (Control)createControlMethod.invoke(null, shell, args[3]);
+        final Control control = (Control)createControlMethod.invoke(null, shell, args[3]);
         NativeComponent.getControlRegistry().add(control, componentID);
         configureControl(control, componentID);
         shell.setVisible (true);
+        shell.getDisplay().asyncExec(new Runnable() {
+          public void run() {
+            if(!shell.isDisposed()) {
+              shell.setLocation(0, 0);
+            }
+          }
+        });
       }
       return null;
     }

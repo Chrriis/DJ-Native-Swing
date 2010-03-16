@@ -92,17 +92,17 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
             "      function debug (text) {" + LS +
             "        document.getElementById ('debug').innerHTML = text;" + LS +
             "      }" + LS +
-            "      window.onerror = function (e) {" + LS +
-            "        var text = '';" + LS +
-            "        if (typeof e == 'string') {" + LS +
-            "          text = e;" + LS +
-            "        } else {" +
-            "          for (var x in e) {" + LS +
-            "            text += x+': '+e[x]+'\\n';" + LS +
-            "          }" + LS +
-            "        }" + LS +
-            "        debug (text);" + LS +
-            "      };" + LS +
+//            "      window.onerror = function (e) {" + LS +
+//            "        var text = '';" + LS +
+//            "        if (typeof e == 'string') {" + LS +
+//            "          text = e;" + LS +
+//            "        } else {" +
+//            "          for (var x in e) {" + LS +
+//            "            text += x+': '+e[x]+'\\n';" + LS +
+//            "          }" + LS +
+//            "        }" + LS +
+//            "        debug (text);" + LS +
+//            "      };" + LS +
             "      var sendCommand = " + JWebBrowser.COMMAND_FUNCTION + ";" + LS +
             "      var htmlContent;" + LS +
             "      var htmlDirtyTracker;" + LS +
