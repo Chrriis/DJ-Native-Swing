@@ -9,16 +9,13 @@ package chrriis.dj.nativeswing.swtimpl.components;
 
 import java.awt.Component;
 import java.io.Serializable;
-import java.util.HashMap;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Shell;
 
 import chrriis.dj.nativeswing.swtimpl.ControlCommandMessage;
-import chrriis.dj.nativeswing.swtimpl.components.ModalDialogUtils.NativeModalComponent;
+import chrriis.dj.nativeswing.swtimpl.NativeModalDialogHandler;
 
 /**
  * A native file selection dialog.
@@ -26,64 +23,46 @@ import chrriis.dj.nativeswing.swtimpl.components.ModalDialogUtils.NativeModalCom
  */
 public class JFileDialog {
 
-  private static class NativeFileDialogContainer extends NativeModalComponent {
-
-    private static class CMN_openFileDialog extends ControlCommandMessage {
-      @Override
-      public Object run(Object[] args) {
-        Data data = (Data)args[0];
-        Control control = getControl();
-        if(control.isDisposed()) {
-          return data;
-        }
-        int style = 0;
-        if(data.isSave) {
-          style |= SWT.SAVE;
-        }
-        if(data.isMulti) {
-          style |= SWT.MULTI;
-        }
-        FileDialog fileDialog = new FileDialog(control.getShell(), style);
-        if(data.title != null) {
-          fileDialog.setText(data.title);
-        }
-        fileDialog.setOverwrite(data.isConfirmedOverwrite);
-        if(data.parentDirectory != null) {
-          fileDialog.setFilterPath(data.parentDirectory);
-        }
-        if(data.selectedFileNames != null && data.selectedFileNames.length == 1) {
-          fileDialog.setFileName(data.selectedFileNames[0]);
-        }
-        if(data.extensionFilters != null) {
-          fileDialog.setFilterExtensions(data.extensionFilters);
-          fileDialog.setFilterNames(data.extensionFiltersNames);
-          fileDialog.setFilterIndex(data.selectedExtensionFilterIndex);
-        }
-        fileDialog.open();
-        data.selectedFileNames = fileDialog.getFileNames();
-        data.selectedExtensionFilterIndex = fileDialog.getFilterIndex();
-        data.parentDirectory = fileDialog.getFilterPath();
-        if(data.parentDirectory.length() == 0) {
-          data.parentDirectory = null;
-        }
+  private static class CMN_openFileDialog extends ControlCommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      Data data = (Data)args[0];
+      Control control = getControl();
+      if(control.isDisposed()) {
         return data;
       }
+      int style = 0;
+      if(data.isSave) {
+        style |= SWT.SAVE;
+      }
+      if(data.isMulti) {
+        style |= SWT.MULTI;
+      }
+      FileDialog fileDialog = new FileDialog(control.getShell(), style);
+      if(data.title != null) {
+        fileDialog.setText(data.title);
+      }
+      fileDialog.setOverwrite(data.isConfirmedOverwrite);
+      if(data.parentDirectory != null) {
+        fileDialog.setFilterPath(data.parentDirectory);
+      }
+      if(data.selectedFileNames != null && data.selectedFileNames.length == 1) {
+        fileDialog.setFileName(data.selectedFileNames[0]);
+      }
+      if(data.extensionFilters != null) {
+        fileDialog.setFilterExtensions(data.extensionFilters);
+        fileDialog.setFilterNames(data.extensionFiltersNames);
+        fileDialog.setFilterIndex(data.selectedExtensionFilterIndex);
+      }
+      fileDialog.open();
+      data.selectedFileNames = fileDialog.getFileNames();
+      data.selectedExtensionFilterIndex = fileDialog.getFilterIndex();
+      data.parentDirectory = fileDialog.getFilterPath();
+      if(data.parentDirectory.length() == 0) {
+        data.parentDirectory = null;
+      }
+      return data;
     }
-
-    @SuppressWarnings("unused")
-    protected static Control createControl(Shell shell, Object[] parameters) {
-      return new Composite(shell, SWT.NONE);
-    }
-
-    @Override
-    protected Component createEmbeddableComponent() {
-      return super.createEmbeddableComponent(new HashMap<Object, Object>());
-    }
-
-    public Data open(Data data) {
-      return (Data)new CMN_openFileDialog().syncExec(this, data);
-    }
-
   }
 
   private static class Data implements Serializable {
@@ -105,12 +84,12 @@ public class JFileDialog {
    * @param component The parent component.
    */
   public void show(Component component) {
-    final NativeFileDialogContainer nativeComponent = new NativeFileDialogContainer();
-    ModalDialogUtils.showModalDialog(component, nativeComponent, new Runnable() {
-      public void run() {
-        data = nativeComponent.open(data);
+    new NativeModalDialogHandler() {
+      @Override
+      protected void processResult(Object result) {
+        data = (Data)result;
       }
-    });
+    }.showModalDialog(component, new CMN_openFileDialog(), data);
   }
 
   /**

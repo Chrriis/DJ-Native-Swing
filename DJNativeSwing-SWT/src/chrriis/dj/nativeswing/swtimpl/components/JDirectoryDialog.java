@@ -9,16 +9,13 @@ package chrriis.dj.nativeswing.swtimpl.components;
 
 import java.awt.Component;
 import java.io.Serializable;
-import java.util.HashMap;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.Shell;
 
 import chrriis.dj.nativeswing.swtimpl.ControlCommandMessage;
-import chrriis.dj.nativeswing.swtimpl.components.ModalDialogUtils.NativeModalComponent;
+import chrriis.dj.nativeswing.swtimpl.NativeModalDialogHandler;
 
 /**
  * A native directory selection dialog.
@@ -26,45 +23,27 @@ import chrriis.dj.nativeswing.swtimpl.components.ModalDialogUtils.NativeModalCom
  */
 public class JDirectoryDialog {
 
-  private static class NativeDirectoryDialogContainer extends NativeModalComponent {
-
-    private static class CMN_openDirectoryDialog extends ControlCommandMessage {
-      @Override
-      public Object run(Object[] args) {
-        Data data = (Data)args[0];
-        Control control = getControl();
-        if(control.isDisposed()) {
-          return data;
-        }
-        DirectoryDialog directoryDialog = new DirectoryDialog(control.getShell(), SWT.NONE);
-        if(data.title != null) {
-          directoryDialog.setText(data.title);
-        }
-        if(data.selectedDirectory != null) {
-          directoryDialog.setFilterPath(data.selectedDirectory);
-        }
-        if(data.message != null) {
-          directoryDialog.setMessage(data.message);
-        }
-        data.selectedDirectory = directoryDialog.open();
+  private static class CMN_openDirectoryDialog extends ControlCommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      Data data = (Data)args[0];
+      Control control = getControl();
+      if(control.isDisposed()) {
         return data;
       }
+      DirectoryDialog directoryDialog = new DirectoryDialog(control.getShell(), SWT.NONE);
+      if(data.title != null) {
+        directoryDialog.setText(data.title);
+      }
+      if(data.selectedDirectory != null) {
+        directoryDialog.setFilterPath(data.selectedDirectory);
+      }
+      if(data.message != null) {
+        directoryDialog.setMessage(data.message);
+      }
+      data.selectedDirectory = directoryDialog.open();
+      return data;
     }
-
-    @SuppressWarnings("unused")
-    protected static Control createControl(Shell shell, Object[] parameters) {
-      return new Composite(shell, SWT.NONE);
-    }
-
-    @Override
-    protected Component createEmbeddableComponent() {
-      return super.createEmbeddableComponent(new HashMap<Object, Object>());
-    }
-
-    public Data open(Data data) {
-      return (Data)new CMN_openDirectoryDialog().syncExec(this, data);
-    }
-
   }
 
   private static class Data implements Serializable {
@@ -80,12 +59,12 @@ public class JDirectoryDialog {
    * @param component The parent component.
    */
   public void show(Component component) {
-    final NativeDirectoryDialogContainer nativeComponent = new NativeDirectoryDialogContainer();
-    ModalDialogUtils.showModalDialog(component, nativeComponent, new Runnable() {
-      public void run() {
-        data = nativeComponent.open(data);
+    new NativeModalDialogHandler() {
+      @Override
+      protected void processResult(Object result) {
+        data = (Data)result;
       }
-    });
+    }.showModalDialog(component, new CMN_openDirectoryDialog(), data);
   }
 
   /**
