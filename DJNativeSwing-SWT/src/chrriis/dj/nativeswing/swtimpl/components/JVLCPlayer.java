@@ -91,17 +91,21 @@ public class JVLCPlayer extends NSPanelComponent {
 
     @Override
     public String getLocalFileURL(File localFile) {
+      String absolutePath = localFile.getAbsolutePath();
+      if(absolutePath.startsWith("\\\\")) {
+        return absolutePath;
+      }
       String s;
       try {
         s = "file://" + localFile.toURI().toURL().toString().substring("file:".length());
       } catch (Exception e) {
-        s = "file:///" + localFile.getAbsolutePath();
+        s = "file:///" + absolutePath;
         if(Utils.IS_WINDOWS) {
           s = s.replace('\\', '/');
         }
       }
       // We have to convert all special remaining characters (e.g. letters with accents).
-      StringBuffer sb = new StringBuffer();
+      StringBuilder sb = new StringBuilder();
       for(int i=0; i<s.length(); i++) {
         char c = s.charAt(i);
         boolean isToEncode = false;

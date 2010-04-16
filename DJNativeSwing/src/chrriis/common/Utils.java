@@ -73,7 +73,7 @@ public class Utils {
     if(s == null || s.length() == 0) {
       return s;
     }
-    StringBuffer sb = new StringBuffer((int)(s.length() * 1.1));
+    StringBuilder sb = new StringBuilder((int)(s.length() * 1.1));
     for(int i=0; i<s.length(); i++) {
       char c = s.charAt(i);
       switch(c) {

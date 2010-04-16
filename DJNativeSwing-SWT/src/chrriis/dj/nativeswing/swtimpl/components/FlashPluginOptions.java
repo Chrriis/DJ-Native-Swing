@@ -74,7 +74,7 @@ public class FlashPluginOptions {
 
   Map<String, String> getHTMLParameters() {
     HashMap<String, String> htmlParameters = new HashMap<String, String>(getParameters());
-    StringBuffer variablesSB = new StringBuffer();
+    StringBuilder variablesSB = new StringBuilder();
     for(Entry<String, String> variable: getVariables().entrySet()) {
       if(variablesSB.length() > 0) {
         variablesSB.append('&');

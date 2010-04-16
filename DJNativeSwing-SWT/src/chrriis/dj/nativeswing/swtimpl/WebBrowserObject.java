@@ -230,8 +230,8 @@ public abstract class WebBrowserObject {
         @Override
         public InputStream getInputStream() {
           ObjectHTMLConfiguration objectHtmlConfiguration = webBrowserObject.getObjectHtmlConfiguration();
-          StringBuffer objectParameters = new StringBuffer();
-          StringBuffer embedParameters = new StringBuffer();
+          StringBuilder objectParameters = new StringBuilder();
+          StringBuilder embedParameters = new StringBuilder();
           Map<String, String> parameters = objectHtmlConfiguration.getHTMLParameters();
           HashMap<String, String> htmlParameters = parameters == null? new HashMap<String, String>(): new HashMap<String, String>(parameters);
           String windowsParamName = objectHtmlConfiguration.getWindowsParamName();
