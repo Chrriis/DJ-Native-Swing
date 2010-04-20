@@ -202,6 +202,21 @@ public abstract class NativeComponent extends Canvas {
   }
 
   /**
+   * Get the native components that are currently registered.
+   * @return The currently registered native components.
+   */
+  public static NativeComponent[] getNativeComponents() {
+    List<NativeComponent> nativeComponentList = new ArrayList<NativeComponent>();
+    for(int instanceID: nativeComponentRegistry.getInstanceIDs()) {
+      NativeComponent nativeComponent = (NativeComponent)nativeComponentRegistry.get(instanceID);
+      if(nativeComponent != null) {
+        nativeComponentList.add(nativeComponent);
+      }
+    }
+    return nativeComponentList.toArray(new NativeComponent[0]);
+  }
+
+  /**
    * Get the registry of the components, which references created components using the component ID.
    * @return the registry.
    */

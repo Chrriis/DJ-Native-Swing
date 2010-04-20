@@ -73,6 +73,14 @@ are using them get loaded.
   Set whether the messages that did not reach the native component should be
   printed.
 
+* nativeswing.components.debug.printCreation
+  = true/false (default: false)
+  Set whether the creation of a native component should be printed.
+
+* nativeswing.components.debug.printDisposal
+  = true/false (default: false)
+  Set whether the disposal of a native component should be printed.
+
 * nativeswing.components.swallowRuntimeExceptions
   = true/false (default: false)
   Set whether synchronous component methods should swallow runtime
