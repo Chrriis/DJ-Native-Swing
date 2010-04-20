@@ -192,6 +192,20 @@ public enum NSSystemPropertySWT {
   COMPONENTS_DEBUG_PRINTFAILEDMESSAGES("nativeswing.components.debug.printFailedMessages", Type.READ_WRITE),
 
   /**
+   * nativeswing.components.debug.printCreation
+   * = true/false (default: false)<br/>
+   * Set whether the creation of a native component should be printed.
+   */
+  COMPONENTS_DEBUG_PRINTCREATION("nativeswing.components.debug.printCreation", Type.READ_WRITE),
+
+  /**
+   * nativeswing.components.debug.printDisposal
+   * = true/false (default: false)<br/>
+   * Set whether the disposal of a native component should be printed.
+   */
+  COMPONENTS_DEBUG_PRINTDISPOSAL("nativeswing.components.debug.printDisposal", Type.READ_WRITE),
+
+  /**
    * nativeswing.components.swallowRuntimeExceptions
    * = true/false (default: false)<br/>
    * Set whether synchronous component methods should swallow runtime

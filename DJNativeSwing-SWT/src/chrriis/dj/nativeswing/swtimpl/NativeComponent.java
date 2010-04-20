@@ -49,6 +49,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseMoveListener;
@@ -514,10 +516,20 @@ public abstract class NativeComponent extends Canvas {
           }
         });
         shell.setLayout(new FillLayout());
-        int componentID = (Integer)args[0];
+        final int componentID = (Integer)args[0];
         Method createControlMethod = Class.forName((String)args[1]).getDeclaredMethod("createControl", Shell.class, Object[].class);
         createControlMethod.setAccessible(true);
         final Control control = (Control)createControlMethod.invoke(null, shell, args[3]);
+        if(Boolean.parseBoolean(NSSystemPropertySWT.COMPONENTS_DEBUG_PRINTCREATION.get())) {
+          System.err.println("Created control: " + componentID);
+        }
+        control.addDisposeListener(new DisposeListener() {
+          public void widgetDisposed(DisposeEvent e) {
+            if(Boolean.parseBoolean(NSSystemPropertySWT.COMPONENTS_DEBUG_PRINTDISPOSAL.get())) {
+              System.err.println("Disposed control: " + componentID);
+            }
+          }
+        });
         NativeComponent.getControlRegistry().add(control, componentID);
         configureControl(control, componentID);
         shell.setVisible (true);
