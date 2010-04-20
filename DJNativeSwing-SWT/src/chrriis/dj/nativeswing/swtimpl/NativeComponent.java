@@ -202,8 +202,8 @@ public abstract class NativeComponent extends Canvas {
   }
 
   /**
-   * Get the native components that are currently registered.
-   * @return The currently registered native components.
+   * Get the native components that are currently registered, which may have an invalid native peer.
+   * @return The currently registered native components, which may have an invalid native peer.
    */
   public static NativeComponent[] getNativeComponents() {
     List<NativeComponent> nativeComponentList = new ArrayList<NativeComponent>();
