@@ -61,6 +61,12 @@ import chrriis.dj.nativeswing.swtimpl.NativeComponent;
  */
 class NativeWebBrowser extends NativeComponent {
 
+  static enum WebBrowserRuntime {
+    DEFAULT,
+    XULRUNNER,
+    WEBKIT
+  }
+
   public static final String COMMAND_FUNCTION = "sendNSCommand";
   public static final String COMMAND_LOCATION_PREFIX = "command://";
   public static final String COMMAND_STATUS_PREFIX = "scommand://";
@@ -101,10 +107,16 @@ class NativeWebBrowser extends NativeComponent {
         return null;
       }
       JWebBrowser jWebBrowser;
-      if(nativeWebBrowser.isXULRunnerRuntime()) {
-        jWebBrowser = new JWebBrowser(JWebBrowser.useXULRunnerRuntime());
-      } else {
-        jWebBrowser = new JWebBrowser();
+      switch(nativeWebBrowser.getRuntime()) {
+        case WEBKIT:
+          jWebBrowser = new JWebBrowser(JWebBrowser.useWebkitRuntime());
+          break;
+        case XULRUNNER:
+          jWebBrowser = new JWebBrowser(JWebBrowser.useXULRunnerRuntime());
+          break;
+        default:
+          jWebBrowser = new JWebBrowser();
+          break;
       }
       Object[] listeners = nativeWebBrowser.listenerList.getListenerList();
       WebBrowserWindowWillOpenEvent e = null;
@@ -370,21 +382,21 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
 
-  private boolean isXULRunnerRuntime;
+  private WebBrowserRuntime runtime;
 
-  public boolean isXULRunnerRuntime() {
-    return isXULRunnerRuntime;
+  public WebBrowserRuntime getRuntime() {
+    return runtime;
   }
 
   private String xulRunnerHome;
 
   @Override
   protected Object[] getNativePeerCreationParameters() {
-    return new Object[] {xulRunnerHome, isXULRunnerRuntime};
+    return new Object[] {runtime, xulRunnerHome};
   }
 
   protected static Control createControl(Shell shell, Object[] parameters) {
-    String xulRunnerPath = (String)parameters[0];
+    String xulRunnerPath = (String)parameters[1];
     if(xulRunnerPath != null) {
       System.setProperty("org.eclipse.swt.browser.XULRunnerPath", xulRunnerPath);
     } else {
@@ -397,11 +409,19 @@ class NativeWebBrowser extends NativeComponent {
       }
     }
     int style = SWT.NONE;
-    if(((Boolean)parameters[1])) {
+    WebBrowserRuntime wbRuntime = (WebBrowserRuntime)parameters[0];
+    if(wbRuntime == WebBrowserRuntime.XULRUNNER) {
       style |= SWT.MOZILLA;
+    }
+    String webKitProperty = System.getProperty("org.eclipse.swt.browser.UseWebKitGTK");
+    if(wbRuntime == WebBrowserRuntime.WEBKIT) {
+      System.setProperty("org.eclipse.swt.browser.UseWebKitGTK", "true");
     }
     final Browser browser = new Browser(shell, style);
     configureBrowserFunction(browser);
+    if(wbRuntime == WebBrowserRuntime.WEBKIT) {
+      System.setProperty("org.eclipse.swt.browser.UseWebKitGTK", webKitProperty);
+    }
     browser.addCloseWindowListener(new CloseWindowListener() {
       public void close(WindowEvent e) {
         new CMJ_closeWindow().asyncExec(browser);
@@ -591,10 +611,20 @@ class NativeWebBrowser extends NativeComponent {
 
   private Reference<JWebBrowser> webBrowser;
 
-  public NativeWebBrowser(JWebBrowser webBrowser, boolean isXULRunnerRuntime) {
+  public NativeWebBrowser(JWebBrowser webBrowser, WebBrowserRuntime runtime) {
     this.webBrowser = new WeakReference<JWebBrowser>(webBrowser);
-    this.isXULRunnerRuntime = isXULRunnerRuntime || "xulrunner".equals(NSSystemPropertySWT.WEBBROWSER_RUNTIME.get());
-    xulRunnerHome = NSSystemPropertySWT.WEBBROWSER_XULRUNNER_HOME.get();
+    this.runtime = runtime;
+    if(runtime == WebBrowserRuntime.DEFAULT) {
+      String runtimeProperty = NSSystemPropertySWT.WEBBROWSER_RUNTIME.get();
+      if("xulrunner".equals(runtimeProperty)) {
+        this.runtime = WebBrowserRuntime.XULRUNNER;
+      } else if("webkit".equals(runtimeProperty)) {
+        this.runtime = WebBrowserRuntime.WEBKIT;
+      }
+    }
+    if(runtime == WebBrowserRuntime.XULRUNNER) {
+      xulRunnerHome = NSSystemPropertySWT.WEBBROWSER_XULRUNNER_HOME.get();
+    }
   }
 
   private static class CMN_clearSessionCookies extends CommandMessage {

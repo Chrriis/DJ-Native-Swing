@@ -178,10 +178,16 @@ public class DefaultWebBrowserDecorator extends WebBrowserDecorator {
       fileNewWindowMenuItem.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           JWebBrowser newWebBrowser;
-          if(((NativeWebBrowser)webBrowser.getNativeComponent()).isXULRunnerRuntime()) {
-            newWebBrowser = new JWebBrowser(JWebBrowser.useXULRunnerRuntime());
-          } else {
-            newWebBrowser = new JWebBrowser();
+          switch(((NativeWebBrowser)webBrowser.getNativeComponent()).getRuntime()) {
+            case WEBKIT:
+              newWebBrowser = new JWebBrowser(JWebBrowser.useWebkitRuntime());
+              break;
+            case XULRUNNER:
+              newWebBrowser = new JWebBrowser(JWebBrowser.useXULRunnerRuntime());
+              break;
+            default:
+              newWebBrowser = new JWebBrowser();
+              break;
           }
           JWebBrowser.copyAppearance(webBrowser, newWebBrowser);
           JWebBrowser.copyContent(webBrowser, newWebBrowser);

@@ -53,6 +53,17 @@ public class JWebBrowser extends NSPanelComponent {
     return XUL_RUNNER_RUNTIME_OPTION;
   }
 
+  private static final String USE_WEBKIT_RUNTIME_OPTION_KEY = "Webkit Runtime";
+  private static final NSOption WEBKIT_RUNTIME_OPTION = new NSOption(USE_WEBKIT_RUNTIME_OPTION_KEY);
+
+  /**
+   * Create an option to make the web browser use the Webkit runtime.
+   * @return the option to use the Webkit runtime.
+   */
+  static NSOption useWebkitRuntime() {
+    return WEBKIT_RUNTIME_OPTION;
+  }
+
   /**
    * A factory that creates the decorators for web browsers.
    * @author Christopher Deckers
@@ -162,7 +173,13 @@ public class JWebBrowser extends NSPanelComponent {
    */
   public JWebBrowser(NSOption... options) {
     Map<Object, Object> optionMap = NSOption.createOptionMap(options);
-    nativeWebBrowser = new NativeWebBrowser(this, optionMap.get(USE_XULRUNNER_RUNTIME_OPTION_KEY) != null);
+    NativeWebBrowser.WebBrowserRuntime runtime = NativeWebBrowser.WebBrowserRuntime.DEFAULT;
+    if(optionMap.get(USE_XULRUNNER_RUNTIME_OPTION_KEY) != null) {
+      runtime = NativeWebBrowser.WebBrowserRuntime.XULRUNNER;
+    } else if(optionMap.get(USE_WEBKIT_RUNTIME_OPTION_KEY) != null) {
+      runtime = NativeWebBrowser.WebBrowserRuntime.WEBKIT;
+    }
+    nativeWebBrowser = new NativeWebBrowser(this, runtime);
     initialize(nativeWebBrowser);
     embeddableComponent = nativeWebBrowser.createEmbeddableComponent(optionMap);
     webBrowserDecorator = createWebBrowserDecorator(embeddableComponent);
