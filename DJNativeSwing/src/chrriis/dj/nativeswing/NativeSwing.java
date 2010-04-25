@@ -412,8 +412,15 @@ public class NativeSwing {
     // We use our own HW forcing, so we disable the one from JNA
     System.setProperty("jna.force_hw_popups", "false");
     // We have to disable mixing until all bahaviors can be implemented using the JDK features.
-    if(SystemProperty.SUN_AWT_DISABLEMIXING.get() == null) {
-      SystemProperty.SUN_AWT_DISABLEMIXING.set("true");
+    if(SystemProperty.JAVAWEBSTART_VERSION.get() != null && SystemProperty.JAVA_VERSION.get().compareTo("1.6.0_18") >= 0) {
+      if(SystemProperty.SUN_AWT_DISABLEMIXING.get() == null) {
+        System.err.println("Under WebStart on Java >= 1.6.0_18, the value of the \"" + SystemProperty.SUN_AWT_DISABLEMIXING.getName() + "\" system property needs to be defined in the JNLP descriptor with value \"true\" (or \"false\" if you really want the default behavior). When not set to \"true\", the content of the native components may not be displayed.");
+        SystemProperty.SUN_AWT_DISABLEMIXING.set("false");
+      }
+    } else {
+      if(SystemProperty.SUN_AWT_DISABLEMIXING.get() == null) {
+        SystemProperty.SUN_AWT_DISABLEMIXING.set("true");
+      }
     }
     boolean isSunMixingEnabled = !"true".equals(SystemProperty.SUN_AWT_DISABLEMIXING.get()) && SystemProperty.JAVA_VERSION.get().compareTo("1.6.0_12") >= 0;
     isHeavyWeightForcerEnabled = isSunMixingEnabled;

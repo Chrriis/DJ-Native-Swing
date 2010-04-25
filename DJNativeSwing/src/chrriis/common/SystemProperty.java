@@ -109,6 +109,8 @@ public enum SystemProperty {
   JAVA_VENDOR_URL("java.vendor.url"),
   JAVA_VENDOR_URL_BUG("java.vendor.url.bug"),
 
+  JAVAWEBSTART_VERSION("javawebstart.version"),
+
   JAVA_VM_INFO("java.vm.info"),
   JAVA_VM_NAME("java.vm.name"),
   JAVA_VM_SPECIFICATION_NAME("java.vm.specification.name"),
