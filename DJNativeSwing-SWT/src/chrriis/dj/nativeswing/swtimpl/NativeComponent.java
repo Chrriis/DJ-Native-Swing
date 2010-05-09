@@ -728,9 +728,9 @@ public abstract class NativeComponent extends Canvas {
 
   private void throwDuplicateCreationException() {
     isNativePeerValid = false;
-    invalidNativePeerText = "Failed to create " + getComponentDescription() + "\n\nReason:\nA native component cannot be removed then re-added to a component hierarchy.";
+    invalidNativePeerText = "Failed to create " + getComponentDescription() + "\n\nReason:\nThe native component cannot be removed then re-added to a component hierarchy.";
     repaint();
-    throw new IllegalStateException("A native component cannot be removed then re-added to a component hierarchy! Nevertheless, you could achieve re-parenting by setting the constructor option to defer destruction until finalization.");
+    throw new IllegalStateException("The native component cannot be removed then re-added to a component hierarchy! To allow such reparenting, the component must be created with the \"destroyOnFinalization\" constructor option.");
   }
 
   private int additionCount;
