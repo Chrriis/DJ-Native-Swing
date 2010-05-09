@@ -8,15 +8,15 @@
 package chrriis.dj.nativeswing;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.Panel;
+import java.awt.event.MouseWheelEvent;
 
 import javax.swing.JComponent;
 import javax.swing.JLayeredPane;
-import javax.swing.RootPaneContainer;
 import javax.swing.SwingUtilities;
 
+import chrriis.common.UIUtils;
 import chrriis.dj.nativeswing.NativeComponentWrapper.NativeComponentHolder;
 
 /**
@@ -32,6 +32,7 @@ class NativeComponentProxyFinalizationPanel extends NativeComponentProxy {
 
     public EmbeddedPanel() {
       super(new BorderLayout());
+      enableEvents(MouseWheelEvent.MOUSE_WHEEL_EVENT_MASK);
     }
 
   }
@@ -42,8 +43,26 @@ class NativeComponentProxyFinalizationPanel extends NativeComponentProxy {
   @Override
   public void addNotify() {
     super.addNotify();
+    // This call throws a runtime exception if the hierarchy is not compatible
+    JLayeredPane layeredPane = findLayeredPane(this);
     boolean isEmbeddedPanelCreated = embeddedPanel != null;
-    if(!isEmbeddedPanelCreated) {
+    if(isEmbeddedPanelCreated) {
+      JLayeredPane oldLayeredPane = findLayeredPane(embeddedPanel);
+      if(layeredPane != oldLayeredPane) {
+        nativeComponentWrapper.prepareCrossWindowReparenting();
+        Container oldParent = embeddedPanel.getParent();
+        oldParent.remove(embeddedPanel);
+        UIUtils.revalidate(oldParent);
+        oldParent.repaint();
+        layeredPane.setLayer(embeddedPanel, Integer.MIN_VALUE);
+        layeredPane.add(embeddedPanel);
+        nativeComponentWrapper.commitCrossWindowReparenting();
+        UIUtils.revalidate(layeredPane);
+        layeredPane.repaint();
+        revalidate();
+        repaint();
+      }
+    } else {
       embeddedPanel = new EmbeddedPanel();
       embeddedPanel.add(nativeComponentWrapper.getNativeComponent(), BorderLayout.CENTER);
     }
@@ -71,23 +90,21 @@ class NativeComponentProxyFinalizationPanel extends NativeComponentProxy {
     if(!isProxied) {
       embeddedPanel.setVisible(false);
       isProxied = true;
-      for(Component parent = this; (parent = parent.getParent()) != null; ) {
-        if(!parent.isLightweight() && parent instanceof RootPaneContainer) {
-          JLayeredPane layeredPane = ((RootPaneContainer)parent).getLayeredPane();
-          layeredPane.setLayer(embeddedPanel, Integer.MIN_VALUE);
-          // Hack to reparent without the native component to be disposed
-//          layeredPane.add(embeddedPanel);
-          layeredPane.setComponentZOrder(embeddedPanel, 0);
-          layeredPane.revalidate();
-          layeredPane.repaint();
-          revalidate();
-          repaint();
-          super.removeNotify();
-          return;
-        }
+      try {
+        // This call throws a runtime exception if the hierarchy is not compatible
+        JLayeredPane layeredPane = findLayeredPane(this);
+        layeredPane.setLayer(embeddedPanel, Integer.MIN_VALUE);
+        // Hack to reparent without the native component to be disposed
+//        layeredPane.add(embeddedPanel);
+        layeredPane.setComponentZOrder(embeddedPanel, 0);
+        layeredPane.revalidate();
+        layeredPane.repaint();
+        revalidate();
+        repaint();
+      } catch(RuntimeException e) {
+        super.removeNotify();
+        throw e;
       }
-      super.removeNotify();
-      throw new IllegalStateException("The window ancestor must be a root pane container!");
     }
     super.removeNotify();
   }

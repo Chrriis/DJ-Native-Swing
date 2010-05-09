@@ -7,9 +7,13 @@
  */
 package chrriis.dj.nativeswing;
 
+import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+
+import javax.swing.JLayeredPane;
+import javax.swing.RootPaneContainer;
 
 /**
  * @author Christopher Deckers
@@ -48,5 +52,14 @@ abstract class NativeComponentProxy extends EmbeddableComponent {
   }
 
   protected abstract void dispose();
+
+  protected static JLayeredPane findLayeredPane(Component c) {
+    for(Component parent = c; (parent = parent.getParent()) != null; ) {
+      if(!parent.isLightweight() && parent instanceof RootPaneContainer) {
+        return ((RootPaneContainer)parent).getLayeredPane();
+      }
+    }
+    throw new IllegalStateException("The window ancestor must be a root pane container!");
+  }
 
 }

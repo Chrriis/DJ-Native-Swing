@@ -298,4 +298,13 @@ public class UIUtils {
     }
   }
 
+  public static void revalidate(Component c) {
+    if(c instanceof JComponent) {
+      ((JComponent) c).revalidate();
+    } else {
+      c.invalidate();
+      c.validate();
+    }
+  }
+
 }

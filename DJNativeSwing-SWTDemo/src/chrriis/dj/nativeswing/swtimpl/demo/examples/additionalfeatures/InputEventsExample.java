@@ -13,6 +13,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -24,6 +26,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 import chrriis.common.UIUtils;
+import chrriis.dj.nativeswing.swtimpl.NativeComponent;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
 
@@ -39,9 +42,10 @@ public class InputEventsExample extends JPanel {
     JPanel webBrowserPanel = new JPanel(new BorderLayout());
     webBrowserPanel.setBorder(BorderFactory.createTitledBorder("Native Web Browser component"));
     final JWebBrowser webBrowser = new JWebBrowser();
+    NativeComponent nativeComponent = webBrowser.getNativeComponent();
     // Add the popup menu
     webBrowser.setDefaultPopupMenuRegistered(false);
-    webBrowser.getNativeComponent().addMouseListener(new MouseAdapter() {
+    nativeComponent.addMouseListener(new MouseAdapter() {
       @Override
       public void mousePressed(MouseEvent e) {
         maybeShowPopup(e);
@@ -69,7 +73,7 @@ public class InputEventsExample extends JPanel {
     southPanel.setBorder(BorderFactory.createTitledBorder("Key and mouse events from the web browser"));
     textArea = new JTextArea();
     textArea.setEditable(false);
-    webBrowser.getNativeComponent().addMouseListener(new MouseAdapter() {
+    nativeComponent.addMouseListener(new MouseAdapter() {
       @Override
       public void mousePressed(MouseEvent e) {
         textArea.append(e.toString() + "\n");
@@ -79,7 +83,12 @@ public class InputEventsExample extends JPanel {
         textArea.append(e.toString() + "\n");
       }
     });
-    webBrowser.getNativeComponent().addKeyListener(new KeyAdapter() {
+    nativeComponent.addMouseWheelListener(new MouseWheelListener() {
+      public void mouseWheelMoved(MouseWheelEvent e) {
+        textArea.append(e.toString() + "\n");
+      }
+    });
+    nativeComponent.addKeyListener(new KeyAdapter() {
       @Override
       public void keyPressed(KeyEvent e) {
         textArea.append(e.toString() + "\n");

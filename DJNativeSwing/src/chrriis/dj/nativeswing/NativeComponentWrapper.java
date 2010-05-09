@@ -13,6 +13,7 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
+import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
@@ -108,6 +109,7 @@ public class NativeComponentWrapper {
     public SimpleNativeComponentHolder(NativeComponentWrapper nativeComponent) {
       this.nativeComponent = nativeComponent;
       add(nativeComponent.getNativeComponent());
+      enableEvents(MouseWheelEvent.MOUSE_WHEEL_EVENT_MASK);
     }
 
     @Override
@@ -295,6 +297,14 @@ public class NativeComponentWrapper {
     } else {
       c.transferFocusBackward();
     }
+  }
+
+  protected void prepareCrossWindowReparenting() {
+    throw new IllegalStateException("Reparenting accross windows is not supported!");
+  }
+
+  protected void commitCrossWindowReparenting() {
+    throw new IllegalStateException("Reparenting accross windows is not supported!");
   }
 
 }

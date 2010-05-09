@@ -101,6 +101,16 @@ public abstract class NativeComponent extends Canvas {
       setShellEnabled(isEnabled);
     }
 
+    @Override
+    protected void prepareCrossWindowReparenting() {
+      NativeComponent.this.prepareCrossWindowReparenting();
+    }
+
+    @Override
+    protected void commitCrossWindowReparenting() {
+      NativeComponent.this.commitCrossWindowReparenting();
+    }
+
   };
 
   private class CMLocal_runInSequence extends LocalMessage {
@@ -458,7 +468,7 @@ public abstract class NativeComponent extends Canvas {
   }
 
   private static class CMN_createControl extends CommandMessage {
-    public Shell createShell(Object handle) throws Exception {
+    private static Shell createShell(Object handle) throws Exception {
       if(NativeInterface.isInProcess()) {
         Canvas canvas = (Canvas)handle;
         // SWT_AWT adds a component listener, but it conflicts. Thus we have to restore the listeners.
@@ -511,8 +521,11 @@ public abstract class NativeComponent extends Canvas {
     @Override
     public Object run(Object[] args) throws Exception {
       // We need to synchronize: a non-UI thread may send a message thinking the component is valid, but the message would be invalid as the control is not yet in the registry.
-      synchronized(NativeComponent.getControlRegistry()) {
-        final Shell shell = createShell(args[2]);
+      ObjectRegistry controlRegistry = NativeComponent.getControlRegistry();
+      synchronized(controlRegistry) {
+        final int componentID = (Integer)args[0];
+        Object canvasHandle = args[1];
+        final Shell shell = createShell(canvasHandle);
         shell.addControlListener(new ControlAdapter() {
           private boolean isAdjusting;
           @Override
@@ -531,22 +544,30 @@ public abstract class NativeComponent extends Canvas {
           }
         });
         shell.setLayout(new FillLayout());
-        final int componentID = (Integer)args[0];
-        Method createControlMethod = Class.forName((String)args[1]).getDeclaredMethod("createControl", Shell.class, Object[].class);
-        createControlMethod.setAccessible(true);
-        final Control control = (Control)createControlMethod.invoke(null, shell, args[3]);
-        if(Boolean.parseBoolean(NSSystemPropertySWT.COMPONENTS_DEBUG_PRINTCREATION.get())) {
-          System.err.println("Created control: " + componentID);
-        }
-        control.addDisposeListener(new DisposeListener() {
-          public void widgetDisposed(DisposeEvent e) {
-            if(Boolean.parseBoolean(NSSystemPropertySWT.COMPONENTS_DEBUG_PRINTDISPOSAL.get())) {
-              System.err.println("Disposed control: " + componentID);
-            }
+        Control control = (Control)controlRegistry.get(componentID);
+        if(control != null) {
+          Shell oldShell = control.getShell();
+          control.setParent(shell);
+          oldShell.dispose();
+        } else {
+          String nativeComponentClassName = (String)args[2];
+          Object nativePeerCreationParameters = args[3];
+          Method createControlMethod = Class.forName(nativeComponentClassName).getDeclaredMethod("createControl", Shell.class, Object[].class);
+          createControlMethod.setAccessible(true);
+          control = (Control)createControlMethod.invoke(null, shell, nativePeerCreationParameters);
+          if(Boolean.parseBoolean(NSSystemPropertySWT.COMPONENTS_DEBUG_PRINTCREATION.get())) {
+            System.err.println("Created control: " + componentID);
           }
-        });
-        NativeComponent.getControlRegistry().add(control, componentID);
-        configureControl(control, componentID);
+          control.addDisposeListener(new DisposeListener() {
+            public void widgetDisposed(DisposeEvent e) {
+              if(Boolean.parseBoolean(NSSystemPropertySWT.COMPONENTS_DEBUG_PRINTDISPOSAL.get())) {
+                System.err.println("Disposed control: " + componentID);
+              }
+            }
+          });
+          controlRegistry.add(control, componentID);
+          configureControl(control, componentID);
+        }
         shell.setVisible (true);
         shell.getDisplay().asyncExec(new Runnable() {
           public void run() {
@@ -709,7 +730,7 @@ public abstract class NativeComponent extends Canvas {
     isNativePeerValid = false;
     invalidNativePeerText = "Failed to create " + getComponentDescription() + "\n\nReason:\nA native component cannot be removed then re-added to a component hierarchy.";
     repaint();
-    throw new IllegalStateException("A native component cannot be removed then re-added to a component hierarchy! Nevertheless, you could achieve re-parenting by setting the constructor option to defer destruction until finalization (note that re-parenting accross different windows is not supported).");
+    throw new IllegalStateException("A native component cannot be removed then re-added to a component hierarchy! Nevertheless, you could achieve re-parenting by setting the constructor option to defer destruction until finalization.");
   }
 
   private int additionCount;
@@ -717,6 +738,9 @@ public abstract class NativeComponent extends Canvas {
   @Override
   public void addNotify() {
     super.addNotify();
+    if(isCrossWindowReparenting) {
+      return;
+    }
     if(isForcingInitialization) {
       return;
     }
@@ -837,7 +861,7 @@ public abstract class NativeComponent extends Canvas {
       NativeInterface.addNativeInterfaceListener(nativeInterfaceListener);
       isNativePeerValid = true;
       try {
-        runSync(new CMN_createControl(), componentID, NativeComponent.this.getClass().getName(), getHandle(), getNativePeerCreationParameters());
+        runSync(new CMN_createControl(), componentID, getHandle(), NativeComponent.this.getClass().getName(), getNativePeerCreationParameters());
       } catch(Exception e) {
         isNativePeerValid = false;
         StringBuilder sb = new StringBuilder();
@@ -914,6 +938,10 @@ public abstract class NativeComponent extends Canvas {
 
   @Override
   public void removeNotify() {
+    if(isCrossWindowReparenting) {
+      super.removeNotify();
+      return;
+    }
     disposeNativePeer();
     super.removeNotify();
   }
@@ -1354,6 +1382,40 @@ public abstract class NativeComponent extends Canvas {
     } catch(Exception e) {
       e.printStackTrace();
     }
+  }
+
+  private static class CMN_reparentToHiddenShell extends ControlCommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      Control control = getControl();
+      Shell shell = control.getShell();
+      Shell newShell = new Shell(control.getDisplay(), SWT.NONE);
+      control.setParent(newShell);
+      shell.dispose();
+      return null;
+    }
+  }
+
+  private boolean isCrossWindowReparenting;
+
+  private void prepareCrossWindowReparenting() {
+    isCrossWindowReparenting = true;
+    runSync(new CMN_reparentToHiddenShell(), componentID, getHandle());
+  }
+
+  private void commitCrossWindowReparenting() {
+    new CMN_reshape().asyncExec(this, getWidth(), getHeight());
+    try {
+      runSync(new CMN_createControl(), componentID, getHandle());
+    } catch(Exception e) {
+      StringBuilder sb = new StringBuilder();
+      for(Throwable t = e; t != null; t = t.getCause()) {
+        sb.append("    " + t.toString() + "\n");
+      }
+      invalidateNativePeer("Failed to reparent " + getComponentDescription() + "\n\nReason:\n" + sb.toString());
+      e.printStackTrace();
+    }
+    isCrossWindowReparenting = false;
   }
 
   @Override
