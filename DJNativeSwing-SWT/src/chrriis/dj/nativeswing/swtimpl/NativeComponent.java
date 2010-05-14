@@ -1404,9 +1404,9 @@ public abstract class NativeComponent extends Canvas {
   }
 
   private void commitCrossWindowReparenting() {
-    new CMN_reshape().asyncExec(this, getWidth(), getHeight());
     try {
       runSync(new CMN_createControl(), componentID, getHandle());
+      new CMN_reshape().asyncExec(this, getWidth(), getHeight());
     } catch(Exception e) {
       StringBuilder sb = new StringBuilder();
       for(Throwable t = e; t != null; t = t.getCause()) {
