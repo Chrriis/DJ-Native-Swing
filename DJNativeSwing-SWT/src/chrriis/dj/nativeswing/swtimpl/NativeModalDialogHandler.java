@@ -25,7 +25,6 @@ import javax.swing.SwingUtilities;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
 
 import chrriis.common.Utils;
 
@@ -38,8 +37,8 @@ public abstract class NativeModalDialogHandler {
   private static class NativeModalComponent extends NativeComponent {
 
     @SuppressWarnings("unused")
-    protected static Control createControl(Shell shell, Object[] parameters) {
-      return new Composite(shell, SWT.NONE);
+    protected static Control createControl(Composite parent, Object[] parameters) {
+      return new Composite(parent, SWT.NONE);
     }
 
     @Override

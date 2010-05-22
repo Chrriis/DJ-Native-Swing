@@ -552,7 +552,7 @@ public abstract class NativeComponent extends Canvas {
         } else {
           String nativeComponentClassName = (String)args[2];
           Object nativePeerCreationParameters = args[3];
-          Method createControlMethod = Class.forName(nativeComponentClassName).getDeclaredMethod("createControl", Shell.class, Object[].class);
+          Method createControlMethod = Class.forName(nativeComponentClassName).getDeclaredMethod("createControl", Composite.class, Object[].class);
           createControlMethod.setAccessible(true);
           control = (Control)createControlMethod.invoke(null, shell, nativePeerCreationParameters);
           if(Boolean.parseBoolean(NSSystemPropertySWT.COMPONENTS_DEBUG_PRINTCREATION.get())) {

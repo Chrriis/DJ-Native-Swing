@@ -45,6 +45,7 @@ import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -395,7 +396,7 @@ class NativeWebBrowser extends NativeComponent {
     return new Object[] {runtime, xulRunnerHome};
   }
 
-  protected static Control createControl(Shell shell, Object[] parameters) {
+  protected static Control createControl(Composite parent, Object[] parameters) {
     String xulRunnerPath = (String)parameters[1];
     if(xulRunnerPath != null) {
       System.setProperty("org.eclipse.swt.browser.XULRunnerPath", xulRunnerPath);
@@ -417,7 +418,7 @@ class NativeWebBrowser extends NativeComponent {
     if(wbRuntime == WebBrowserRuntime.WEBKIT) {
       System.setProperty("org.eclipse.swt.browser.UseWebKitGTK", "true");
     }
-    final Browser browser = new Browser(shell, style);
+    final Browser browser = new Browser(parent, style);
     configureBrowserFunction(browser);
     if(wbRuntime == WebBrowserRuntime.WEBKIT) {
       System.setProperty("org.eclipse.swt.browser.UseWebKitGTK", webKitProperty);

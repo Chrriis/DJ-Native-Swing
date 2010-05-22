@@ -15,8 +15,8 @@ import org.eclipse.swt.SWTException;
 import org.eclipse.swt.ole.win32.OLE;
 import org.eclipse.swt.ole.win32.OleClientSite;
 import org.eclipse.swt.ole.win32.OleFrame;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
 
 import chrriis.dj.nativeswing.swtimpl.OleNativeComponent;
 
@@ -25,8 +25,8 @@ import chrriis.dj.nativeswing.swtimpl.OleNativeComponent;
  */
 class NativeWMediaPlayer extends OleNativeComponent {
 
-  protected static Control createControl(Shell shell, Object[] parameters) {
-    OleFrame frame = new OleFrame(shell, SWT.NONE);
+  protected static Control createControl(Composite parent, Object[] parameters) {
+    OleFrame frame = new OleFrame(parent, SWT.NONE);
     OleClientSite site;
     try {
       site = new OleClientSite(frame, SWT.NONE, "WMPlayer.OCX");
