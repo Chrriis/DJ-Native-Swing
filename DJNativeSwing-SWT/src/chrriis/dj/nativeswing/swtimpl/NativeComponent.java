@@ -406,7 +406,10 @@ public abstract class NativeComponent extends Canvas {
           me = new MouseEvent(nativeComponent, type, System.currentTimeMillis(), SWTUtils.translateSWTModifiers(e_stateMask), e_x, e_y, e_count, isPopupTrigger, button);
         }
       }
+      // Dispatch the event, but prevent focus otherwise the Swing focus handling gets triggered.
+      nativeComponent.setFocusable(false);
       nativeComponent.dispatchEvent(me);
+      nativeComponent.setFocusable(true);
       return null;
     }
   }
