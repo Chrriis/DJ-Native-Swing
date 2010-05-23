@@ -21,6 +21,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
@@ -42,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.swing.MenuSelectionManager;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
 
@@ -406,10 +408,51 @@ public abstract class NativeComponent extends Canvas {
           me = new MouseEvent(nativeComponent, type, System.currentTimeMillis(), SWTUtils.translateSWTModifiers(e_stateMask), e_x, e_y, e_count, isPopupTrigger, button);
         }
       }
-      // Dispatch the event, but prevent focus otherwise the Swing focus handling gets triggered.
-      nativeComponent.setFocusable(false);
-      nativeComponent.dispatchEvent(me);
-      nativeComponent.setFocusable(true);
+      // Manually dispatch the mouse event, otherwise Swing's focus handling is triggered resulting in focus issues.
+      switch(me.getID()) {
+        case MouseEvent.MOUSE_PRESSED:
+          // Dismiss any currently shown popup menus.
+          MenuSelectionManager.defaultManager().clearSelectedPath();
+          for(MouseListener mouseListener: nativeComponent.getMouseListeners()) {
+            mouseListener.mousePressed(me);
+          }
+          break;
+        case MouseEvent.MOUSE_RELEASED:
+          for(MouseListener mouseListener: nativeComponent.getMouseListeners()) {
+            mouseListener.mouseReleased(me);
+          }
+          break;
+        case MouseEvent.MOUSE_CLICKED:
+          for(MouseListener mouseListener: nativeComponent.getMouseListeners()) {
+            mouseListener.mouseClicked(me);
+          }
+          break;
+        case MouseEvent.MOUSE_ENTERED:
+          for(MouseListener mouseListener: nativeComponent.getMouseListeners()) {
+            mouseListener.mouseEntered(me);
+          }
+          break;
+        case MouseEvent.MOUSE_EXITED:
+          for(MouseListener mouseListener: nativeComponent.getMouseListeners()) {
+            mouseListener.mouseExited(me);
+          }
+          break;
+        case MouseEvent.MOUSE_MOVED:
+          for(MouseMotionListener mouseListener: nativeComponent.getMouseMotionListeners()) {
+            mouseListener.mouseMoved(me);
+          }
+          break;
+        case MouseEvent.MOUSE_DRAGGED:
+          for(MouseMotionListener mouseListener: nativeComponent.getMouseMotionListeners()) {
+            mouseListener.mouseDragged(me);
+          }
+          break;
+        case MouseEvent.MOUSE_WHEEL:
+          for(java.awt.event.MouseWheelListener mouseListener: nativeComponent.getMouseWheelListeners()) {
+            mouseListener.mouseWheelMoved((MouseWheelEvent)me);
+          }
+          break;
+      }
       return null;
     }
   }
