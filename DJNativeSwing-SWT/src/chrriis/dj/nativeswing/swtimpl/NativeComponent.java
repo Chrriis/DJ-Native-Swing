@@ -10,6 +10,7 @@ package chrriis.dj.nativeswing.swtimpl;
 import java.awt.AWTEvent;
 import java.awt.Canvas;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -1507,6 +1508,19 @@ public abstract class NativeComponent extends Canvas {
       return super.getListeners(listenerType);
     }
     return result;
+  }
+
+  @Override
+  public java.awt.Point getLocationOnScreen() {
+    Container parent = getParent();
+    if(parent != null) {
+      // On Linux, the location on screen call returns values as if the native component was located in (0; 0)...
+      java.awt.Point locationOnScreen = parent.getLocationOnScreen();
+      locationOnScreen.x += getX();
+      locationOnScreen.y += getY();
+      return locationOnScreen;
+    }
+    return super.getLocationOnScreen();
   }
 
 }
