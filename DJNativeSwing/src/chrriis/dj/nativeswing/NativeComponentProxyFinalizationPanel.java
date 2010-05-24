@@ -30,9 +30,52 @@ class NativeComponentProxyFinalizationPanel extends NativeComponentProxy {
 
   private static class EmbeddedPanel extends Panel implements NativeComponentHolder {
 
-    public EmbeddedPanel() {
+    private NativeComponentWrapper nativeComponentWrapper;
+
+    public EmbeddedPanel(NativeComponentWrapper nativeComponentWrapper) {
       super(new BorderLayout());
+      this.nativeComponentWrapper = nativeComponentWrapper;
       enableEvents(MouseWheelEvent.MOUSE_WHEEL_EVENT_MASK);
+    }
+
+    private boolean isHiddenReparenting;
+    private boolean isRemovingFromParent;
+
+//    @Override
+//    public void addNotify() {
+//      super.addNotify();
+//      if(isHiddenReparenting) {
+//        isHiddenReparenting = false;
+//        nativeComponentWrapper.restoreFromHiddenParent();
+//      }
+//    }
+
+    @Override
+    public void removeNotify() {
+      super.removeNotify();
+      if(!isRemovingFromParent) {
+        Container parent = getParent();
+        if(parent != null) {
+          isRemovingFromParent = true;
+          parent.remove(this);
+          parent.invalidate();
+          parent.validate();
+          isRemovingFromParent = false;
+        }
+      }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+      if(isHiddenReparenting) {
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            nativeComponentWrapper.restoreFromHiddenParent();
+            // Remove will dispose the component only after the store/restore sequence is complete.
+            nativeComponentWrapper.getNativeComponent().removeNotify();
+          }
+        });
+      }
     }
 
   }
@@ -45,25 +88,33 @@ class NativeComponentProxyFinalizationPanel extends NativeComponentProxy {
     super.addNotify();
     // This call throws a runtime exception if the hierarchy is not compatible
     JLayeredPane layeredPane = findLayeredPane(this);
+    if(embeddedPanel != null && embeddedPanel.isHiddenReparenting) {
+      layeredPane.setLayer(embeddedPanel, Integer.MIN_VALUE);
+      layeredPane.add(embeddedPanel);
+      layeredPane.invalidate();
+      layeredPane.validate();
+      nativeComponentWrapper.restoreFromHiddenParent();
+      embeddedPanel.isHiddenReparenting = false;
+    }
     boolean isEmbeddedPanelCreated = embeddedPanel != null;
     if(isEmbeddedPanelCreated) {
       JLayeredPane oldLayeredPane = findLayeredPane(embeddedPanel);
       if(layeredPane != oldLayeredPane) {
-        nativeComponentWrapper.prepareCrossWindowReparenting();
+        nativeComponentWrapper.storeInHiddenParent();
         Container oldParent = embeddedPanel.getParent();
         oldParent.remove(embeddedPanel);
         UIUtils.revalidate(oldParent);
         oldParent.repaint();
         layeredPane.setLayer(embeddedPanel, Integer.MIN_VALUE);
         layeredPane.add(embeddedPanel);
-        nativeComponentWrapper.commitCrossWindowReparenting();
+        nativeComponentWrapper.restoreFromHiddenParent();
         UIUtils.revalidate(layeredPane);
         layeredPane.repaint();
         revalidate();
         repaint();
       }
     } else {
-      embeddedPanel = new EmbeddedPanel();
+      embeddedPanel = new EmbeddedPanel(nativeComponentWrapper);
       embeddedPanel.add(nativeComponentWrapper.getNativeComponent(), BorderLayout.CENTER);
     }
     isProxied = false;
@@ -87,23 +138,31 @@ class NativeComponentProxyFinalizationPanel extends NativeComponentProxy {
 
   @Override
   public void removeNotify() {
-    if(!isProxied) {
-      embeddedPanel.setVisible(false);
-      isProxied = true;
-      try {
-        // This call throws a runtime exception if the hierarchy is not compatible
-        JLayeredPane layeredPane = findLayeredPane(this);
-        layeredPane.setLayer(embeddedPanel, Integer.MIN_VALUE);
-        // Hack to reparent without the native component to be disposed
+    try {
+      if(embeddedPanel != null) {
+        // We try to support the case where a component is placed in a window that gets disposed, and then added to a different window.
+        nativeComponentWrapper.storeInHiddenParent();
+        embeddedPanel.isHiddenReparenting = true;
+      }
+    } catch(Exception e) {
+      if(!isProxied) {
+        embeddedPanel.setVisible(false);
+        isProxied = true;
+        try {
+          // This call throws a runtime exception if the hierarchy is not compatible
+          JLayeredPane layeredPane = findLayeredPane(this);
+          layeredPane.setLayer(embeddedPanel, Integer.MIN_VALUE);
+          // Hack to reparent without the native component to be disposed
 //        layeredPane.add(embeddedPanel);
-        layeredPane.setComponentZOrder(embeddedPanel, 0);
-        layeredPane.revalidate();
-        layeredPane.repaint();
-        revalidate();
-        repaint();
-      } catch(RuntimeException e) {
-        super.removeNotify();
-        throw e;
+          layeredPane.setComponentZOrder(embeddedPanel, 0);
+          layeredPane.revalidate();
+          layeredPane.repaint();
+          revalidate();
+          repaint();
+        } catch(RuntimeException ex) {
+          super.removeNotify();
+          throw ex;
+        }
       }
     }
     super.removeNotify();
@@ -131,6 +190,7 @@ class NativeComponentProxyFinalizationPanel extends NativeComponentProxy {
     embeddedPanel = null;
     Container parent = panel.getParent();
     if(parent != null) {
+      panel.isRemovingFromParent = true;
       parent.remove(panel);
       parent.invalidate();
       parent.validate();

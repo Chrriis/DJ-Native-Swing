@@ -299,12 +299,11 @@ public class NativeComponentWrapper {
     }
   }
 
-  protected void prepareCrossWindowReparenting() {
-    throw new IllegalStateException("Reparenting accross windows is not supported!");
+  protected void storeInHiddenParent() {
+    throw new IllegalStateException("Storing to a hidden parent is not supported!");
   }
 
-  protected void commitCrossWindowReparenting() {
-    throw new IllegalStateException("Reparenting accross windows is not supported!");
+  protected void restoreFromHiddenParent() {
   }
 
 }

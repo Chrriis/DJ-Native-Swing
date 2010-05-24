@@ -105,13 +105,13 @@ public abstract class NativeComponent extends Canvas {
     }
 
     @Override
-    protected void prepareCrossWindowReparenting() {
-      NativeComponent.this.prepareCrossWindowReparenting();
+    protected void storeInHiddenParent() {
+      NativeComponent.this.storeInHiddenParent();
     }
 
     @Override
-    protected void commitCrossWindowReparenting() {
-      NativeComponent.this.commitCrossWindowReparenting();
+    protected void restoreFromHiddenParent() {
+      NativeComponent.this.restoreFromHiddenParent();
     }
 
   };
@@ -1445,12 +1445,17 @@ public abstract class NativeComponent extends Canvas {
 
   private boolean isCrossWindowReparenting;
 
-  private void prepareCrossWindowReparenting() {
+  private void storeInHiddenParent() {
     isCrossWindowReparenting = true;
     runSync(new CMN_reparentToHiddenShell(), componentID, getHandle());
   }
 
-  private void commitCrossWindowReparenting() {
+  private void restoreFromHiddenParent() {
+    if(!isDisplayable()) {
+      // If component is not displayable we don't fail but restore state.
+      isCrossWindowReparenting = false;
+      return;
+    }
     try {
       runSync(new CMN_createControl(), componentID, getHandle());
       new CMN_reshape().asyncExec(this, getWidth(), getHeight());
