@@ -11,6 +11,8 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Panel;
 import java.awt.event.MouseWheelEvent;
+import java.lang.reflect.Method;
+import java.util.Hashtable;
 
 import javax.swing.JComponent;
 import javax.swing.JLayeredPane;
@@ -125,8 +127,15 @@ class NativeComponentProxyFinalizationPanel extends NativeComponentProxy {
       } else {
         // Hack to reparent without the native component to be disposed
         setComponentZOrder(embeddedPanel, 0);
-      }
-      if(oldParent != null) {
+        if(oldParent instanceof JLayeredPane) {
+          try {
+            Method getComponentToLayerMethod = JLayeredPane.class.getDeclaredMethod("getComponentToLayer");
+            getComponentToLayerMethod.setAccessible(true);
+            ((Hashtable<?, ?>)getComponentToLayerMethod.invoke(oldParent)).remove(embeddedPanel);
+          } catch(Exception e) {
+            System.err.println("Failed to remove from JLayeredPane internal hashtable...");
+          }
+        }
         oldParent.revalidate();
         oldParent.repaint();
       }
