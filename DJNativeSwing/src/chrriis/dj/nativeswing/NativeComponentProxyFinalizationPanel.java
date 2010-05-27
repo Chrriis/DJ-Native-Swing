@@ -129,11 +129,12 @@ class NativeComponentProxyFinalizationPanel extends NativeComponentProxy {
         setComponentZOrder(embeddedPanel, 0);
         if(oldParent instanceof JLayeredPane) {
           try {
+            // setComponentZOrder calls removeDelicately, which does not clean up the componentToLayer Hashtable of a JLayeredPane for heavyweight containers like remove does.
             Method getComponentToLayerMethod = JLayeredPane.class.getDeclaredMethod("getComponentToLayer");
             getComponentToLayerMethod.setAccessible(true);
             ((Hashtable<?, ?>)getComponentToLayerMethod.invoke(oldParent)).remove(embeddedPanel);
-          } catch(Exception e) {
-            System.err.println("Failed to remove from JLayeredPane internal hashtable...");
+          } catch(Throwable e) {
+            // If it does not work, remain silent as it may not be a problem depending on the VM
           }
         }
         oldParent.revalidate();
