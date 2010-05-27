@@ -962,6 +962,10 @@ public class WebServer {
           @Override
           public InputStream getInputStream() {
             String url = resourceURL_;
+            int anchorIndex = url.indexOf('#');
+            if(anchorIndex > 0) {
+              url = url.substring(0, anchorIndex);
+            }
             try {
               return new URL(url).openStream();
             } catch(Exception e) {
