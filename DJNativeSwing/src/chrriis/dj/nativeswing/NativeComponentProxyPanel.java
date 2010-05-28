@@ -148,16 +148,19 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
         embeddedPanel.setVisible(isShowing);
       }
     }
-    Point location = SwingUtilities.convertPoint(this, new Point(0, 0), embeddedPanel.getParent());
-    Dimension size = getSize();
-    Rectangle bounds = new Rectangle(location.x, location.y, size.width, size.height);
-    if(!embeddedPanel.getBounds().equals(bounds)) {
-      embeddedPanel.setBounds(bounds);
-      embeddedPanel.invalidate();
-      embeddedPanel.validate();
-      embeddedPanel.repaint();
-      if(isVisibilityConstrained) {
-        adjustEmbeddedPanelShape();
+    Container parent = embeddedPanel.getParent();
+    if(parent != null) {
+      Point location = SwingUtilities.convertPoint(this, new Point(0, 0), parent);
+      Dimension size = getSize();
+      Rectangle bounds = new Rectangle(location.x, location.y, size.width, size.height);
+      if(!embeddedPanel.getBounds().equals(bounds)) {
+        embeddedPanel.setBounds(bounds);
+        embeddedPanel.invalidate();
+        embeddedPanel.validate();
+        embeddedPanel.repaint();
+        if(isVisibilityConstrained) {
+          adjustEmbeddedPanelShape();
+        }
       }
     }
   }
@@ -286,9 +289,11 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
         super.removeNotify();
         isRemovingFromParent = true;
         Container parent = getParent();
-        parent.remove(this);
-        parent.invalidate();
-        parent.validate();
+        if(parent != null) {
+          parent.remove(this);
+          parent.invalidate();
+          parent.validate();
+        }
         isRemovingFromParent = false;
       } else {
         super.removeNotify();

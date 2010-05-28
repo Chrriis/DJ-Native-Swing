@@ -106,6 +106,9 @@ public abstract class NativeComponent extends Canvas {
 
     @Override
     protected void storeInHiddenParent() {
+      if(Boolean.parseBoolean(System.getProperty("nativeswing.components.disableHiddenParentReparenting"))) {
+        throw new IllegalStateException("Storing to a hidden parent is not supported!");
+      }
       NativeComponent.this.storeInHiddenParent();
     }
 
