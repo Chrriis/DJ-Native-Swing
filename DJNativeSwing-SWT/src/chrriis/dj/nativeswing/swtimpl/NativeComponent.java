@@ -788,7 +788,7 @@ public abstract class NativeComponent extends Canvas {
   @Override
   public void addNotify() {
     super.addNotify();
-    if(isCrossWindowReparenting) {
+    if(isStoredInHiddenParent) {
       return;
     }
     if(isForcingInitialization) {
@@ -988,7 +988,7 @@ public abstract class NativeComponent extends Canvas {
 
   @Override
   public void removeNotify() {
-    if(isCrossWindowReparenting) {
+    if(isStoredInHiddenParent) {
       super.removeNotify();
       return;
     }
@@ -1446,17 +1446,17 @@ public abstract class NativeComponent extends Canvas {
     }
   }
 
-  private boolean isCrossWindowReparenting;
+  private boolean isStoredInHiddenParent;
 
   private void storeInHiddenParent() {
-    isCrossWindowReparenting = true;
+    isStoredInHiddenParent = true;
     runSync(new CMN_reparentToHiddenShell(), componentID, getHandle());
   }
 
   private void restoreFromHiddenParent() {
     if(!isDisplayable()) {
       // If component is not displayable we don't fail but restore state.
-      isCrossWindowReparenting = false;
+      isStoredInHiddenParent = false;
       return;
     }
     try {
@@ -1470,7 +1470,7 @@ public abstract class NativeComponent extends Canvas {
       invalidateNativePeer("Failed to reparent " + getComponentDescription() + "\n\nReason:\n" + sb.toString());
       e.printStackTrace();
     }
-    isCrossWindowReparenting = false;
+    isStoredInHiddenParent = false;
   }
 
   @Override
