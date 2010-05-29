@@ -47,6 +47,9 @@ public class Utils {
     IS_WINDOWS = os.startsWith("Windows");
   }
 
+  public static final boolean IS_WINDOWS_VISTA_OR_GREATER = IS_WINDOWS && SystemProperty.OS_VERSION.get().compareTo("6.0") >= 0;
+  public static final boolean IS_WINDOWS_7_OR_GREATER = IS_WINDOWS && SystemProperty.OS_VERSION.get().compareTo("6.1") >= 0;
+
   public static final String LINE_SEPARATOR = SystemProperty.LINE_SEPARATOR.get();
 
   public static String decodeURL(String s) {

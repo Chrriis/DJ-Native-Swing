@@ -1155,10 +1155,11 @@ public abstract class NativeComponent extends Canvas {
   private static class CMN_getComponentImage extends ControlCommandMessage {
 
     private static boolean printRemoveClip(Control control, GC gc) {
+      boolean isFocusControl = control.isFocusControl();
       org.eclipse.swt.graphics.Rectangle bounds = control.getBounds();
       Display display = control.getDisplay();
       Composite oldParent = control.getParent();
-      Shell tmpHiddenParentShell = new Shell();
+      Shell tmpHiddenParentShell = new Shell(SWT.NO_TRIM | SWT.NO_FOCUS | SWT.NO_BACKGROUND);
       Shell tmpParentShell = new Shell(tmpHiddenParentShell, SWT.NO_TRIM | SWT.NO_FOCUS | SWT.NO_BACKGROUND);
       Point location = display.map(control, null, control.getLocation());
       tmpParentShell.setLocation(location);
@@ -1187,18 +1188,26 @@ public abstract class NativeComponent extends Canvas {
       control.moveBelow(screenshotCanvas);
       tmpParentShell.setVisible(true);
       boolean result = control.print(gc);
-      control.setParent(oldParent);
-      control.setLocation(bounds.x, bounds.y);
-      control.moveAbove(controlReplacementCanvas);
-      controlReplacementCanvas.dispose();
-      oldParent.removePaintListener(paintListener);
-      tmpParentShell.dispose();
-      tmpHiddenParentShell.dispose();
-      oldParent.setRedraw(true);
-      control.setRedraw(true);
-      control.redraw();
-      control.update();
-      screenshot.dispose();
+      if(oldParent.isDisposed()) {
+        control.dispose();
+      } else {
+        control.setParent(oldParent);
+        // If the focus was lost because of the printing action, restore it.
+        if(isFocusControl && !control.isFocusControl()) {
+          control.setFocus();
+        }
+        control.setLocation(bounds.x, bounds.y);
+        control.moveAbove(controlReplacementCanvas);
+        controlReplacementCanvas.dispose();
+        oldParent.removePaintListener(paintListener);
+        tmpParentShell.dispose();
+        tmpHiddenParentShell.dispose();
+        oldParent.setRedraw(true);
+        control.setRedraw(true);
+        control.redraw();
+        control.update();
+        screenshot.dispose();
+      }
       return result;
     }
 
@@ -1224,9 +1233,19 @@ public abstract class NativeComponent extends Canvas {
         printRemoveClip(control, gc);
       } else if(Utils.IS_WINDOWS) {
         org.eclipse.swt.graphics.Rectangle bounds = control.getBounds();
+        boolean isFocusControl = control.isFocusControl();
+        Composite oldParent = control.getParent();
+        control.setRedraw(false);
+        oldParent.setRedraw(false);
         control.print(gc);
-        // If the window is moving while the component is printed, it is reparented at the wrong location: we have to restore the right location.
+        // If the focus was lost because of the printing action, restore it.
+        if(isFocusControl && !control.isFocusControl()) {
+          control.setFocus();
+        }
+        // If the window is moving while the component is printed, it is reparented to the wrong location: we have to restore the right location.
         control.setLocation(bounds.x, bounds.y);
+        oldParent.setRedraw(true);
+        control.setRedraw(true);
         // There can be painting artifacts when dragging another window slowly on top: refresh the component.
         control.redraw(0, 0, bounds.width, bounds.height, true);
         control.update();
