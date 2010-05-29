@@ -895,7 +895,7 @@ public class WebServer {
           return null;
         }
         parameter = parameter.substring(index + 1);
-        final String resourcePath = parameter;
+        final String resourcePath = removeHTMLAnchor(parameter);
         return new WebServerContent() {
           @Override
           public String getContentType() {
@@ -930,25 +930,25 @@ public class WebServer {
           int port = url.getPort();
           resourceURL = url.getProtocol() + "://" + url.getHost() + (port != -1? ":" + port: "");
           if(parameter.startsWith("/")) {
-            resourceURL += parameter;
+            resourceURL += removeHTMLAnchor(parameter);
           } else {
             String path = url.getPath();
             path = path.substring(0, path.lastIndexOf('/') + 1) + parameter;
             resourceURL += path.startsWith("/")? path: "/" + path;
           }
         } catch(Exception e) {
-          File file = Utils.getLocalFile(new File(codeBase, parameter).getAbsolutePath());
+          File file = Utils.getLocalFile(new File(codeBase, removeHTMLAnchor(parameter)).getAbsolutePath());
           if(file != null) {
-            resourceURL = new File(codeBase, parameter).toURI().toString();
+            resourceURL = new File(codeBase, removeHTMLAnchor(parameter)).toURI().toString();
           } else {
-            resourceURL = codeBase + "/" + parameter;
+            resourceURL = codeBase + "/" + removeHTMLAnchor(parameter);
           }
         }
         final String resourceURL_ = resourceURL;
         return new WebServerContent() {
           @Override
           public long getContentLength() {
-            File file = Utils.getLocalFile(getFileURL(resourceURL_));
+            File file = Utils.getLocalFile(resourceURL_);
             if(file != null) {
               return file.length();
             }
@@ -956,30 +956,21 @@ public class WebServer {
           }
           @Override
           public String getContentType() {
-            String url = getFileURL(resourceURL_);
-            int index = url.lastIndexOf('.');
-            return getDefaultMimeType(index == -1? null: url.substring(index));
+            int index = resourceURL_.lastIndexOf('.');
+            return getDefaultMimeType(index == -1? null: resourceURL_.substring(index));
           }
           @Override
           public InputStream getInputStream() {
-            String url = getFileURL(resourceURL_);
             try {
-              return new URL(url).openStream();
+              return new URL(resourceURL_).openStream();
             } catch(Exception e) {
             }
             try {
-              return new FileInputStream("/" + url);
+              return new FileInputStream("/" + resourceURL_);
             } catch(Exception e) {
               e.printStackTrace();
             }
             return null;
-          }
-          private String getFileURL(String url) {
-            int anchorIndex = url.indexOf('#');
-            if(anchorIndex > 0) {
-              url = url.substring(0, anchorIndex);
-            }
-            return url;
           }
         };
       }
@@ -991,6 +982,14 @@ public class WebServer {
       }
     }
     return null;
+  }
+
+  private static String removeHTMLAnchor(String location) {
+    int anchorIndex = location.indexOf('#');
+    if(anchorIndex > 0) {
+      location = location.substring(0, anchorIndex);
+    }
+    return location;
   }
 
   private static WebServer webServer;
