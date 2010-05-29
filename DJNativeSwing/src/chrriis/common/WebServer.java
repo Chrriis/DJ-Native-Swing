@@ -948,7 +948,7 @@ public class WebServer {
         return new WebServerContent() {
           @Override
           public long getContentLength() {
-            File file = Utils.getLocalFile(resourceURL_);
+            File file = Utils.getLocalFile(getFileURL(resourceURL_));
             if(file != null) {
               return file.length();
             }
@@ -956,16 +956,13 @@ public class WebServer {
           }
           @Override
           public String getContentType() {
-            int index = resourceURL_.lastIndexOf('.');
-            return getDefaultMimeType(index == -1? null: resourceURL_.substring(index));
+            String url = getFileURL(resourceURL_);
+            int index = url.lastIndexOf('.');
+            return getDefaultMimeType(index == -1? null: url.substring(index));
           }
           @Override
           public InputStream getInputStream() {
-            String url = resourceURL_;
-            int anchorIndex = url.indexOf('#');
-            if(anchorIndex > 0) {
-              url = url.substring(0, anchorIndex);
-            }
+            String url = getFileURL(resourceURL_);
             try {
               return new URL(url).openStream();
             } catch(Exception e) {
@@ -976,6 +973,13 @@ public class WebServer {
               e.printStackTrace();
             }
             return null;
+          }
+          private String getFileURL(String url) {
+            int anchorIndex = url.indexOf('#');
+            if(anchorIndex > 0) {
+              url = url.substring(0, anchorIndex);
+            }
+            return url;
           }
         };
       }
