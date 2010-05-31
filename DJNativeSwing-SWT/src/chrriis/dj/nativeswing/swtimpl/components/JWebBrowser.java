@@ -407,7 +407,7 @@ public class JWebBrowser extends NSPanelComponent {
 //        "}");
     Object[] result = executeJavascriptWithCommandResult("[[getScriptResult]]",
         "try {" +
-        "  " + COMMAND_FUNCTION + "('[[getScriptResult]]', function() {" + javascript + "}());" +
+        "  " + COMMAND_FUNCTION + "('[[getScriptResult]]', (function() {" + javascript + "})());" +
         "} catch(exxxxx) {" +
         "  " + COMMAND_FUNCTION + "('[[getScriptResult]]');" +
         "}");
