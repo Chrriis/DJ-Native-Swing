@@ -419,10 +419,18 @@ class NativeWebBrowser extends NativeComponent {
       System.setProperty("org.eclipse.swt.browser.UseWebKitGTK", "true");
     }
     final Browser browser = new Browser(parent, style);
-    configureBrowserFunction(browser);
     if(wbRuntime == WebBrowserRuntime.WEBKIT) {
-      System.setProperty("org.eclipse.swt.browser.UseWebKitGTK", webKitProperty);
+      if(webKitProperty == null) {
+        System.clearProperty("org.eclipse.swt.browser.UseWebKitGTK");
+      } else {
+        System.setProperty("org.eclipse.swt.browser.UseWebKitGTK", webKitProperty);
+      }
+      if(!"webkit".equals(browser.getBrowserType())) {
+        browser.getShell().dispose();
+        throw new IllegalStateException("The webkit runtime was requested but could not be found!");
+      }
     }
+    configureBrowserFunction(browser);
     browser.addCloseWindowListener(new CloseWindowListener() {
       public void close(WindowEvent e) {
         new CMJ_closeWindow().asyncExec(browser);

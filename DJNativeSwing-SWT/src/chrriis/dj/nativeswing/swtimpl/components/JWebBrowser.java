@@ -60,7 +60,7 @@ public class JWebBrowser extends NSPanelComponent {
    * Create an option to make the web browser use the Webkit runtime.
    * @return the option to use the Webkit runtime.
    */
-  static NSOption useWebkitRuntime() {
+  public static NSOption useWebkitRuntime() {
     return WEBKIT_RUNTIME_OPTION;
   }
 
