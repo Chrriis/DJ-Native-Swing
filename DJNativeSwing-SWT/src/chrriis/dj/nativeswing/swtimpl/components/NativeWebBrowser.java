@@ -466,7 +466,10 @@ class NativeWebBrowser extends NativeComponent {
               });
             } else {
               browser.removeVisibilityWindowListener(this);
-              new CMJ_showWindow().asyncExec(newWebBrowser, componentID, e.menuBar, e.toolBar, e.addressBar, e.statusBar, e.location == null? null: new Point(e.location.x, e.location.y), e.size == null? null: new Dimension(e.size.x, e.size.y));
+              Point location = new Point(e.location.x, e.location.y);
+              // For some reasons we get (1; 1) with WebKit if the size is not set. Let's consider it means null...
+              Dimension size = e.size == null || e.size.x == 1 && e.size.y == 1? null: new Dimension(e.size.x, e.size.y);
+              new CMJ_showWindow().asyncExec(newWebBrowser, componentID, e.menuBar, e.toolBar, e.addressBar, e.statusBar, e.location == null? null: location, size);
             }
           }
         });
