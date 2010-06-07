@@ -920,10 +920,15 @@ public class WebServer {
         };
       }
       if("resource".equals(type)) {
-        parameter = Utils.decodeURL(parameter);
         index = parameter.indexOf('/');
+        if(index > 0) {
+          String subs = parameter.substring(index - 1);
+          if(subs.startsWith("://")) {
+            index = parameter.indexOf('/', index + 2);
+          }
+        }
         String codeBase = Utils.decodeURL(parameter.substring(0, index));
-        parameter = parameter.substring(index + 1);
+        parameter = Utils.decodeURL(parameter.substring(index + 1));
         String resourceURL;
         try {
           URL url = new URL(codeBase);
