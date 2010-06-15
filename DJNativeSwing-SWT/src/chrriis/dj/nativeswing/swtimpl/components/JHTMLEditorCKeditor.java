@@ -94,7 +94,7 @@ class JHTMLEditorCKeditor implements JHTMLEditorImplementation {
             "      var isDirtyTrackingActive = true;" + LS +
             "      function JH_checkDirty() {" + LS +
             "        var oEditor = CKEDITOR.instances." + EDITOR_INSTANCE + ";" + LS +
-            "        if(!htmlContent) {" + LS +
+            "        if(htmlContent == null) {" + LS +
             "          try {" + LS +
             "            htmlContent = oEditor.getData();" + LS +
             "          } catch(e) {" + LS +
@@ -149,6 +149,7 @@ class JHTMLEditorCKeditor implements JHTMLEditorImplementation {
             "      	 function(evt) {" + LS +
             "     	   var editor = evt.editor;" + LS +
             "     	   editor.execCommand('maximize');" + LS +
+            "          JH_clearDirtyIndicator();" + LS +
             "          sendCommand('[Chrriis]JH_setLoaded');" + LS +
             "      	 });" + LS +
             "    </script>" + LS +

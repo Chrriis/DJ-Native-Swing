@@ -109,7 +109,7 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
             "      var isDirtyTrackingActive = true;" + LS +
             "      function JH_checkDirty() {" + LS +
             "        var inst = tinyMCE.get ('" + EDITOR_INSTANCE + "');" + LS +
-            "        if(!htmlContent) {" + LS +
+            "        if(htmlContent == null) {" + LS +
             "          try {" + LS +
             "            htmlContent = inst.getContent();" + LS +
             "          } catch(e) {" + LS +
@@ -172,6 +172,7 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
             "      };" + LS +
             (customOptions != null? "      var addOpts = {" + LS + customOptions + LS + "      };" + LS + "      for (var x in addOpts) {" + LS + "        opts[x] = addOpts[x];" + LS + "      }" + LS: "") +
             "      tinyMCE.init (opts);" + LS +
+            "      JH_clearDirtyIndicator();" + LS +
             "    </script>" + LS +
             "  </head>" + LS +
             "  <body>" + LS +

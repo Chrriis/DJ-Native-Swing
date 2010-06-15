@@ -80,7 +80,7 @@ class JHTMLEditorFCKeditor implements JHTMLEditorImplementation {
             "      var isDirtyTrackingActive = true;" + LS +
             "      function JH_checkDirty() {" + LS +
             "        var inst = FCKeditorAPI.GetInstance('" + EDITOR_INSTANCE + "');" + LS +
-            "        if(!htmlContent) {" + LS +
+            "        if(htmlContent == null) {" + LS +
             "          try {" + LS +
             "            htmlContent = inst.GetHTML();" + LS +
             "          } catch(e) {" + LS +
@@ -137,6 +137,7 @@ class JHTMLEditorFCKeditor implements JHTMLEditorImplementation {
             "        oFCKeditor.BasePath = \"\";" + LS +
             (customJavascriptConfiguration != null? "        oFCKeditor.Config[\"CustomConfigurationsPath\"] = '" + WebServer.getDefaultWebServer().getDynamicContentURL(JHTMLEditor.class.getName(), String.valueOf(instanceID), "customConfigurationScript.js") + "';" + LS: "") +
             "        oFCKeditor.Create();" + LS +
+            "        JH_clearDirtyIndicator();" + LS +
             "      }" + LS +
             "      function FCKeditor_OnComplete(editorInstance) {" + LS +
             "        editorInstance.LinkedField.form.onsubmit = JH_doSave;" + LS +
