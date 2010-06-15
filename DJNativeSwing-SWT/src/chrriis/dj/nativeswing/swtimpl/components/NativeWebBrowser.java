@@ -68,6 +68,8 @@ class NativeWebBrowser extends NativeComponent {
     WEBKIT
   }
 
+  public static final String CONSOLE_OUT_FUNCTION = "nsConsoleOut";
+  public static final String CONSOLE_ERR_FUNCTION = "nsConsoleErr";
   public static final String COMMAND_FUNCTION = "sendNSCommand";
   public static final String COMMAND_LOCATION_PREFIX = "command://";
   public static final String COMMAND_STATUS_PREFIX = "scommand://";
@@ -617,8 +619,41 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
 
+  private static class CMJ_consolePrinting extends ControlCommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
+      JWebBrowser webBrowser = nativeWebBrowser == null? null: nativeWebBrowser.webBrowser.get();
+      if(webBrowser == null) {
+        return null;
+      }
+      System.out.println(args[0]);
+      return null;
+    }
+  }
+
+  private static class NSConsolePrintingBrowserFunction extends BrowserFunction {
+    public NSConsolePrintingBrowserFunction(Browser browser, boolean isErr) {
+      super(browser, isErr? CONSOLE_ERR_FUNCTION: CONSOLE_OUT_FUNCTION);
+    }
+    @Override
+    public Object function(Object[] args) {
+      StringBuilder sb = new StringBuilder();
+      for(int i=0; i<args.length; i++) {
+        if(i > 0) {
+          sb.append(", ");
+        }
+        sb.append(args[i]);
+      }
+      new CMJ_consolePrinting().asyncExec(getBrowser(), sb.toString());
+      return null;
+    }
+  }
+
   private static void configureBrowserFunction(final Browser browser) {
     new NSCommandBrowserFunction(browser);
+    new NSConsolePrintingBrowserFunction(browser, false);
+    new NSConsolePrintingBrowserFunction(browser, true);
   }
 
   private Reference<JWebBrowser> webBrowser;
