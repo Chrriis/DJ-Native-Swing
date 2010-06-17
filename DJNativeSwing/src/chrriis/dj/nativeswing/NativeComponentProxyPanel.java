@@ -188,6 +188,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     }
     Rectangle[] rectangles = computePeerShapeArea();
     if(Arrays.equals(lastArea, rectangles)) {
+      embeddedPanel.nativeComponentWrapper.getNativeComponent().repaint();
       return;
     }
     lastArea = rectangles;
@@ -198,7 +199,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
         embeddedPanel.setVisible(true);
       }
       WindowUtils.setComponentMask(embeddedPanel, rectangles);
-//      nativeComponent.repaintNativeControl();
+      embeddedPanel.nativeComponentWrapper.getNativeComponent().repaint();
     }
   }
 

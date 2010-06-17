@@ -354,6 +354,51 @@ public abstract class NativeComponent extends Canvas {
     }
   }
 
+  private volatile Thread repaintThread;
+
+  private void repaintNativeComponent() {
+    if(repaintThread == null && getWidth() > 0 && getHeight() > 0) {
+      repaintThread = new Thread("NativeSwing Repaint") {
+        @Override
+        public void run() {
+          try {
+            sleep(50);
+          } catch(Exception e) {
+          }
+          applyPendingRepaint();
+        }
+      };
+      repaintThread.start();
+    }
+  }
+
+  private void applyPendingRepaint() {
+    if(repaintThread == null) {
+      return;
+    }
+    if(!SwingUtilities.isEventDispatchThread()) {
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          applyPendingRepaint();
+        }
+      });
+      return;
+    }
+    if(repaintThread == null) {
+      return;
+    }
+    repaintThread = null;
+    if(isNativePeerValid()) {
+      new CMN_redraw().asyncExec(NativeComponent.this);
+    }
+  }
+
+  @Override
+  public void repaint() {
+    super.repaint();
+    repaintNativeComponent();
+  }
+
   private static class CMJ_dispatchMouseEvent extends ControlCommandMessage {
     private static int buttonPressedCount;
     @Override
@@ -1272,6 +1317,9 @@ public abstract class NativeComponent extends Canvas {
       if(!NativeInterface.isUIThread(true)) {
         final AtomicReference<Exception> exception = new AtomicReference<Exception>();
         final AtomicReference<ImageData> result = new AtomicReference<ImageData>();
+        if(control.isDisposed()) {
+          return null;
+        }
         control.getDisplay().syncExec(new Runnable() {
           public void run() {
             try {
@@ -1548,6 +1596,19 @@ public abstract class NativeComponent extends Canvas {
       return locationOnScreen;
     }
     return super.getLocationOnScreen();
+  }
+
+  private static class CMN_redraw extends ControlCommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      Control control = getControl();
+      if(control.isDisposed()) {
+        return null;
+      }
+      Point size = control.getSize();
+      control.redraw(0, 0, size.x, size.y, true);
+      return null;
+    }
   }
 
 }
