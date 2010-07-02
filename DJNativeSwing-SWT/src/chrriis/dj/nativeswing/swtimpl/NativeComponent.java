@@ -1019,11 +1019,9 @@ public abstract class NativeComponent extends Canvas {
       Control control = getControl();
       NativeComponent.getControlRegistry().remove(getComponentID());
       if(control != null) {
-        if(!control.isDisposed()) {
-          Shell shell = control.getShell();
-          if(shell != null) {
-            shell.dispose();
-          }
+        Shell shell = control.getShell();
+        if(shell != null) {
+          shell.dispose();
         }
         control.dispose();
       }
