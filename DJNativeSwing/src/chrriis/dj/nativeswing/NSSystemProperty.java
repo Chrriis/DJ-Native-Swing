@@ -80,6 +80,14 @@ public enum NSSystemProperty {
    */
   INTEGRATION_ACTIVE("nativeswing.integration.active", Type.READ_WRITE),
 
+
+  /**
+   * nativeswing.dependencies.checkVersions
+   * = true/false (default: true)<br/>
+   * Set whether the versions of the dependencies should be checked when possible.
+   */
+  DEPENDENCIES_CHECKVERSIONS("nativeswing.dependencies.checkVersions", Type.READ_WRITE),
+
   ;
 
   //private static final org.slf4j.Logger log = org.slf4j.LoggerFactory

@@ -46,3 +46,9 @@ are using them get loaded.
 * nativeswing.integration.active
   = true/false (default: true)
   Set whether native integration should be active.
+
+--------------------------------------------------------------------------------
+
+* nativeswing.dependencies.checkVersions
+  = true/false (default: true)
+  Set whether the versions of the dependencies should be checked when possible.

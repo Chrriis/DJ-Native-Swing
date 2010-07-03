@@ -85,6 +85,14 @@ public enum NSSystemPropertySWT {
   INTEGRATION_ACTIVE(NSSystemProperty.INTEGRATION_ACTIVE),
 
 
+  /**
+   * nativeswing.dependencies.checkVersions
+   * = true/false (default: true)<br/>
+   * Set whether the versions of the dependencies should be checked when possible.
+   */
+  DEPENDENCIES_CHECKVERSIONS(NSSystemProperty.DEPENDENCIES_CHECKVERSIONS),
+
+
   /* ----------------- NativeSwing-SWT properties ----------------- */
 
   /**

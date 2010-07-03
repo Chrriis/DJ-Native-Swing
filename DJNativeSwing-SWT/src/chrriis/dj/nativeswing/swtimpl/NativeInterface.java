@@ -179,9 +179,11 @@ public class NativeInterface {
       if(isInitialized()) {
         return;
       }
-      // Check the versions of the libraries.
-      if(SWT.getVersion() < 3650) {
-        throw new IllegalStateException("The version of SWT that is required is 3.6 or later!");
+      if(!Boolean.FALSE.equals(NSSystemPropertySWT.DEPENDENCIES_CHECKVERSIONS)) {
+        // Check the versions of the libraries.
+        if(SWT.getVersion() < 3650) {
+          throw new IllegalStateException("The version of SWT that is required is 3.6 or later!");
+        }
       }
       if(nativeInterfaceConfiguration == null) {
         nativeInterfaceConfiguration = new NativeInterfaceConfiguration();
