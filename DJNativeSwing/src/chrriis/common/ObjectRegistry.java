@@ -124,7 +124,7 @@ public class ObjectRegistry {
    * Get all the instance IDs that are used in this registry.
    * @return the instance IDs.
    */
-  public int[] getInstanceIDs() {
+  public synchronized int[] getInstanceIDs() {
     Object[] instanceIDObjects = instanceIDToObjectReferenceMap.keySet().toArray();
     int[] instanceIDs = new int[instanceIDObjects.length];
     for(int i=0; i<instanceIDObjects.length; i++) {
