@@ -40,7 +40,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.DeviceData;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
 import chrriis.common.NetworkURLClassLoader;
 import chrriis.common.SystemProperty;
@@ -221,6 +223,8 @@ public class NativeInterface {
       }
       if(isInProcess()) {
         InProcess.initialize();
+      } else {
+        OutProcess.initialize();
       }
       isInitialized = true;
     }
@@ -448,6 +452,12 @@ public class NativeInterface {
           throw e;
         }
       }
+      Runtime.getRuntime().addShutdownHook(new Thread() {
+        @Override
+        public void run() {
+          destroyControls();
+        }
+      });
     }
 
     private static MessagingInterface createInProcessMessagingInterface() {
@@ -462,7 +472,9 @@ public class NativeInterface {
       startAutoShutdownThread();
       while(isEventPumpRunning) {
         try {
-          if(!display.readAndDispatch()) {
+          if(display.isDisposed()) {
+            isEventPumpRunning = false;
+          } else if(!display.readAndDispatch()) {
             if(isEventPumpRunning) {
               display.sleep();
             }
@@ -499,11 +511,13 @@ public class NativeInterface {
             }
           }
           // Shutdown procedure
-          display.asyncExec(new Runnable() {
-            public void run() {
-              isEventPumpRunning = false;
-            }
-          });
+          if(!display.isDisposed()) {
+            display.asyncExec(new Runnable() {
+              public void run() {
+                isEventPumpRunning = false;
+              }
+            });
+          }
         }
       };
       autoShutdownThread.setDaemon(true);
@@ -513,6 +527,27 @@ public class NativeInterface {
   }
 
   static class OutProcess {
+
+    private static class CMN_destroyControls extends CommandMessage {
+      @Override
+      public Object run(Object[] args) throws Exception {
+        display.syncExec(new Runnable() {
+          public void run() {
+            destroyControls();
+          }
+        });
+        return null;
+      }
+    }
+
+    private static void initialize() {
+      Runtime.getRuntime().addShutdownHook(new Thread() {
+        @Override
+        public void run() {
+          new CMN_destroyControls().asyncExec(true);
+        }
+      });
+    }
 
     private static class CMN_setProperties extends CommandMessage {
       @Override
@@ -961,6 +996,12 @@ public class NativeInterface {
           shutdownThread.setDaemon(true);
           shutdownThread.start();
         }
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+          @Override
+          public void run() {
+            destroyControls();
+          }
+        });
         try {
           socket = serverSocket.accept();
         } catch(Exception e) {
@@ -1087,6 +1128,31 @@ public class NativeInterface {
     public Object run(Object[] args) throws Exception {
       new Message().asyncSend(true);
       return null;
+    }
+  }
+
+  private static void destroyControls() {
+    if(display != null && !display.isDisposed()) {
+      if(display.getThread() != Thread.currentThread()) {
+        display.syncExec(new Runnable() {
+          public void run() {
+            destroyControls();
+          }
+        });
+        return;
+      }
+      for(Control control: NativeComponent.getControls()) {
+        Shell shell = control.isDisposed()? null: control.getShell();
+        try {
+          if(shell != null) {
+            shell.dispose();
+          }
+        } catch(Exception e) {
+          // An exception happens with OLE components... but things get cleared as expected it seems
+        }
+        control.dispose();
+      }
+//      display.dispose();
     }
   }
 
