@@ -17,7 +17,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
 
 import chrriis.common.ObjectRegistry;
 
@@ -365,21 +364,7 @@ abstract class MessagingInterface {
             if(MessagingInterface.this.isAlive()) {
               setAlive(false);
               if(exitOnEndOfStream) {
-                if(isNativeSide()) {
-                  final Display display = NativeInterface.getDisplay();
-                  if(display == null || display.isDisposed()) {
-                    System.exit(0);
-                  } else {
-                    display.asyncExec(new Runnable() {
-                      public void run() {
-                        display.dispose();
-                        System.exit(0);
-                      }
-                    });
-                  }
-                } else {
-                  System.exit(0);
-                }
+                System.exit(0);
                 return;
               }
               e.printStackTrace();
