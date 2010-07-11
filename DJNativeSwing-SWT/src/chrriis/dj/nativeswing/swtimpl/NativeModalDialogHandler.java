@@ -10,10 +10,10 @@ package chrriis.dj.nativeswing.swtimpl;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog;
+import java.awt.Dialog.ModalityType;
 import java.awt.Frame;
 import java.awt.Point;
 import java.awt.Window;
-import java.awt.Dialog.ModalityType;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.HashMap;
@@ -25,6 +25,7 @@ import javax.swing.SwingUtilities;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 
 import chrriis.common.Utils;
 
@@ -48,6 +49,37 @@ public abstract class NativeModalDialogHandler {
 
   }
 
+  private static class CMN_openDialog extends ControlCommandMessage {
+    private transient volatile Object result;
+    @Override
+    public Object run(final Object[] args) throws Exception {
+      Control control = getControl();
+      if(control.isDisposed()) {
+        return null;
+      }
+      Display display = control.getDisplay();
+      if(display.getThread() != Thread.currentThread()) {
+        try {
+          display.syncExec(new Runnable() {
+            public void run() {
+              try {
+                result = CMN_openDialog.this.run(args);
+              } catch(Throwable t) {
+                throw new RuntimeException(t);
+              }
+            }
+          });
+        } catch(RuntimeException e) {
+          throw (Exception)e.getCause();
+        }
+        return result;
+      }
+      ControlCommandMessage commandMessage = (ControlCommandMessage)args[0];
+      commandMessage.setControl(control);
+      return commandMessage.run((Object[])args[1]);
+    }
+  }
+
   /**
    * Show the native modal dialog.
    * @param component The component to use as a parent.
@@ -67,6 +99,8 @@ public abstract class NativeModalDialogHandler {
         dialog = new JDialog((Frame)window, true);
       }
     }
+    // We will show a dialog that is 0x0 with no decorations: it is modal but cannot be seen.
+    // This will ensure dialogs are modaliy blocked without having to hack into the AWT event pumping.
     dialog.setUndecorated(true);
     dialog.setSize(0, 0);
     if(Utils.IS_WINDOWS) {
@@ -80,18 +114,31 @@ public abstract class NativeModalDialogHandler {
     dialog.addWindowListener(new WindowAdapter() {
       @Override
       public void windowOpened(WindowEvent e) {
-        NativeModalComponent nativeModalComponent = new NativeModalComponent();
+        final NativeModalComponent nativeModalComponent = new NativeModalComponent();
         dialog.getContentPane().add(nativeModalComponent.createEmbeddableComponent(new HashMap<Object, Object>()), BorderLayout.CENTER);
         nativeModalComponent.initializeNativePeer();
-        try {
-          processResult(message.syncExec(nativeModalComponent, args));
-        } finally {
-          SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-              dialog.dispose();
+        // We start a new thread which invokes an intermediate internal message (not the user message).
+        new Thread("Modal dialog handler") {
+          @Override
+          public void run() {
+            try {
+              // This internal message runs outside the UI thread, so the AWT thread is not blocked on a sync call.
+              // The purpose of this internal message is to invoke the user message in the SWT UI thread on the native side only.
+              final Object result = new CMN_openDialog().syncExec(nativeModalComponent, message, args);
+              SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                  processResult(result);
+                }
+              });
+            } finally {
+              SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                  dialog.dispose();
+                }
+              });
             }
-          });
-        }
+          }
+        }.start();
       }
     });
     dialog.setVisible(true);
