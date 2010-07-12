@@ -99,6 +99,14 @@ public abstract class NativeModalDialogHandler {
         dialog = new JDialog((Frame)window, true);
       }
     }
+    if(Utils.IS_MAC) {
+      NativeModalComponent nativeModalComponent = new NativeModalComponent();
+      dialog.getContentPane().add(nativeModalComponent.createEmbeddableComponent(new HashMap<Object, Object>()), BorderLayout.CENTER);
+      nativeModalComponent.initializeNativePeer();
+      processResult(message.syncExec(nativeModalComponent, args));
+      dialog.dispose();
+      return;
+    }
     // We will show a dialog that is 0x0 with no decorations: it is modal but cannot be seen.
     // This will ensure dialogs are modaliy blocked without having to hack into the AWT event pumping.
     dialog.setUndecorated(true);
