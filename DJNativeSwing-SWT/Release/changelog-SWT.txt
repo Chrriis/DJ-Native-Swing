@@ -13,7 +13,8 @@ Licence terms: LGPL (see licence.txt)
 - Web Browser allows passing HTTP headers and POST data.
 - Web Browser allows vetoable disposal with page unloading confirmation dialog.
 - Web Browser type and version are accessible.
-- WebKit rendering support.
+- Mozilla XPCOM in/out parameters support.
+- WebKit rendering support (on Linux).
 - Printing to console from web page with nsConsoleOut(xx) and nsConsoleErr(xx).
 - Bug fix for JWebBrowser.executeJavascriptWithResult() (Firefox 3.6.3).
 - Component listeners are improved for consistency (user code to be adjusted!).

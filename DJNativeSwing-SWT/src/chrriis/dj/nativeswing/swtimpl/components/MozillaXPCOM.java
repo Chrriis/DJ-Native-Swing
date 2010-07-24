@@ -278,7 +278,7 @@ public class MozillaXPCOM {
     if(o == null) {
       return null;
     }
-    if(o.getClass().isArray()) {
+    if(o instanceof Object[]) {
       Object[] array = (Object[])o;
       Object[] newArray = new Object[array.length];
       for(int i=0; i<array.length; i++) {
@@ -318,6 +318,21 @@ public class MozillaXPCOM {
     return new InterfaceDefinition(id, null, !(o instanceof NativeSwingProxy), !isNativeSide);
   }
 
+  private static class RunMethodResult implements Serializable {
+    private Object result;
+    private Object[] outParams;
+    public RunMethodResult(Object result, Object[] outParams) {
+      this.result = result;
+      this.outParams = outParams;
+    }
+    public Object getResult() {
+      return result;
+    }
+    public Object[] getOutParams() {
+      return outParams;
+    }
+  }
+
   private static class CM_runMethod extends CommandMessage {
     @Override
     public Object run(Object[] args) {
@@ -331,7 +346,17 @@ public class MozillaXPCOM {
         Method method = nativeInterface.getClass().getMethod(methodName, parameterTypes);
         method.setAccessible(true);
         Object result = method.invoke(nativeInterface, parameterValues);
-        return pack(result, isNativeSide);
+        List<Object> outParamList = null;
+        // Array parameters may be (always are?) in/out parameters, so we have to capture potentially changed values.
+        if(parameterValues != null) {
+          outParamList = new ArrayList<Object>();
+          for(Object o: parameterValues) {
+            if(o instanceof Object[]) {
+              outParamList.add(pack(o, isNativeSide));
+            }
+          }
+        }
+        return new RunMethodResult(pack(result, isNativeSide), outParamList == null || outParamList.isEmpty()? null: outParamList.toArray());
       } catch(Exception e) {
         throw new IllegalStateException("The method " + methodName + " could not be invoked on interface " + nativeInterface + "!", e);
       }
@@ -380,7 +405,21 @@ public class MozillaXPCOM {
                 new CM_disposeResources().syncExec(!isNativeSide, id);
                 return null;
               }
-              return unpack(new CM_runMethod().syncExec(!isNativeSide, id, methodName, parameterTypes, pack(args, isNativeSide), !isNativeSide));
+              RunMethodResult result = (RunMethodResult)new CM_runMethod().syncExec(!isNativeSide, id, methodName, parameterTypes, pack(args, isNativeSide), !isNativeSide);
+              Object[] outParams = result.getOutParams();
+              if(outParams != null) {
+                int cur = 0;
+                for(Object o: args) {
+                  if(o instanceof Object[]) {
+                    Object[] in = (Object[])o;
+                    Object[] out = (Object[])unpack(outParams[cur++]);
+                    for(int j=0; j<in.length; j++) {
+                      in[j] = out[j];
+                    }
+                  }
+                }
+              }
+              return unpack(result.getResult());
             }
           });
           idToProxyInterfaceReferenceMap.put(id, new WeakReference<NativeSwingProxy>(proxyInterface));
