@@ -660,15 +660,15 @@ class NativeWebBrowser extends NativeComponent {
 
   public NativeWebBrowser(JWebBrowser webBrowser, WebBrowserRuntime runtime) {
     this.webBrowser = new WeakReference<JWebBrowser>(webBrowser);
-    this.runtime = runtime;
     if(runtime == WebBrowserRuntime.DEFAULT) {
       String runtimeProperty = NSSystemPropertySWT.WEBBROWSER_RUNTIME.get();
       if("xulrunner".equals(runtimeProperty)) {
-        this.runtime = WebBrowserRuntime.XULRUNNER;
+        runtime = WebBrowserRuntime.XULRUNNER;
       } else if("webkit".equals(runtimeProperty)) {
-        this.runtime = WebBrowserRuntime.WEBKIT;
+        runtime = WebBrowserRuntime.WEBKIT;
       }
     }
+    this.runtime = runtime;
     if(runtime == WebBrowserRuntime.XULRUNNER) {
       xulRunnerHome = NSSystemPropertySWT.WEBBROWSER_XULRUNNER_HOME.get();
     }
