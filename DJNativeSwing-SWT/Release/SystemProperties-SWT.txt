@@ -101,6 +101,14 @@ are using them get loaded.
 
 --------------------------------------------------------------------------------
 
+* nativeswing.vlcplayer.fixPlaylistAutoPlayNext
+  = true/false (default: true)
+  VLC seems to have a bug: it does not automatically play the next queued item.
+  The fix that was added can be deactivated with this system property.
+
+--------------------------------------------------------------------------------
+
 * nativeswing.swt.device.debug
   = true/false (default: false)
-  Set whether the SWT Device debugging is active.
+  Set whether the SWT Device debugging is active. This property can be useful
+  because it outputs the web browser runtime effectively detected for the OS.

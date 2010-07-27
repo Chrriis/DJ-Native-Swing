@@ -241,9 +241,19 @@ public enum NSSystemPropertySWT {
 
 
   /**
+   * nativeswing.vlcplayer.fixPlaylistAutoPlayNext
+   * = true/false (default: true)<br/>
+   * VLC seems to have a bug: it does not automatically play the next queued item.
+   * The fix that was added can be deactivated with this system property.
+   */
+  VLCPLAYER_FIXPLAYLISTAUTOPLAYNEXT("nativeswing.vlcplayer.fixPlaylistAutoPlayNext", Type.READ_WRITE),
+
+
+  /**
    * nativeswing.swt.device.debug
    * = true/false (default: false)<br/>
-   * Set whether the SWT Device debugging is active.
+   * Set whether the SWT Device debugging is active. This property can be useful
+   * because it outputs the web browser runtime effectively detected for the OS.
    */
   SWT_DEVICE_DEBUG("nativeswing.swt.device.debug", Type.READ_WRITE),
 

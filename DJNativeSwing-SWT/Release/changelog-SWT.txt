@@ -30,6 +30,7 @@ Licence terms: LGPL (see licence.txt)
 - Native component generated mouse events set the popup trigger flag correctly.
 - Flash/VLC options are not set to null after load to support multiple requests.
 - VLC player now allows VLC options.
+- VLC player has a fix for VLC bug not auto moving to next playlist item.
 - VLC API improved to work with 1.0.0.
 - Mozilla XPCOM missing interface methods are added.
 - XULRunner home can be set after opening the interface.

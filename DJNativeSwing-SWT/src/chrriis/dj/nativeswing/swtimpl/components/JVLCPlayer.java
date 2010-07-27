@@ -456,6 +456,7 @@ public class JVLCPlayer extends NSPanelComponent {
     webBrowserObject.load(resourceLocation);
     VLCPlaylist playlist = getVLCPlaylist();
     if(resourceLocation != null && !"".equals(resourceLocation)) {
+      playlist.stop();
       playlist.clear();
       playlist.addItem(resourceLocation);
       playlist.play();
