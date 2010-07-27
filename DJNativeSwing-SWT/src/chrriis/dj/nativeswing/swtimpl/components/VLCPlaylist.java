@@ -178,13 +178,15 @@ public class VLCPlaylist {
         @Override
         public void run() {
           final Thread currentThread = this;
+          boolean isFirst = true;
           while(currentThread == playlistFixThread) {
             if(vlcPlayer.isNativePeerDisposed()) {
               setPlaylistFixActive(false);
               return;
             }
             try {
-              sleep(1000);
+              sleep(isFirst? 3000: 1000);
+              isFirst = false;
             } catch(Exception e) {}
             SwingUtilities.invokeLater(new Runnable() {
               public void run() {
