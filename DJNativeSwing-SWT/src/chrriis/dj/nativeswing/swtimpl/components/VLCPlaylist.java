@@ -185,7 +185,7 @@ public class VLCPlaylist {
               return;
             }
             try {
-              sleep(isFirst? 3000: 1000);
+              sleep(isFirst? 3000: 500);
               isFirst = false;
             } catch(Exception e) {}
             SwingUtilities.invokeLater(new Runnable() {
