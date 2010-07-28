@@ -528,6 +528,9 @@ public class DefaultWebBrowserDecorator extends WebBrowserDecorator {
     add(nativeWebBrowserBorderContainerPane, BorderLayout.CENTER);
     nativeWebBrowser.addWebBrowserListener(new NWebBrowserListener());
     adjustBorder();
+    setButtonBarVisible(true);
+    setLocationBarVisible(true);
+    setStatusBarVisible(true);
   }
 
   protected JWebBrowser getWebBrowser() {

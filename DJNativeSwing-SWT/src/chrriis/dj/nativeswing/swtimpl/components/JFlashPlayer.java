@@ -8,22 +8,12 @@
 package chrriis.dj.nativeswing.swtimpl.components;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Component;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
-
-import javax.swing.BorderFactory;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.border.BevelBorder;
 
 import chrriis.common.Utils;
 import chrriis.common.WebServer;
@@ -81,20 +71,52 @@ public class JFlashPlayer extends NSPanelComponent {
     });
   }
 
-  private final ResourceBundle RESOURCES;
-
-  {
-    String className = JFlashPlayer.class.getName();
-    RESOURCES = ResourceBundle.getBundle(className.substring(0, className.lastIndexOf('.')).replace('.', '/') + "/resource/FlashPlayer");
+  /**
+   * A factory that creates the decorators for flash players.
+   * @author Christopher Deckers
+   */
+  public static interface FlashPlayerDecoratorFactory {
+    /**
+     * Create the decorator for a flash player, which adds the rendering component to its component hierarchy and will itself be added to the flash player.
+     * @param flashPlayer the flash player for which to create the decorator.
+     * @param renderingComponent the component that renders the flash player's content.
+     * @return the decorator.
+     */
+    public FlashPlayerDecorator createFlashPlayerDecorator(JFlashPlayer flashPlayer, Component renderingComponent);
   }
 
-  private JPanel webBrowserPanel;
-  private JWebBrowser webBrowser;
+  private static FlashPlayerDecoratorFactory flashPlayerDecoratorFactory;
 
-  private JPanel controlBarPane;
-  private JButton playButton;
-  private JButton pauseButton;
-  private JButton stopButton;
+  /**
+   * Set the decorator that will be used for future flash player instances.
+   * @param flashPlayerDecoratorFactory the factory that creates the decorators, or null for default decorators.
+   */
+  public static void setFlashPlayerDecoratorFactory(FlashPlayerDecoratorFactory flashPlayerDecoratorFactory) {
+    JFlashPlayer.flashPlayerDecoratorFactory = flashPlayerDecoratorFactory;
+  }
+
+  private FlashPlayerDecorator flashPlayerDecorator;
+
+  FlashPlayerDecorator getFlashPlayerDecorator() {
+    return flashPlayerDecorator;
+  }
+
+  /**
+   * Create a decorator for this flash player. This method can be overriden so that the flash player uses a different decorator.
+   * @param renderingComponent the component to add to the decorator's component hierarchy.
+   * @return the decorator that was created.
+   */
+  protected FlashPlayerDecorator createFlashPlayerDecorator(Component renderingComponent) {
+    if(flashPlayerDecoratorFactory != null) {
+      FlashPlayerDecorator flashPlayerDecorator = flashPlayerDecoratorFactory.createFlashPlayerDecorator(this, renderingComponent);
+      if(flashPlayerDecorator != null) {
+        return flashPlayerDecorator;
+      }
+    }
+    return new DefaultFlashPlayerDecorator(this, renderingComponent);
+  }
+
+  private JWebBrowser webBrowser;
 
   private static class NWebBrowserObject extends WebBrowserObject {
 
@@ -179,53 +201,8 @@ public class JFlashPlayer extends NSPanelComponent {
         }
       }
     });
-    webBrowserPanel = new JPanel(new BorderLayout());
-    webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
-    add(webBrowserPanel, BorderLayout.CENTER);
-    controlBarPane = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 2));
-    playButton = new JButton(createIcon("PlayIcon"));
-    playButton.setEnabled(false);
-    playButton.setToolTipText(RESOURCES.getString("PlayText"));
-    playButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        play();
-      }
-    });
-    controlBarPane.add(playButton);
-    pauseButton = new JButton(createIcon("PauseIcon"));
-    pauseButton.setEnabled(false);
-    pauseButton.setToolTipText(RESOURCES.getString("PauseText"));
-    pauseButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        pause();
-      }
-    });
-    controlBarPane.add(pauseButton);
-    stopButton = new JButton(createIcon("StopIcon"));
-    stopButton.setEnabled(false);
-    stopButton.setToolTipText(RESOURCES.getString("StopText"));
-    stopButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        stop();
-      }
-    });
-    controlBarPane.add(stopButton);
-    add(controlBarPane, BorderLayout.SOUTH);
-    adjustBorder();
-    setControlBarVisible(false);
-  }
-
-  private void adjustBorder() {
-    if(isControlBarVisible()) {
-      webBrowserPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-    } else {
-      webBrowserPanel.setBorder(null);
-    }
-  }
-
-  private Icon createIcon(String resourceKey) {
-    String value = RESOURCES.getString(resourceKey);
-    return value.length() == 0? null: new ImageIcon(JWebBrowser.class.getResource(value));
+    flashPlayerDecorator = createFlashPlayerDecorator(webBrowser);
+    add(flashPlayerDecorator, BorderLayout.CENTER);
   }
 
   private volatile String customJavascriptDefinitions;
@@ -278,10 +255,6 @@ public class JFlashPlayer extends NSPanelComponent {
     }
     this.options = options;
     webBrowserObject.load(resourceLocation);
-    boolean isEnabled = resourceLocation != null;
-    playButton.setEnabled(isEnabled);
-    pauseButton.setEnabled(isEnabled);
-    stopButton.setEnabled(isEnabled);
   }
 
   /**
@@ -369,7 +342,7 @@ public class JFlashPlayer extends NSPanelComponent {
    * @return true if the control bar is visible.
    */
   public boolean isControlBarVisible() {
-    return controlBarPane.isVisible();
+    return flashPlayerDecorator.isControlBarVisible();
   }
 
   /**
@@ -377,8 +350,7 @@ public class JFlashPlayer extends NSPanelComponent {
    * @param isControlBarVisible true if the control bar should be visible, false otherwise.
    */
   public void setControlBarVisible(boolean isControlBarVisible) {
-    controlBarPane.setVisible(isControlBarVisible);
-    adjustBorder();
+    flashPlayerDecorator.setControlBarVisible(isControlBarVisible);
   }
 
   /**

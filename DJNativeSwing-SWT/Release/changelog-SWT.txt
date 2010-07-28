@@ -37,6 +37,7 @@ Licence terms: LGPL (see licence.txt)
 - VLC and Flash player do not have a loading message (was causing problems).
 - F5 is blocked for plugin based objects to avoid page reload.
 - Implementation of web browser decorators.
+- Implementation of flash player decorators.
 - JS line comments and escaping are removed for browsers where it is not needed.
 - Resource bundles are loaded without using the package.
 - Browser window size was incorrectly set if JS specified only width or height.

@@ -123,7 +123,7 @@ public class DefaultFlashPlayerDecorator extends FlashPlayerDecorator {
 
   private Icon createIcon(String resourceKey) {
     String value = RESOURCES.getString(resourceKey);
-    return value.length() == 0? null: new ImageIcon(JWebBrowser.class.getResource(value));
+    return value.length() == 0? null: new ImageIcon(JFlashPlayer.class.getResource(value));
   }
 
   private void adjustBorder() {

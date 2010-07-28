@@ -184,9 +184,6 @@ public class JWebBrowser extends NSPanelComponent {
     embeddableComponent = nativeWebBrowser.createEmbeddableComponent(optionMap);
     webBrowserDecorator = createWebBrowserDecorator(embeddableComponent);
     add(webBrowserDecorator, BorderLayout.CENTER);
-    setButtonBarVisible(true);
-    setLocationBarVisible(true);
-    setStatusBarVisible(true);
   }
 
   /**
