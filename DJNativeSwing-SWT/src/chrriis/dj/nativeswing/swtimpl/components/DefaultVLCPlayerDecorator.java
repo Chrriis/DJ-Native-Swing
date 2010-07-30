@@ -163,6 +163,7 @@ public class DefaultVLCPlayerDecorator extends VLCPlayerDecorator {
     }
 
     public void disconnect() {
+      stopUpdateThread();
       vlcPlayer.getWebBrowser().removeWebBrowserListener(webBrowserListener);
     }
 
