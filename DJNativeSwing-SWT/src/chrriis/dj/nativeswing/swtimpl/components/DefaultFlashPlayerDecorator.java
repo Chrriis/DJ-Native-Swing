@@ -18,6 +18,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
@@ -75,10 +76,10 @@ public class DefaultFlashPlayerDecorator extends FlashPlayerDecorator {
         }
       };
       flashPlayer.getWebBrowser().addWebBrowserListener(webBrowserListener);
-      addControlBarComponents(this);
+      addControlBarComponents(this, this);
     }
 
-    public void disconnect() {
+    void disconnect() {
       flashPlayer.getWebBrowser().removeWebBrowserListener(webBrowserListener);
     }
 
@@ -169,12 +170,12 @@ public class DefaultFlashPlayerDecorator extends FlashPlayerDecorator {
 
   /**
    * Add the components that compose the control bar.
-   * Overriden versions do not need to call their super implementation, instead they can selectively add certain default components, for example: <code>controlBar.add(controlBar.getPlayButton())</code>.
+   * Overriden versions do not need to call their super implementation, instead they can selectively add certain default components, for example: <code>buttonContainer.add(controlBar.getPlayButton())</code>.
    */
-  protected void addControlBarComponents(FlashPlayerControlBar controlBar) {
-    controlBar.add(controlBar.getPlayButton());
-    controlBar.add(controlBar.getPauseButton());
-    controlBar.add(controlBar.getStopButton());
+  protected void addControlBarComponents(FlashPlayerControlBar controlBar, JComponent buttonContainer) {
+    buttonContainer.add(controlBar.getPlayButton());
+    buttonContainer.add(controlBar.getPauseButton());
+    buttonContainer.add(controlBar.getStopButton());
   }
 
 }

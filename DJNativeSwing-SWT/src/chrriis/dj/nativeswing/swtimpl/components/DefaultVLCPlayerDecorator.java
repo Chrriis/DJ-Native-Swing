@@ -22,6 +22,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -71,7 +72,6 @@ public class DefaultVLCPlayerDecorator extends VLCPlayerDecorator {
           vlcPlayer.getVLCPlaylist().play();
         }
       });
-      buttonPanel.add(playButton);
       pauseButton = new JButton(createIcon("PauseIcon"));
       pauseButton.setToolTipText(RESOURCES.getString("PauseText"));
       pauseButton.addActionListener(new ActionListener() {
@@ -79,7 +79,6 @@ public class DefaultVLCPlayerDecorator extends VLCPlayerDecorator {
           vlcPlayer.getVLCPlaylist().togglePause();
         }
       });
-      buttonPanel.add(pauseButton);
       stopButton = new JButton(createIcon("StopIcon"));
       stopButton.setToolTipText(RESOURCES.getString("StopText"));
       stopButton.addActionListener(new ActionListener() {
@@ -87,7 +86,7 @@ public class DefaultVLCPlayerDecorator extends VLCPlayerDecorator {
           vlcPlayer.getVLCPlaylist().stop();
         }
       });
-      buttonPanel.add(stopButton);
+      addControlBarComponents(this, buttonPanel);
       seekBarSlider = new JSlider(0, 10000, 0);
       seekBarSlider.setVisible(false);
       seekBarSlider.addChangeListener(new ChangeListener() {
@@ -162,7 +161,7 @@ public class DefaultVLCPlayerDecorator extends VLCPlayerDecorator {
 //      addControlBarComponents(this);
     }
 
-    public void disconnect() {
+    void disconnect() {
       stopUpdateThread();
       vlcPlayer.getWebBrowser().removeWebBrowserListener(webBrowserListener);
     }
@@ -272,20 +271,6 @@ public class DefaultVLCPlayerDecorator extends VLCPlayerDecorator {
       updateThread.start();
     }
 
-    private String formatTime(int milliseconds, boolean showHours) {
-      int seconds = milliseconds / 1000;
-      int hours = seconds / 3600;
-      int minutes = (seconds % 3600) / 60;
-      seconds = seconds % 60;
-      StringBuilder sb = new StringBuilder();
-      if(hours != 0 || showHours) {
-        sb.append(hours).append(':');
-      }
-      sb.append(minutes < 10? "0": "").append(minutes).append(':');
-      sb.append(seconds < 10? "0": "").append(seconds);
-      return sb.toString();
-    }
-
     private void updateControlBar() {
       VLCInput vlcInput = vlcPlayer.getVLCInput();
       VLCMediaState state = vlcInput.getMediaState();
@@ -298,7 +283,7 @@ public class DefaultVLCPlayerDecorator extends VLCPlayerDecorator {
           isAdjustingSeekBar = true;
           seekBarSlider.setValue(Math.round(time * 10000f / length));
           isAdjustingSeekBar = false;
-          timeLabel.setText(formatTime(time, length >= 3600000) + " / " + formatTime(length, false));
+          timeLabel.setText(getTimeDisplay(time, length));
         }
       }
       if(!isValid) {
@@ -373,14 +358,39 @@ public class DefaultVLCPlayerDecorator extends VLCPlayerDecorator {
     return controlBar != null;
   }
 
-//  /**
-//   * Add the components that compose the control bar.
-//   * Overriden versions do not need to call their super implementation, instead they can selectively add certain default components, for example: <code>controlBar.add(controlBar.getPlayButton())</code>.
-//   */
-//  protected void addControlBarComponents(VLCPlayerControlBar controlBar) {
-//    controlBar.add(controlBar.getPlayButton());
-//    controlBar.add(controlBar.getPauseButton());
-//    controlBar.add(controlBar.getStopButton());
-//  }
+  /**
+   * Get the time to display in the time display area.
+   * @param currentTime The current playing time.
+   * @param totalTime The total playing time.
+   * @return a text, which by default returns a time in the form "02:45 / 04:23".
+   */
+  protected String getTimeDisplay(int currentTime, int totalTime) {
+    boolean showHours = totalTime >= 3600000;
+    return formatTime(currentTime, showHours) + " / " + formatTime(totalTime, showHours);
+  }
+
+  private String formatTime(int milliseconds, boolean showHours) {
+    int seconds = milliseconds / 1000;
+    int hours = seconds / 3600;
+    int minutes = (seconds % 3600) / 60;
+    seconds = seconds % 60;
+    StringBuilder sb = new StringBuilder();
+    if(hours != 0 || showHours) {
+      sb.append(hours).append(':');
+    }
+    sb.append(minutes < 10? "0": "").append(minutes).append(':');
+    sb.append(seconds < 10? "0": "").append(seconds);
+    return sb.toString();
+  }
+
+  /**
+   * Add the components that compose the control bar.
+   * Overriden versions do not need to call their super implementation, instead they can selectively add certain default components, for example: <code>buttonContainer.add(controlBar.getPlayButton())</code>.
+   */
+  protected void addControlBarComponents(VLCPlayerControlBar controlBar, JComponent buttonContainer) {
+    buttonContainer.add(controlBar.getPlayButton());
+    buttonContainer.add(controlBar.getPauseButton());
+    buttonContainer.add(controlBar.getStopButton());
+  }
 
 }
