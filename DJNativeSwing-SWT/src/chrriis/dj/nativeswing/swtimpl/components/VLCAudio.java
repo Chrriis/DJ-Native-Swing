@@ -15,11 +15,9 @@ import chrriis.dj.nativeswing.swtimpl.WebBrowserObject;
  */
 public class VLCAudio {
 
-  private JVLCPlayer vlcPlayer;
   private WebBrowserObject webBrowserObject;
 
   VLCAudio(JVLCPlayer vlcPlayer) {
-    this.vlcPlayer = vlcPlayer;
     webBrowserObject = vlcPlayer.getWebBrowserObject();
   }
 
@@ -29,7 +27,6 @@ public class VLCAudio {
    */
   public void setMute(boolean isMute) {
     webBrowserObject.setObjectProperty("audio.mute", isMute);
-    vlcPlayer.adjustVolumePanel();
   }
 
   /**
@@ -49,7 +46,6 @@ public class VLCAudio {
       throw new IllegalArgumentException("The volume must be between 0 and 100");
     }
     webBrowserObject.setObjectProperty("audio.volume", Math.round((volume * 1.99 + 1)));
-    vlcPlayer.adjustVolumePanel();
   }
 
   /**
@@ -127,7 +123,6 @@ public class VLCAudio {
    */
   public void toggleMute() {
     webBrowserObject.invokeObjectFunction("audio.toggleMute");
-    vlcPlayer.adjustVolumePanel();
   }
 
 }

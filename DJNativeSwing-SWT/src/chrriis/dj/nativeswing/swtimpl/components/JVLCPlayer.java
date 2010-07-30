@@ -8,36 +8,16 @@
 package chrriis.dj.nativeswing.swtimpl.components;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Component;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ResourceBundle;
-
-import javax.swing.BorderFactory;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSlider;
-import javax.swing.SwingUtilities;
-import javax.swing.border.BevelBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import chrriis.common.Utils;
 import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.NSOption;
 import chrriis.dj.nativeswing.swtimpl.NSPanelComponent;
 import chrriis.dj.nativeswing.swtimpl.WebBrowserObject;
-import chrriis.dj.nativeswing.swtimpl.components.VLCInput.VLCMediaState;
 
 /**
  * A native multimedia player. It is a browser-based component, which relies on the VLC plugin.<br/>
@@ -47,20 +27,52 @@ import chrriis.dj.nativeswing.swtimpl.components.VLCInput.VLCMediaState;
  */
 public class JVLCPlayer extends NSPanelComponent {
 
-  private final ResourceBundle RESOURCES;
-
-  {
-    String className = JVLCPlayer.class.getName();
-    RESOURCES = ResourceBundle.getBundle(className.substring(0, className.lastIndexOf('.')).replace('.', '/') + "/resource/VLCPlayer");
+  /**
+   * A factory that creates the decorators for VLC players.
+   * @author Christopher Deckers
+   */
+  public static interface VLCPlayerDecoratorFactory {
+    /**
+     * Create the decorator for a VLC player, which adds the rendering component to its component hierarchy and will itself be added to the VLC player.
+     * @param vlcPlayer the VLC player for which to create the decorator.
+     * @param renderingComponent the component that renders the VLC player's content.
+     * @return the decorator.
+     */
+    public VLCPlayerDecorator createVLCPlayerDecorator(JVLCPlayer vlcPlayer, Component renderingComponent);
   }
 
-  private JPanel webBrowserPanel;
-  private JWebBrowser webBrowser;
+  private static VLCPlayerDecoratorFactory vlcPlayerDecoratorFactory;
 
-  private JPanel controlBarPane;
-  private JButton playButton;
-  private JButton pauseButton;
-  private JButton stopButton;
+  /**
+   * Set the decorator that will be used for future vlc player instances.
+   * @param vlcPlayerDecoratorFactory the factory that creates the decorators, or null for default decorators.
+   */
+  public static void setVLCPlayerDecoratorFactory(VLCPlayerDecoratorFactory vlcPlayerDecoratorFactory) {
+    JVLCPlayer.vlcPlayerDecoratorFactory = vlcPlayerDecoratorFactory;
+  }
+
+  private VLCPlayerDecorator vlcPlayerDecorator;
+
+  VLCPlayerDecorator getVLCPlayerDecorator() {
+    return vlcPlayerDecorator;
+  }
+
+  /**
+   * Create a decorator for this vlc player. This method can be overriden so that the vlc player uses a different decorator.
+   * @param renderingComponent the component to add to the decorator's component hierarchy.
+   * @return the decorator that was created.
+   */
+  protected VLCPlayerDecorator createVLCPlayerDecorator(Component renderingComponent) {
+    if(vlcPlayerDecoratorFactory != null) {
+      VLCPlayerDecorator vlcPlayerDecorator = vlcPlayerDecoratorFactory.createVLCPlayerDecorator(this, renderingComponent);
+      if(vlcPlayerDecorator != null) {
+        return vlcPlayerDecorator;
+      }
+    }
+    return new DefaultVLCPlayerDecorator(this, renderingComponent);
+  }
+
+  private JWebBrowser webBrowser;
 
   private static class NWebBrowserObject extends WebBrowserObject {
 
@@ -142,118 +154,10 @@ public class JVLCPlayer extends NSPanelComponent {
     return webBrowserObject;
   }
 
-  private JSlider seekBarSlider;
-  private volatile boolean isAdjustingSeekBar;
-  private volatile Thread updateThread;
-  private JLabel timeLabel;
-  private JButton volumeButton;
-  private JSlider volumeSlider;
-  private boolean isAdjustingVolume;
-
-  void adjustVolumePanel() {
-    volumeButton.setEnabled(true);
-    VLCAudio vlcAudio = getVLCAudio();
-    boolean isMute = vlcAudio.isMute();
-    if(isMute) {
-      volumeButton.setIcon(createIcon("VolumeOffIcon"));
-      volumeButton.setToolTipText(RESOURCES.getString("VolumeOffText"));
-    } else {
-      volumeButton.setIcon(createIcon("VolumeOnIcon"));
-      volumeButton.setToolTipText(RESOURCES.getString("VolumeOnText"));
-    }
-    volumeSlider.setEnabled(!isMute);
-    if(!isMute) {
-      isAdjustingVolume = true;
-      volumeSlider.setValue(vlcAudio.getVolume());
-      isAdjustingVolume = false;
-    }
-  }
-
   @Override
   public void removeNotify() {
-    stopUpdateThread();
     super.removeNotify();
     cleanup();
-  }
-
-  @Override
-  public void addNotify() {
-    super.addNotify();
-    if(webBrowserObject.hasContent()) {
-      startUpdateThread();
-    }
-  }
-
-  private void stopUpdateThread() {
-    updateThread = null;
-  }
-
-  private void startUpdateThread() {
-    if(updateThread != null) {
-      return;
-    }
-    if(isNativePeerDisposed()) {
-      return;
-    }
-    updateThread = new Thread("NativeSwing - VLC Player control bar update") {
-      @Override
-      public void run() {
-        final Thread currentThread = this;
-        while(currentThread == updateThread) {
-          if(isNativePeerDisposed()) {
-            stopUpdateThread();
-            return;
-          }
-          try {
-            sleep(1000);
-          } catch(Exception e) {}
-          SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-              if(currentThread != updateThread) {
-                return;
-              }
-              if(!isNativePeerValid()) {
-                return;
-              }
-              VLCInput vlcInput = getVLCInput();
-              VLCMediaState state = vlcInput.getMediaState();
-              boolean isValid = state == VLCMediaState.OPENING || state == VLCMediaState.BUFFERING || state == VLCMediaState.PLAYING || state == VLCMediaState.PAUSED || state == VLCMediaState.STOPPING;
-              if(isValid) {
-                int time = vlcInput.getAbsolutePosition();
-                int length = vlcInput.getDuration();
-                isValid = time >= 0 && length > 0;
-                if(isValid) {
-                  isAdjustingSeekBar = true;
-                  seekBarSlider.setValue(Math.round(time * 10000f / length));
-                  isAdjustingSeekBar = false;
-                  timeLabel.setText(formatTime(time, length >= 3600000) + " / " + formatTime(length, false));
-                }
-              }
-              if(!isValid) {
-                timeLabel.setText("");
-              }
-              seekBarSlider.setVisible(isValid);
-            }
-          });
-        }
-      }
-    };
-    updateThread.setDaemon(true);
-    updateThread.start();
-  }
-
-  private static String formatTime(int milliseconds, boolean showHours) {
-    int seconds = milliseconds / 1000;
-    int hours = seconds / 3600;
-    int minutes = (seconds % 3600) / 60;
-    seconds = seconds % 60;
-    StringBuilder sb = new StringBuilder();
-    if(hours != 0 || showHours) {
-      sb.append(hours).append(':');
-    }
-    sb.append(minutes < 10? "0": "").append(minutes).append(':');
-    sb.append(seconds < 10? "0": "").append(seconds);
-    return sb.toString();
   }
 
   /**
@@ -268,115 +172,8 @@ public class JVLCPlayer extends NSPanelComponent {
     vlcInput = new VLCInput(this);
     vlcPlaylist = new VLCPlaylist(this);
     vlcVideo = new VLCVideo(this);
-    webBrowserPanel = new JPanel(new BorderLayout());
-    webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
-    add(webBrowserPanel, BorderLayout.CENTER);
-    controlBarPane = new JPanel(new BorderLayout());
-    seekBarSlider = new JSlider(0, 10000, 0);
-    seekBarSlider.setVisible(false);
-    seekBarSlider.addChangeListener(new ChangeListener() {
-      public void stateChanged(ChangeEvent e) {
-        if(!isAdjustingSeekBar) {
-          getVLCInput().setRelativePosition(((float)seekBarSlider.getValue()) / 10000);
-        }
-      }
-    });
-    controlBarPane.add(seekBarSlider, BorderLayout.NORTH);
-    JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 2));
-    playButton = new JButton(createIcon("PlayIcon"));
-    playButton.setEnabled(false);
-    playButton.setToolTipText(RESOURCES.getString("PlayText"));
-    playButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        getVLCPlaylist().play();
-      }
-    });
-    buttonPanel.add(playButton);
-    pauseButton = new JButton(createIcon("PauseIcon"));
-    pauseButton.setEnabled(false);
-    pauseButton.setToolTipText(RESOURCES.getString("PauseText"));
-    pauseButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        getVLCPlaylist().togglePause();
-      }
-    });
-    buttonPanel.add(pauseButton);
-    stopButton = new JButton(createIcon("StopIcon"));
-    stopButton.setEnabled(false);
-    stopButton.setToolTipText(RESOURCES.getString("StopText"));
-    stopButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        getVLCPlaylist().stop();
-      }
-    });
-    buttonPanel.add(stopButton);
-    JPanel volumePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 2));
-    volumeButton = new JButton();
-    Insets margin = volumeButton.getMargin();
-    margin.left = Math.min(2, margin.left);
-    margin.right = Math.min(2, margin.left);
-    volumeButton.setMargin(margin);
-    volumeButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        getVLCAudio().toggleMute();
-      }
-    });
-    volumePanel.add(volumeButton);
-    volumeSlider = new JSlider();
-    volumeSlider.addChangeListener(new ChangeListener() {
-      public void stateChanged(ChangeEvent e) {
-        if(!isAdjustingVolume) {
-          getVLCAudio().setVolume(volumeSlider.getValue());
-        }
-      }
-    });
-    volumeSlider.setPreferredSize(new Dimension(60, volumeSlider.getPreferredSize().height));
-    volumePanel.add(volumeSlider);
-    adjustVolumePanel();
-    volumeButton.setEnabled(false);
-    volumeSlider.setEnabled(false);
-    GridBagLayout gridBag = new GridBagLayout();
-    GridBagConstraints cons = new GridBagConstraints();
-    JPanel buttonBarPanel = new JPanel(gridBag);
-    cons.gridx = 0;
-    cons.gridy = 0;
-    cons.weightx = 1.0;
-    cons.anchor = GridBagConstraints.WEST;
-    cons.fill = GridBagConstraints.HORIZONTAL;
-    timeLabel = new JLabel(" ");
-    timeLabel.setPreferredSize(new Dimension(0, timeLabel.getPreferredSize().height));
-    gridBag.setConstraints(timeLabel, cons);
-    buttonBarPanel.add(timeLabel);
-    cons.gridx++;
-    cons.weightx = 0.0;
-    cons.anchor = GridBagConstraints.CENTER;
-    cons.fill = GridBagConstraints.NONE;
-    gridBag.setConstraints(buttonPanel, cons);
-    buttonBarPanel.add(buttonPanel);
-    buttonBarPanel.setMinimumSize(buttonBarPanel.getPreferredSize());
-    cons.gridx++;
-    cons.weightx = 1.0;
-    cons.anchor = GridBagConstraints.EAST;
-    cons.fill = GridBagConstraints.HORIZONTAL;
-    volumePanel.setPreferredSize(new Dimension(0, volumePanel.getPreferredSize().height));
-    gridBag.setConstraints(volumePanel, cons);
-    buttonBarPanel.add(volumePanel);
-    controlBarPane.add(buttonBarPanel, BorderLayout.CENTER);
-    add(controlBarPane, BorderLayout.SOUTH);
-    adjustBorder();
-  }
-
-  private void adjustBorder() {
-    if(isControlBarVisible()) {
-      webBrowserPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-    } else {
-      webBrowserPanel.setBorder(null);
-    }
-  }
-
-  private Icon createIcon(String resourceKey) {
-    String value = RESOURCES.getString(resourceKey);
-    return value.length() == 0? null: new ImageIcon(JWebBrowser.class.getResource(value));
+    vlcPlayerDecorator = createVLCPlayerDecorator(webBrowser);
+    add(vlcPlayerDecorator, BorderLayout.CENTER);
   }
 
   /**
@@ -461,14 +258,6 @@ public class JVLCPlayer extends NSPanelComponent {
       playlist.addItem(resourceLocation);
       playlist.play();
     }
-    boolean hasContent = webBrowserObject.hasContent();
-    playButton.setEnabled(hasContent);
-    pauseButton.setEnabled(hasContent);
-    stopButton.setEnabled(hasContent);
-    if(hasContent) {
-      adjustVolumePanel();
-      startUpdateThread();
-    }
   }
 
   /**
@@ -476,7 +265,7 @@ public class JVLCPlayer extends NSPanelComponent {
    * @return true if the control bar is visible.
    */
   public boolean isControlBarVisible() {
-    return controlBarPane.isVisible();
+    return vlcPlayerDecorator.isControlBarVisible();
   }
 
   /**
@@ -484,8 +273,7 @@ public class JVLCPlayer extends NSPanelComponent {
    * @param isControlBarVisible true if the control bar should be visible, false otherwise.
    */
   public void setControlBarVisible(boolean isControlBarVisible) {
-    controlBarPane.setVisible(isControlBarVisible);
-    adjustBorder();
+    vlcPlayerDecorator.setControlBarVisible(isControlBarVisible);
   }
 
   /* ------------------------- VLC API exposed ------------------------- */
