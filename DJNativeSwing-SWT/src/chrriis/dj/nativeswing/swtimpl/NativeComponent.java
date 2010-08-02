@@ -17,6 +17,11 @@ import java.awt.Graphics;
 import java.awt.MenuComponent;
 import java.awt.Rectangle;
 import java.awt.Window;
+import java.awt.dnd.DragSource;
+import java.awt.dnd.DragSourceAdapter;
+import java.awt.dnd.DragSourceDragEvent;
+import java.awt.dnd.DragSourceDropEvent;
+import java.awt.dnd.DropTarget;
 import java.awt.event.ComponentListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -292,6 +297,7 @@ public abstract class NativeComponent extends Canvas {
    * Construct a native component.
    */
   public NativeComponent() {
+    DnDHandler.activateDragAndDrop();
     componentID = NativeComponent.getNativeComponentRegistry().add(this);
     addFocusListener(new FocusAdapter() {
       @Override
@@ -753,7 +759,7 @@ public abstract class NativeComponent extends Canvas {
       }
       public void keyReleased(org.eclipse.swt.events.KeyEvent e) {
         new CMJ_dispatchKeyEvent().asyncExec(control, getKeyEventArgs(e, KeyEvent.KEY_RELEASED));
-        // TODO: Maybe innacurate: swing may issue pressed events when a key is stuck. verify this behavior some day.
+        // TODO: Maybe innacurate: Swing may issue pressed events when a key is stuck. Verify this behavior some day.
         new CMJ_dispatchKeyEvent().asyncExec(control, getKeyEventArgs(e, KeyEvent.KEY_TYPED));
       }
     });
@@ -1562,6 +1568,14 @@ public abstract class NativeComponent extends Canvas {
   }
 
   /**
+   * Indicate whether a back buffer is (still) stored in the component.
+   * @return true if a back buffer is still held, false otherwise.
+   */
+  public boolean hasBackBuffer() {
+    return nativeComponentWrapper.hasBackBuffer();
+  }
+
+  /**
    * Update the back buffer on the areas that have non opaque overlays and that are not covered by opaque components.
    */
   public void updateBackBufferOnVisibleTranslucentAreas() {
@@ -1618,6 +1632,77 @@ public abstract class NativeComponent extends Canvas {
       control.redraw(0, 0, size.x, size.y, true);
       return null;
     }
+  }
+
+  private static class CMN_setShellVisible extends ControlCommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      getControl().getShell().setVisible((Boolean)args[0]);
+      return null;
+    }
+  }
+
+  /**
+   * A class that allows to register a native component as a drop targer and receive drops (using the back buffer functionality during the DnD operation).
+   * @author Christopher Deckers
+   */
+  private static class DnDHandler {
+
+    private static boolean isDnDActive;
+    private static DnDHandler dndHandler;
+
+    private NativeComponent[] nativeComponents;
+    private boolean[] hadBackBuffers;
+
+    private static void activateDragAndDrop() {
+      if(isDnDActive) {
+        return;
+      }
+      isDnDActive = true;
+      DragSource dragSource = DragSource.getDefaultDragSource();
+      DragSourceAdapter dragSourceListener = new DragSourceAdapter() {
+        @Override
+        public void dragMouseMoved(DragSourceDragEvent dsde) {
+          if(dndHandler != null) {
+            return;
+          }
+          dndHandler = new DnDHandler();
+          List<NativeComponent> nativeComponentList = new ArrayList<NativeComponent>();
+          for(NativeComponent nativeComponent: NativeComponent.getNativeComponents()) {
+            DropTarget dropTarget = nativeComponent.getDropTarget();
+            if(dropTarget != null && dropTarget.isActive()) {
+              nativeComponentList.add(nativeComponent);
+            }
+          }
+          NativeComponent[] nativeComponents = nativeComponentList.toArray(new NativeComponent[0]);
+          boolean[] hadBackBuffers = new boolean[nativeComponents.length];
+          for(int i=0; i<nativeComponents.length; i++) {
+            NativeComponent nativeComponent = nativeComponents[i];
+            hadBackBuffers[i] = nativeComponent.hasBackBuffer();
+            nativeComponent.createBackBuffer();
+            new CMN_setShellVisible().syncExec(nativeComponent, false);
+          }
+          dndHandler.nativeComponents = nativeComponents;
+          dndHandler.hadBackBuffers = hadBackBuffers;
+        }
+        @Override
+        public void dragDropEnd(DragSourceDropEvent dsde) {
+          NativeComponent[] nativeComponents = dndHandler.nativeComponents;
+          boolean[] hadBackBuffers = dndHandler.hadBackBuffers;
+          for(int i=0; i<nativeComponents.length; i++) {
+            NativeComponent nativeComponent = nativeComponents[i];
+            new CMN_setShellVisible().syncExec(nativeComponent, true);
+            if(!hadBackBuffers[i]) {
+              nativeComponent.destroyBackBuffer();
+            }
+          }
+          dndHandler = null;
+        }
+      };
+      dragSource.addDragSourceMotionListener(dragSourceListener);
+      dragSource.addDragSourceListener(dragSourceListener);
+    }
+
   }
 
 }
