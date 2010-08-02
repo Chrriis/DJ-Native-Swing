@@ -224,7 +224,7 @@ public class UIUtils {
   /**
    * Set a transparency hint for the getComponentVisibleArea(xxx) method to decide whether a component is visible.
    * @param c The component for which to set the transparency hint.
-   * @param isTransparent, which is true/false/null, where null removes any hint: glass panes of JRootPanes are considered transparent by default for example.
+   * @param isTransparent which is true/false/null, where null removes any hint: glass panes of JRootPanes are considered transparent by default for example.
    */
   public static void setComponentTransparencyHint(Component c, Boolean isTransparent) {
     // If it is not a JComponent it can only be opaque and thus isComponentTransparent will return false.
