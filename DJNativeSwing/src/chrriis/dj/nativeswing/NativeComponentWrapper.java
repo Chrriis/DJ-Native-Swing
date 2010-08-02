@@ -255,6 +255,14 @@ public class NativeComponentWrapper {
   }
 
   /**
+   * Indicate whether a back buffer is (still) stored in the component.
+   * @return true if a back buffer is still held, false otherwise.
+   */
+  public boolean hasBackBuffer() {
+    return getBackBufferManager().hasBackBuffer();
+  }
+
+  /**
    * Create an image of the native peer as a back buffer, which can be used when painting the component, or to simulate alpha blending.
    */
   public void createBackBuffer() {

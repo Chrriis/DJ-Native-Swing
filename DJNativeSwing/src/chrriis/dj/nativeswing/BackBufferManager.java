@@ -99,6 +99,12 @@ class BackBufferManager {
     }
   }
 
+  public boolean hasBackBuffer() {
+    synchronized(backBufferLock) {
+      return backBuffer != null;
+    }
+  }
+
   public void destroyBackBuffer() {
     synchronized(backBufferLock) {
       if(backBuffer != null) {
