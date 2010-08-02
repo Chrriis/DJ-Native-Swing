@@ -18,6 +18,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ResourceBundle;
 
+import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -40,12 +41,22 @@ import chrriis.dj.nativeswing.swtimpl.components.VLCInput.VLCMediaState;
  */
 public class DefaultVLCPlayerDecorator extends VLCPlayerDecorator {
 
+  public static enum VLCDecoratorComponentType {
+    PLAY_BUTTON,
+    PAUSE_BUTTON,
+    STOP_BUTTON,
+    VOLUME_BUTTON_ON,
+    VOLUME_BUTTON_OFF,
+  }
+
   private final ResourceBundle RESOURCES;
 
   {
     String className = JVLCPlayer.class.getName();
     RESOURCES = ResourceBundle.getBundle(className.substring(0, className.lastIndexOf('.')).replace('.', '/') + "/resource/VLCPlayer");
   }
+
+  private int lastVolume = 50;
 
   public class VLCPlayerControlBar extends JPanel {
 
@@ -65,22 +76,22 @@ public class DefaultVLCPlayerDecorator extends VLCPlayerDecorator {
     VLCPlayerControlBar() {
       super(new BorderLayout());
       JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 2));
-      playButton = new JButton(createIcon("PlayIcon"));
-      playButton.setToolTipText(RESOURCES.getString("PlayText"));
+      playButton = new JButton();
+      configureComponent(playButton, VLCDecoratorComponentType.PLAY_BUTTON);
       playButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           vlcPlayer.getVLCPlaylist().play();
         }
       });
-      pauseButton = new JButton(createIcon("PauseIcon"));
-      pauseButton.setToolTipText(RESOURCES.getString("PauseText"));
+      pauseButton = new JButton();
+      configureComponent(pauseButton, VLCDecoratorComponentType.PAUSE_BUTTON);
       pauseButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           vlcPlayer.getVLCPlaylist().togglePause();
         }
       });
-      stopButton = new JButton(createIcon("StopIcon"));
-      stopButton.setToolTipText(RESOURCES.getString("StopText"));
+      stopButton = new JButton();
+      configureComponent(stopButton, VLCDecoratorComponentType.STOP_BUTTON);
       stopButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           vlcPlayer.getVLCPlaylist().stop();
@@ -172,6 +183,8 @@ public class DefaultVLCPlayerDecorator extends VLCPlayerDecorator {
       playButton.setEnabled(isEnabled);
       pauseButton.setEnabled(isEnabled);
       stopButton.setEnabled(isEnabled);
+      volumeButton.setEnabled(isEnabled);
+      volumeSlider.setEnabled(isEnabled);
       if(isEnabled) {
         adjustVolumePanel();
         startUpdateThread();
@@ -185,23 +198,24 @@ public class DefaultVLCPlayerDecorator extends VLCPlayerDecorator {
       VLCAudio vlcAudio = vlcPlayer.getVLCAudio();
       boolean isMute = vlcAudio.isMute();
       int volume = vlcAudio.getVolume();
+      volumeButton.setEnabled(true);
+      volumeSlider.setEnabled(!isMute);
       if(isMute == this.isMute && this.volume == volume) {
         return;
       }
-      volumeButton.setEnabled(true);
       if(isMute) {
-        volumeButton.setIcon(createIcon("VolumeOffIcon"));
-        volumeButton.setToolTipText(RESOURCES.getString("VolumeOffText"));
+        configureComponent(volumeButton, VLCDecoratorComponentType.VOLUME_BUTTON_OFF);
       } else {
-        volumeButton.setIcon(createIcon("VolumeOnIcon"));
-        volumeButton.setToolTipText(RESOURCES.getString("VolumeOnText"));
+        configureComponent(volumeButton, VLCDecoratorComponentType.VOLUME_BUTTON_ON);
       }
-      volumeSlider.setEnabled(!isMute);
+      isAdjustingVolume = true;
       if(!isMute) {
-        isAdjustingVolume = true;
         volumeSlider.setValue(volume);
-        isAdjustingVolume = false;
+        lastVolume = volume;
+      } else {
+        volumeSlider.setValue(lastVolume);
       }
+      isAdjustingVolume = false;
       this.isMute = isMute;
       this.volume = volume;
     }
@@ -312,11 +326,6 @@ public class DefaultVLCPlayerDecorator extends VLCPlayerDecorator {
 
   private JPanel nativeComponentBorderContainerPane;
 
-  private Icon createIcon(String resourceKey) {
-    String value = RESOURCES.getString(resourceKey);
-    return value.length() == 0? null: new ImageIcon(JVLCPlayer.class.getResource(value));
-  }
-
   private void adjustBorder() {
     nativeComponentBorderContainerPane.setBorder(getInnerAreaBorder());
   }
@@ -391,6 +400,45 @@ public class DefaultVLCPlayerDecorator extends VLCPlayerDecorator {
     buttonContainer.add(controlBar.getPlayButton());
     buttonContainer.add(controlBar.getPauseButton());
     buttonContainer.add(controlBar.getStopButton());
+  }
+
+  /**
+   * Configure a component (its text, icon, tooltip, etc.).
+   */
+  protected void configureComponent(JComponent c, VLCDecoratorComponentType componentType) {
+    switch(componentType) {
+      case PLAY_BUTTON: {
+        ((AbstractButton)c).setIcon(createIcon("PlayIcon"));
+        ((AbstractButton)c).setToolTipText(RESOURCES.getString("PlayText"));
+        return;
+      }
+      case PAUSE_BUTTON: {
+        ((AbstractButton)c).setIcon(createIcon("PauseIcon"));
+        ((AbstractButton)c).setToolTipText(RESOURCES.getString("PauseText"));
+        return;
+      }
+      case STOP_BUTTON: {
+        ((AbstractButton)c).setIcon(createIcon("StopIcon"));
+        ((AbstractButton)c).setToolTipText(RESOURCES.getString("StopText"));
+        return;
+      }
+      case VOLUME_BUTTON_OFF: {
+        ((AbstractButton)c).setIcon(createIcon("VolumeOffIcon"));
+        ((AbstractButton)c).setToolTipText(RESOURCES.getString("VolumeOffText"));
+        return;
+      }
+      case VOLUME_BUTTON_ON: {
+        ((AbstractButton)c).setIcon(createIcon("VolumeOnIcon"));
+        ((AbstractButton)c).setToolTipText(RESOURCES.getString("VolumeOnText"));
+        return;
+      }
+    }
+    throw new IllegalStateException("Type not handled: " + componentType);
+  }
+
+  private Icon createIcon(String resourceKey) {
+    String value = RESOURCES.getString(resourceKey);
+    return value.length() == 0? null: new ImageIcon(JVLCPlayer.class.getResource(value));
   }
 
 }

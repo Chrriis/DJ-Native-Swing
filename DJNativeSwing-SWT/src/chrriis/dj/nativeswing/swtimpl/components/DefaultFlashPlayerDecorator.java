@@ -14,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ResourceBundle;
 
+import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -29,6 +30,12 @@ import chrriis.common.WebServer;
  * @author Christopher Deckers
  */
 public class DefaultFlashPlayerDecorator extends FlashPlayerDecorator {
+
+  public static enum FlashDecoratorComponentType {
+    PLAY_BUTTON,
+    PAUSE_BUTTON,
+    STOP_BUTTON,
+  }
 
   private final ResourceBundle RESOURCES;
 
@@ -47,22 +54,22 @@ public class DefaultFlashPlayerDecorator extends FlashPlayerDecorator {
 
     FlashPlayerControlBar() {
       super(new FlowLayout(FlowLayout.CENTER, 4, 2));
-      playButton = new JButton(createIcon("PlayIcon"));
-      playButton.setToolTipText(RESOURCES.getString("PlayText"));
+      playButton = new JButton();
+      configureComponent(playButton, FlashDecoratorComponentType.PLAY_BUTTON);
       playButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           flashPlayer.play();
         }
       });
-      pauseButton = new JButton(createIcon("PauseIcon"));
-      pauseButton.setToolTipText(RESOURCES.getString("PauseText"));
+      pauseButton = new JButton();
+      configureComponent(pauseButton, FlashDecoratorComponentType.PAUSE_BUTTON);
       pauseButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           flashPlayer.pause();
         }
       });
-      stopButton = new JButton(createIcon("StopIcon"));
-      stopButton.setToolTipText(RESOURCES.getString("StopText"));
+      stopButton = new JButton();
+      configureComponent(stopButton, FlashDecoratorComponentType.STOP_BUTTON);
       stopButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           flashPlayer.stop();
@@ -122,11 +129,6 @@ public class DefaultFlashPlayerDecorator extends FlashPlayerDecorator {
 
   private JPanel nativeComponentBorderContainerPane;
 
-  private Icon createIcon(String resourceKey) {
-    String value = RESOURCES.getString(resourceKey);
-    return value.length() == 0? null: new ImageIcon(JFlashPlayer.class.getResource(value));
-  }
-
   private void adjustBorder() {
     nativeComponentBorderContainerPane.setBorder(getInnerAreaBorder());
   }
@@ -176,6 +178,35 @@ public class DefaultFlashPlayerDecorator extends FlashPlayerDecorator {
     buttonContainer.add(controlBar.getPlayButton());
     buttonContainer.add(controlBar.getPauseButton());
     buttonContainer.add(controlBar.getStopButton());
+  }
+
+  /**
+   * Configure a component (its text, icon, tooltip, etc.).
+   */
+  protected void configureComponent(JComponent c, FlashDecoratorComponentType componentType) {
+    switch(componentType) {
+      case PLAY_BUTTON: {
+        ((AbstractButton)c).setIcon(createIcon("PlayIcon"));
+        ((AbstractButton)c).setToolTipText(RESOURCES.getString("PlayText"));
+        return;
+      }
+      case PAUSE_BUTTON: {
+        ((AbstractButton)c).setIcon(createIcon("PauseIcon"));
+        ((AbstractButton)c).setToolTipText(RESOURCES.getString("PauseText"));
+        return;
+      }
+      case STOP_BUTTON: {
+        ((AbstractButton)c).setIcon(createIcon("StopIcon"));
+        ((AbstractButton)c).setToolTipText(RESOURCES.getString("StopText"));
+        return;
+      }
+    }
+    throw new IllegalStateException("Type not handled: " + componentType);
+  }
+
+  private Icon createIcon(String resourceKey) {
+    String value = RESOURCES.getString(resourceKey);
+    return value.length() == 0? null: new ImageIcon(JFlashPlayer.class.getResource(value));
   }
 
 }
