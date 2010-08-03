@@ -247,8 +247,17 @@ public class NativeComponentWrapper {
   /**
    * Paint the back buffer, if one was created, to a graphic context.
    * @param g the graphic context to paint to.
+   * @param isPaintingProxy true to paint even if the buffer is handled by a proxy.
    */
-  public void paintBackBuffer(Graphics g) {
+  public void paintBackBuffer(Graphics g, boolean isPaintingProxy) {
+    NativeComponentProxy nativeComponentProxy = getNativeComponentProxy();
+    if(nativeComponentProxy != null) {
+      BackBufferManager backBufferManager = nativeComponentProxy.getBackBufferManager();
+      if(backBufferManager != null) {
+        backBufferManager.paintBackBuffer(g);
+      }
+      return;
+    }
     if(backBufferManager != null) {
       backBufferManager.paintBackBuffer(g);
     }
@@ -259,7 +268,15 @@ public class NativeComponentWrapper {
    * @return true if a back buffer is still held, false otherwise.
    */
   public boolean hasBackBuffer() {
-    return getBackBufferManager().hasBackBuffer();
+    NativeComponentProxy nativeComponentProxy = getNativeComponentProxy();
+    if(nativeComponentProxy != null) {
+      BackBufferManager backBufferManager = nativeComponentProxy.getBackBufferManager();
+      if(backBufferManager != null) {
+        return backBufferManager.hasBackBuffer();
+      }
+      return false;
+    }
+    return backBufferManager != null && backBufferManager.hasBackBuffer();
   }
 
   /**

@@ -821,7 +821,7 @@ public abstract class NativeComponent extends Canvas {
       } catch(Exception e) {
       }
     } else {
-      nativeComponentWrapper.paintBackBuffer(g);
+      nativeComponentWrapper.paintBackBuffer(g, DnDHandler.dndHandler != null);
     }
   }
 
