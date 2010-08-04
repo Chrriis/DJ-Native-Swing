@@ -544,7 +544,9 @@ public class NativeInterface {
       Runtime.getRuntime().addShutdownHook(new Thread() {
         @Override
         public void run() {
-          new CMN_destroyControls().asyncExec(true);
+          if(isOpen()) {
+            new CMN_destroyControls().asyncExec(true);
+          }
         }
       });
     }
