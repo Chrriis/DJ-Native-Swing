@@ -821,7 +821,7 @@ public abstract class NativeComponent extends Canvas {
       } catch(Exception e) {
       }
     } else {
-      nativeComponentWrapper.paintBackBuffer(g, DnDHandler.dndHandler != null);
+      nativeComponentWrapper.paintBackBuffer(g, false);
     }
   }
 
@@ -1588,10 +1588,6 @@ public abstract class NativeComponent extends Canvas {
    */
   public void updateBackBuffer(Rectangle[] rectangles) {
     nativeComponentWrapper.updateBackBuffer(rectangles);
-    if(DnDHandler.dndHandler != null) {
-      // We don't want to repaint the native component, only the backbuffer.
-      super.repaint();
-    }
   }
 
   /**
@@ -1638,16 +1634,8 @@ public abstract class NativeComponent extends Canvas {
     }
   }
 
-  private static class CMN_setShellVisible extends ControlCommandMessage {
-    @Override
-    public Object run(Object[] args) {
-      getControl().getShell().setVisible((Boolean)args[0]);
-      return null;
-    }
-  }
-
   /**
-   * A class that allows to register a native component as a drop targer and receive drops (using the back buffer functionality during the DnD operation).
+   * A class that allows to register a native component as a drop target and receive drops: native components are disabled during the DnD operation to let mouse events reach their drop target.
    * @author Christopher Deckers
    */
   private static class DnDHandler {
@@ -1656,7 +1644,7 @@ public abstract class NativeComponent extends Canvas {
     private static DnDHandler dndHandler;
 
     private NativeComponent[] nativeComponents;
-    private boolean[] hadBackBuffers;
+    private boolean[] wereEnabled;
 
     private static void activateDragAndDrop() {
       if(isDnDActive) {
@@ -1679,25 +1667,23 @@ public abstract class NativeComponent extends Canvas {
             }
           }
           NativeComponent[] nativeComponents = nativeComponentList.toArray(new NativeComponent[0]);
-          boolean[] hadBackBuffers = new boolean[nativeComponents.length];
+          boolean[] wereEnabled = new boolean[nativeComponents.length];
           for(int i=0; i<nativeComponents.length; i++) {
             NativeComponent nativeComponent = nativeComponents[i];
-            hadBackBuffers[i] = nativeComponent.hasBackBuffer();
-            nativeComponent.createBackBuffer();
-            new CMN_setShellVisible().syncExec(nativeComponent, false);
+            wereEnabled[i] = nativeComponent.isShellEnabled;
+            nativeComponent.setShellEnabled(false);
           }
           dndHandler.nativeComponents = nativeComponents;
-          dndHandler.hadBackBuffers = hadBackBuffers;
+          dndHandler.wereEnabled = wereEnabled;
         }
         @Override
         public void dragDropEnd(DragSourceDropEvent dsde) {
           NativeComponent[] nativeComponents = dndHandler.nativeComponents;
-          boolean[] hadBackBuffers = dndHandler.hadBackBuffers;
+          boolean[] wereEnabled = dndHandler.wereEnabled;
           for(int i=0; i<nativeComponents.length; i++) {
             NativeComponent nativeComponent = nativeComponents[i];
-            new CMN_setShellVisible().syncExec(nativeComponent, true);
-            if(!hadBackBuffers[i]) {
-              nativeComponent.destroyBackBuffer();
+            if(wereEnabled[i]) {
+              nativeComponent.setShellEnabled(true);
             }
           }
           dndHandler = null;
