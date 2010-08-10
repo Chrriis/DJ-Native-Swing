@@ -226,8 +226,8 @@ public enum NSSystemPropertySWT {
 
   /**
    * nativeswing.webbrowser.runtime
-   * = xulrunner (default: none)<br/>
-   * Set the runtime of the web browser. Currently, only XULRunner is supported.
+   * = xulrunner/webkit (default: none)<br/>
+   * Set the runtime of the web browser.
    */
   WEBBROWSER_RUNTIME("nativeswing.webbrowser.runtime", Type.READ_WRITE),
 
