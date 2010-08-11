@@ -698,6 +698,7 @@ public abstract class NativeComponent extends Canvas {
     if(lastEvent != null) {
       Integer lastEventType = (Integer)control.getData("NS_LastMouseEventType");
       if(lastEventType.intValue() == mouseEventType &&
+          mouseEventType != MouseEvent.MOUSE_WHEEL &&
           lastEvent.x == e.x &&
           lastEvent.y == e.y &&
           lastEvent.button == e.button &&
