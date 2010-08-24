@@ -14,6 +14,7 @@ import java.awt.Dialog.ModalityType;
 import java.awt.Frame;
 import java.awt.Point;
 import java.awt.Window;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.HashMap;
@@ -119,6 +120,9 @@ public abstract class NativeModalDialogHandler {
     } else {
       dialog.setLocationRelativeTo(window);
     }
+    // We send an artificial event to clear the default lightweight target for mouse events.
+    // Without this code, if a mouse down closes the native dialog, then the corresponding mouse up is retargeted to the previous lightweight target.
+    window.dispatchEvent(new MouseEvent(window, MouseEvent.MOUSE_MOVED, System.currentTimeMillis(), 0, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, 0, false, 0));
     dialog.addWindowListener(new WindowAdapter() {
       @Override
       public void windowOpened(WindowEvent e) {
