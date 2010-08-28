@@ -150,7 +150,7 @@ public class DefaultWebBrowserDecorator extends WebBrowserDecorator {
   private boolean isViewMenuVisible;
 
   private void updateNavigationButtons() {
-    if(isViewMenuVisible || isButtonBarVisible()) {
+    if(!nativeWebBrowser.isNativePeerDisposed() && (isViewMenuVisible || isButtonBarVisible())) {
       boolean isBackEnabled = nativeWebBrowser.isNativePeerInitialized()? nativeWebBrowser.isBackNavigationEnabled(): false;
       if(buttonBar != null) {
         buttonBar.getBackButton().setEnabled(isBackEnabled);
