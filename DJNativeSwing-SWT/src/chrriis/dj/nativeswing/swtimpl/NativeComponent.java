@@ -579,7 +579,7 @@ public abstract class NativeComponent extends Canvas {
     }
   }
 
-  private static class CMN_createControl extends CommandMessage {
+  private static class CMN_createControl extends CommandMessage implements NoSerializationTestMessage {
     private static Shell createShell(Object handle) throws Exception {
       if(NativeInterface.isInProcess()) {
         Canvas canvas = (Canvas)handle;
@@ -885,7 +885,7 @@ public abstract class NativeComponent extends Canvas {
     if(NativeInterface.isAlive()) {
       NativeInterface.checkUIThread(false);
     }
-    Window windowAncestor = SwingUtilities.getWindowAncestor(this);
+    final Window windowAncestor = SwingUtilities.getWindowAncestor(this);
     if(windowAncestor == null) {
       throw new IllegalStateException("This method can only be called when the component has a Window ancestor!");
     }
@@ -895,7 +895,20 @@ public abstract class NativeComponent extends Canvas {
     if(!isNativePeerInitialized) {
       isForcingInitialization = true;
       try {
-        windowAncestor.addNotify();
+        if(Utils.IS_MAC) {
+          // On Mac, if we initialize the window in the UI thread, it gets wrong insets, paints incorrectly, etc.
+          // The "fix" is to initialize in the SWT thread.
+          class MacWindowInitMessage extends CommandMessage implements NoSerializationTestMessage {
+            @Override
+            public Object run(Object[] args) throws Exception {
+              windowAncestor.addNotify();
+              return null;
+            }
+          };
+          new MacWindowInitMessage().syncSend(true);
+        } else {
+          windowAncestor.addNotify();
+        }
         createNativePeer();
       } finally {
         isForcingInitialization = false;

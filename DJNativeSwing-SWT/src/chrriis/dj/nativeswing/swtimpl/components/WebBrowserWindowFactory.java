@@ -165,7 +165,7 @@ public class WebBrowserWindowFactory {
 
   /**
    * Create a web browser window, as a dialog or a frame depending on whether a parent window is specified, with a given web browser.
-   * @param parentWindow the parent window, wihch can be null.
+   * @param parentWindow the parent window, which can be null.
    * @param webBrowser the web browser.
    * @return the web browser window that was created.
    */

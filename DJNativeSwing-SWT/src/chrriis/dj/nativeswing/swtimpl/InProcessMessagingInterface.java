@@ -86,7 +86,7 @@ abstract class InProcessMessagingInterface extends MessagingInterface {
 
   @Override
   protected void writeMessageToChannel(Message message) throws IOException {
-    if(IS_PRINTING_NON_SERIALIZABLE_MESSAGES && !message.getClass().getName().equals("chrriis.dj.nativeswing.swtimpl.NativeComponent$CMN_createControl")) {
+    if(IS_PRINTING_NON_SERIALIZABLE_MESSAGES && !(message instanceof NoSerializationTestMessage)) {
       ObjectOutputStream oos = new ObjectOutputStream(new ByteArrayOutputStream());
       try {
         oos.writeObject(message);
