@@ -164,7 +164,7 @@ public class Utils {
     if(classResourceURL != null && classResourceURL.startsWith("jar:file:")) {
       classResourceURL = classResourceURL.substring("jar:file:".length());
       if(classResourceURL.endsWith("!" + resourcePath)) {
-        return new File(decodeURL(classResourceURL.substring(0, classResourceURL.length() - 1 - resourcePath.length())));
+        return new File(decodeURL(classResourceURL.substring(0, classResourceURL.length() - 1 - resourcePath.length()).replace("+", "%2B")));
       }
     }
     return null;
