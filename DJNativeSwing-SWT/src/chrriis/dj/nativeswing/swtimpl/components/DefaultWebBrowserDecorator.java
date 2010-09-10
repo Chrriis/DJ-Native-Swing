@@ -75,6 +75,7 @@ public class DefaultWebBrowserDecorator extends WebBrowserDecorator {
     RELOAD_BUTTON,
     STOP_BUTTON,
     GO_BUTTON,
+    STATUS_LABEL,
   }
 
   private final ResourceBundle RESOURCES;
@@ -487,6 +488,7 @@ public class DefaultWebBrowserDecorator extends WebBrowserDecorator {
       super(new BorderLayout());
       setBorder(BorderFactory.createCompoundBorder(STATUS_BAR_BORDER, BorderFactory.createEmptyBorder(2, 2, 2, 2)));
       statusLabel = new JLabel();
+      configureComponent(statusLabel, WebBrowserDecoratorComponentType.STATUS_LABEL);
       updateStatus();
       add(statusLabel, BorderLayout.CENTER);
       progressBar = new JProgressBar() {
@@ -814,6 +816,8 @@ public class DefaultWebBrowserDecorator extends WebBrowserDecorator {
         ((AbstractButton)c).setToolTipText(RESOURCES.getString("GoText"));
         return;
       }
+      case STATUS_LABEL:
+        return;
     }
     throw new IllegalStateException("Type not handled: " + componentType);
   }
