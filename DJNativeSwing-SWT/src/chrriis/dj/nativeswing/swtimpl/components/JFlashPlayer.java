@@ -167,7 +167,39 @@ public class JFlashPlayer extends NSPanelComponent {
     @Override
     public String getLocalFileURL(File localFile) {
       // Local files cannot be played due to security restrictions. We need to proxy.
-      return WebServer.getDefaultWebServer().getResourcePathURL(localFile.getParent(), localFile.getName());
+      // Moreover, we need to double encode non ASCII characters.
+      return WebServer.getDefaultWebServer().getResourcePathURL(encodeSpecialCharacters(localFile.getParent()), encodeSpecialCharacters(localFile.getName()));
+    }
+
+    private String encodeSpecialCharacters(String s) {
+      // We have to convert all special remaining characters (e.g. letters with accents).
+      StringBuilder sb = new StringBuilder();
+      for(int i=0; i<s.length(); i++) {
+        char c = s.charAt(i);
+        boolean isToEncode = false;
+        if((c < 'a' || c > 'z') && (c < 'A' || c > 'Z') && (c < '0' || c > '9')) {
+          switch(c) {
+            case '.':
+            case '-':
+            case '*':
+            case '_':
+            case '+':
+            case '%':
+            case ':':
+            case '/':
+              break;
+            default:
+              isToEncode = true;
+              break;
+          }
+        }
+        if(isToEncode) {
+          sb.append(Utils.encodeURL(String.valueOf(c)));
+        } else {
+          sb.append(c);
+        }
+      }
+      return sb.toString();
     }
 
   }

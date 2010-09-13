@@ -117,6 +117,10 @@ public class JVLCPlayer extends NSPanelComponent {
         }
       }
       // We have to convert all special remaining characters (e.g. letters with accents).
+      return encodeSpecialCharacters(s);
+    }
+
+    private String encodeSpecialCharacters(String s) {
       StringBuilder sb = new StringBuilder();
       for(int i=0; i<s.length(); i++) {
         char c = s.charAt(i);
