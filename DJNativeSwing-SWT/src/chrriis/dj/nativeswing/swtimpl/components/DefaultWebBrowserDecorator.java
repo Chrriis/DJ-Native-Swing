@@ -43,6 +43,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 import javax.swing.border.AbstractBorder;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
@@ -151,18 +152,23 @@ public class DefaultWebBrowserDecorator extends WebBrowserDecorator {
   private boolean isViewMenuVisible;
 
   private void updateNavigationButtons() {
-    if(!nativeWebBrowser.isNativePeerDisposed() && (isViewMenuVisible || isButtonBarVisible())) {
-      boolean isBackEnabled = nativeWebBrowser.isNativePeerInitialized()? nativeWebBrowser.isBackNavigationEnabled(): false;
-      if(buttonBar != null) {
-        buttonBar.getBackButton().setEnabled(isBackEnabled);
+    // We defer because this is called from web browser listeners and some of them are synchronous calls.
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        if(!nativeWebBrowser.isNativePeerDisposed() && (isViewMenuVisible || isButtonBarVisible())) {
+          boolean isBackEnabled = nativeWebBrowser.isNativePeerInitialized()? nativeWebBrowser.isBackNavigationEnabled(): false;
+          if(buttonBar != null) {
+            buttonBar.getBackButton().setEnabled(isBackEnabled);
+          }
+          menuBar.backMenuItem.setEnabled(isBackEnabled);
+          boolean isForwardEnabled = nativeWebBrowser.isNativePeerInitialized()? nativeWebBrowser.isForwardNavigationEnabled(): false;
+          if(buttonBar != null) {
+            buttonBar.getForwardButton().setEnabled(isForwardEnabled);
+          }
+          menuBar.forwardMenuItem.setEnabled(isForwardEnabled);
+        }
       }
-      menuBar.backMenuItem.setEnabled(isBackEnabled);
-      boolean isForwardEnabled = nativeWebBrowser.isNativePeerInitialized()? nativeWebBrowser.isForwardNavigationEnabled(): false;
-      if(buttonBar != null) {
-        buttonBar.getForwardButton().setEnabled(isForwardEnabled);
-      }
-      menuBar.forwardMenuItem.setEnabled(isForwardEnabled);
-    }
+    });
   }
 
   private static final Border STATUS_BAR_BORDER = new AbstractBorder() {
@@ -474,7 +480,12 @@ public class DefaultWebBrowserDecorator extends WebBrowserDecorator {
     }
 
     void updateLocation() {
-      locationField.setText(nativeWebBrowser.isNativePeerInitialized()? nativeWebBrowser.getResourceLocation(): "");
+      // We defer because this is called from web browser listeners and some of them are synchronous calls.
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          locationField.setText(nativeWebBrowser.isNativePeerInitialized() && !nativeWebBrowser.isNativePeerDisposed()? nativeWebBrowser.getResourceLocation(): "");
+        }
+      });
     }
 
   }
