@@ -700,6 +700,7 @@ public class NativeInterface {
           NSSystemPropertySWT.INTERFACE_SYNCMESSAGES.getName(),
           NSSystemPropertySWT.INTERFACE_DEBUG_PRINTMESSAGES.getName(),
           NSSystemPropertySWT.PEERVM_DEBUG_PRINTSTARTMESSAGE.getName(),
+          NSSystemPropertySWT.PEERVM_DEBUG_PRINTSTOPMESSAGE.getName(),
           NSSystemPropertySWT.SWT_DEVICE_DEBUG.getName(),
           "nativeswing.swt.devicedata.debug",
           "nativeswing.swt.devicedata.tracking",
@@ -1103,7 +1104,7 @@ public class NativeInterface {
           }.start();
         }
       } else {
-        SWTOutProcessSocketsMessagingInterface outInterface = new SWTOutProcessSocketsMessagingInterface(socket, true, display);
+        SWTOutProcessSocketsMessagingInterface outInterface = new SWTOutProcessSocketsMessagingInterface(socket, true, display, pid);
         synchronized(OPEN_STATE_LOCK) {
           messagingInterface = outInterface;
         }
@@ -1119,6 +1120,9 @@ public class NativeInterface {
         } catch(Exception e) {
           e.printStackTrace();
         }
+      }
+      if(Boolean.parseBoolean(NSSystemPropertySWT.PEERVM_DEBUG_PRINTSTOPMESSAGE.get())) {
+        System.err.println("Stopping peer VM #" + pid);
       }
     }
   }

@@ -61,6 +61,11 @@ are using them get loaded.
   Set whether a message should be printed when the peer VM is launched, in order
   to check that the peer VM could be created.
  
+* nativeswing.peervm.debug.printStopMessage
+  = true/false (default: false)<br/>
+  Set whether a message should be printed when the peer VM stops, in order to
+  know that it stopped on purpose and not because of a crash.
+
 * nativeswing.peervm.debug.printCommandLine
   = true/false (default: false)
   Set whether the command line that is used to spawn the peer VM should be

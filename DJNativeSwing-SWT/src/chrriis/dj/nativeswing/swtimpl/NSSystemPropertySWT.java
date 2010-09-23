@@ -183,6 +183,14 @@ public enum NSSystemPropertySWT {
   PEERVM_DEBUG_PRINTSTARTMESSAGE("nativeswing.peervm.debug.printStartMessage", Type.READ_WRITE),
 
   /**
+   * nativeswing.peervm.debug.printStopMessage
+   * = true/false (default: false)<br/>
+   * Set whether a message should be printed when the peer VM stops, in order to
+   * know that it stopped on purpose and not because of a crash.
+   */
+  PEERVM_DEBUG_PRINTSTOPMESSAGE("nativeswing.peervm.debug.printStopMessage", Type.READ_WRITE),
+
+  /**
    * nativeswing.peervm.debug.printCommandLine
    * = true/false (default: false)<br/>
    * Set whether the command line that is used to spawn the peer VM should be

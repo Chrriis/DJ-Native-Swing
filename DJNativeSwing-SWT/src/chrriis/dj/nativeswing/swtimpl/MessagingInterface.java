@@ -351,6 +351,10 @@ abstract class MessagingInterface {
     System.err.println("Failed messaging: " + message);
   }
 
+  protected void terminate() {
+    System.exit(0);
+  }
+
   protected void createReceiverThread(final boolean exitOnEndOfStream) {
     Thread receiverThread = new Thread("NativeSwing Receiver - " + (isNativeSide()? "SWT": "Swing")) {
       @Override
@@ -364,7 +368,7 @@ abstract class MessagingInterface {
             if(MessagingInterface.this.isAlive()) {
               setAlive(false);
               if(exitOnEndOfStream) {
-                System.exit(0);
+                terminate();
                 return;
               }
               e.printStackTrace();

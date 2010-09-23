@@ -125,10 +125,12 @@ abstract class OutProcessSocketsMessagingInterface extends MessagingInterface {
   static class SWTOutProcessSocketsMessagingInterface extends OutProcessSocketsMessagingInterface {
 
     private Display display;
+    private int pid;
 
-    public SWTOutProcessSocketsMessagingInterface(Socket socket, final boolean exitOnEndOfStream, Display display) {
+    public SWTOutProcessSocketsMessagingInterface(Socket socket, final boolean exitOnEndOfStream, Display display, int pid) {
       super(true, socket, exitOnEndOfStream);
       this.display = display;
+      this.pid = pid;
     }
 
     @Override
@@ -139,6 +141,14 @@ abstract class OutProcessSocketsMessagingInterface extends MessagingInterface {
     @Override
     public boolean isUIThread() {
       return Thread.currentThread() == display.getThread();
+    }
+
+    @Override
+    protected void terminate() {
+      if(isNativeSide() && Boolean.parseBoolean(NSSystemPropertySWT.PEERVM_DEBUG_PRINTSTOPMESSAGE.get())) {
+        System.err.println("Stopping peer VM #" + pid);
+      }
+      super.terminate();
     }
 
   }
