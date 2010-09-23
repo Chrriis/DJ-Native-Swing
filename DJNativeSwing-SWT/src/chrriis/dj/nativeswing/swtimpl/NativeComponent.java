@@ -1410,8 +1410,14 @@ public abstract class NativeComponent extends Canvas {
         } catch(Exception e) {
           e.printStackTrace();
         }
-        out.close();
-        socket.close();
+        try {
+          out.close();
+        } catch(Exception e) {
+        }
+        try {
+          socket.close();
+        } catch(Exception e) {
+        }
         return null;
       }
       throw new IllegalStateException("Not implemented");
