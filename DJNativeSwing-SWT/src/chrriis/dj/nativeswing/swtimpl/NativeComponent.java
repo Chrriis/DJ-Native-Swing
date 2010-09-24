@@ -1228,6 +1228,12 @@ public abstract class NativeComponent extends Canvas {
 
   private static class CMN_getComponentImage extends ControlCommandMessage {
 
+    @Override
+    protected boolean isValid() {
+      // The message should run even if the control is disposed because the socket would not get closed otherwise and the caller be blocked.
+      return true;
+    }
+
     private static boolean printRemoveClip(Control control, GC gc) {
       boolean isFocusControl = control.isFocusControl();
       org.eclipse.swt.graphics.Rectangle bounds = control.getBounds();
@@ -1334,9 +1340,9 @@ public abstract class NativeComponent extends Canvas {
 
     @Override
     public Object run(Object[] args) throws Exception {
-      int port = (Integer)args[0];
+      final int port = (Integer)args[0];
       Rectangle[] rectangles = (Rectangle[])args[1];
-      String hostAddress = (String)args[2];
+      final String hostAddress = (String)args[2];
       final Control control = getControl();
       ImageData imageData;
       final Region region = new Region();
@@ -1346,11 +1352,21 @@ public abstract class NativeComponent extends Canvas {
       if(!NativeInterface.isUIThread(true)) {
         final AtomicReference<Exception> exception = new AtomicReference<Exception>();
         final AtomicReference<ImageData> result = new AtomicReference<ImageData>();
-        if(control.isDisposed()) {
+        if(control == null || control.isDisposed()) {
+          new Socket(hostAddress, port).close();
           return null;
         }
+        final AtomicReference<Boolean> isSocketClosed = new AtomicReference<Boolean>(false);
         control.getDisplay().syncExec(new Runnable() {
           public void run() {
+            if(control.isDisposed()) {
+              try {
+                new Socket(hostAddress, port).close();
+                isSocketClosed.set(true);
+              } catch(Exception e) {
+              }
+              return;
+            }
             try {
               result.set(getImageData(control, region));
             } catch (Exception e) {
@@ -1358,6 +1374,10 @@ public abstract class NativeComponent extends Canvas {
             }
           }
         });
+        if(!isSocketClosed.get() && control.isDisposed()) {
+          new Socket(hostAddress, port).close();
+          return null;
+        }
         if(exception.get() != null) {
           new Socket(hostAddress, port).close();
           throw exception.get();
