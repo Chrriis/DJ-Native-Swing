@@ -34,6 +34,7 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.StringReader;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
@@ -1501,8 +1502,30 @@ public abstract class NativeComponent extends Canvas {
       };
       CMN_getComponentImage getComponentImage = new CMN_getComponentImage();
       NativeInterface.addNativeInterfaceListener(nativeInterfaceListener);
+      final AtomicReference<Boolean> isServerSocketToBeClosed = new AtomicReference<Boolean>(true);
+      new Thread("Component image socket closing") {
+        @Override
+        public void run() {
+          for(int i=0; i<50; i++) {
+            if(!isServerSocketToBeClosed.get()) {
+              return;
+            }
+            try {
+              sleep(100);
+            } catch (InterruptedException e) {
+            }
+          }
+          if(isServerSocketToBeClosed.get()) {
+            try {
+              serverSocket.close();
+            } catch (IOException e) {
+            }
+          }
+        }
+      }.start();
       getComponentImage.asyncExec(this, serverSocket.getLocalPort(), rectangles, localHostAddress);
       Socket socket = serverSocket.accept();
+      isServerSocketToBeClosed.set(false);
       // Has to be a multiple of 3
       byte[] bytes = new byte[1024 * 3];
       int count = 0;
