@@ -1485,6 +1485,7 @@ public abstract class NativeComponent extends Canvas {
     rectangles = rectangleList.toArray(new Rectangle[0]);
     try {
       final ServerSocket serverSocket = new ServerSocket();
+      serverSocket.setReuseAddress(false);
       String localHostAddress = Utils.getLocalHostAddress();
       if(localHostAddress == null) {
         localHostAddress = "127.0.0.1";
