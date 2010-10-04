@@ -826,9 +826,9 @@ public class NativeInterface {
       if(isCreatingProcess) {
         p = createProcess(localHostAddress, port, pid_);
         if(!isProcessIOChannelMode) {
-          connectStream(System.out, p.getInputStream(), pid_);
+          connectStream(System.out, p.getInputStream(), "out", pid_);
         }
-        connectStream(System.err, p.getErrorStream(), pid_);
+        connectStream(System.err, p.getErrorStream(), "err", pid_);
       } else {
         p = null;
       }
@@ -899,9 +899,9 @@ public class NativeInterface {
 
     }
 
-    private static void connectStream(final PrintStream out, InputStream in, final int pid) {
+    private static void connectStream(final PrintStream out, InputStream in, String name, final int pid) {
       final BufferedInputStream bin = new BufferedInputStream(in);
-      Thread streamThread = new Thread("NativeSwing Stream Connector") {
+      Thread streamThread = new Thread("NativeSwing" + "[" + pid + "] " + name + " Stream Connector") {
         private IOStreamFormatter byteProcessor = new IOStreamFormatter(pid);
         @Override
         public void run() {
