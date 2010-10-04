@@ -23,8 +23,8 @@ import org.eclipse.swt.widgets.Display;
  */
 abstract class OutProcessSocketsMessagingInterface extends MessagingInterface {
 
-  public OutProcessSocketsMessagingInterface(boolean isNativeSide, Socket socket, boolean exitOnEndOfStream) {
-    super(isNativeSide);
+  public OutProcessSocketsMessagingInterface(boolean isNativeSide, Socket socket, boolean exitOnEndOfStream, int pid) {
+    super(isNativeSide, pid);
     this.socket = socket;
     initialize(exitOnEndOfStream);
   }
@@ -125,12 +125,10 @@ abstract class OutProcessSocketsMessagingInterface extends MessagingInterface {
   static class SWTOutProcessSocketsMessagingInterface extends OutProcessSocketsMessagingInterface {
 
     private Display display;
-    private int pid;
 
     public SWTOutProcessSocketsMessagingInterface(Socket socket, final boolean exitOnEndOfStream, Display display, int pid) {
-      super(true, socket, exitOnEndOfStream);
+      super(true, socket, exitOnEndOfStream, pid);
       this.display = display;
-      this.pid = pid;
     }
 
     @Override
@@ -146,7 +144,7 @@ abstract class OutProcessSocketsMessagingInterface extends MessagingInterface {
     @Override
     protected void terminate() {
       if(isNativeSide() && Boolean.parseBoolean(NSSystemPropertySWT.PEERVM_DEBUG_PRINTSTOPMESSAGE.get())) {
-        System.err.println("Stopping peer VM #" + pid);
+        System.err.println("Stopping peer VM #" + getPID());
       }
       super.terminate();
     }
@@ -157,8 +155,8 @@ abstract class OutProcessSocketsMessagingInterface extends MessagingInterface {
 
     private final Process process;
 
-    public SwingOutProcessSocketsMessagingInterface(Socket socket, final boolean exitOnEndOfStream, Process process) {
-      super(false, socket, exitOnEndOfStream);
+    public SwingOutProcessSocketsMessagingInterface(Socket socket, final boolean exitOnEndOfStream, Process process, int pid) {
+      super(false, socket, exitOnEndOfStream, pid);
       this.process = process;
     }
 

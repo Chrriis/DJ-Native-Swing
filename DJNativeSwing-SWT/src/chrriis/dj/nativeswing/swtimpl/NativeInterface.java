@@ -420,6 +420,8 @@ public class NativeInterface {
 
   static class InProcess {
 
+    private static volatile int pid;
+
     static void createInProcessCommunicationChannel() {
       synchronized(OPEN_STATE_LOCK) {
         messagingInterface = createInProcessMessagingInterface();
@@ -461,7 +463,8 @@ public class NativeInterface {
     }
 
     private static MessagingInterface createInProcessMessagingInterface() {
-      return new SWTInProcessMessagingInterface(display).getMirrorMessagingInterface();
+      int pid_ = ++pid;
+      return new SWTInProcessMessagingInterface(display, pid_).getMirrorMessagingInterface();
     }
 
     static void runEventPump() {
@@ -818,20 +821,20 @@ public class NativeInterface {
           }
         }
       }
+      int pid_ = ++pid;
       Process p;
       if(isCreatingProcess) {
-        pid++;
-        p = createProcess(localHostAddress, port, pid);
+        p = createProcess(localHostAddress, port, pid_);
         if(!isProcessIOChannelMode) {
-          connectStream(System.out, p.getInputStream(), pid);
+          connectStream(System.out, p.getInputStream(), pid_);
         }
-        connectStream(System.err, p.getErrorStream(), pid);
+        connectStream(System.err, p.getErrorStream(), pid_);
       } else {
         p = null;
       }
       if(isProcessIOChannelMode) {
         // We need the process in this mode, so it cannot be null.
-        return new SwingOutProcessIOMessagingInterface(p.getInputStream(), p.getOutputStream(), false, p);
+        return new SwingOutProcessIOMessagingInterface(p.getInputStream(), p.getOutputStream(), false, p, pid_);
       }
       Exception exception = null;
       Socket socket = null;
@@ -867,7 +870,7 @@ public class NativeInterface {
         }
         throw new IllegalStateException("Failed to connect to spawned VM!", exception);
       }
-      return new SwingOutProcessSocketsMessagingInterface(socket, false, p);
+      return new SwingOutProcessSocketsMessagingInterface(socket, false, p, pid_);
     }
 
     private static class IOStreamFormatter {
@@ -1047,7 +1050,7 @@ public class NativeInterface {
       if(isProcessIOChannelMode) {
         PrintStream sysout = System.out;
         InputStream sysin = System.in;
-        SWTOutProcessIOMessagingInterface outInterface = new SWTOutProcessIOMessagingInterface(sysin, sysout, true, display);
+        SWTOutProcessIOMessagingInterface outInterface = new SWTOutProcessIOMessagingInterface(sysin, sysout, true, display, pid);
         synchronized(OPEN_STATE_LOCK) {
           messagingInterface = outInterface;
         }

@@ -28,8 +28,11 @@ abstract class MessagingInterface {
 
   protected static final boolean IS_DEBUGGING_MESSAGES = Boolean.parseBoolean(NSSystemPropertySWT.INTERFACE_DEBUG_PRINTMESSAGES.get());
 
-  public MessagingInterface(boolean isNativeSide) {
+  private int pid;
+
+  public MessagingInterface(boolean isNativeSide, int pid) {
     this.isNativeSide = isNativeSide;
+    this.pid = pid;
   }
 
   public abstract void destroy();
@@ -355,8 +358,12 @@ abstract class MessagingInterface {
     System.exit(0);
   }
 
-  protected void createReceiverThread(final boolean exitOnEndOfStream) {
-    Thread receiverThread = new Thread("NativeSwing Receiver - " + (isNativeSide()? "SWT": "Swing")) {
+  protected int getPID() {
+    return pid;
+  }
+
+  private void createReceiverThread(final boolean exitOnEndOfStream) {
+    Thread receiverThread = new Thread("NativeSwing Receiver - " + (isNativeSide()? "SWT": "Swing") + " [" + pid + "]") {
       @Override
       public void run() {
         while(MessagingInterface.this.isAlive()) {

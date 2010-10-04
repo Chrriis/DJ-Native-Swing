@@ -24,8 +24,8 @@ import org.eclipse.swt.widgets.Display;
  */
 abstract class OutProcessIOMessagingInterface extends MessagingInterface {
 
-  public OutProcessIOMessagingInterface(boolean isNativeSide, InputStream is, OutputStream os, boolean exitOnEndOfStream) {
-    super(isNativeSide);
+  public OutProcessIOMessagingInterface(boolean isNativeSide, InputStream is, OutputStream os, boolean exitOnEndOfStream, int pid) {
+    super(isNativeSide, pid);
     this.is = is;
     this.os = os;
     initialize(exitOnEndOfStream);
@@ -137,8 +137,8 @@ abstract class OutProcessIOMessagingInterface extends MessagingInterface {
 
     private Display display;
 
-    public SWTOutProcessIOMessagingInterface(InputStream is, OutputStream os, final boolean exitOnEndOfStream, Display display) {
-      super(true, is, os, exitOnEndOfStream);
+    public SWTOutProcessIOMessagingInterface(InputStream is, OutputStream os, final boolean exitOnEndOfStream, Display display, int pid) {
+      super(true, is, os, exitOnEndOfStream, pid);
       this.display = display;
     }
 
@@ -158,8 +158,8 @@ abstract class OutProcessIOMessagingInterface extends MessagingInterface {
 
     private final Process process;
 
-    public SwingOutProcessIOMessagingInterface(InputStream is, OutputStream os, final boolean exitOnEndOfStream, Process process) {
-      super(false, is, os, exitOnEndOfStream);
+    public SwingOutProcessIOMessagingInterface(InputStream is, OutputStream os, final boolean exitOnEndOfStream, Process process, int pid) {
+      super(false, is, os, exitOnEndOfStream, pid);
       this.process = process;
     }
 

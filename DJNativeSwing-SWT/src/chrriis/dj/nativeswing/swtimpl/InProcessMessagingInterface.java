@@ -27,8 +27,8 @@ abstract class InProcessMessagingInterface extends MessagingInterface {
 
   private static final boolean IS_PRINTING_NON_SERIALIZABLE_MESSAGES = Boolean.parseBoolean(NSSystemPropertySWT.INTERFACE_INPROCESS_PRINTNONSERIALIZABLEMESSAGES.get());
 
-  public InProcessMessagingInterface(boolean isNativeSide) {
-    super(isNativeSide);
+  public InProcessMessagingInterface(boolean isNativeSide, int pid) {
+    super(isNativeSide, pid);
   }
 
   @Override
@@ -44,7 +44,15 @@ abstract class InProcessMessagingInterface extends MessagingInterface {
         }
       });
     }
+    InProcessMessagingInterface mirrorMessagingInterface = getMirrorMessagingInterface();
     setAlive(false);
+    mirrorMessagingInterface.setAlive(false);
+    synchronized (sentMessageList) {
+      sentMessageList.notifyAll();
+    }
+    synchronized (mirrorMessagingInterface.sentMessageList) {
+      mirrorMessagingInterface.sentMessageList.notifyAll();
+    }
   }
 
   @Override
@@ -68,12 +76,21 @@ abstract class InProcessMessagingInterface extends MessagingInterface {
   private List<Message> sentMessageList = new LinkedList<Message>();
 
   Message getNextMessage() {
+    boolean isAlive = isAlive();
     synchronized (sentMessageList) {
       while(sentMessageList.isEmpty()) {
         try {
           sentMessageList.wait();
         } catch(InterruptedException e) {
         }
+        isAlive = isAlive();
+        if(!isAlive) {
+          break;
+        }
+      }
+      if(!isAlive) {
+        sentMessageList.clear();
+        throw new IllegalStateException("The interface is closed.");
       }
       return sentMessageList.remove(0);
     }
@@ -105,10 +122,10 @@ abstract class InProcessMessagingInterface extends MessagingInterface {
 
     private Display display;
 
-    public SWTInProcessMessagingInterface(Display display) {
-      super(true);
+    public SWTInProcessMessagingInterface(Display display, int pid) {
+      super(true, pid);
       this.display = display;
-      setMirrorMessagingInterface(new SwingInProcessMessagingInterface(this));
+      setMirrorMessagingInterface(new SwingInProcessMessagingInterface(this, pid));
       initialize(false);
     }
 
@@ -126,8 +143,8 @@ abstract class InProcessMessagingInterface extends MessagingInterface {
 
   static class SwingInProcessMessagingInterface extends InProcessMessagingInterface {
 
-    public SwingInProcessMessagingInterface(InProcessMessagingInterface mirrorMessagingInterface) {
-      super(false);
+    public SwingInProcessMessagingInterface(InProcessMessagingInterface mirrorMessagingInterface, int pid) {
+      super(false, pid);
       setMirrorMessagingInterface(mirrorMessagingInterface);
       initialize(false);
     }
