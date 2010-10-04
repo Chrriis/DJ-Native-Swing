@@ -377,6 +377,13 @@ public class NativeInterface {
     return getMessagingInterface(isNativeSide).isUIThread();
   }
 
+  static int getInterfaceID(boolean isNativeSide) {
+    if(!isAlive()) {
+      throw new IllegalStateException("The native interface is not alive!");
+    }
+    return getMessagingInterface(isNativeSide).getPID();
+  }
+
   static void checkUIThread(boolean isNativeSide) {
     if(!isAlive()) {
       throw new IllegalStateException("The native interface is not alive!");

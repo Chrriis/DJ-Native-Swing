@@ -1310,7 +1310,7 @@ public abstract class NativeComponent extends Canvas {
         // 2. https://bugs.eclipse.org/bugs/show_bug.cgi?id=299714
         // Note 1: bug 1 is marked as fixed, but preliminary testing shows some other bugs. Have to test more before removing this hack.
         // Note 2: 3.6M3 seems to fix this bug, so I comment the implementation.
-        // Note 3: some issues on win 7 make me add a property to turn the old hack back on in case of future unexpected user issues.
+        // Note 3: some issues on win 7 make me add an undocumented property to turn the old hack back on in case of future unexpected user issues.
         printRemoveClip(control, gc);
       } else if(Utils.IS_WINDOWS) {
         org.eclipse.swt.graphics.Rectangle bounds = control.getBounds();
@@ -1392,16 +1392,32 @@ public abstract class NativeComponent extends Canvas {
         new Socket(hostAddress, port).close();
         return null;
       }
+      sendImageData(hostAddress, port, imageData, rectangles);
+      return null;
+    }
+
+    private void sendImageData(final String hostAddress, final int port, final ImageData imageData, final Rectangle[] rectangles) {
+      if(NativeInterface.isUIThread(true)) {
+        new Thread("NativeSwing[" + NativeInterface.getInterfaceID(true) + "] Component Image Data Transfer") {
+          @Override
+          public void run() {
+            sendImageData(hostAddress, port, imageData, rectangles);
+          }
+        }.start();
+        return;
+      }
       int cursor = 0;
       // Has to be a multiple of 3
       byte[] bytes = new byte[1024 * 3];
       PaletteData palette = imageData.palette;
       if (palette.isDirect) {
-        Socket socket = new Socket(hostAddress, port);
-        BufferedOutputStream out = new BufferedOutputStream(socket.getOutputStream());
+        Socket socket = null;
+        BufferedOutputStream out = null;
         int width = imageData.width;
         int height = imageData.height;
         try {
+          socket = new Socket(hostAddress, port);
+          out = new BufferedOutputStream(socket.getOutputStream());
           for(Rectangle rectangle: rectangles) {
             for(int j=0; j<rectangle.height; j++) {
               int y = rectangle.y + j;
@@ -1432,14 +1448,18 @@ public abstract class NativeComponent extends Canvas {
           e.printStackTrace();
         }
         try {
-          out.close();
+          if(out != null) {
+            out.close();
+          }
         } catch(Exception e) {
         }
         try {
-          socket.close();
+          if(socket != null) {
+            socket.close();
+          }
         } catch(Exception e) {
         }
-        return null;
+        return;
       }
       throw new IllegalStateException("Not implemented");
     }
@@ -1506,8 +1526,8 @@ public abstract class NativeComponent extends Canvas {
       final AtomicReference<Boolean> isServerSocketToBeClosed = new AtomicReference<Boolean>(true);
       if(Boolean.parseBoolean(System.getProperty("nativeswing.components.useComponentImageClosingThread"))) {
         // We know some users having issues and it is possible this could help.
-        // As long as it is not confirmed, we only activate this when we want to.
-        new Thread("Component image socket closing") {
+        // As long as it is not confirmed, we only activate this explicitely through an undocumented system property.
+        new Thread("NativeSwing[" + NativeInterface.getInterfaceID(false) + "] Component Image Socket Closing") {
           @Override
           public void run() {
             for(int i=0; i<50; i++) {
