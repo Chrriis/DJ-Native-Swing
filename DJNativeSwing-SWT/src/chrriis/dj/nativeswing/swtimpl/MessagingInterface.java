@@ -363,7 +363,7 @@ abstract class MessagingInterface {
   }
 
   private void createReceiverThread(final boolean exitOnEndOfStream) {
-    Thread receiverThread = new Thread("NativeSwing[" + pid + "] Receiver - " + (isNativeSide()? "SWT": "Swing")) {
+    Thread receiverThread = new Thread("NativeSwing[" + pid + "] " + (isNativeSide()? "SWT": "Swing") + " Receiver") {
       @Override
       public void run() {
         while(MessagingInterface.this.isAlive()) {

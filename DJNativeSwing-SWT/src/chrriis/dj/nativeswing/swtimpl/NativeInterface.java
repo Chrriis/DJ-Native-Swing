@@ -901,7 +901,7 @@ public class NativeInterface {
 
     private static void connectStream(final PrintStream out, InputStream in, String name, final int pid) {
       final BufferedInputStream bin = new BufferedInputStream(in);
-      Thread streamThread = new Thread("NativeSwing" + "[" + pid + "] " + name + " Stream Connector") {
+      Thread streamThread = new Thread("NativeSwing[" + pid + "] " + name + " Stream Connector") {
         private IOStreamFormatter byteProcessor = new IOStreamFormatter(pid);
         @Override
         public void run() {
