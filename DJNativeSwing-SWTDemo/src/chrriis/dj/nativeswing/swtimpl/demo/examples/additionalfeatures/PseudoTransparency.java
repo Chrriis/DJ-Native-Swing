@@ -79,7 +79,7 @@ public class PseudoTransparency extends JPanel {
 
   private void updateBackgroundBuffer() {
     // we refresh the background buffer outside the UI thread, to minimize the overhead.
-    new Thread() {
+    new Thread("NativeSwing Pseudo Transparency Refresh") {
       @Override
       public void run() {
         int i = 0;

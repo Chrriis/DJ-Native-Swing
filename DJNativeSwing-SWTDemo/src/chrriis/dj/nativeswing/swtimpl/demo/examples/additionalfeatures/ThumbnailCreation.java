@@ -120,7 +120,7 @@ public class ThumbnailCreation extends JPanel {
       thumbnailPane.setThumbnail(null);
       return;
     }
-    new Thread() {
+    new Thread("NativeSwing Thumbnail Loader") {
       @Override
       public void run() {
         BufferedImage image = new BufferedImage(cWidth, cHeight, BufferedImage.TYPE_INT_ARGB);
