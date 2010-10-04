@@ -405,7 +405,7 @@ abstract class MessagingInterface {
           if(message != null) {
             if(!message.isUI()) {
               final Message message_ = message;
-              new Thread("NativeSwing Async") {
+              new Thread("NativeSwing[" + getPID() + "] Non-UI Message [" + message.getID() + "] Executor") {
                 @Override
                 public void run() {
                   runMessage(message_);

@@ -195,16 +195,7 @@ public class NativeInterface {
         public void eventDispatched(AWTEvent e) {
           KeyEvent ke = (KeyEvent)e;
           if(ke.getID() == KeyEvent.KEY_PRESSED && ke.getKeyCode() == KeyEvent.VK_F3 && ke.isControlDown() && ke.isAltDown() && ke.isShiftDown()) {
-            new Thread("Dump stack traces") {
-              @Override
-              public void run() {
-                CMN_dumpStackTraces cmnDumpStackTraces = new CMN_dumpStackTraces();
-                cmnDumpStackTraces.run(null);
-                if(!isInProcess() && isOpen()) {
-                  syncSend(true, cmnDumpStackTraces);
-                }
-              }
-            }.start();
+            dumpStackTraces();
           }
         }
       }, AWTEvent.KEY_EVENT_MASK);
@@ -227,6 +218,25 @@ public class NativeInterface {
         OutProcess.initialize();
       }
       isInitialized = true;
+    }
+  }
+
+  /**
+   * Dump the stack traces, including the ones from the peer VM when applicable.
+   */
+  public static void dumpStackTraces() {
+    Utils.dumpStackTraces();
+    if(!isInProcess() && isOpen()) {
+      if(isUIThread(false)) {
+        new Thread("NativeSwing stack traces dump") {
+          @Override
+          public void run() {
+            syncSend(true, new CMN_dumpStackTraces());
+          }
+        }.start();
+      } else {
+        syncSend(true, new CMN_dumpStackTraces());
+      }
     }
   }
 
