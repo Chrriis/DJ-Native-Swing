@@ -9,7 +9,9 @@ package chrriis.common;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A convenient class to register objects to an ID.
@@ -17,37 +19,56 @@ import java.util.Map;
  */
 public class ObjectRegistry {
 
-  private Thread cleanUpThread;
+  private static Thread cleanUpThread;
+  private static Set<ObjectRegistry> registrySet = new HashSet<ObjectRegistry>();
 
-  private synchronized void startThread() {
-    if(cleanUpThread != null) {
-      return;
-    }
-    cleanUpThread = new Thread("Registry cleanup thread") {
-      @Override
-      public void run() {
-        while(true) {
-          try {
-            sleep(1000);
-          } catch(Exception e) {
-          }
-          synchronized(ObjectRegistry.this) {
-            for(Integer instanceID: instanceIDToObjectReferenceMap.keySet().toArray(new Integer[0])) {
-              if(instanceIDToObjectReferenceMap.get(instanceID).get() == null) {
-                instanceIDToObjectReferenceMap.remove(instanceID);
+  private static int nextThreadNumber;
+
+  private static void startThread(ObjectRegistry objectRegistry) {
+    synchronized (registrySet) {
+      registrySet.add(objectRegistry);
+      if(cleanUpThread != null) {
+        return;
+      }
+      cleanUpThread = new Thread("Registry cleanup thread-" + nextThreadNumber++) {
+        @Override
+        public void run() {
+          while(true) {
+            try {
+              sleep(1000);
+            } catch(Exception e) {
+            }
+            ObjectRegistry[] registries;
+            synchronized (registrySet) {
+              registries = registrySet.toArray(new ObjectRegistry[0]);
+            }
+            for(ObjectRegistry registry: registries) {
+              synchronized(registry) {
+                for(Integer instanceID: registry.instanceIDToObjectReferenceMap.keySet().toArray(new Integer[0])) {
+                  if(registry.instanceIDToObjectReferenceMap.get(instanceID).get() == null) {
+                    registry.instanceIDToObjectReferenceMap.remove(instanceID);
+                  }
+                }
+                if(registry.instanceIDToObjectReferenceMap.isEmpty()) {
+                  synchronized (registrySet) {
+                    registrySet.remove(registry);
+                  }
+                }
               }
             }
-            if(instanceIDToObjectReferenceMap.isEmpty()) {
-              cleanUpThread = null;
-              return;
+            synchronized (registrySet) {
+              if(registrySet.isEmpty()) {
+                cleanUpThread = null;
+                return;
+              }
             }
           }
         }
-      }
-    };
-    boolean isApplet = "applet".equals(System.getProperty("nativeswing.deployment.type"));
-    cleanUpThread.setDaemon(!isApplet);
-    cleanUpThread.start();
+      };
+      boolean isApplet = "applet".equals(System.getProperty("nativeswing.deployment.type"));
+      cleanUpThread.setDaemon(!isApplet);
+      cleanUpThread.start();
+    }
   }
 
   private int nextInstanceID = 1;
@@ -64,18 +85,25 @@ public class ObjectRegistry {
    * @param o the object to add.
    * @return an unused instance ID that is strictly greater than 0.
    */
-  public synchronized int add(Object o) {
-    while(true) {
-      int instanceID = nextInstanceID++;
-      if(!instanceIDToObjectReferenceMap.containsKey(instanceID)) {
-        if(o == null) {
-          return instanceID;
+  public int add(Object o) {
+    boolean isStartingThread = false;
+    int instanceID;
+    synchronized (this) {
+      while(true) {
+        instanceID = nextInstanceID++;
+        if(!instanceIDToObjectReferenceMap.containsKey(instanceID)) {
+          if(o != null) {
+            instanceIDToObjectReferenceMap.put(instanceID, new WeakReference<Object>(o));
+            isStartingThread = true;
+          }
+          break;
         }
-        instanceIDToObjectReferenceMap.put(instanceID, new WeakReference<Object>(o));
-        startThread();
-        return instanceID;
       }
     }
+    if(isStartingThread) {
+      startThread(this);
+    }
+    return instanceID;
   }
 
   /**
@@ -83,13 +111,15 @@ public class ObjectRegistry {
    * @param o the object to add.
    * @param instanceID the ID to associate the object to.
    */
-  public synchronized void add(Object o, int instanceID) {
-    Object o2 = get(instanceID);
-    if(o2 != null && o2 != o) {
-      throw new IllegalStateException("An object is already registered with the id \"" + instanceID + "\" for object: " + o);
+  public void add(Object o, int instanceID) {
+    synchronized (this) {
+      Object o2 = get(instanceID);
+      if(o2 != null && o2 != o) {
+        throw new IllegalStateException("An object is already registered with the id \"" + instanceID + "\" for object: " + o);
+      }
+      instanceIDToObjectReferenceMap.put(instanceID, new WeakReference<Object>(o));
     }
-    instanceIDToObjectReferenceMap.put(instanceID, new WeakReference<Object>(o));
-    startThread();
+    startThread(this);
   }
 
   /**
