@@ -1504,26 +1504,30 @@ public abstract class NativeComponent extends Canvas {
       CMN_getComponentImage getComponentImage = new CMN_getComponentImage();
       NativeInterface.addNativeInterfaceListener(nativeInterfaceListener);
       final AtomicReference<Boolean> isServerSocketToBeClosed = new AtomicReference<Boolean>(true);
-      new Thread("Component image socket closing") {
-        @Override
-        public void run() {
-          for(int i=0; i<50; i++) {
-            if(!isServerSocketToBeClosed.get()) {
-              return;
+      if(Boolean.parseBoolean(System.getProperty("nativeswing.components.useComponentImageClosingThread"))) {
+        // We know some users having issues and it is possible this could help.
+        // As long as it is not confirmed, we only activate this when we want to.
+        new Thread("Component image socket closing") {
+          @Override
+          public void run() {
+            for(int i=0; i<50; i++) {
+              if(!isServerSocketToBeClosed.get()) {
+                return;
+              }
+              try {
+                sleep(100);
+              } catch (InterruptedException e) {
+              }
             }
-            try {
-              sleep(100);
-            } catch (InterruptedException e) {
+            if(isServerSocketToBeClosed.get()) {
+              try {
+                serverSocket.close();
+              } catch (IOException e) {
+              }
             }
           }
-          if(isServerSocketToBeClosed.get()) {
-            try {
-              serverSocket.close();
-            } catch (IOException e) {
-            }
-          }
-        }
-      }.start();
+        }.start();
+      }
       getComponentImage.asyncExec(this, serverSocket.getLocalPort(), rectangles, localHostAddress);
       Socket socket = serverSocket.accept();
       isServerSocketToBeClosed.set(false);
