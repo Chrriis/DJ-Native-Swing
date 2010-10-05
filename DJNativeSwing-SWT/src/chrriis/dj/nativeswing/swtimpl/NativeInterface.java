@@ -23,7 +23,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -164,11 +166,17 @@ public class NativeInterface {
     }
   }
 
-  private static class CMN_dumpStackTraces extends CommandMessage {
+  private static class CMN_printStackTraces extends CommandMessage {
     @Override
     public Object run(Object[] args) {
-      Utils.dumpStackTraces();
-      return null;
+      boolean isToConsole = (Boolean)args[0];
+      if(isToConsole) {
+        Utils.printStackTraces();
+        return null;
+      }
+      StringWriter sw = new StringWriter();
+      Utils.printStackTraces(new PrintWriter(sw));
+      return sw.toString();
     }
   }
 
@@ -195,7 +203,7 @@ public class NativeInterface {
         public void eventDispatched(AWTEvent e) {
           KeyEvent ke = (KeyEvent)e;
           if(ke.getID() == KeyEvent.KEY_PRESSED && ke.getKeyCode() == KeyEvent.VK_F3 && ke.isControlDown() && ke.isAltDown() && ke.isShiftDown()) {
-            dumpStackTraces();
+            printStackTraces();
           }
         }
       }, AWTEvent.KEY_EVENT_MASK);
@@ -222,20 +230,59 @@ public class NativeInterface {
   }
 
   /**
-   * Dump the stack traces, including the ones from the peer VM when applicable.
+   * Print the stack traces to system err, including the ones from the peer VM when applicable.
    */
-  public static void dumpStackTraces() {
-    Utils.dumpStackTraces();
+  public static void printStackTraces() {
+    Utils.printStackTraces();
+    printPeerStackTrace(System.err);
+  }
+
+  /**
+   * Print the stack traces to a print stream, including the ones from the peer VM when applicable.
+   */
+  public static void printStackTraces(PrintStream printStream) {
+    Utils.printStackTraces(printStream);
+    printPeerStackTrace(printStream);
+  }
+
+  /**
+   * Print the stack traces to a print writer, including the ones from the peer VM when applicable.
+   */
+  public static void printStackTraces(PrintWriter printWriter) {
+    Utils.printStackTraces(printWriter);
+    printPeerStackTrace(printWriter);
+  }
+
+  private static void printPeerStackTrace(final Object o) {
     if(!isInProcess() && isOpen()) {
       if(isUIThread(false)) {
-        new Thread("NativeSwing stack traces dump") {
+        Thread t = new Thread("NativeSwing stack traces dump") {
           @Override
           public void run() {
-            syncSend(true, new CMN_dumpStackTraces());
+            printPeerStackTrace(o);
           }
-        }.start();
+        };
+        t.start();
+        try {
+          t.join();
+        } catch (InterruptedException e) {}
       } else {
-        syncSend(true, new CMN_dumpStackTraces());
+        boolean isToConsole = o == null;
+        CMN_printStackTraces message = new CMN_printStackTraces();
+        message.setArgs(isToConsole);
+        String s = (String)syncSend(true, message);
+        if(!isToConsole) {
+          String descriptor = "---- NativeSwing[" + getMessagingInterface(false).getPID() + "] Peer VM Stack Traces ----" + Utils.LINE_SEPARATOR;
+          if(o instanceof PrintStream) {
+            PrintStream ps = (PrintStream)o;
+            ps.append(descriptor);
+            ps.append(s);
+          } else if(o instanceof PrintWriter) {
+            PrintWriter pw = (PrintWriter)o;
+            pw.append(descriptor);
+            pw.append(s);
+          }
+        }
       }
     }
   }

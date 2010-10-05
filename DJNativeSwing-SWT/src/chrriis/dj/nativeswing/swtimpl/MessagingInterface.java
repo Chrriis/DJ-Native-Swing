@@ -168,14 +168,14 @@ abstract class MessagingInterface {
       int instanceID = (Integer)args[0];
       boolean isOriginatorNativeSide = (Boolean)args[2];
       MessagingInterface messagingInterface = NativeInterface.getMessagingInterface(!isOriginatorNativeSide);
-      Thread thread = (Thread)messagingInterface.syncThreadRegistry.get(instanceID);
+      ThreadLock threadLock = (ThreadLock)messagingInterface.syncThreadRegistry.get(instanceID);
       messagingInterface.syncThreadRegistry.remove(instanceID);
-      if(thread == null) {
+      if(threadLock == null) {
         return null;
       }
-      synchronized(thread) {
+      synchronized(threadLock) {
         messagingInterface.syncThreadRegistry.add(args[1], instanceID);
-        thread.notify();
+        threadLock.notify();
       }
       return null;
     }
@@ -197,16 +197,19 @@ abstract class MessagingInterface {
 
   private ObjectRegistry syncThreadRegistry = new ObjectRegistry();
 
+  private static class ThreadLock {
+  }
+
   private Object nonUISyncExec(Message message) {
-    Thread thread = Thread.currentThread();
-    final int instanceID = syncThreadRegistry.add(Thread.currentThread());
+    ThreadLock threadLock = new ThreadLock();
+    final int instanceID = syncThreadRegistry.add(threadLock);
     CM_asyncExec asyncExec = new CM_asyncExec();
     asyncExec.setArgs(instanceID, message, isNativeSide());
     asyncSend(asyncExec);
-    synchronized(thread) {
-      while(syncThreadRegistry.get(instanceID) instanceof Thread) {
+    synchronized(threadLock) {
+      while(syncThreadRegistry.get(instanceID) instanceof ThreadLock) {
         try {
-          thread.wait();
+          threadLock.wait();
         } catch(Exception e) {
         }
         if(!isAlive()) {
@@ -391,10 +394,10 @@ abstract class MessagingInterface {
               RECEIVER_LOCK.notify();
             }
             for(int instanceID: syncThreadRegistry.getInstanceIDs()) {
-              Thread thread = (Thread)syncThreadRegistry.get(instanceID);
-              if(thread != null) {
-                synchronized(thread) {
-                  thread.notify();
+              Object o = syncThreadRegistry.get(instanceID);
+              if(o instanceof ThreadLock) {
+                synchronized(o) {
+                  o.notify();
                 }
               }
             }
