@@ -9,6 +9,8 @@ package chrriis.common;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -308,7 +310,19 @@ public class Utils {
     return sb.toString();
   }
 
-  public static void dumpStackTraces() {
+  public static void printStackTraces() {
+    printStackTraces(System.err);
+  }
+
+  public static void printStackTraces(PrintStream printStream) {
+    printStream.print(getStackTracesAsString());
+  }
+
+  public static void printStackTraces(PrintWriter printWriter) {
+    printWriter.print(getStackTracesAsString());
+  }
+
+  private static String getStackTracesAsString() {
     Map<Thread, StackTraceElement[]> allStackTraces = Thread.getAllStackTraces();
     Thread[] threads = allStackTraces.keySet().toArray(new Thread[0]);
     Arrays.sort(threads, new Comparator<Thread>() {
@@ -316,13 +330,15 @@ public class Utils {
         return o1.getName().compareToIgnoreCase(o2.getName());
       }
     });
+    StringBuilder sb = new StringBuilder();
     for(Thread t: threads) {
-      System.err.println((t.isDaemon()? "Daemon Thread [": "Thread [") + t.getName() + "] (" + t.getState() + ")");
+      sb.append((t.isDaemon()? "Daemon Thread [": "Thread [")).append(t.getName()).append("] (").append(t.getState()).append(")").append(LINE_SEPARATOR);
       StackTraceElement[] stackTraceElements = allStackTraces.get(t);
       for (StackTraceElement stackTraceElement: stackTraceElements) {
-        System.err.println("\tat " + stackTraceElement);
+        sb.append("\tat ").append(stackTraceElement).append(LINE_SEPARATOR);
       }
     }
+    return sb.toString();
   }
 
   private static String localHostAddress;
