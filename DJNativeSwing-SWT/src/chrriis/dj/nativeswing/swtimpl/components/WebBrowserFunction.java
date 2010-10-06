@@ -8,9 +8,10 @@
 package chrriis.dj.nativeswing.swtimpl.components;
 
 /**
+ * A function that can be registered to a web browser.
  * @author Christopher Deckers
  */
-abstract class WebBrowserFunction {
+public abstract class WebBrowserFunction {
 
   private String name;
 

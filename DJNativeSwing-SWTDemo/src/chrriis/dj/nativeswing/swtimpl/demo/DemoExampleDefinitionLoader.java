@@ -43,6 +43,7 @@ import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.NavigationParamet
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.SendingCommands;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.SettingContent;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.SimpleWebBrowserExample;
+import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.WebBrowserFunctionsExample;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.XPCOMDownloadManager;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.XPCOMToggleEditionMode;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.win32.multimediaplayer.SimpleWMediaPlayerExample;
@@ -71,6 +72,7 @@ public class DemoExampleDefinitionLoader {
         new Example("Navigation Parameters", NavigationParameters.class, "Define HTTP headers and/or POST data to send along with the HTTP navigation request.", true),
         new Example("Classpath Pages", ClasspathPages.class, "Load web pages from the classpath with the help of the embedded simple web server.", true),
         new Example("Confirmed Disposal", ConfirmedDisposal.class, "Dispose a web browser giving the current page the opportunity to ask for confirmation.", true),
+        new Example("Functions", WebBrowserFunctionsExample.class, "Register a Java function that can be invoked from Javascript.", true),
         new Example("Mozilla XPCOM Page Edition", XPCOMToggleEditionMode.class, "Toggle edition mode of a web page by accessing the Mozilla interfaces using XPCOM.", true, isXULRunnerPresent, xulRunnerErrorMessage),
         new Example("Mozilla XPCOM Download Manager", XPCOMDownloadManager.class, "Modify the browser's download manager using Mozilla XPCOM.", true, isXULRunnerPresent, xulRunnerErrorMessage),
         new Example("Custom Decorators", CustomDecorators.class, "Modify the browser's decorator, to add our own menus and buttons.", true),
