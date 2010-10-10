@@ -685,7 +685,10 @@ public class NativeInterface {
       optionalReferenceList.add("org/mozilla/xpcom/Mozilla.class");
       optionalReferenceList.add("org/mozilla/interfaces/nsIWebBrowser.class");
       for(String optionalReference: optionalReferenceList) {
-        if(NativeInterface.class.getResource('/' + optionalReference) != null) {
+        if(!optionalReference.startsWith("/")) {
+          optionalReference = '/' + optionalReference;
+        }
+        if(NativeInterface.class.getResource(optionalReference) != null) {
           referenceList.add(optionalReference);
         }
       }
