@@ -21,8 +21,6 @@ import java.util.Map;
 
 import javax.swing.SwingUtilities;
 
-import chrriis.common.Utils;
-
 /**
  * A wrapper for a native component, so that it becomes part of the Native Swing framework.
  * This class should be used by developers who want to have some native component be properly integrated in Swing applications.
@@ -180,8 +178,7 @@ public class NativeComponentWrapper {
     Boolean deferredDestruction = optionMap.get(NSComponentOptions.DESTROY_ON_FINALIZATION_OPTION_KEY) != null? Boolean.TRUE: null;
     Boolean componentHierarchyProxying = optionMap.get(NSComponentOptions.PROXY_COMPONENT_HIERARCHY_OPTION_KEY) != null? Boolean.TRUE: null;
     Boolean visibilityConstraint = optionMap.get(NSComponentOptions.CONSTRAIN_VISIBILITY_OPTION_KEY) != null? Boolean.TRUE: null;
-    // Mac does not support shaping: we are not going to activate our algorithm.
-    if(Utils.IS_MAC || Boolean.valueOf(System.getProperty("nativeswing.integration.useDefaultClipping")) || visibilityConstraint == null && componentHierarchyProxying == null) {
+    if(Boolean.valueOf(System.getProperty("nativeswing.integration.useDefaultClipping")) || visibilityConstraint == null && componentHierarchyProxying == null) {
       if(deferredDestruction != null && componentHierarchyProxying == null) {
         componentHierarchyProxying = true;
       }

@@ -123,7 +123,7 @@ class NativeComponentProxyFinalizationPanel extends NativeComponentProxy {
     JComponent oldParent = (JComponent)embeddedPanel.getParent();
     if(oldParent != this) {
       if(oldParent == null) {
-        add(embeddedPanel, BorderLayout.CENTER);
+        add(embeddedPanel);
       } else {
         // Hack to reparent without the native component to be disposed
         setComponentZOrder(embeddedPanel, 0);

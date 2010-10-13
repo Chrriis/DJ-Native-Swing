@@ -7,8 +7,6 @@
  */
 package chrriis.dj.nativeswing;
 
-import java.awt.BorderLayout;
-
 import javax.swing.JPanel;
 
 /**
@@ -17,7 +15,7 @@ import javax.swing.JPanel;
 class EmbeddableComponent extends JPanel {
 
   public EmbeddableComponent() {
-    super(new BorderLayout());
+    super(new ClipLayout());
   }
 
 }

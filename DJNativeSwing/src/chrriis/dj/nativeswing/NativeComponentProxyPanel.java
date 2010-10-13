@@ -13,6 +13,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.LayoutManager;
 import java.awt.Panel;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -36,6 +37,7 @@ import javax.swing.SwingUtilities;
 
 import chrriis.common.Filter;
 import chrriis.common.UIUtils;
+import chrriis.common.Utils;
 import chrriis.dj.nativeswing.NativeComponentWrapper.NativeComponentHolder;
 
 import com.sun.jna.examples.WindowUtils;
@@ -153,6 +155,13 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
       Point location = SwingUtilities.convertPoint(this, new Point(0, 0), parent);
       Dimension size = getSize();
       Rectangle bounds = new Rectangle(location.x, location.y, size.width, size.height);
+      Rectangle clip = embeddedPanel.getRectangularClip();
+      if(clip != null) {
+        bounds.x += clip.x;
+        bounds.y += clip.y;
+        bounds.width = clip.width;
+        bounds.height = clip.height;
+      }
       if(!embeddedPanel.getBounds().equals(bounds)) {
         embeddedPanel.setBounds(bounds);
         embeddedPanel.invalidate();
@@ -198,8 +207,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
       if(!embeddedPanel.isVisible()) {
         embeddedPanel.setVisible(true);
       }
-      WindowUtils.setComponentMask(embeddedPanel, rectangles);
-      embeddedPanel.nativeComponentWrapper.getNativeComponent().repaint();
+      embeddedPanel.applyShape(rectangles);
     }
   }
 
@@ -253,7 +261,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     private boolean isDestructionOnFinalization;
 
     public EmbeddedPanel(NativeComponentWrapper nativeComponentWrapper, boolean isDestructionOnFinalization) {
-      super(new BorderLayout());
+      super(new ClipLayout());
       this.nativeComponentWrapper = nativeComponentWrapper;
       this.isDestructionOnFinalization = isDestructionOnFinalization;
       enableEvents(MouseWheelEvent.MOUSE_WHEEL_EVENT_MASK);
@@ -323,6 +331,61 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
       }
     }
 
+    private Rectangle clip;
+    private static final boolean RESTRICT_SHAPE_TO_SINGLE_RECTANGLE = Boolean.parseBoolean(NSSystemProperty.COMPONENTS_FORCESINGLERECTANGLESHAPES.get());
+
+    public void applyShape(Rectangle[] rectangles) {
+      if(!Utils.IS_MAC && !RESTRICT_SHAPE_TO_SINGLE_RECTANGLE) {
+        WindowUtils.setComponentMask(this, rectangles);
+        nativeComponentWrapper.getNativeComponent().repaint();
+        return;
+      }
+      // Mac does not support shaping native components, so instead we are going to constrain the component to a single rectangle.
+      // This works for simple cases like being placed in a scrollpane where viewport's intersection with the native component result in a rectangular visible area.
+      // It does not allow placing Swing components on top of native components because this creates a hole resulting in a shape being an aggregation of rectangles.
+      Rectangle clip;
+      if(rectangles.length == 0) {
+        clip = null;
+      } else {
+        clip = new Rectangle(rectangles[0]);
+        if(rectangles.length > 1) {
+          System.err.println("Non-rectangular clip detected on a system that does not support this feature.");
+          for(int i=1; i<rectangles.length; i++) {
+            clip = clip.union(rectangles[i]);
+          }
+        }
+      }
+      if(Utils.equals(this.clip, clip)) {
+        return;
+      }
+      int oldOffsetX = this.clip == null? 0: this.clip.x;
+      int oldOffsetY = this.clip == null? 0: this.clip.y;
+      this.clip = clip;
+      int offsetX = clip == null? 0: clip.x;
+      int offsetY = clip == null? 0: clip.y;
+      NativeComponentProxy nativeComponentProxy = nativeComponentWrapper.getNativeComponentProxy();
+      if(nativeComponentProxy != null) {
+        ((ClipLayout)getLayout()).setClip(clip == null? null: new Rectangle(-clip.x, -clip.y, nativeComponentProxy.getWidth(), nativeComponentProxy.getHeight()));
+      }
+      Container parent = getParent();
+      if(parent != null) {
+        LayoutManager layout = parent.getLayout();
+        if(layout instanceof ClipLayout) {
+          ((ClipLayout)layout).setClip(clip);
+        } else {
+          int diffX = offsetX - oldOffsetX;
+          int diffY = offsetY - oldOffsetY;
+          setBounds(getX() + diffX, getY() + diffY, getWidth() - diffX, getHeight() - diffY);
+        }
+        doLayout();
+        UIUtils.revalidate(parent);
+      }
+    }
+
+    public Rectangle getRectangularClip() {
+      return clip;
+    }
+
   }
 
   private EmbeddedPanel embeddedPanel;
@@ -389,7 +452,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
         UIUtils.revalidate(layeredPane);
         layeredPane.repaint();
       } else {
-        add(embeddedPanel, BorderLayout.CENTER);
+        add(embeddedPanel);
         revalidate();
         repaint();
       }

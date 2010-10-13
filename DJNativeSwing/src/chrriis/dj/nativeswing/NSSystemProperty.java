@@ -72,6 +72,15 @@ public enum NSSystemProperty {
    */
   COMPONENTS_DEBUG_PRINTSHAPECOMPUTING("nativeswing.components.debug.printShapeComputing", Type.READ_WRITE),
 
+  /**
+   * nativeswing.components.forceSingleRectangleShapes
+   * = true/false (default: false)
+   * Certain platforms only support shapes for native components that resolve to
+   * single rectangles. Developers who want to develop on a different platform with
+   * the same constraint can force that behavior for consistency.
+   */
+  COMPONENTS_FORCESINGLERECTANGLESHAPES("nativeswing.components.forceSingleRectangleShapes", Type.READ_WRITE),
+
 
   /**
    * nativeswing.integration.active

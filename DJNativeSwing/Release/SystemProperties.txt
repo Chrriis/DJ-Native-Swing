@@ -40,6 +40,12 @@ are using them get loaded.
   = true/false (default: false)
   Set whether the computation of the shape applied to the native component (when
   the visibility constraint option is active) should be printed.
+  
+* nativeswing.components.forceSingleRectangleShapes
+  = true/false (default: false)
+  Certain platforms only support shapes for native components that resolve to
+  single rectangles. Developers who want to develop on a different platform with
+  the same constraint can force that behavior for consistency.
 
 --------------------------------------------------------------------------------
 
