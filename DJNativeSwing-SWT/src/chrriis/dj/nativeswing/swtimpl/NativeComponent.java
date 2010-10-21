@@ -1742,7 +1742,14 @@ public abstract class NativeComponent extends Canvas {
       DragSource dragSource = DragSource.getDefaultDragSource();
       DragSourceAdapter dragSourceListener = new DragSourceAdapter() {
         @Override
+        public void dragEnter(DragSourceDragEvent dsde) {
+          processDragSourceEvent(dsde);
+        }
+        @Override
         public void dragMouseMoved(DragSourceDragEvent dsde) {
+          processDragSourceEvent(dsde);
+        }
+        private void processDragSourceEvent(DragSourceDragEvent dsde) {
           if(dndHandler != null) {
             return;
           }
