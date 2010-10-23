@@ -59,6 +59,8 @@ public class MozillaXPCOM {
       String path = NSSystemPropertySWT.WEBBROWSER_XULRUNNER_HOME.get();
       if(path == null) {
         path = System.getProperty("org.eclipse.swt.browser.XULRunnerPath");
+      } else {
+        System.setProperty("org.eclipse.swt.browser.XULRunnerPath", path);
       }
       if (Utils.IS_MAC) {
         if(path == null) {
