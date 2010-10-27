@@ -1147,10 +1147,11 @@ public abstract class NativeComponent extends Canvas {
   private static class CMN_setShellEnabled extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
-      if(getControl().isDisposed()) {
+      Control control = getControl();
+      if(control == null || control.isDisposed()) {
         return null;
       }
-      getControl().getShell().setEnabled((Boolean)args[0]);
+      control.getShell().setEnabled((Boolean)args[0]);
       return null;
     }
   }
