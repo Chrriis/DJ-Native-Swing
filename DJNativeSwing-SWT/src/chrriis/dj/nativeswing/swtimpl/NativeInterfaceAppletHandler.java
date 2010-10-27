@@ -14,6 +14,40 @@ import java.util.Set;
 import chrriis.common.WebServer;
 
 /**
+ * This is a special helper that allows Native Swing to work in a JApplet.<br/>
+ * <br/>
+ * Here is how to use it:<br/>
+ * <br/>
+ * 1. Add a static initializer at the top of the JApplet subclass:
+ * <code><pre>static {
+ *  NativeInterfaceAppletHandler.activateAppletMode();
+ *}</pre></code>
+ * <br/>
+ * 2. Override all applet lifecycle methods to call a corresponding method of the NativeInterfaceAppletHandler as the first statement.
+ * <code><pre>public void init() {
+ *  NativeInterfaceAppletHandler.init(this);
+ *  // Rest of init().
+ *}
+ *public void start() {
+ *  NativeInterfaceAppletHandler.start(this);
+ *  // Rest of start().
+ *}
+ *public void stop() {
+ *  NativeInterfaceAppletHandler.stop(this);
+ *  // Rest of stop().
+ *}
+ *public void destroy() {
+ *  NativeInterfaceAppletHandler.destroy(this);
+ *  // Rest of destroy().
+ *}</pre></code>
+ * <br/>
+ * 3. Open the interface explicitely.<br/>
+ * While the methods of this class do close the interface and reopen it when re-starting if it was previously open, it does not automatically open it. In most cases, one would probably change the start() method like this:
+ * <code><pre>public void start() {
+ *  NativeInterfaceAppletHandler.start(this);
+ *  NativeInterface.open();
+ *  // Rest of start().
+ *}</pre></code>
  * @author Christopher Deckers
  */
 public class NativeInterfaceAppletHandler {
