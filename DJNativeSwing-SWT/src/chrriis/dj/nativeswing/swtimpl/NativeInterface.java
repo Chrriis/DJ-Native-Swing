@@ -35,6 +35,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.event.EventListenerList;
 
@@ -402,7 +404,7 @@ public class NativeInterface {
     }
   }
 
-  private static Display display;
+  private static volatile Display display;
 
   /**
    * Get the SWT display. This is only possible when in the native context.
@@ -451,9 +453,51 @@ public class NativeInterface {
       throw new IllegalStateException("runEventPump was already called and can only be called once (the first call should be at the end of the main method)!");
     }
     isEventPumpRunning = true;
+    startAutoShutdownThread();
     if(isInProcess()) {
       InProcess.runEventPump();
+    } else {
+      OutProcess.runEventPump();
     }
+  }
+
+  private static void startAutoShutdownThread() {
+    final Thread displayThread = display == null? null: display.getThread();
+    final Thread currentThread = Thread.currentThread();
+    Thread autoShutdownThread = new Thread("NativeSwing Auto-Shutdown") {
+      protected Thread[] activeThreads = new Thread[1024];
+      @Override
+      public void run() {
+        boolean isAlive = true;
+        while(isAlive) {
+          try {
+            Thread.sleep(1000);
+          } catch(Exception e) {
+          }
+          ThreadGroup group = Thread.currentThread().getThreadGroup();
+          for(ThreadGroup parentGroup = group; (parentGroup = parentGroup.getParent()) != null; group = parentGroup) {
+          }
+          isAlive = false;
+          for(int i=group.enumerate(activeThreads, true)-1; i>=0; i--) {
+            Thread t = activeThreads[i];
+            if(t != displayThread && t != currentThread && !t.isDaemon() && t.isAlive()) {
+              isAlive = true;
+              break;
+            }
+          }
+        }
+        // Shutdown procedure
+        if(display != null && !display.isDisposed()) {
+          display.asyncExec(new Runnable() {
+            public void run() {
+              isEventPumpRunning = false;
+            }
+          });
+        }
+      }
+    };
+    autoShutdownThread.setDaemon(true);
+    autoShutdownThread.start();
   }
 
   private static EventListenerList listenerList = new EventListenerList();
@@ -495,11 +539,75 @@ public class NativeInterface {
 
     private static void initialize() {
       Device.DEBUG = Boolean.parseBoolean(NSSystemPropertySWT.SWT_DEVICE_DEBUG.get());
+      if(Utils.IS_MAC && "applet".equals(System.getProperty("nativeswing.deployment.type"))) {
+        runWithMacExecutor(new Runnable() {
+          public void run() {
+            findSWTDisplay();
+          }
+        });
+      } else {
+        try {
+          findSWTDisplay();
+        } catch(SWTException e) {
+          if(Utils.IS_MAC) {
+            // When -XstartOnFirstThread is not specified, we can apply the same detection as the applet mode.
+            runWithMacExecutor(new Runnable() {
+              public void run() {
+                findSWTDisplay();
+              }
+            });
+          } else {
+            throw e;
+          }
+        }
+      }
+      Runtime.getRuntime().addShutdownHook(new Thread() {
+        @Override
+        public void run() {
+          destroyControls();
+        }
+      });
+    }
+
+    private static void runWithMacExecutor(final Runnable runnable) {
+      // When in an applet on Mac, we have no access to the main thread so we have to use a special mechanism.
+      Executor mainQueueExecutor;
+      try {
+        Object dispatch = Class.forName("com.apple.concurrent.Dispatch").getMethod("getInstance").invoke(null);
+        mainQueueExecutor = (Executor)dispatch.getClass().getMethod("getNonBlockingMainQueueExecutor").invoke(dispatch);
+      } catch(Exception e) {
+        throw new IllegalStateException("Failed to use the Mac Dispatch executor. This may happen if the version of Java that is used is too old.", e);
+      }
+      // It seems the executor is asynchronous but we want this method to be synchronous: we sync using a lock.
+      // Note that this code should work even if it were synchronous.
+      final AtomicBoolean isExecutorCallComplete = new AtomicBoolean(false);
+      synchronized(isExecutorCallComplete) {
+        mainQueueExecutor.execute(new Runnable() {
+          public void run() {
+            try {
+              runnable.run();
+            } finally {
+              synchronized(isExecutorCallComplete) {
+                isExecutorCallComplete.set(true);
+                isExecutorCallComplete.notify();
+              }
+            }
+          }
+        });
+        while(!isExecutorCallComplete.get()) {
+          try {
+            isExecutorCallComplete.wait();
+          } catch (InterruptedException e) {}
+        }
+      }
+    }
+
+    private static void findSWTDisplay() {
       display = Display.getCurrent();
       if(display == null && Boolean.parseBoolean(System.getProperty("nativeswing.interface.inprocess.useExternalSWTDisplay"))) {
         display = Display.getDefault();
         if(display.getThread() == Thread.currentThread()) {
-          // The display was created by us, so we dispose it and create it properly.
+          // Though we wanted to recycle the display, it was actually created by us so we dispose it and create it properly.
           display.dispose();
           display = null;
           System.setProperty("nativeswing.interface.inprocess.useExternalSWTDisplay", "false");
@@ -509,21 +617,8 @@ public class NativeInterface {
         DeviceData data = new DeviceData();
         data.debug = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.debug"));
         data.tracking = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.tracking"));
-        try {
-          display = new Display(data);
-        } catch(SWTException e) {
-          if(Utils.IS_MAC && e.code == SWT.ERROR_THREAD_INVALID_ACCESS) {
-            throw new IllegalStateException("An error occurred while creating the SWT Display! On a Mac, the Native Interface can only be initialized from the main thread and the Java process needs to be started with the \"-XstartOnFirstThread\" VM parameter.", e);
-          }
-          throw e;
-        }
+        display = new Display(data);
       }
-      Runtime.getRuntime().addShutdownHook(new Thread() {
-        @Override
-        public void run() {
-          destroyControls();
-        }
-      });
     }
 
     private static MessagingInterface createInProcessMessagingInterface() {
@@ -536,7 +631,18 @@ public class NativeInterface {
         // If we recycle the display thread (we haven't created it) and runEventPump is called, we just return.
         return;
       }
-      startAutoShutdownThread();
+      if(Utils.IS_MAC && display.getThread() != Thread.currentThread()) {
+        runWithMacExecutor(new Runnable() {
+          public void run() {
+            runSWTEventPump();
+          }
+        });
+        return;
+      }
+      runSWTEventPump();
+    }
+
+    private static void runSWTEventPump() {
       while(isEventPumpRunning) {
         try {
           if(display.isDisposed()) {
@@ -551,44 +657,6 @@ public class NativeInterface {
         }
       }
       display.dispose();
-    }
-
-    static void startAutoShutdownThread() {
-      final Thread displayThread = display.getThread();
-      Thread autoShutdownThread = new Thread("NativeSwing Auto-Shutdown") {
-        protected Thread[] activeThreads = new Thread[1024];
-        @Override
-        public void run() {
-          boolean isAlive = true;
-          while(isAlive) {
-            try {
-              Thread.sleep(1000);
-            } catch(Exception e) {
-            }
-            ThreadGroup group = Thread.currentThread().getThreadGroup();
-            for(ThreadGroup parentGroup = group; (parentGroup = parentGroup.getParent()) != null; group = parentGroup) {
-            }
-            isAlive = false;
-            for(int i=group.enumerate(activeThreads, true)-1; i>=0; i--) {
-              Thread t = activeThreads[i];
-              if(t != displayThread && !t.isDaemon() && t.isAlive()) {
-                isAlive = true;
-                break;
-              }
-            }
-          }
-          // Shutdown procedure
-          if(!display.isDisposed()) {
-            display.asyncExec(new Runnable() {
-              public void run() {
-                isEventPumpRunning = false;
-              }
-            });
-          }
-        }
-      };
-      autoShutdownThread.setDaemon(true);
-      autoShutdownThread.start();
     }
 
   }
@@ -1195,6 +1263,17 @@ public class NativeInterface {
         System.err.println("Stopping peer VM #" + pid);
       }
     }
+
+    static void runEventPump() {
+      // There is nothing to be done for out process, but we want this call to be blocking.
+      while(isEventPumpRunning) {
+        try {
+          Thread.sleep(1000);
+        } catch (Exception e) {
+        }
+      }
+    }
+
   }
 
   private static volatile long lastProcessTime = Long.MAX_VALUE;

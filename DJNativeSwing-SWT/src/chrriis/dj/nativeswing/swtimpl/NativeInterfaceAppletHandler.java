@@ -41,7 +41,7 @@ import chrriis.common.WebServer;
  *  // Rest of destroy().
  *}</pre></code>
  * <br/>
- * 3. Open the interface explicitely.<br/>
+ * 3. Open the interface explicitly.<br/>
  * While the methods of this class do close the interface and reopen it when re-starting if it was previously open, it does not automatically open it. In most cases, one would probably change the start() method like this:
  * <code><pre>public void start() {
  *  NativeInterfaceAppletHandler.start(this);
@@ -61,6 +61,17 @@ public class NativeInterfaceAppletHandler {
   public static void activateAppletMode() {
     System.setProperty("nativeswing.deployment.type", "applet");
     NativeInterface.initialize();
+    if(NativeInterface.isInProcess()) {
+      Thread eventPumpThread = new Thread("NativeSwing event pump thread") {
+        @Override
+        public void run() {
+          // This is the Mac case, which uses the executor.
+          NativeInterface.runEventPump();
+        }
+      };
+      eventPumpThread.setDaemon(true);
+      eventPumpThread.start();
+    }
   }
 
   public static void init(Applet applet) {
