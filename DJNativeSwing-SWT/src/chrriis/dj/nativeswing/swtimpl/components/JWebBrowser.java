@@ -694,10 +694,18 @@ public class JWebBrowser extends NSPanelComponent {
     nativeWebBrowser.setDefaultPopupMenuRegistered(isDefaultPopupMenuRegistered);
   }
 
+  /**
+   * Register a function to the web browser which can be called from Javascript.
+   * @param function the function to add.
+   */
   public void registerFunction(WebBrowserFunction function) {
     nativeWebBrowser.registerFunction(function);
   }
 
+  /**
+   * Unregister a function from the web browser, which cannot be called from Javascript anymore.
+   * @param function the function to remove.
+   */
   public void unregisterFunction(WebBrowserFunction function) {
     nativeWebBrowser.unregisterFunction(function);
   }
