@@ -9,6 +9,7 @@ package chrriis.common;
 
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Window;
 import java.util.ArrayList;
@@ -197,7 +198,10 @@ public class UIUtils {
     Component c = component;
     Container parent = c.getParent();
     while(parent != null && !(parent instanceof Window)) {
-      tempRectangle.setBounds(0, 0, parent.getWidth(), parent.getHeight());
+      // I was using parent.getWidth() and parent.getHeight(), but they return wrong value for applet Panel containers.
+      // parent.getSize() returns the right value though...
+      Dimension parentSize = parent.getSize();
+      tempRectangle.setBounds(0, 0, parentSize.width, parentSize.height);
       Rectangle parentBounds = SwingUtilities.convertRectangle(parent, tempRectangle, component);
       List<Rectangle> newRectangleList = new ArrayList<Rectangle>();
       for(Rectangle rectangle: shape) {
