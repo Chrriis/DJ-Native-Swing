@@ -46,14 +46,14 @@ public class ConstrainVisibility extends JPanel {
     JFlashPlayer flashPlayer = new JFlashPlayer(JFlashPlayer.constrainVisibility());
     flashPlayer.setControlBarVisible(false);
     flashPlayer.load(SimpleFlashExample.class, "resource/Movement-pointer_or_click.swf");
-    flashPlayer.setBounds(OFFSET_X * layerIndex, OFFSET_Y * layerIndex, WIDTH, HEIGHT);
+    flashPlayer.setBounds(0, 0, 200, 200);
     layeredPane.setLayer(flashPlayer, layerIndex++);
     layeredPane.add(flashPlayer);
     // A swing panel
     JPanel swingPanel = new JPanel();
     swingPanel.setBorder(BorderFactory.createTitledBorder("Swing JPanel"));
     swingPanel.setBackground(Color.GREEN);
-    swingPanel.setBounds(OFFSET_X * layerIndex, OFFSET_Y * layerIndex, WIDTH, HEIGHT);
+    swingPanel.setBounds(200, 100, WIDTH, HEIGHT);
     layeredPane.setLayer(swingPanel, layerIndex++);
     layeredPane.add(swingPanel);
     // A web browser
@@ -67,15 +67,15 @@ public class ConstrainVisibility extends JPanel {
         "    <p>A paragraph with a <a href=\"http://www.google.com\">link</a>.</p>" + LS +
         "  </body>" + LS +
         "</html>");
-    webBrowser.setBounds(OFFSET_X * layerIndex, OFFSET_Y * layerIndex, WIDTH, HEIGHT);
+    webBrowser.setBounds(300, 250, WIDTH, HEIGHT);
     layeredPane.setLayer(webBrowser, layerIndex++);
     // A swing button
     JButton swingButton = new JButton("Swing JButton");
-    swingButton.setBounds(OFFSET_X * layerIndex, OFFSET_Y * layerIndex, WIDTH, HEIGHT);
+    swingButton.setBounds(400, 400, WIDTH, HEIGHT);
     layeredPane.setLayer(swingButton, layerIndex++);
     layeredPane.add(swingButton);
     layeredPane.add(webBrowser);
-    layeredPane.setPreferredSize(new Dimension(WIDTH + OFFSET_X * (layerIndex - 1), HEIGHT + OFFSET_Y * (layerIndex - 1)));
+    layeredPane.setPreferredSize(new Dimension(600, 600));
     add(new JScrollPane(layeredPane), BorderLayout.CENTER);
   }
 

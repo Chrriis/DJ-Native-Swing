@@ -105,11 +105,11 @@ public class DemoExampleDefinitionLoader {
         new Example("Simple Example", NativeDialogs.class, "Use a file dialog or a directory dialog, and customize them to your needs.", true),
     }));
     exampleGroupList.add(new ExampleGroup("Additional Features", new Example[] {
-        new Example("Constrain Visibility", ConstrainVisibility.class, "Constrain the visibility to superimpose Swing and native components.\nNote that Mac does not support such non-rectangular shaping of native components.", true),
+        new Example("Constrain Visibility", ConstrainVisibility.class, "Constrain the visibility to superimpose Swing and native components.\nNote that Mac only supports shapes resolving to a single rectangle.", true),
         new Example("Deferred Destruction", DeferredDestruction.class, "Defer destruction until finalization to add/remove the same component.\nIt is not destroyed when removed but on disposeNativePeer() or garbage collection.", true),
-        new Example("Hierarchy Proxying", HierarchyProxying.class, "Use a proxied component hierarchy for the native components to allow re-parenting and change of component Z-order.\nNote that Mac does not support such non-rectangular shaping of native components.", true),
+        new Example("Hierarchy Proxying", HierarchyProxying.class, "Use a proxied component hierarchy for the native components to allow re-parenting and change of component Z-order.\nNote that Mac only supports shapes resolving to a single rectangle.", true),
         new Example("Thumbnail Creation", ThumbnailCreation.class, "Create a thumbnail by painting a native component to an image.", true),
-        new Example("Pseudo Transparency", PseudoTransparency.class, "Simulate alpha blending of a Swing component over a native component. This works rather well over static content.\nNote that Mac does not support such non-rectangular shaping of native components.", true),
+        new Example("Pseudo Transparency", PseudoTransparency.class, "Simulate alpha blending of a Swing component over a native component. This works rather well over static content.\nNote that Mac only supports shapes resolving to a single rectangle.", true),
         new Example("Component Life Cycle", ComponentLifeCycle.class, "Present the life cycle of a component and when method calls happen.\nAlso highlight how runInSequence(Runnable) can be useful, and for special needs how to use initializeNativePeer().", true),
         new Example("Mouse & key events", InputEventsExample.class, "Attach a listener for key and mouse events, and go as far as replacing the web browser popup menu with a Swing one.", true),
     }));
