@@ -27,6 +27,7 @@ import chrriis.dj.nativeswing.swtimpl.demo.examples.htmleditor.TinyMCEExample;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.introduction.Codewise;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.introduction.NativeIntegration;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.introduction.TheSolution;
+import chrriis.dj.nativeswing.swtimpl.demo.examples.introduction.WebStartAndApplets;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.nativedialogs.NativeDialogs;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.syntaxhighlighter.SimpleSyntaxHighlighterExample;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.utilities.FileAssociations;
@@ -61,6 +62,7 @@ public class DemoExampleDefinitionLoader {
         new Example("Native Integration", NativeIntegration.class, "First, some background information on the problems of native integration in a Swing-based application.", false),
         new Example("The Solution", TheSolution.class, "The DJ Project - NativeSwing.", false),
         new Example("Codewise", Codewise.class, "How hard is it to code using this library?", false),
+        new Example("WebStart & Applets", WebStartAndApplets.class, "WebStart and Applets support.", false),
     }));
     exampleGroupList.add(new ExampleGroup("JWebBrowser", new Example[] {
         new Example("Simple Example", SimpleWebBrowserExample.class, "This is a simple example that shows the basic configuration of an embedded web browser component.", true),
@@ -103,11 +105,11 @@ public class DemoExampleDefinitionLoader {
         new Example("Simple Example", NativeDialogs.class, "Use a file dialog or a directory dialog, and customize them to your needs.", true),
     }));
     exampleGroupList.add(new ExampleGroup("Additional Features", new Example[] {
-        new Example("Constrain Visibility", ConstrainVisibility.class, "Constrain the visibility to superimpose Swing and native components.", true),
+        new Example("Constrain Visibility", ConstrainVisibility.class, "Constrain the visibility to superimpose Swing and native components.\nNote that Mac does not support such non-rectangular shaping of native components.", true),
         new Example("Deferred Destruction", DeferredDestruction.class, "Defer destruction until finalization to add/remove the same component.\nIt is not destroyed when removed but on disposeNativePeer() or garbage collection.", true),
-        new Example("Hierarchy Proxying", HierarchyProxying.class, "Use a proxied component hierarchy for the native components to allow re-parenting and change of component Z-order.", true),
+        new Example("Hierarchy Proxying", HierarchyProxying.class, "Use a proxied component hierarchy for the native components to allow re-parenting and change of component Z-order.\nNote that Mac does not support such non-rectangular shaping of native components.", true),
         new Example("Thumbnail Creation", ThumbnailCreation.class, "Create a thumbnail by painting a native component to an image.", true),
-        new Example("Pseudo Transparency", PseudoTransparency.class, "Simulate alpha blending of a Swing component over a native component. This works rather well over static content.", true),
+        new Example("Pseudo Transparency", PseudoTransparency.class, "Simulate alpha blending of a Swing component over a native component. This works rather well over static content.\nNote that Mac does not support such non-rectangular shaping of native components.", true),
         new Example("Component Life Cycle", ComponentLifeCycle.class, "Present the life cycle of a component and when method calls happen.\nAlso highlight how runInSequence(Runnable) can be useful, and for special needs how to use initializeNativePeer().", true),
         new Example("Mouse & key events", InputEventsExample.class, "Attach a listener for key and mouse events, and go as far as replacing the web browser popup menu with a Swing one.", true),
     }));
