@@ -18,7 +18,7 @@ The key components are a rich native web browser and a flash player.
 2. How to use it?
 
 Simply place the NativeSwing.jar and NativeSwing-SWT.jar libraries in your
-classpath, as well as the SWT 3.5 library corresponding to your platform (visit
+classpath, as well as the SWT library corresponding to your platform (visit
 http://www.eclipse.org/swt).
 You may need to refer to the SWT FAQ (http://www.eclipse.org/swt/faq.php) to get
 it working on certain platforms (like the need to install XULRunner on Linux).
@@ -29,13 +29,15 @@ Then, you need to add the following to your main method:
 public static void main(String[] args) {
   NativeInterface.open();
   // Here goes the rest of the program initialization
+  NativeInterface.runEventPump();
 }
 
 If you want to use the shaping mode for native components (cf the demo), you
 need "jna.jar" and "jna_WindowUtils.jar" in your classpath.
 
-If you want to use the HTML editor, you need the zip of the FCK editor or the
-Tiny MCE editor in your classpath.
+If you want to use the HTML editor, you need the zip of the FCK editor, the
+CKEditor editor or the Tiny MCE editor in your classpath depending on which
+implementation is configured.
 
 If you want to use the syntax highlighter, you need zip of the SyntaxHighlighter
 in your classpath.
@@ -52,8 +54,8 @@ library, (re-)named swt.jar alongside DJNativeSwing-SWTDemo.jar.
 
 4. What is the development status?
 
-The library is tested on Windows and Linux, and logically works on all the
-platforms where SWT supports placing SWT components in a Swing application.
+The library is tested on Windows, Linux and Mac but may work on other platforms
+SWT supports.
 
 For information about the current implementation status, visit the DJ Project's
 website.
@@ -73,7 +75,7 @@ In case of a problem with the framework or some components, it is possible to
 activate certain system properties in order to get more information.
 
 The list of properties can be found in SystemProperties.txt (framework
-properties) and SystemProperties-SWT.
+properties) and SystemProperties-SWT.txt.
 
 
 7. How to contribute?
