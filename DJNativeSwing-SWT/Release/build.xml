@@ -10,7 +10,7 @@
   	<copy file="../DJNativeSwing-SWTCore/DJNativeSwing-SWTCore.jar" tofile="DJNativeSwing-SWTCore.jar"/>
     <delete file="DJNativeSwing-SWT.jar"/>
     <jar duplicate="preserve" destfile="DJNativeSwing-SWT.jar">
-    	<zipgroupfileset dir="." includes="DJNativeSwing-SWTAPI.jar DJNativeSwing-SWTCore.jar"/>
+    	<zipgroupfileset dir="." includes="DJNativeSwing-SWTAPI.jar,DJNativeSwing-SWTCore.jar"/>
 		</jar>
     <ant antfile="../DJNativeSwing-SWTDemo/build.xml" inheritall="false"/>
     <zip duplicate="preserve" destfile="Release/DJNativeSwing-SWT.zip">
@@ -32,6 +32,9 @@
       <zipfileset dir="../DJNativeSwing-SWTCore/src" prefix="src/DJNativeSwing-SWTCore"/>
       <!-- DJNativeSwing documentation -->
       <zipfileset dir="documentation/javadoc" prefix="api"/>
+      <!-- NetBeans splitted JARs -->
+      <zipfileset dir="." includes="DJNativeSwing-SWTAPI.jar,DJNativeSwing-SWTCore.jar" prefix="netbeans"/>
+      <zipfileset dir="Release/NetBeans" prefix="netbeans"/>
     </zip>
   </target>
 

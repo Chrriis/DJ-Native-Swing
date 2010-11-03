@@ -452,6 +452,10 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
 
   private static volatile boolean isEventPumpRunning;
 
+  public boolean isEventPumpRunning_() {
+    return isEventPumpRunning;
+  }
+
   /**
    * Run the native event pump. Certain platforms require this method call at the end of the main method to function properly, so it is suggested to always add it.
    */

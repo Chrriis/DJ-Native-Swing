@@ -55,6 +55,8 @@ public interface ISWTNativeInterface {
 
   public void runEventPump_();
 
+  public boolean isEventPumpRunning_();
+
   public void addNativeInterfaceListener_(NativeInterfaceListener listener);
 
   public void removeNativeInterfaceListener_(NativeInterfaceListener listener);

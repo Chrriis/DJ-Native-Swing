@@ -125,6 +125,14 @@ public abstract class NativeInterface {
   }
 
   /**
+   * Indicate if events are being pumped (by a call to runEventPump).
+   * @return true if events are being pumped.
+   */
+  public static boolean isEventPumpRunning() {
+    return swtNativeInterface.isEventPumpRunning_();
+  }
+
+  /**
    * Add a native interface listener.
    * @param listener the native listener to add.
    */
