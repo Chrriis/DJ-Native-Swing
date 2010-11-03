@@ -5,29 +5,30 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.dj.nativeswing.swtimpl;
+package chrriis.dj.nativeswing.swtimpl.internal.core;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
+import java.net.Socket;
 
 import javax.swing.SwingUtilities;
 
 import org.eclipse.swt.widgets.Display;
 
+import chrriis.dj.nativeswing.swtimpl.Message;
+import chrriis.dj.nativeswing.swtimpl.NSSystemPropertySWT;
+
 /**
  * @author Christopher Deckers
  */
-abstract class OutProcessIOMessagingInterface extends MessagingInterface {
+abstract class OutProcessSocketsMessagingInterface extends MessagingInterface {
 
-  public OutProcessIOMessagingInterface(boolean isNativeSide, InputStream is, OutputStream os, boolean exitOnEndOfStream, int pid) {
+  public OutProcessSocketsMessagingInterface(boolean isNativeSide, Socket socket, boolean exitOnEndOfStream, int pid) {
     super(isNativeSide, pid);
-    this.is = is;
-    this.os = os;
+    this.socket = socket;
     initialize(exitOnEndOfStream);
   }
 
@@ -38,22 +39,17 @@ abstract class OutProcessIOMessagingInterface extends MessagingInterface {
   public void destroy() {
     setAlive(false);
     try {
-      oos.close();
-    } catch(Exception e) {
-    }
-    try {
       ois.close();
     } catch(Exception e) {
     }
   }
 
-  private InputStream is;
-  private OutputStream os;
+  private Socket socket;
 
   @Override
   protected void openChannel() {
     try {
-      oos = new ObjectOutputStream(new BufferedOutputStream(os) {
+      oos = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()) {
         @Override
         public synchronized void write(int b) throws IOException {
           super.write(b);
@@ -66,7 +62,7 @@ abstract class OutProcessIOMessagingInterface extends MessagingInterface {
         }
       });
       oos.flush();
-      ois = new ObjectInputStream(new BufferedInputStream(is));
+      ois = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
     } catch(IOException e) {
       throw new RuntimeException(e);
     }
@@ -83,15 +79,10 @@ abstract class OutProcessIOMessagingInterface extends MessagingInterface {
     } catch(Exception e) {
     }
     try {
-      is.close();
+      socket.close();
     } catch(Exception e) {
     }
-    is = null;
-    try {
-      os.close();
-    } catch(Exception e) {
-    }
-    os = null;
+    socket = null;
   }
 
   private static final int OOS_RESET_THRESHOLD;
@@ -126,19 +117,20 @@ abstract class OutProcessIOMessagingInterface extends MessagingInterface {
     if(o instanceof Message) {
       Message message = (Message)o;
       if(IS_DEBUGGING_MESSAGES) {
-        System.err.println("RECV: " + message.getID() + ", " + message);
+        System.err.println("RECV: " + SWTNativeInterface.getMessageID(message) + ", " + message);
       }
       return message;
     }
+    System.err.println("Unknown message: " + o);
     return null;
   }
 
-  static class SWTOutProcessIOMessagingInterface extends OutProcessIOMessagingInterface {
+  static class SWTOutProcessSocketsMessagingInterface extends OutProcessSocketsMessagingInterface {
 
     private Display display;
 
-    public SWTOutProcessIOMessagingInterface(InputStream is, OutputStream os, final boolean exitOnEndOfStream, Display display, int pid) {
-      super(true, is, os, exitOnEndOfStream, pid);
+    public SWTOutProcessSocketsMessagingInterface(Socket socket, final boolean exitOnEndOfStream, Display display, int pid) {
+      super(true, socket, exitOnEndOfStream, pid);
       this.display = display;
     }
 
@@ -152,14 +144,22 @@ abstract class OutProcessIOMessagingInterface extends MessagingInterface {
       return Thread.currentThread() == display.getThread();
     }
 
+    @Override
+    protected void terminate() {
+      if(isNativeSide() && Boolean.parseBoolean(NSSystemPropertySWT.PEERVM_DEBUG_PRINTSTOPMESSAGE.get())) {
+        System.err.println("Stopping peer VM #" + getPID());
+      }
+      super.terminate();
+    }
+
   }
 
-  static class SwingOutProcessIOMessagingInterface extends OutProcessIOMessagingInterface {
+  static class SwingOutProcessSocketsMessagingInterface extends OutProcessSocketsMessagingInterface {
 
     private final Process process;
 
-    public SwingOutProcessIOMessagingInterface(InputStream is, OutputStream os, final boolean exitOnEndOfStream, Process process, int pid) {
-      super(false, is, os, exitOnEndOfStream, pid);
+    public SwingOutProcessSocketsMessagingInterface(Socket socket, final boolean exitOnEndOfStream, Process process, int pid) {
+      super(false, socket, exitOnEndOfStream, pid);
       this.process = process;
     }
 

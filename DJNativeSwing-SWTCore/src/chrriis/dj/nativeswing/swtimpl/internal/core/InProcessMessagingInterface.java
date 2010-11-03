@@ -5,7 +5,7 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.dj.nativeswing.swtimpl;
+package chrriis.dj.nativeswing.swtimpl.internal.core;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -19,6 +19,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
 import chrriis.common.ObjectRegistry;
+import chrriis.dj.nativeswing.swtimpl.Message;
+import chrriis.dj.nativeswing.swtimpl.NSSystemPropertySWT;
 
 /**
  * @author Christopher Deckers
@@ -34,7 +36,7 @@ abstract class InProcessMessagingInterface extends MessagingInterface {
   @Override
   public void destroy() {
     // Dispose all SWT controls (simulate dead peer).
-    ObjectRegistry controlRegistry = NativeComponent.getControlRegistry();
+    ObjectRegistry controlRegistry = SWTNativeComponent.getControlRegistry();
     for(int instanceID: controlRegistry.getInstanceIDs()) {
       final Control control = (Control)controlRegistry.get(instanceID);
       controlRegistry.remove(instanceID);

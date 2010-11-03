@@ -7,16 +7,18 @@
  */
 package chrriis.dj.nativeswing.swtimpl.components.win32;
 
+import chrriis.dj.nativeswing.swtimpl.internal.IOleNativeComponent;
+
 /**
  * A Media Player object responsible for controls-related actions.
  * @author Christopher Deckers
  */
 public class WMPControls {
 
-  private NativeWMediaPlayer nativeComponent;
+  private IOleNativeComponent nativeComponent;
 
   WMPControls(JWMediaPlayer wMediaPlayer) {
-    nativeComponent = (NativeWMediaPlayer)wMediaPlayer.getNativeComponent();
+    nativeComponent = (IOleNativeComponent)wMediaPlayer.getNativeComponent();
   }
 
   /**

@@ -57,7 +57,7 @@ public abstract class CommandMessage extends Message {
 
   private static final Object[] EMPTY_ARGS = new Object[0];
 
-  Object runCommand() throws Exception {
+  protected Object runCommand() throws Exception {
     return run(args == null? EMPTY_ARGS: args);
   }
 

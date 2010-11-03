@@ -5,7 +5,7 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.dj.nativeswing.swtimpl;
+package chrriis.dj.nativeswing.swtimpl.internal.core;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -36,7 +36,7 @@ import chrriis.common.Utils;
  */
 public abstract class NativeModalDialogHandler {
 
-  private static class NativeModalComponent extends NativeComponent {
+  private static class NativeModalComponent extends SWTNativeComponent {
 
     @SuppressWarnings("unused")
     protected static Control createControl(Composite parent, Object[] parameters) {

@@ -5,7 +5,7 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.dj.nativeswing.swtimpl.components;
+package chrriis.dj.nativeswing.swtimpl.components.internal.core;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -53,26 +53,29 @@ import org.eclipse.swt.widgets.Shell;
 
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.swtimpl.CommandMessage;
-import chrriis.dj.nativeswing.swtimpl.ControlCommandMessage;
 import chrriis.dj.nativeswing.swtimpl.NSSystemPropertySWT;
 import chrriis.dj.nativeswing.swtimpl.NativeComponent;
+import chrriis.dj.nativeswing.swtimpl.components.Credentials;
+import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
+import chrriis.dj.nativeswing.swtimpl.components.JWebBrowserWindow;
+import chrriis.dj.nativeswing.swtimpl.components.WebBrowserAuthenticationHandler;
+import chrriis.dj.nativeswing.swtimpl.components.WebBrowserCommandEvent;
+import chrriis.dj.nativeswing.swtimpl.components.WebBrowserEvent;
+import chrriis.dj.nativeswing.swtimpl.components.WebBrowserFunction;
+import chrriis.dj.nativeswing.swtimpl.components.WebBrowserListener;
+import chrriis.dj.nativeswing.swtimpl.components.WebBrowserNavigationEvent;
+import chrriis.dj.nativeswing.swtimpl.components.WebBrowserNavigationParameters;
+import chrriis.dj.nativeswing.swtimpl.components.WebBrowserWindowFactory;
+import chrriis.dj.nativeswing.swtimpl.components.WebBrowserWindowOpeningEvent;
+import chrriis.dj.nativeswing.swtimpl.components.WebBrowserWindowWillOpenEvent;
+import chrriis.dj.nativeswing.swtimpl.components.internal.INativeWebBrowser;
+import chrriis.dj.nativeswing.swtimpl.internal.core.ControlCommandMessage;
+import chrriis.dj.nativeswing.swtimpl.internal.core.SWTNativeComponent;
 
 /**
  * @author Christopher Deckers
  */
-class NativeWebBrowser extends NativeComponent {
-
-  static enum WebBrowserRuntime {
-    DEFAULT,
-    XULRUNNER,
-    WEBKIT
-  }
-
-  public static final String CONSOLE_OUT_FUNCTION = "nsConsoleOut";
-  public static final String CONSOLE_ERR_FUNCTION = "nsConsoleErr";
-  public static final String COMMAND_FUNCTION = "sendNSCommand";
-  public static final String COMMAND_LOCATION_PREFIX = "command://";
-  public static final String COMMAND_STATUS_PREFIX = "scommand://";
+class NativeWebBrowser extends SWTNativeComponent implements INativeWebBrowser {
 
   private static class CMJ_closeWindow extends ControlCommandMessage {
     @Override
@@ -168,7 +171,7 @@ class NativeWebBrowser extends NativeComponent {
         if(size != null) {
           ((Window)browserWindow).validate();
           Dimension windowSize = browserWindow.getSize();
-          Dimension webBrowserSize = browserWindow.getWebBrowser().getEmbeddableComponent().getSize();
+          Dimension webBrowserSize = ((NativeWebBrowser)browserWindow.getWebBrowser().getNativeComponent()).embeddableComponent.getSize();
           if(size.width > 0) {
             windowSize.width -= webBrowserSize.width;
             windowSize.width += size.width;
@@ -906,11 +909,11 @@ class NativeWebBrowser extends NativeComponent {
       return;
     }
     Menu menu = new Menu(browser.getShell(), SWT.POP_UP);
-    String className = NativeWebBrowser.class.getName();
+    String className = JWebBrowser.class.getName();
     ResourceBundle bundle = ResourceBundle.getBundle(className.substring(0, className.lastIndexOf('.')).replace('.', '/') + "/resource/WebBrowser");
     final MenuItem backMenuItem = new MenuItem(menu, SWT.PUSH);
     backMenuItem.setText(bundle.getString("SystemMenuBack"));
-    backMenuItem.setImage(new Image(browser.getDisplay(), NativeWebBrowser.class.getResourceAsStream(bundle.getString("SystemMenuBackIcon"))));
+    backMenuItem.setImage(new Image(browser.getDisplay(), JWebBrowser.class.getResourceAsStream(bundle.getString("SystemMenuBackIcon"))));
     backMenuItem.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent e) {
@@ -919,7 +922,7 @@ class NativeWebBrowser extends NativeComponent {
     });
     final MenuItem forwardMenuItem = new MenuItem(menu, SWT.PUSH);
     forwardMenuItem.setText(bundle.getString("SystemMenuForward"));
-    forwardMenuItem.setImage(new Image(browser.getDisplay(), NativeWebBrowser.class.getResourceAsStream(bundle.getString("SystemMenuForwardIcon"))));
+    forwardMenuItem.setImage(new Image(browser.getDisplay(), JWebBrowser.class.getResourceAsStream(bundle.getString("SystemMenuForwardIcon"))));
     forwardMenuItem.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent e) {
@@ -928,7 +931,7 @@ class NativeWebBrowser extends NativeComponent {
     });
     final MenuItem reloadMenuItem = new MenuItem(menu, SWT.PUSH);
     reloadMenuItem.setText(bundle.getString("SystemMenuReload"));
-    reloadMenuItem.setImage(new Image(browser.getDisplay(), NativeWebBrowser.class.getResourceAsStream(bundle.getString("SystemMenuReloadIcon"))));
+    reloadMenuItem.setImage(new Image(browser.getDisplay(), JWebBrowser.class.getResourceAsStream(bundle.getString("SystemMenuReloadIcon"))));
     reloadMenuItem.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent e) {
@@ -937,7 +940,7 @@ class NativeWebBrowser extends NativeComponent {
     });
     final MenuItem stopMenuItem = new MenuItem(menu, SWT.PUSH);
     stopMenuItem.setText(bundle.getString("SystemMenuStop"));
-    stopMenuItem.setImage(new Image(browser.getDisplay(), NativeWebBrowser.class.getResourceAsStream(bundle.getString("SystemMenuStopIcon"))));
+    stopMenuItem.setImage(new Image(browser.getDisplay(), JWebBrowser.class.getResourceAsStream(bundle.getString("SystemMenuStopIcon"))));
     stopMenuItem.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent e) {
@@ -1167,7 +1170,7 @@ class NativeWebBrowser extends NativeComponent {
   private static class CMN_getBrowserVersion extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
-      return new JSBrowserDetection((Browser)getControl()).browserVersion;
+      return new NativeJSBrowserDetection((Browser)getControl()).browserVersion;
     }
   }
 
@@ -1183,9 +1186,12 @@ class NativeWebBrowser extends NativeComponent {
     listenerList.remove(WebBrowserListener.class, listener);
   }
 
+  private Component embeddableComponent;
+
   @Override
-  protected Component createEmbeddableComponent(Map<Object, Object> optionMap) {
-    return super.createEmbeddableComponent(optionMap);
+  public Component createEmbeddableComponent(Map<Object, Object> optionMap) {
+    embeddableComponent = super.createEmbeddableComponent(optionMap);
+    return embeddableComponent;
   }
 
   @Override
@@ -1213,7 +1219,7 @@ class NativeWebBrowser extends NativeComponent {
     }
   }
 
-  protected boolean unloadAndDispose() {
+  public boolean unloadAndDispose() {
     if(isNativePeerInitialized()) {
       // We return "isAlive" (and not "isDisposed") because it is easier to test the returned value.
       if(Boolean.TRUE.equals(runSync(new CMN_unloadAndDispose()))) {
@@ -1222,7 +1228,6 @@ class NativeWebBrowser extends NativeComponent {
     }
     disposeNativePeer();
     return true;
-
   }
 
 }

@@ -49,6 +49,8 @@ import javax.swing.border.Border;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
+import chrriis.dj.nativeswing.swtimpl.components.internal.INativeWebBrowser;
+
 /**
  * A default web browser decorator, which can actually be subclassed for simple customization.
  * @author Christopher Deckers
@@ -205,7 +207,7 @@ public class DefaultWebBrowserDecorator extends WebBrowserDecorator {
       fileNewWindowMenuItem.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           JWebBrowser newWebBrowser;
-          switch(((NativeWebBrowser)webBrowser.getNativeComponent()).getRuntime()) {
+          switch(((INativeWebBrowser)webBrowser.getNativeComponent()).getRuntime()) {
             case WEBKIT:
               newWebBrowser = new JWebBrowser(JWebBrowser.useWebkitRuntime());
               break;
@@ -554,11 +556,11 @@ public class DefaultWebBrowserDecorator extends WebBrowserDecorator {
   private WebBrowserStatusBar statusBar;
 
   private JWebBrowser webBrowser;
-  private NativeWebBrowser nativeWebBrowser;
+  private INativeWebBrowser nativeWebBrowser;
 
   public DefaultWebBrowserDecorator(JWebBrowser webBrowser, Component renderingComponent) {
     this.webBrowser = webBrowser;
-    nativeWebBrowser = (NativeWebBrowser)webBrowser.getNativeComponent();
+    nativeWebBrowser = (INativeWebBrowser)webBrowser.getNativeComponent();
     menuToolAndLocationBarPanel = new JPanel(new BorderLayout());
     menuBar = new WebBrowserMenuBar();
     menuToolAndLocationBarPanel.add(menuBar, BorderLayout.NORTH);

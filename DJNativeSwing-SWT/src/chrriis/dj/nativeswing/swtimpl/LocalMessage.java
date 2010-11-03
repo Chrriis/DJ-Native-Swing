@@ -20,7 +20,7 @@ public abstract class LocalMessage extends CommandMessage {
   }
 
   @Override
-  Object runCommand() {
+  protected Object runCommand() {
     try {
       return super.runCommand();
     } catch(RuntimeException e) {

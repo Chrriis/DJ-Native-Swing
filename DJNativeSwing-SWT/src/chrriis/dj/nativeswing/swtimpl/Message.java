@@ -64,7 +64,7 @@ public class Message implements Serializable {
     return NativeInterface.syncSend(isTargetNativeSide, this);
   }
 
-  void computeId(boolean isTargetNativeSide) {
+  void computeID(boolean isTargetNativeSide) {
     if(id != 0) {
       return;
     }

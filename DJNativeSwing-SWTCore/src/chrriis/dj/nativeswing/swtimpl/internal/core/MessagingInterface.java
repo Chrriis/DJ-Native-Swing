@@ -5,7 +5,7 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.dj.nativeswing.swtimpl;
+package chrriis.dj.nativeswing.swtimpl.internal.core;
 
 import java.awt.AWTEvent;
 import java.awt.EventQueue;
@@ -19,6 +19,9 @@ import java.util.List;
 import org.eclipse.swt.SWT;
 
 import chrriis.common.ObjectRegistry;
+import chrriis.dj.nativeswing.swtimpl.CommandMessage;
+import chrriis.dj.nativeswing.swtimpl.Message;
+import chrriis.dj.nativeswing.swtimpl.NSSystemPropertySWT;
 
 
 /**
@@ -106,37 +109,37 @@ abstract class MessagingInterface {
 
   private CommandResultMessage runMessage(Message message) {
     if(IS_DEBUGGING_MESSAGES) {
-      System.err.println(">RUN: " + message.getID() + ", " + message);
+      System.err.println(">RUN: " + SWTNativeInterface.getMessageID(message) + ", " + message);
     }
     CommandResultMessage commandResultMessage;
     if(message instanceof CommandMessage) {
       CommandMessage commandMessage = (CommandMessage)message;
       Object result = null;
       Throwable throwable = null;
-      if(message.isValid()) {
+      if(SWTNativeInterface.isMessageValid(message)) {
         try {
-          result = commandMessage.runCommand();
+          result = SWTNativeInterface.runMessageCommand(commandMessage);
         } catch(Throwable t) {
           throwable = t;
         }
       }
-      if(commandMessage.isSyncExec()) {
-        commandResultMessage = new CommandResultMessage(commandMessage.getID(), result, throwable);
+      if(SWTNativeInterface.isMessageSyncExec(commandMessage)) {
+        commandResultMessage = new CommandResultMessage(SWTNativeInterface.getMessageID(commandMessage), result, throwable);
         asyncSend(commandResultMessage);
       } else {
         if(throwable != null) {
           throwable.printStackTrace();
         }
-        commandResultMessage = new CommandResultMessage(message.getID(), result, throwable);
+        commandResultMessage = new CommandResultMessage(SWTNativeInterface.getMessageID(message), result, throwable);
       }
     } else {
-      commandResultMessage = new CommandResultMessage(message.getID(), null, null);
-      if(message.isSyncExec()) {
+      commandResultMessage = new CommandResultMessage(SWTNativeInterface.getMessageID(message), null, null);
+      if(SWTNativeInterface.isMessageSyncExec(message)) {
         asyncSend(commandResultMessage);
       }
     }
     if(IS_DEBUGGING_MESSAGES) {
-      System.err.println("<RUN: " + message.getID());
+      System.err.println("<RUN: " + SWTNativeInterface.getMessageID(message));
     }
     return commandResultMessage;
   }
@@ -167,7 +170,7 @@ abstract class MessagingInterface {
     public Object run(Object[] args) {
       int instanceID = (Integer)args[0];
       boolean isOriginatorNativeSide = (Boolean)args[2];
-      MessagingInterface messagingInterface = NativeInterface.getMessagingInterface(!isOriginatorNativeSide);
+      MessagingInterface messagingInterface = SWTNativeInterface.getInstance().getMessagingInterface(!isOriginatorNativeSide);
       ThreadLock threadLock = (ThreadLock)messagingInterface.syncThreadRegistry.get(instanceID);
       messagingInterface.syncThreadRegistry.remove(instanceID);
       if(threadLock == null) {
@@ -186,10 +189,10 @@ abstract class MessagingInterface {
     public Object run(Object[] args) {
       Message message = (Message)args[1];
       boolean isOriginatorNativeSide = (Boolean)args[2];
-      message.setSyncExec(false);
-      MessagingInterface messagingInterface = NativeInterface.getMessagingInterface(!isOriginatorNativeSide);
+      SWTNativeInterface.setMessageSyncExec(message, false);
+      MessagingInterface messagingInterface = SWTNativeInterface.getInstance().getMessagingInterface(!isOriginatorNativeSide);
       CM_asyncExecResponse asyncExecResponse = new CM_asyncExecResponse();
-      asyncExecResponse.setArgs(args[0], messagingInterface.runMessage(message), messagingInterface.isNativeSide());
+      SWTNativeInterface.setMessageArgs(asyncExecResponse, args[0], messagingInterface.runMessage(message), messagingInterface.isNativeSide());
       messagingInterface.asyncSend(asyncExecResponse);
       return null;
     }
@@ -204,7 +207,7 @@ abstract class MessagingInterface {
     ThreadLock threadLock = new ThreadLock();
     final int instanceID = syncThreadRegistry.add(threadLock);
     CM_asyncExec asyncExec = new CM_asyncExec();
-    asyncExec.setArgs(instanceID, message, isNativeSide());
+    SWTNativeInterface.setMessageArgs(asyncExec, instanceID, message, isNativeSide());
     asyncSend(asyncExec);
     synchronized(threadLock) {
       while(syncThreadRegistry.get(instanceID) instanceof ThreadLock) {
@@ -227,13 +230,13 @@ abstract class MessagingInterface {
   private final Object LOCK = new Object();
 
   public Object syncSend(Message message) {
-    message.computeId(!isNativeSide());
+    SWTNativeInterface.computeMessageID(message, !isNativeSide());
     if(!isUIThread()) {
       return nonUISyncExec(message);
     }
     synchronized(LOCK) {
-      message.setUI(true);
-      message.setSyncExec(true);
+      SWTNativeInterface.setMessageUI(message, true);
+      SWTNativeInterface.setMessageSyncExec(message, true);
       if(!isAlive()) {
         printFailedInvocation(message);
         return null;
@@ -245,7 +248,7 @@ abstract class MessagingInterface {
         while(true) {
           commandResultMessage = processReceivedMessages();
           if(commandResultMessage != null) {
-            if(commandResultMessage.getOriginalID() != message.getID()) {
+            if(commandResultMessage.getOriginalID() != SWTNativeInterface.getMessageID(message)) {
               commandResultMessageList.add(commandResultMessage);
               commandResultMessage = null;
             } else {
@@ -260,7 +263,7 @@ abstract class MessagingInterface {
                   if(isNativeSide()) {
                     // Sometimes, AWT is synchronously waiting for the native side to pump some event.
                     // The native side is currently waiting, so we set a timeout and do some pumping.
-                    NativeInterface.getDisplay().readAndDispatch();
+                    SWTNativeInterface.getInstance().getDisplay().readAndDispatch();
                   } else {
                     // On Mac OS, under rare circumstances, we have a situation where SWT is waiting synchronously on AWT, while AWT is blocked here.
                     // We have to use a similar forced dispatching trick.
@@ -315,7 +318,7 @@ abstract class MessagingInterface {
 
   private Object processCommandResult(CommandResultMessage commandResultMessage) {
     if(IS_DEBUGGING_MESSAGES) {
-      System.err.println("<USE: " + commandResultMessage.getID());
+      System.err.println("<USE: " + SWTNativeInterface.getMessageID(commandResultMessage));
     }
     Throwable exception = commandResultMessage.getException();
     if(exception != null) {
@@ -328,9 +331,9 @@ abstract class MessagingInterface {
   }
 
   public void asyncSend(Message message) {
-    message.computeId(!isNativeSide());
-    message.setUI(isUIThread());
-    message.setSyncExec(false);
+    SWTNativeInterface.computeMessageID(message, !isNativeSide());
+    SWTNativeInterface.setMessageUI(message, isUIThread());
+    SWTNativeInterface.setMessageSyncExec(message, false);
     try {
       writeMessage(message);
     } catch(Exception e) {
@@ -344,7 +347,7 @@ abstract class MessagingInterface {
       return;
     }
     if(IS_DEBUGGING_MESSAGES) {
-      System.err.println((message.isSyncExec()? "SENDS": "SENDA") + ": " + message.getID() + ", " + message);
+      System.err.println((SWTNativeInterface.isMessageSyncExec(message)? "SENDS": "SENDA") + ": " + SWTNativeInterface.getMessageID(message) + ", " + message);
     }
     writeMessageToChannel(message);
   }
@@ -383,7 +386,7 @@ abstract class MessagingInterface {
               }
               e.printStackTrace();
               try {
-                isRespawned = NativeInterface.notifyKilled();
+                isRespawned = SWTNativeInterface.getInstance().notifyKilled();
               } catch(Exception ex) {
                 ex.printStackTrace();
               }
@@ -402,13 +405,13 @@ abstract class MessagingInterface {
               }
             }
             if(isRespawned) {
-              NativeInterface.notifyRespawned();
+              SWTNativeInterface.getInstance().notifyRespawned();
             }
           }
           if(message != null) {
-            if(!message.isUI()) {
+            if(!SWTNativeInterface.isMessageUI(message)) {
               final Message message_ = message;
-              new Thread("NativeSwing[" + getPID() + "] Non-UI Message [" + message.getID() + "] Executor") {
+              new Thread("NativeSwing[" + getPID() + "] Non-UI Message [" + SWTNativeInterface.getMessageID(message) + "] Executor") {
                 @Override
                 public void run() {
                   runMessage(message_);

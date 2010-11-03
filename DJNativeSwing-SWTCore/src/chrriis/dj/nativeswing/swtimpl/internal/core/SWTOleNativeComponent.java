@@ -5,7 +5,7 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.dj.nativeswing.swtimpl;
+package chrriis.dj.nativeswing.swtimpl.internal.core;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -25,18 +25,19 @@ import org.eclipse.swt.ole.win32.OleParameterDescription;
 import org.eclipse.swt.ole.win32.Variant;
 
 import chrriis.common.Utils;
+import chrriis.dj.nativeswing.swtimpl.internal.IOleNativeComponent;
 
 
 /**
  * A convenience class for Windows Ole-based native components.
  * @author Christopher Deckers
  */
-public abstract class OleNativeComponent extends NativeComponent {
+public abstract class SWTOleNativeComponent extends SWTNativeComponent implements IOleNativeComponent {
 
   /**
    * Construct an OLE native component.
    */
-  public OleNativeComponent() {
+  public SWTOleNativeComponent() {
   }
 
   protected static void configureOleFrame(OleClientSite site, OleFrame frame) {

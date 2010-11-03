@@ -17,13 +17,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.NSOption;
 import chrriis.dj.nativeswing.swtimpl.EventDispatchUtils;
 import chrriis.dj.nativeswing.swtimpl.NSPanelComponent;
+import chrriis.dj.nativeswing.swtimpl.NativeComponent;
+import chrriis.dj.nativeswing.swtimpl.components.internal.INativeWebBrowser;
+import chrriis.dj.nativeswing.swtimpl.components.internal.INativeWebBrowserStatic;
+import chrriis.dj.nativeswing.swtimpl.internal.CoreClassFactory;
 
 /**
  * A native web browser, using Internet Explorer or Mozilla on Windows, and Mozilla on other platforms.<br/>
@@ -34,13 +37,13 @@ import chrriis.dj.nativeswing.swtimpl.NSPanelComponent;
 public class JWebBrowser extends NSPanelComponent {
 
   /** The function to use when sending a command from some web content using Javascript. */
-  public static final String COMMAND_FUNCTION = NativeWebBrowser.COMMAND_FUNCTION;
+  public static final String COMMAND_FUNCTION = INativeWebBrowser.COMMAND_FUNCTION;
 
   /** The prefix to use when sending a command from some web content, using a static link or by setting window.location from Javascript. */
-  public static final String COMMAND_LOCATION_PREFIX = NativeWebBrowser.COMMAND_LOCATION_PREFIX;
+  public static final String COMMAND_LOCATION_PREFIX = INativeWebBrowser.COMMAND_LOCATION_PREFIX;
 
   /** The prefix to use when sending a command from some web content, by setting window.status from Javascript. */
-  public static final String COMMAND_STATUS_PREFIX = NativeWebBrowser.COMMAND_STATUS_PREFIX;
+  public static final String COMMAND_STATUS_PREFIX = INativeWebBrowser.COMMAND_STATUS_PREFIX;
 
   private static final String USE_XULRUNNER_RUNTIME_OPTION_KEY = "XULRunner Runtime";
   private static final NSOption XUL_RUNNER_RUNTIME_OPTION = new NSOption(USE_XULRUNNER_RUNTIME_OPTION_KEY);
@@ -109,11 +112,13 @@ public class JWebBrowser extends NSPanelComponent {
     return new DefaultWebBrowserDecorator(this, renderingComponent);
   }
 
+  private static INativeWebBrowserStatic webBrowserStatic = CoreClassFactory.create(INativeWebBrowserStatic.class, "chrriis.dj.nativeswing.swtimpl.components.internal.core.NativeWebBrowserStatic", new Class<?>[0], new Object[0]);
+
   /**
    * Clear all session cookies from all web browser instances.
    */
   public static void clearSessionCookies() {
-    NativeWebBrowser.clearSessionCookies();
+    webBrowserStatic.clearSessionCookies();
   }
 
   /**
@@ -121,7 +126,7 @@ public class JWebBrowser extends NSPanelComponent {
    * @return the cookie or null if it does not exist.
    */
   public static String getCookie(String url, String name) {
-    return NativeWebBrowser.getCookie(url, name);
+    return webBrowserStatic.getCookie(url, name);
   }
 
   /**
@@ -134,10 +139,10 @@ public class JWebBrowser extends NSPanelComponent {
    * <code>foo=; expires=Thu, 01-Jan-1970 00:00:01 GMT</code> (deletes cookie <code>foo</code>)
    */
   public static void setCookie(String url, String value) {
-    NativeWebBrowser.setCookie(url, value);
+    webBrowserStatic.setCookie(url, value);
   }
 
-  private NativeWebBrowser nativeWebBrowser;
+  private INativeWebBrowser nativeWebBrowser;
 
   /**
    * Copy the appearance, the visibility of the various bars, from one web browser to another.
@@ -165,24 +170,21 @@ public class JWebBrowser extends NSPanelComponent {
     }
   }
 
-  private Component embeddableComponent;
-
   /**
    * Construct a new web browser.
    * @param options the options to configure the behavior of this component.
    */
   public JWebBrowser(NSOption... options) {
     Map<Object, Object> optionMap = NSOption.createOptionMap(options);
-    NativeWebBrowser.WebBrowserRuntime runtime = NativeWebBrowser.WebBrowserRuntime.DEFAULT;
+    INativeWebBrowser.WebBrowserRuntime runtime = INativeWebBrowser.WebBrowserRuntime.DEFAULT;
     if(optionMap.get(USE_XULRUNNER_RUNTIME_OPTION_KEY) != null) {
-      runtime = NativeWebBrowser.WebBrowserRuntime.XULRUNNER;
+      runtime = INativeWebBrowser.WebBrowserRuntime.XULRUNNER;
     } else if(optionMap.get(USE_WEBKIT_RUNTIME_OPTION_KEY) != null) {
-      runtime = NativeWebBrowser.WebBrowserRuntime.WEBKIT;
+      runtime = INativeWebBrowser.WebBrowserRuntime.WEBKIT;
     }
-    nativeWebBrowser = new NativeWebBrowser(this, runtime);
-    initialize(nativeWebBrowser);
-    embeddableComponent = nativeWebBrowser.createEmbeddableComponent(optionMap);
-    webBrowserDecorator = createWebBrowserDecorator(embeddableComponent);
+    nativeWebBrowser = CoreClassFactory.create(INativeWebBrowser.class, "chrriis.dj.nativeswing.swtimpl.components.internal.core.NativeWebBrowser", new Class<?>[] {JWebBrowser.class, INativeWebBrowser.WebBrowserRuntime.class}, new Object[] {this, runtime});
+    initialize((NativeComponent)nativeWebBrowser);
+    webBrowserDecorator = createWebBrowserDecorator(nativeWebBrowser.createEmbeddableComponent(optionMap));
     add(webBrowserDecorator, BorderLayout.CENTER);
   }
 
@@ -498,13 +500,13 @@ public class JWebBrowser extends NSPanelComponent {
     public void commandReceived(WebBrowserCommandEvent e) {
       if(command.equals(e.getCommand())) {
         result.set(e.getParameters());
-        ((NativeWebBrowser)e.getWebBrowser().getNativeComponent()).removeWebBrowserListener(this);
+        ((INativeWebBrowser)e.getWebBrowser().getNativeComponent()).removeWebBrowserListener(this);
       }
     }
   }
 
   private Object[] executeJavascriptWithCommandResult(final String command, String script) {
-    if(!nativeWebBrowser.isNativePeerInitialized()) {
+    if(!((NativeComponent)nativeWebBrowser).isNativePeerInitialized()) {
       return null;
     }
     final AtomicReference<Object[]> result = new AtomicReference<Object[]>();
@@ -724,10 +726,6 @@ public class JWebBrowser extends NSPanelComponent {
    */
   public String getBrowserVersion() {
     return nativeWebBrowser.getBrowserVersion();
-  }
-
-  JPanel getEmbeddableComponent() {
-    return (JPanel)embeddableComponent;
   }
 
   /**

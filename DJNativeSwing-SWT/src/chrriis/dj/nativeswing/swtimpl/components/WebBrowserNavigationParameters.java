@@ -39,7 +39,7 @@ public class WebBrowserNavigationParameters {
     headers = headerList.toArray(new String[0]);
   }
 
-  String[] getHeaders() {
+  public String[] getHeaders() {
     return headers;
   }
 
@@ -76,7 +76,7 @@ public class WebBrowserNavigationParameters {
     postData = sb.toString();
   }
 
-  String getPostData() {
+  public String getPostData() {
     return postData;
   }
 

@@ -5,7 +5,7 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.dj.nativeswing.swtimpl.components;
+package chrriis.dj.nativeswing.swtimpl.components.internal.core;
 
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.layout.FillLayout;
@@ -14,12 +14,12 @@ import org.eclipse.swt.widgets.Shell;
 /**
  * @author Christopher Deckers
  */
-class JSBrowserDetection {
+class NativeJSBrowserDetection {
 
   public final String browserName;
   public final String browserVersion;
 
-  public JSBrowserDetection(Browser browser) {
+  public NativeJSBrowserDetection(Browser browser) {
     Shell shell = new Shell(browser.getDisplay());
     shell.setLayout(new FillLayout());
     Browser browser_ = new Browser(shell, browser.getStyle());

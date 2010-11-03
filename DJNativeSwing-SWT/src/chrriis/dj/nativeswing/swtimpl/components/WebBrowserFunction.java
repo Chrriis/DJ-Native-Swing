@@ -23,6 +23,6 @@ public abstract class WebBrowserFunction {
     return name;
   }
 
-  protected abstract Object invoke(JWebBrowser webBrowser, Object... args);
+  public abstract Object invoke(JWebBrowser webBrowser, Object... args);
 
 }

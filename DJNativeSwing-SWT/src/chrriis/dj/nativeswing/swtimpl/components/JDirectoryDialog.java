@@ -8,14 +8,9 @@
 package chrriis.dj.nativeswing.swtimpl.components;
 
 import java.awt.Component;
-import java.io.Serializable;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.DirectoryDialog;
-
-import chrriis.dj.nativeswing.swtimpl.ControlCommandMessage;
-import chrriis.dj.nativeswing.swtimpl.NativeModalDialogHandler;
+import chrriis.dj.nativeswing.swtimpl.components.internal.INativeDirectoryDialog;
+import chrriis.dj.nativeswing.swtimpl.internal.CoreClassFactory;
 
 /**
  * A native directory selection dialog.
@@ -23,48 +18,14 @@ import chrriis.dj.nativeswing.swtimpl.NativeModalDialogHandler;
  */
 public class JDirectoryDialog {
 
-  private static class CMN_openDirectoryDialog extends ControlCommandMessage {
-    @Override
-    public Object run(Object[] args) {
-      Data data = (Data)args[0];
-      Control control = getControl();
-      if(control.isDisposed()) {
-        return data;
-      }
-      DirectoryDialog directoryDialog = new DirectoryDialog(control.getShell(), SWT.NONE);
-      if(data.title != null) {
-        directoryDialog.setText(data.title);
-      }
-      if(data.selectedDirectory != null) {
-        directoryDialog.setFilterPath(data.selectedDirectory);
-      }
-      if(data.message != null) {
-        directoryDialog.setMessage(data.message);
-      }
-      data.selectedDirectory = directoryDialog.open();
-      return data;
-    }
-  }
-
-  private static class Data implements Serializable {
-    public String title;
-    public String message;
-    public String selectedDirectory;
-  }
-
-  private Data data = new Data();
+  private INativeDirectoryDialog nativeDirectoryDialog = CoreClassFactory.create(INativeDirectoryDialog.class, "chrriis.dj.nativeswing.swtimpl.components.internal.core.NativeDirectoryDialog", new Class<?>[0], new Object[0]);
 
   /**
    * Show the directory selection dialog, which is a blocking call until the user has made a choice.
    * @param component The parent component.
    */
   public void show(Component component) {
-    new NativeModalDialogHandler() {
-      @Override
-      protected void processResult(Object result) {
-        data = (Data)result;
-      }
-    }.showModalDialog(component, new CMN_openDirectoryDialog(), data);
+    nativeDirectoryDialog.show(component);
   }
 
   /**
@@ -72,7 +33,7 @@ public class JDirectoryDialog {
    * @return the selected directory.
    */
   public String getSelectedDirectory() {
-    return data.selectedDirectory;
+    return nativeDirectoryDialog.getSelectedDirectory();
   }
 
   /**
@@ -80,7 +41,7 @@ public class JDirectoryDialog {
    * @param selectedDirectory the directory that should be selected.
    */
   public void setSelectedDirectory(String selectedDirectory) {
-    data.selectedDirectory = selectedDirectory;
+    nativeDirectoryDialog.setSelectedDirectory(selectedDirectory);
   }
 
   /**
@@ -88,7 +49,7 @@ public class JDirectoryDialog {
    * @param title the title to set or null to use the default title.
    */
   public void setTitle(String title) {
-    data.title = title;
+    nativeDirectoryDialog.setTitle(title);
   }
 
   /**
@@ -96,7 +57,7 @@ public class JDirectoryDialog {
    * @return the title or null if it is not set.
    */
   public String getTitle() {
-    return data.title;
+    return nativeDirectoryDialog.getTitle();
   }
 
   /**
@@ -104,7 +65,7 @@ public class JDirectoryDialog {
    * @param message the message to show.
    */
   public void setMessage(String message) {
-    data.message = message;
+    nativeDirectoryDialog.setMessage(message);
   }
 
   /**
@@ -112,7 +73,7 @@ public class JDirectoryDialog {
    * @return the message or null if it is not set.
    */
   public String getMessage() {
-    return data.message;
+    return nativeDirectoryDialog.getMessage();
   }
 
 }

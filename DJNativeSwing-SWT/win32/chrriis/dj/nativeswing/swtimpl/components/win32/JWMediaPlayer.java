@@ -14,6 +14,9 @@ import java.util.List;
 import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.NSOption;
 import chrriis.dj.nativeswing.swtimpl.NSPanelComponent;
+import chrriis.dj.nativeswing.swtimpl.NativeComponent;
+import chrriis.dj.nativeswing.swtimpl.components.win32.internal.INativeWMediaPlayer;
+import chrriis.dj.nativeswing.swtimpl.internal.CoreClassFactory;
 
 /**
  * A multimedia player, based on the Window Media Player (only avaialable on the Windows operating system).<br/>
@@ -23,15 +26,15 @@ import chrriis.dj.nativeswing.swtimpl.NSPanelComponent;
  */
 public class JWMediaPlayer extends NSPanelComponent {
 
-  private NativeWMediaPlayer nativeComponent;
+  private INativeWMediaPlayer nativeComponent;
 
   /**
    * Construct a Windows Media Player.
    * @param options the options to configure the behavior of this component.
    */
   public JWMediaPlayer(NSOption... options) {
-    nativeComponent = new NativeWMediaPlayer();
-    initialize(nativeComponent);
+    nativeComponent = CoreClassFactory.create(INativeWMediaPlayer.class, "chrriis.dj.nativeswing.swtimpl.components.win32.internal.core.NativeWMediaPlayer", new Class<?>[0], new Object[0]);
+    initialize((NativeComponent)nativeComponent);
     wmpSettings = new WMPSettings(this);
     wmpControls = new WMPControls(this);
     wmpMedia = new WMPMedia(this);

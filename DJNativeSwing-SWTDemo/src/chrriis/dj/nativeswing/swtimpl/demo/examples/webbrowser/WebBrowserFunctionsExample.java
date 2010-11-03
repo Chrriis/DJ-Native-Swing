@@ -39,7 +39,7 @@ public class WebBrowserFunctionsExample extends JPanel {
     final JTextArea functionCallsTextArea = new JTextArea(7, 0);
     webBrowser.registerFunction(new WebBrowserFunction("invokeJava") {
       @Override
-      protected Object invoke(JWebBrowser webBrowser, Object... args) {
+      public Object invoke(JWebBrowser webBrowser, Object... args) {
         StringBuilder sb = new StringBuilder();
         sb.append("-> " + getName() + "() called from Javascript with args:");
         for (int i=0; i<args.length; i++) {
@@ -58,7 +58,7 @@ public class WebBrowserFunctionsExample extends JPanel {
     });
     webBrowser.registerFunction(new WebBrowserFunction("invokeJavaWithError") {
       @Override
-      protected Object invoke(JWebBrowser webBrowser, Object... args) {
+      public Object invoke(JWebBrowser webBrowser, Object... args) {
         functionCallsTextArea.setText("-> " + getName() + "() called from Javascript." + LS + "-> Generating a Java runtime exception.");
         functionCallsTextArea.setCaretPosition(0);
         // This will generate an error

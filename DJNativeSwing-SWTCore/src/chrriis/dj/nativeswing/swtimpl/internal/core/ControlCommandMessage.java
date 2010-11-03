@@ -5,13 +5,15 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.dj.nativeswing.swtimpl;
+package chrriis.dj.nativeswing.swtimpl.internal.core;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.widgets.Control;
 
 import chrriis.common.ObjectRegistry;
+import chrriis.dj.nativeswing.swtimpl.CommandMessage;
+import chrriis.dj.nativeswing.swtimpl.NativeComponent;
 
 /**
  * A message that makes the link between a native component on the local side and its native peer control.
@@ -45,7 +47,7 @@ public abstract class ControlCommandMessage extends CommandMessage {
    * @param nativeComponent the native component.
    */
   public void setNativeComponent(NativeComponent nativeComponent) {
-    componentID = nativeComponent.getComponentID();
+    componentID = ((SWTNativeComponent)nativeComponent).getComponentID();
     setTargetNativeSide(true);
   }
 
@@ -71,7 +73,7 @@ public abstract class ControlCommandMessage extends CommandMessage {
    * @return the control, or null.
    */
   public Control getControl() {
-    ObjectRegistry controlRegistry = NativeComponent.getControlRegistry();
+    ObjectRegistry controlRegistry = SWTNativeComponent.getControlRegistry();
     return controlRegistry == null? null: (Control)controlRegistry.get(componentID);
   }
 
@@ -80,7 +82,7 @@ public abstract class ControlCommandMessage extends CommandMessage {
    * @return the native component, or null.
    */
   public NativeComponent getNativeComponent() {
-    ObjectRegistry nativeComponentRegistry = NativeComponent.getNativeComponentRegistry();
+    ObjectRegistry nativeComponentRegistry = SWTNativeComponent.getNativeComponentRegistry();
     return nativeComponentRegistry == null? null: (NativeComponent)nativeComponentRegistry.get(componentID);
   }
 
@@ -159,11 +161,12 @@ public abstract class ControlCommandMessage extends CommandMessage {
   }
 
   @Override
-  Object runCommand() throws Exception {
+  protected Object runCommand() throws Exception {
     try {
       return super.runCommand();
     } catch(RuntimeException e) {
-      if(NativeInterface.isInProcess() || NativeInterface.OutProcess.isNativeSide()) {
+      SWTNativeInterface nativeInterface = SWTNativeInterface.getInstance();
+      if(nativeInterface.isInProcess_() || nativeInterface.isOutProcessNativeSide_()) {
         for(Throwable ex=e; ex != null; ex = ex.getCause()) {
           if(ex instanceof SWTException && ((SWTException)ex).code == SWT.ERROR_WIDGET_DISPOSED) {
             throw new DisposedControlException(ex);
@@ -176,10 +179,11 @@ public abstract class ControlCommandMessage extends CommandMessage {
 
   @Override
   protected boolean isValid() {
-    if(NativeInterface.isInProcess()) {
+    SWTNativeInterface nativeInterface = SWTNativeInterface.getInstance();
+    if(nativeInterface.isInProcess_()) {
       return getControl() != null || getNativeComponent() != null;
     }
-    if(NativeInterface.OutProcess.isNativeSide()) {
+    if(nativeInterface.isOutProcessNativeSide_()) {
       return getControl() != null;
     }
     return getNativeComponent() != null;
