@@ -6,6 +6,12 @@
     <ant antfile="documentation/build.xml" inheritall="false"/>
     <ant antfile="../DJNativeSwing/build.xml" inheritall="false"/>
     <ant antfile="build.xml" inheritall="false"/>
+    <ant antfile="../DJNativeSwing-SWTCore/build.xml" inheritall="false"/>
+  	<copy file="../DJNativeSwing-SWTCore/DJNativeSwing-SWTCore.jar" tofile="DJNativeSwing-SWTCore.jar"/>
+    <delete file="DJNativeSwing-SWT.jar"/>
+    <jar duplicate="preserve" destfile="DJNativeSwing-SWT.jar">
+    	<zipgroupfileset dir="." includes="DJNativeSwing-SWTAPI.jar DJNativeSwing-SWTCore.jar"/>
+		</jar>
     <ant antfile="../DJNativeSwing-SWTDemo/build.xml" inheritall="false"/>
     <zip duplicate="preserve" destfile="Release/DJNativeSwing-SWT.zip">
       <!-- DJNativeSwing documents -->
