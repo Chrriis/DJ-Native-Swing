@@ -22,6 +22,7 @@
       <zipfileset dir="../DJNativeSwing-SWT" includes="DJNativeSwing.jar,DJNativeSwing-SWT.jar,DJNativeSwing-SWTDemo.jar"/>
       <zipfileset dir="../DJNativeSwing/lib" prefix="lib"/>
       <zipfileset dir="../DJNativeSwing-SWT/lib" prefix="lib"/>
+      <zipfileset dir="../DJNativeSwing-SWTCore/lib" prefix="lib"/>
       <!-- DJNativeSwingDemo sources -->
       <zipfileset dir="../DJNativeSwing-SWTDemo/src" prefix="src/DJNativeSwing-SWTDemo"/>
       <!-- DJNativeSwing sources -->

@@ -88,7 +88,6 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
    * Indicate whether the native interface is open.
    * @return true if the native interface is open, false otherwise.
    */
-  @Override
   public boolean isOpen_() {
     synchronized(OPEN_STATE_LOCK) {
       return isOpen;
@@ -104,7 +103,6 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
   /**
    * Close the native interface, which destroys the native side (peer VM). Note that the native interface can be re-opened later.
    */
-  @Override
   public void close_() {
     synchronized(OPEN_CLOSE_SYNC_LOCK) {
       if(!isOpen()) {
@@ -126,7 +124,6 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
   /**
    * Get the configuration, which allows to modify some parameters.
    */
-  @Override
   public NativeInterfaceConfiguration getConfiguration_() {
     if(nativeInterfaceConfiguration == null) {
       nativeInterfaceConfiguration = createConfiguration();
@@ -167,14 +164,12 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
    * Indicate whether the native interface is initialized.
    * @return true if the native interface is initialized, false otherwise.
    */
-  @Override
   public boolean isInitialized_() {
     return isInitialized;
   }
 
   private boolean isInProcess;
 
-  @Override
   public boolean isInProcess_() {
     synchronized(OPEN_STATE_LOCK) {
       return isInProcess;
@@ -199,7 +194,6 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
    * Initialize the native interface, but do not open it. This method sets some properties and registers a few listeners to keep track of certain states necessary for the good functioning of the framework.<br/>
    * This method is automatically called if open() is used. It should be called early in the program, the best place being as the first call in the main method.
    */
-  @Override
   public void initialize_() {
     synchronized(OPEN_CLOSE_SYNC_LOCK) {
       if(isInitialized()) {
@@ -248,7 +242,6 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
   /**
    * Print the stack traces to system err, including the ones from the peer VM when applicable.
    */
-  @Override
   public void printStackTraces_() {
     Utils.printStackTraces();
     printPeerStackTrace(System.err);
@@ -257,7 +250,6 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
   /**
    * Print the stack traces to a print stream, including the ones from the peer VM when applicable.
    */
-  @Override
   public void printStackTraces_(PrintStream printStream) {
     Utils.printStackTraces(printStream);
     printPeerStackTrace(printStream);
@@ -266,7 +258,6 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
   /**
    * Print the stack traces to a print writer, including the ones from the peer VM when applicable.
    */
-  @Override
   public void printStackTraces_(PrintWriter printWriter) {
     Utils.printStackTraces(printWriter);
     printPeerStackTrace(printWriter);
@@ -313,7 +304,6 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
    * Open the native interface, which creates the peer VM that handles the native side of the native integration.<br/>
    * Initialization takes place if the interface was not already initialized. If initialization was not explicitely performed, this method should be called early in the program, the best place being as the first call in the main method.
    */
-  @Override
   public void open_() {
     synchronized(OPEN_CLOSE_SYNC_LOCK) {
       if(isOpen()) {
@@ -368,7 +358,6 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
     }
   }
 
-  @Override
   public Object syncSend_(boolean isTargetNativeSide, final Message message) {
     checkOpen();
     if(message instanceof LocalMessage) {
@@ -378,7 +367,6 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
     return getMessagingInterface(!isTargetNativeSide).syncSend(message);
   }
 
-  @Override
   public void asyncSend_(boolean isTargetNativeSide, final Message message) {
     if(IS_SYNCING_MESSAGES) {
       syncSend_(isTargetNativeSide, message);
@@ -432,7 +420,6 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
     return display;
   }
 
-  @Override
   public boolean isOutProcessNativeSide_() {
     return OutProcess.isNativeSide();
   }
@@ -442,7 +429,6 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
    * @return true if the current thread is the user interface thread.
    * @throws IllegalStateException when the native interface is not alive.
    */
-  @Override
   public boolean isUIThread_(boolean isNativeSide) {
     if(!isAlive()) {
       throw new IllegalStateException("The native interface is not alive!");
@@ -469,7 +455,6 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
   /**
    * Run the native event pump. Certain platforms require this method call at the end of the main method to function properly, so it is suggested to always add it.
    */
-  @Override
   public void runEventPump_() {
     if(!isInitialized()) {
       throw new IllegalStateException("Cannot run the event pump when the interface is not initialized!");
@@ -531,7 +516,6 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
    * Add a native interface listener.
    * @param listener the native listener to add.
    */
-  @Override
   public void addNativeInterfaceListener_(NativeInterfaceListener listener) {
     listenerList.add(NativeInterfaceListener.class, listener);
   }
@@ -540,7 +524,6 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
    * Remove a native interface listener.
    * @param listener the native listener to remove.
    */
-  @Override
   public void removeNativeInterfaceListener_(NativeInterfaceListener listener) {
     listenerList.remove(NativeInterfaceListener.class, listener);
   }
@@ -549,7 +532,6 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
    * Get all the native interface listeners.
    * @return the native interface listeners.
    */
-  @Override
   public NativeInterfaceListener[] getNativeInterfaceListeners_() {
     return listenerList.getListeners(NativeInterfaceListener.class);
   }
@@ -1395,7 +1377,6 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
    * The main method that is called by the native side (peer VM).
    * @param args the arguments that are passed to the peer VM.
    */
-  @Override
   public void main_(String[] args) throws Exception {
     OutProcess.runNativeSide(args);
   }

@@ -4,8 +4,8 @@
   <target name="createJar" description="Create the Jar files">
     <delete file="DJNativeSwing.jar"/>
   	<copy file="../DJNativeSwing/DJNativeSwing.jar" tofile="DJNativeSwing.jar"/>
-    <delete file="DJNativeSwing-SWT.jar"/>
-    <jar duplicate="preserve" destfile="DJNativeSwing-SWT.jar">
+    <delete file="DJNativeSwing-SWTAPI.jar"/>
+    <jar duplicate="preserve" destfile="DJNativeSwing-SWTAPI.jar">
 	    <fileset dir="bin"/>
 		</jar>
   </target>
