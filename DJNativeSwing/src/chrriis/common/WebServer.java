@@ -238,6 +238,9 @@ public class WebServer {
       extensionToMimeTypeMap.put("mvb", "application/x-msmediaview");
       extensionToMimeTypeMap.put("nws", "message/rfc822");
       extensionToMimeTypeMap.put("oda", "application/oda");
+      extensionToMimeTypeMap.put("oga", "audio/ogg");
+      extensionToMimeTypeMap.put("ogg", "audio/ogg");
+      extensionToMimeTypeMap.put("ogv", "video/ogg");
       extensionToMimeTypeMap.put("p10", "application/pkcs10");
       extensionToMimeTypeMap.put("p12", "application/x-pkcs12");
       extensionToMimeTypeMap.put("p7b", "application/x-pkcs7-certificates");
