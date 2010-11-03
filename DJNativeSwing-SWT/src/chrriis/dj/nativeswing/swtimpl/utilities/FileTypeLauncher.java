@@ -11,7 +11,7 @@ import java.awt.Dimension;
 
 import javax.swing.ImageIcon;
 
-import chrriis.dj.nativeswing.swtimpl.internal.CoreClassFactory;
+import chrriis.dj.nativeswing.swtimpl.internal.NativeCoreObjectFactory;
 import chrriis.dj.nativeswing.swtimpl.utilities.internal.INativeFileTypeLauncher;
 import chrriis.dj.nativeswing.swtimpl.utilities.internal.INativeFileTypeLauncherStatic;
 
@@ -23,11 +23,11 @@ import chrriis.dj.nativeswing.swtimpl.utilities.internal.INativeFileTypeLauncher
  */
 public class FileTypeLauncher {
 
-  private static INativeFileTypeLauncherStatic fileTypeLauncherStatic = CoreClassFactory.create(INativeFileTypeLauncherStatic.class, "chrriis.dj.nativeswing.swtimpl.utilities.internal.core.NativeFileTypeLauncherStatic", new Class<?>[0], new Object[0]);
+  private static INativeFileTypeLauncherStatic fileTypeLauncherStatic = NativeCoreObjectFactory.create(INativeFileTypeLauncherStatic.class, "chrriis.dj.nativeswing.swtimpl.utilities.core.NativeFileTypeLauncherStatic", new Class<?>[0], new Object[0]);
   private INativeFileTypeLauncher fileTypeLauncher;
 
   public FileTypeLauncher() {
-    this(CoreClassFactory.create(INativeFileTypeLauncher.class, "chrriis.dj.nativeswing.swtimpl.utilities.internal.core.NativeFileTypeLauncher", new Class<?>[0], new Object[0]));
+    this(NativeCoreObjectFactory.create(INativeFileTypeLauncher.class, "chrriis.dj.nativeswing.swtimpl.utilities.core.NativeFileTypeLauncher", new Class<?>[0], new Object[0]));
   }
 
   FileTypeLauncher(INativeFileTypeLauncher fileTypeLauncher) {
@@ -97,7 +97,8 @@ public class FileTypeLauncher {
    * Get the launcher for a given file name, which may or may not represent an existing file. The name can also simply be the extension of a file (including the '.').
    */
   public static FileTypeLauncher getLauncher(String fileName) {
-    return new FileTypeLauncher(fileTypeLauncherStatic.getLauncher(fileName));
+    INativeFileTypeLauncher launcher = fileTypeLauncherStatic.getLauncher(fileName);
+    return launcher == null? null: new FileTypeLauncher(launcher);
   }
 
   /**

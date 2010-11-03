@@ -5,7 +5,7 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.dj.nativeswing.swtimpl.internal.core;
+package chrriis.dj.nativeswing.swtimpl.core;
 
 import java.awt.AWTEvent;
 import java.awt.Toolkit;
@@ -60,13 +60,13 @@ import chrriis.dj.nativeswing.swtimpl.NSSystemPropertySWT;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.NativeInterfaceConfiguration;
 import chrriis.dj.nativeswing.swtimpl.NativeInterfaceListener;
+import chrriis.dj.nativeswing.swtimpl.core.InProcessMessagingInterface.SWTInProcessMessagingInterface;
+import chrriis.dj.nativeswing.swtimpl.core.InProcessMessagingInterface.SwingInProcessMessagingInterface;
+import chrriis.dj.nativeswing.swtimpl.core.OutProcessIOMessagingInterface.SWTOutProcessIOMessagingInterface;
+import chrriis.dj.nativeswing.swtimpl.core.OutProcessIOMessagingInterface.SwingOutProcessIOMessagingInterface;
+import chrriis.dj.nativeswing.swtimpl.core.OutProcessSocketsMessagingInterface.SWTOutProcessSocketsMessagingInterface;
+import chrriis.dj.nativeswing.swtimpl.core.OutProcessSocketsMessagingInterface.SwingOutProcessSocketsMessagingInterface;
 import chrriis.dj.nativeswing.swtimpl.internal.ISWTNativeInterface;
-import chrriis.dj.nativeswing.swtimpl.internal.core.InProcessMessagingInterface.SWTInProcessMessagingInterface;
-import chrriis.dj.nativeswing.swtimpl.internal.core.InProcessMessagingInterface.SwingInProcessMessagingInterface;
-import chrriis.dj.nativeswing.swtimpl.internal.core.OutProcessIOMessagingInterface.SWTOutProcessIOMessagingInterface;
-import chrriis.dj.nativeswing.swtimpl.internal.core.OutProcessIOMessagingInterface.SwingOutProcessIOMessagingInterface;
-import chrriis.dj.nativeswing.swtimpl.internal.core.OutProcessSocketsMessagingInterface.SWTOutProcessSocketsMessagingInterface;
-import chrriis.dj.nativeswing.swtimpl.internal.core.OutProcessSocketsMessagingInterface.SwingOutProcessSocketsMessagingInterface;
 
 /**
  * The native interface, which establishes the link between the peer VM (native side) and the local side.

@@ -5,7 +5,7 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.dj.nativeswing.swtimpl.internal.core;
+package chrriis.dj.nativeswing.swtimpl.core;
 
 import java.awt.AWTEvent;
 import java.awt.Canvas;
@@ -89,7 +89,7 @@ import chrriis.dj.nativeswing.swtimpl.NativeComponent;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.NativeInterfaceAdapter;
 import chrriis.dj.nativeswing.swtimpl.NativeInterfaceListener;
-import chrriis.dj.nativeswing.swtimpl.internal.core.ControlCommandMessage.DisposedControlException;
+import chrriis.dj.nativeswing.swtimpl.core.ControlCommandMessage.DisposedControlException;
 
 import com.sun.jna.Native;
 

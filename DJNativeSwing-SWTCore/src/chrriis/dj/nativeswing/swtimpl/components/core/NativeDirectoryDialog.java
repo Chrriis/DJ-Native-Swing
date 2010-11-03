@@ -5,7 +5,7 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.dj.nativeswing.swtimpl.components.internal.core;
+package chrriis.dj.nativeswing.swtimpl.components.core;
 
 import java.awt.Component;
 import java.io.Serializable;
@@ -14,8 +14,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Control;
 
 import chrriis.dj.nativeswing.swtimpl.components.internal.INativeDirectoryDialog;
-import chrriis.dj.nativeswing.swtimpl.internal.core.ControlCommandMessage;
-import chrriis.dj.nativeswing.swtimpl.internal.core.NativeModalDialogHandler;
+import chrriis.dj.nativeswing.swtimpl.core.ControlCommandMessage;
+import chrriis.dj.nativeswing.swtimpl.core.NativeModalDialogHandler;
 
 /**
  * @author Christopher Deckers
@@ -53,7 +53,6 @@ class NativeDirectoryDialog implements INativeDirectoryDialog {
     }
   }
 
-  @Override
   public void show(Component component) {
     new NativeModalDialogHandler() {
       @Override

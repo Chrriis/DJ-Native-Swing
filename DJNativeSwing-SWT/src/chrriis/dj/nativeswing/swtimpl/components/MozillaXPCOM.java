@@ -15,7 +15,7 @@ import org.mozilla.xpcom.XPCOMInitializationException;
 
 import chrriis.dj.nativeswing.swtimpl.CommandMessage;
 import chrriis.dj.nativeswing.swtimpl.components.internal.INativeMozillaXPCOM;
-import chrriis.dj.nativeswing.swtimpl.internal.CoreClassFactory;
+import chrriis.dj.nativeswing.swtimpl.internal.NativeCoreObjectFactory;
 
 /**
  * This class is meant to allow accessing the JavaXPCOM nsIWebBrowser interface, and other Mozilla XPCOM interfaces.
@@ -23,7 +23,7 @@ import chrriis.dj.nativeswing.swtimpl.internal.CoreClassFactory;
  */
 public class MozillaXPCOM {
 
-  private static INativeMozillaXPCOM nativeMozillaXPCOM = CoreClassFactory.create(INativeMozillaXPCOM.class, "chrriis.dj.nativeswing.swtimpl.components.internal.core.NativeMozillaXPCOM", new Class<?>[0], new Object[0]);
+  private static INativeMozillaXPCOM nativeMozillaXPCOM = NativeCoreObjectFactory.create(INativeMozillaXPCOM.class, "chrriis.dj.nativeswing.swtimpl.components.core.NativeMozillaXPCOM", new Class<?>[0], new Object[0]);
 
   /**
    * A class that gives access to the functionalities of <code>org.mozilla.xpcom.Mozilla</code>.

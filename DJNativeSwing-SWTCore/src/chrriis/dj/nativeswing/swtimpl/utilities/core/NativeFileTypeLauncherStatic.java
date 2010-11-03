@@ -5,7 +5,7 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.dj.nativeswing.swtimpl.utilities.internal.core;
+package chrriis.dj.nativeswing.swtimpl.utilities.core;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -27,7 +27,7 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.program.Program;
 
 import chrriis.dj.nativeswing.swtimpl.CommandMessage;
-import chrriis.dj.nativeswing.swtimpl.internal.core.SWTUtils;
+import chrriis.dj.nativeswing.swtimpl.core.SWTUtils;
 import chrriis.dj.nativeswing.swtimpl.utilities.internal.INativeFileTypeLauncher;
 import chrriis.dj.nativeswing.swtimpl.utilities.internal.INativeFileTypeLauncherStatic;
 

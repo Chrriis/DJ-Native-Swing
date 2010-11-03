@@ -29,6 +29,7 @@
       <zipfileset dir="../DJNativeSwing/src" prefix="src/DJNativeSwing"/>
       <zipfileset dir="../DJNativeSwing-SWT/src" prefix="src/DJNativeSwing-SWT"/>
       <zipfileset dir="../DJNativeSwing-SWT/win32" prefix="src/DJNativeSwing-SWT"/>
+      <zipfileset dir="../DJNativeSwing-SWTCore/src" prefix="src/DJNativeSwing-SWTCore"/>
       <!-- DJNativeSwing documentation -->
       <zipfileset dir="documentation/javadoc" prefix="api"/>
     </zip>

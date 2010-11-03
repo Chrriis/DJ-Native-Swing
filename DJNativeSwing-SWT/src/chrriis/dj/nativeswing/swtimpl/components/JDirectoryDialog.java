@@ -10,7 +10,7 @@ package chrriis.dj.nativeswing.swtimpl.components;
 import java.awt.Component;
 
 import chrriis.dj.nativeswing.swtimpl.components.internal.INativeDirectoryDialog;
-import chrriis.dj.nativeswing.swtimpl.internal.CoreClassFactory;
+import chrriis.dj.nativeswing.swtimpl.internal.NativeCoreObjectFactory;
 
 /**
  * A native directory selection dialog.
@@ -18,7 +18,7 @@ import chrriis.dj.nativeswing.swtimpl.internal.CoreClassFactory;
  */
 public class JDirectoryDialog {
 
-  private INativeDirectoryDialog nativeDirectoryDialog = CoreClassFactory.create(INativeDirectoryDialog.class, "chrriis.dj.nativeswing.swtimpl.components.internal.core.NativeDirectoryDialog", new Class<?>[0], new Object[0]);
+  private INativeDirectoryDialog nativeDirectoryDialog = NativeCoreObjectFactory.create(INativeDirectoryDialog.class, "chrriis.dj.nativeswing.swtimpl.components.core.NativeDirectoryDialog", new Class<?>[0], new Object[0]);
 
   /**
    * Show the directory selection dialog, which is a blocking call until the user has made a choice.

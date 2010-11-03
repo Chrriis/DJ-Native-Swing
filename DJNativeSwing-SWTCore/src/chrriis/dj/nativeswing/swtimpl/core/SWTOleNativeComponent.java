@@ -5,7 +5,7 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.dj.nativeswing.swtimpl.internal.core;
+package chrriis.dj.nativeswing.swtimpl.core;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;

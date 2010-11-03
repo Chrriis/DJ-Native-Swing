@@ -10,8 +10,8 @@ package chrriis.dj.nativeswing.swtimpl;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
-import chrriis.dj.nativeswing.swtimpl.internal.CoreClassFactory;
 import chrriis.dj.nativeswing.swtimpl.internal.ISWTNativeInterface;
+import chrriis.dj.nativeswing.swtimpl.internal.NativeCoreObjectFactory;
 
 /**
  * The native interface, which establishes the link between the peer VM (native side) and the local side.
@@ -19,7 +19,7 @@ import chrriis.dj.nativeswing.swtimpl.internal.ISWTNativeInterface;
  */
 public abstract class NativeInterface {
 
-  private static ISWTNativeInterface swtNativeInterface = CoreClassFactory.create(ISWTNativeInterface.class, "chrriis.dj.nativeswing.swtimpl.internal.core.SWTNativeInterface", new Class<?>[0], new Object[0]);
+  private static ISWTNativeInterface swtNativeInterface = NativeCoreObjectFactory.create(ISWTNativeInterface.class, "chrriis.dj.nativeswing.swtimpl.core.SWTNativeInterface", new Class<?>[0], new Object[0]);
 
   protected static NativeInterface getInstance() {
     return (NativeInterface)swtNativeInterface;

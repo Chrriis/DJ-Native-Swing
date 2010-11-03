@@ -5,7 +5,7 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.dj.nativeswing.swtimpl.components.win32.internal.core;
+package chrriis.dj.nativeswing.swtimpl.components.win32.core;
 
 import java.awt.Component;
 import java.util.Map;
@@ -19,7 +19,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import chrriis.dj.nativeswing.swtimpl.components.win32.internal.INativeWMediaPlayer;
-import chrriis.dj.nativeswing.swtimpl.internal.core.SWTOleNativeComponent;
+import chrriis.dj.nativeswing.swtimpl.core.SWTOleNativeComponent;
 
 /**
  * @author Christopher Deckers

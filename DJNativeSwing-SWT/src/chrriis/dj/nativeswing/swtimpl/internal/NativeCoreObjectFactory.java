@@ -12,23 +12,23 @@ import java.lang.reflect.Constructor;
 /**
  * @author Christopher Deckers
  */
-public class CoreClassFactory {
+public class NativeCoreObjectFactory {
 
-  private static CoreClassFactory classFactory;
+  private static NativeCoreObjectFactory factory;
 
-  public static void setDefaultClassFactory(CoreClassFactory classFactory) {
-    synchronized(CoreClassFactory.class) {
-      CoreClassFactory.classFactory = classFactory;
+  public static void setDefaultFactory(NativeCoreObjectFactory factory) {
+    synchronized(NativeCoreObjectFactory.class) {
+      NativeCoreObjectFactory.factory = factory;
     }
   }
 
   public static <T> T create(Class<T> clazz, String className, Class<?>[] types, Object[] args) {
     ClassLoader classLoader;
-    synchronized(CoreClassFactory.class) {
-      classLoader = classFactory != null? classFactory.classLoader: null;
+    synchronized(NativeCoreObjectFactory.class) {
+      classLoader = factory != null? factory.classLoader: null;
     }
     if(classLoader == null) {
-      classLoader = CoreClassFactory.class.getClassLoader();
+      classLoader = NativeCoreObjectFactory.class.getClassLoader();
     }
     try {
       @SuppressWarnings("unchecked")
@@ -45,7 +45,7 @@ public class CoreClassFactory {
 
   private ClassLoader classLoader;
 
-  public CoreClassFactory(ClassLoader classLoader) {
+  public NativeCoreObjectFactory(ClassLoader classLoader) {
     this.classLoader = classLoader;
   }
 

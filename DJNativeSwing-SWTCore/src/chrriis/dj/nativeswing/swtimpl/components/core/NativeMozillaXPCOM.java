@@ -5,7 +5,7 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.dj.nativeswing.swtimpl.components.internal.core;
+package chrriis.dj.nativeswing.swtimpl.components.core;
 
 import java.io.File;
 import java.io.Serializable;
@@ -30,7 +30,7 @@ import chrriis.dj.nativeswing.swtimpl.NSSystemPropertySWT;
 import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
 import chrriis.dj.nativeswing.swtimpl.components.MozillaXPCOM;
 import chrriis.dj.nativeswing.swtimpl.components.internal.INativeMozillaXPCOM;
-import chrriis.dj.nativeswing.swtimpl.internal.core.ControlCommandMessage;
+import chrriis.dj.nativeswing.swtimpl.core.ControlCommandMessage;
 
 /**
  * @author Christopher Deckers

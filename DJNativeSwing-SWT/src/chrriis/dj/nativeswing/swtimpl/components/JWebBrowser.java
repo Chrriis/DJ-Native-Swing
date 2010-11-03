@@ -26,7 +26,7 @@ import chrriis.dj.nativeswing.swtimpl.NSPanelComponent;
 import chrriis.dj.nativeswing.swtimpl.NativeComponent;
 import chrriis.dj.nativeswing.swtimpl.components.internal.INativeWebBrowser;
 import chrriis.dj.nativeswing.swtimpl.components.internal.INativeWebBrowserStatic;
-import chrriis.dj.nativeswing.swtimpl.internal.CoreClassFactory;
+import chrriis.dj.nativeswing.swtimpl.internal.NativeCoreObjectFactory;
 
 /**
  * A native web browser, using Internet Explorer or Mozilla on Windows, and Mozilla on other platforms.<br/>
@@ -112,7 +112,7 @@ public class JWebBrowser extends NSPanelComponent {
     return new DefaultWebBrowserDecorator(this, renderingComponent);
   }
 
-  private static INativeWebBrowserStatic webBrowserStatic = CoreClassFactory.create(INativeWebBrowserStatic.class, "chrriis.dj.nativeswing.swtimpl.components.internal.core.NativeWebBrowserStatic", new Class<?>[0], new Object[0]);
+  private static INativeWebBrowserStatic webBrowserStatic = NativeCoreObjectFactory.create(INativeWebBrowserStatic.class, "chrriis.dj.nativeswing.swtimpl.components.core.NativeWebBrowserStatic", new Class<?>[0], new Object[0]);
 
   /**
    * Clear all session cookies from all web browser instances.
@@ -182,7 +182,7 @@ public class JWebBrowser extends NSPanelComponent {
     } else if(optionMap.get(USE_WEBKIT_RUNTIME_OPTION_KEY) != null) {
       runtime = INativeWebBrowser.WebBrowserRuntime.WEBKIT;
     }
-    nativeWebBrowser = CoreClassFactory.create(INativeWebBrowser.class, "chrriis.dj.nativeswing.swtimpl.components.internal.core.NativeWebBrowser", new Class<?>[] {JWebBrowser.class, INativeWebBrowser.WebBrowserRuntime.class}, new Object[] {this, runtime});
+    nativeWebBrowser = NativeCoreObjectFactory.create(INativeWebBrowser.class, "chrriis.dj.nativeswing.swtimpl.components.core.NativeWebBrowser", new Class<?>[] {JWebBrowser.class, INativeWebBrowser.WebBrowserRuntime.class}, new Object[] {this, runtime});
     initialize((NativeComponent)nativeWebBrowser);
     webBrowserDecorator = createWebBrowserDecorator(nativeWebBrowser.createEmbeddableComponent(optionMap));
     add(webBrowserDecorator, BorderLayout.CENTER);

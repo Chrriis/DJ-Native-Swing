@@ -5,7 +5,7 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.dj.nativeswing.swtimpl.components.internal.core;
+package chrriis.dj.nativeswing.swtimpl.components.core;
 
 import java.awt.Component;
 import java.io.Serializable;
@@ -16,8 +16,8 @@ import org.eclipse.swt.widgets.Control;
 import chrriis.dj.nativeswing.swtimpl.components.JFileDialog.DialogType;
 import chrriis.dj.nativeswing.swtimpl.components.JFileDialog.SelectionMode;
 import chrriis.dj.nativeswing.swtimpl.components.internal.INativeFileDialog;
-import chrriis.dj.nativeswing.swtimpl.internal.core.ControlCommandMessage;
-import chrriis.dj.nativeswing.swtimpl.internal.core.NativeModalDialogHandler;
+import chrriis.dj.nativeswing.swtimpl.core.ControlCommandMessage;
+import chrriis.dj.nativeswing.swtimpl.core.NativeModalDialogHandler;
 
 /**
  * A native file selection dialog.

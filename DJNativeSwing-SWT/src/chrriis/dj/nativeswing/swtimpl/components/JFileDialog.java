@@ -10,7 +10,7 @@ package chrriis.dj.nativeswing.swtimpl.components;
 import java.awt.Component;
 
 import chrriis.dj.nativeswing.swtimpl.components.internal.INativeFileDialog;
-import chrriis.dj.nativeswing.swtimpl.internal.CoreClassFactory;
+import chrriis.dj.nativeswing.swtimpl.internal.NativeCoreObjectFactory;
 
 /**
  * A native file selection dialog.
@@ -18,7 +18,7 @@ import chrriis.dj.nativeswing.swtimpl.internal.CoreClassFactory;
  */
 public class JFileDialog {
 
-  private INativeFileDialog nativeFileDialog = CoreClassFactory.create(INativeFileDialog.class, "chrriis.dj.nativeswing.swtimpl.components.internal.core.NativeFileDialog", new Class<?>[0], new Object[0]);
+  private INativeFileDialog nativeFileDialog = NativeCoreObjectFactory.create(INativeFileDialog.class, "chrriis.dj.nativeswing.swtimpl.components.core.NativeFileDialog", new Class<?>[0], new Object[0]);
 
   /**
    * Show the file selection dialog, which is a blocking call until the user has made a choice.
