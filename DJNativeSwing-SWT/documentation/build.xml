@@ -19,6 +19,10 @@
         <include name="chrriis/**"/>
         <exclude name="chrriis/**/internal"/>
       </packageset>
+      <packageset dir="netbeans">
+        <include name="chrriis/**"/>
+        <exclude name="chrriis/**/internal"/>
+      </packageset>
       <link offline="true" href="http://java.sun.com/javase/6/docs/api/" packagelistloc="documentation/javadoc-package-lists/jdk"/>
       <link offline="true" href="http://help.eclipse.org/stable/nftopic/org.eclipse.platform.doc.isv/reference/api/" packagelistloc="documentation/javadoc-package-lists/swt"/>
     </javadoc>

@@ -1,4 +1,13 @@
-Instructions to use DJ NativeSwing in NetBeans.
+Instructions to use DJ NativeSwing as modules in NetBeans.
+
+
+The general idea is to replace DJNativeSwing-SWT.jar by its split version:
+  - DJNativeSwing-SWTAPI.jar
+  - DJNativeSwing-SWTCore.jar
+Copies of the Core JAR can be linked to each SWT port in different modules, while the API JAR exposes the NativeSwing API and is able to locate the right Core module to use.
+
+
+Here are the steps to follow:
 
 
 1. Create main application
