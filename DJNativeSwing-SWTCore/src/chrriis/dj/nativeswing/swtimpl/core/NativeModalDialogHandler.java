@@ -122,7 +122,13 @@ public abstract class NativeModalDialogHandler {
     }
     // We send an artificial event to clear the default lightweight target for mouse events.
     // Without this code, if a mouse down closes the native dialog, then the corresponding mouse up is retargeted to the previous lightweight target.
-    window.dispatchEvent(new MouseEvent(window, MouseEvent.MOUSE_MOVED, System.currentTimeMillis(), 0, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, 0, false, 0));
+    MouseEvent mouseEvent;
+    if(Utils.IS_JAVA_6_OR_GREATER) {
+      mouseEvent = new MouseEvent(window, MouseEvent.MOUSE_MOVED, System.currentTimeMillis(), 0, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, 0, false, 0);
+    } else {
+      mouseEvent = new MouseEvent(window, MouseEvent.MOUSE_MOVED, System.currentTimeMillis(), 0, Integer.MIN_VALUE, Integer.MIN_VALUE, 0, false, 0);
+    }
+    window.dispatchEvent(mouseEvent);
     dialog.addWindowListener(new WindowAdapter() {
       @Override
       public void windowOpened(WindowEvent e) {
