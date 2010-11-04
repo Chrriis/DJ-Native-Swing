@@ -15,6 +15,7 @@ import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.internal.NativeCoreObjectFactory;
 
 /**
+ * A special helper that allows Native Swing to work as a NetBeans module.<br/>
  * @author Christopher Deckers
  */
 public class NativeInterfaceNetBeansHandler {

@@ -1,3 +1,10 @@
+/*
+ * Christopher Deckers (chrriis@nextencia.net)
+ * http://www.nextencia.net
+ *
+ * See the file "readme.txt" for information on usage and redistribution of
+ * this file, and for a DISCLAIMER OF ALL WARRANTIES.
+ */
 package chrriis.dj.nativeswing.swtimpl.netbeans;
 
 import java.util.ArrayList;
@@ -21,23 +28,23 @@ import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 
 /**
-* Der ModuleHandler ist eine Hilfsklasse zum programatischen (de)aktivieren
-* von Modulen und der Analyse von installierten aktiven Modulen.
-* @author rittner
-*/
+ * A helper class that allows activating/deactivating NetBeans modules programmatically.
+ * @author Aljoscha Rittner
+ * @author Christopher Deckers
+ */
 class ModuleHandler {
 
-  private boolean restart = false;
+  private boolean isRestart = false;
   private OperationContainer<OperationSupport> oc;
   private Restarter restarter;
-  private final boolean directMode;
+  private final boolean isDirectMode;
 
   public ModuleHandler() {
     this (false);
   }
 
-  public ModuleHandler(boolean directMode) {
-    this.directMode = directMode;
+  public ModuleHandler(boolean isDirectMode) {
+    this.isDirectMode = isDirectMode;
   }
 
   public List<String> getModules(String startFilter, boolean includeDisabled) {
@@ -54,16 +61,8 @@ class ModuleHandler {
     return activatedModules;
   }
 
-  /**
-   * F�hrt einen Neustart der Anwendung durch, wenn der vorherige setModulesState
-   * ein Flag daf�r gesetzt hat. mit force, kann der Restart erzwungen werden.
-   * <p>
-   * Man sollte nicht davon ausgehen, dass nach dem Aufruf der Methode
-   * zur�ckgekehrt wird.
-   * @param force
-   */
-  public void doRestart(boolean force) {
-    if (force || restart) {
+  public void doRestart(boolean isForced) {
+    if (isForced || isRestart) {
       if (oc != null && restarter != null) {
         try {
           oc.getSupport().doRestart(restarter, null);
@@ -78,19 +77,19 @@ class ModuleHandler {
   }
 
   /**
-   * Aktiviert oder deaktivert die Liste der Module
-   * @param enable
-   * @param codeNames
-   * @return true, wenn ein Neustart zwingend erforderlich ist
+   * Activate/deactivate a list of modules
+   * @param codeNames The names of the modules.
+   * @param isEnabled True to enable the modules, false otherwise.
+   * @return true if a restart is mandatory.
    */
-  public boolean setModulesState (boolean enable, Set<String> codeNames) {
+  public boolean setModulesState(Set<String> codeNames, boolean isEnabled) {
     boolean restartFlag;
-    if (enable) {
+    if (isEnabled) {
       restartFlag = setModulesEnabled(codeNames);
     } else {
       restartFlag = setModulesDisabled(codeNames);
     }
-    return restart = restart || restartFlag;
+    return isRestart = isRestart || restartFlag;
   }
 
   private boolean setModulesDisabled(Set<String> codeNames) {
@@ -108,7 +107,7 @@ class ModuleHandler {
       }
     }
     if (!toDisable.isEmpty()) {
-      oc = directMode ? OperationContainer.createForDirectDisable() : OperationContainer.createForDisable();
+      oc = isDirectMode ? OperationContainer.createForDirectDisable() : OperationContainer.createForDisable();
       for (UpdateElement module : toDisable) {
         if (oc.canBeAdded(module.getUpdateUnit(), module)) {
           OperationInfo<OperationSupport> operationInfo = oc.add(module);

@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import chrriis.common.WebServer;
 
 /**
- * This is a special helper that allows Native Swing to work in a JApplet.<br/>
+ * A special helper that allows Native Swing to work in a JApplet.<br/>
  * <br/>
  * Here is how to use it:<br/>
  * <br/>

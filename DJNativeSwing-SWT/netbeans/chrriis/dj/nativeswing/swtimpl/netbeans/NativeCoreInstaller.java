@@ -1,3 +1,10 @@
+/*
+ * Christopher Deckers (chrriis@nextencia.net)
+ * http://www.nextencia.net
+ *
+ * See the file "readme.txt" for information on usage and redistribution of
+ * this file, and for a DISCLAIMER OF ALL WARRANTIES.
+ */
 package chrriis.dj.nativeswing.swtimpl.netbeans;
 
 import java.util.Collections;
@@ -10,6 +17,10 @@ import org.openide.modules.ModuleInstall;
 
 import chrriis.common.Utils;
 
+/**
+ * The NetBeans integration object responsible for the activation of the appropriate platform core module.
+ * @author Christopher Deckers
+ */
 public class NativeCoreInstaller extends ModuleInstall {
 
   @Override
@@ -45,9 +56,9 @@ public class NativeCoreInstaller extends ModuleInstall {
       toDisable.remove(toEnable);
     }
     ModuleHandler disablerModuleHandler = new ModuleHandler(true);
-    disablerModuleHandler.setModulesState(false, toDisable);
+    disablerModuleHandler.setModulesState(toDisable, false);
     ModuleHandler enablerModuleHandler = new ModuleHandler(true);
-    enablerModuleHandler.setModulesState(true, Collections.singleton(toEnable));
+    enablerModuleHandler.setModulesState(Collections.singleton(toEnable), true);
   }
 
 }
