@@ -10,6 +10,7 @@ package chrriis.dj.nativeswing.swtimpl;
 import java.applet.Applet;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import chrriis.common.WebServer;
 
@@ -60,17 +61,36 @@ public class NativeInterfaceAppletHandler {
 
   public static void activateAppletMode() {
     System.setProperty("nativeswing.deployment.type", "applet");
-    NativeInterface.initialize();
     if(NativeInterface.isInProcess()) {
-      Thread eventPumpThread = new Thread("NativeSwing event pump thread") {
-        @Override
-        public void run() {
-          // This is the Mac case, which uses the executor.
-          NativeInterface.runEventPump();
+      final AtomicBoolean isInitialized = new AtomicBoolean(false);
+      synchronized(isInitialized) {
+        Thread eventPumpThread = new Thread("NativeSwing event pump thread") {
+          @Override
+          public void run() {
+            try {
+              NativeInterface.initialize();
+            } finally {
+              isInitialized.set(true);
+              synchronized (isInitialized) {
+                isInitialized.notify();
+              }
+            }
+            if(!NativeInterface.isEventPumpRunning()) {
+              NativeInterface.runEventPump();
+            }
+          }
+        };
+        eventPumpThread.setDaemon(true);
+        eventPumpThread.start();
+        while(!isInitialized.get()) {
+          try {
+            isInitialized.wait();
+          } catch (InterruptedException e) {
+          }
         }
-      };
-      eventPumpThread.setDaemon(true);
-      eventPumpThread.start();
+      }
+    } else {
+      NativeInterface.initialize();
     }
   }
 

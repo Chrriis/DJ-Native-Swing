@@ -55,7 +55,7 @@ public abstract class NativeInterface {
     return swtNativeInterface.isInitialized_();
   }
 
-  static boolean isInProcess() {
+  public static boolean isInProcess() {
     return swtNativeInterface.isInProcess_();
   }
 

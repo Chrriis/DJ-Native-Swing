@@ -7,9 +7,10 @@
  */
 package chrriis.dj.nativeswing.swtimpl.netbeans;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.openide.util.Lookup;
 
-import chrriis.common.Utils;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.internal.NativeCoreObjectFactory;
 
@@ -23,19 +24,36 @@ public class NativeInterfaceNetBeansHandler {
   public static void initialize() {
     NativeCoreAPIProvider apiProvider = Lookup.getDefault().lookup(NativeCoreAPIProvider.class);
     NativeCoreObjectFactory.setDefaultFactory(apiProvider.getObjectFactory());
-    NativeInterface.initialize();
-    if(Utils.IS_MAC) {
-      Thread eventPumpThread = new Thread("NativeSwing event pump thread") {
-        @Override
-        public void run() {
-          if(!NativeInterface.isEventPumpRunning()) {
-            // This is the Mac case, which uses the executor.
-            NativeInterface.runEventPump();
+    if(NativeInterface.isInProcess()) {
+      final AtomicBoolean isInitialized = new AtomicBoolean(false);
+      synchronized(isInitialized) {
+        Thread eventPumpThread = new Thread("NativeSwing event pump thread") {
+          @Override
+          public void run() {
+            try {
+              NativeInterface.initialize();
+            } finally {
+              isInitialized.set(true);
+              synchronized (isInitialized) {
+                isInitialized.notify();
+              }
+            }
+            if(!NativeInterface.isEventPumpRunning()) {
+              NativeInterface.runEventPump();
+            }
+          }
+        };
+        eventPumpThread.setDaemon(true);
+        eventPumpThread.start();
+        while(!isInitialized.get()) {
+          try {
+            isInitialized.wait();
+          } catch (InterruptedException e) {
           }
         }
-      };
-      eventPumpThread.setDaemon(true);
-      eventPumpThread.start();
+      }
+    } else {
+      NativeInterface.initialize();
     }
   }
 
