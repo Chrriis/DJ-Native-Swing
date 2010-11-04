@@ -1,4 +1,4 @@
-package utils;
+package chrriis.dj.nativeswing.swtimpl.netbeans;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.netbeans.api.autoupdate.OperationContainer;
 import org.netbeans.api.autoupdate.OperationContainer.OperationInfo;
 import org.netbeans.api.autoupdate.OperationException;
@@ -24,17 +25,17 @@ import org.openide.util.Lookup;
 * von Modulen und der Analyse von installierten aktiven Modulen.
 * @author rittner
 */
-public class ModuleHandler {
+class ModuleHandler {
 
   private boolean restart = false;
   private OperationContainer<OperationSupport> oc;
   private Restarter restarter;
   private final boolean directMode;
 
-
   public ModuleHandler() {
     this (false);
   }
+
   public ModuleHandler(boolean directMode) {
     this.directMode = directMode;
   }
@@ -52,7 +53,6 @@ public class ModuleHandler {
     Collections.sort(activatedModules);
     return activatedModules;
   }
-
 
   /**
    * F�hrt einen Neustart der Anwendung durch, wenn der vorherige setModulesState
@@ -96,7 +96,7 @@ public class ModuleHandler {
   private boolean setModulesDisabled(Set<String> codeNames) {
     Collection<UpdateElement> toDisable = new HashSet<UpdateElement>();
     List<UpdateUnit> allUpdateUnits =
-            UpdateManager.getDefault().getUpdateUnits(UpdateManager.TYPE.MODULE);
+      UpdateManager.getDefault().getUpdateUnits(UpdateManager.TYPE.MODULE);
     for (UpdateUnit unit : allUpdateUnits) {
       if (unit.getInstalled() != null) {
         UpdateElement el = unit.getInstalled();
@@ -107,25 +107,20 @@ public class ModuleHandler {
         }
       }
     }
-
-
     if (!toDisable.isEmpty()) {
       oc = directMode ? OperationContainer.createForDirectDisable() : OperationContainer.createForDisable();
       for (UpdateElement module : toDisable) {
         if (oc.canBeAdded(module.getUpdateUnit(), module)) {
-          OperationInfo operationInfo = oc.add(module);
+          OperationInfo<OperationSupport> operationInfo = oc.add(module);
           if (operationInfo == null) {
             continue;
           }
           // get all module depending on this module
-          @SuppressWarnings("unchecked")
-          Set<UpdateElement> requiredElements = (Set<UpdateElement>)operationInfo.getRequiredElements();
+          Set<UpdateElement> requiredElements = operationInfo.getRequiredElements();
           // add all of them between modules for disable
           oc.add(requiredElements);
         }
       }
-
-
       try {
         // get operation support for complete the disable operation
         OperationSupport support = oc.getSupport();
@@ -138,13 +133,11 @@ public class ModuleHandler {
       }
     }
     return restarter != null;
-
   }
 
   private boolean setModulesEnabled(Set<String> codeNames) {
     Collection<UpdateElement> toEnable = new HashSet<UpdateElement>();
-    List<UpdateUnit> allUpdateUnits =
-            UpdateManager.getDefault().getUpdateUnits(UpdateManager.TYPE.MODULE);
+    List<UpdateUnit> allUpdateUnits = UpdateManager.getDefault().getUpdateUnits(UpdateManager.TYPE.MODULE);
     for (UpdateUnit unit : allUpdateUnits) {
       if (unit.getInstalled() != null) {
         UpdateElement el = unit.getInstalled();
@@ -155,25 +148,20 @@ public class ModuleHandler {
         }
       }
     }
-
-
     if (!toEnable.isEmpty()) {
       oc = OperationContainer.createForEnable();
       for (UpdateElement module : toEnable) {
         if (oc.canBeAdded(module.getUpdateUnit(), module)) {
-          OperationInfo operationInfo = oc.add(module);
+          OperationInfo<OperationSupport> operationInfo = oc.add(module);
           if (operationInfo == null) {
             continue;
           }
           // get all module depending on this module
-          @SuppressWarnings("unchecked")
-          Set<UpdateElement> requiredElements = (Set<UpdateElement>)operationInfo.getRequiredElements();
+          Set<UpdateElement> requiredElements = operationInfo.getRequiredElements();
           // add all of them between modules for disable
           oc.add(requiredElements);
         }
       }
-
-
       try {
         // get operation support for complete the enable operation
         OperationSupport support = oc.getSupport();
@@ -186,7 +174,6 @@ public class ModuleHandler {
       }
     }
     return false;
-
   }
 
 }

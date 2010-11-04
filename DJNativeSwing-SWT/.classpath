@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="win32"/>
+	<classpathentry kind="src" path="netbeans"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/DJNativeSwing"/>
 	<classpathentry kind="lib" path="lib/fckeditor/FCKeditor_2.6.3.zip"/>
@@ -10,5 +11,10 @@
 	<classpathentry kind="lib" path="lib/tinymce/TinyMCE_3.3.zip"/>
 	<classpathentry kind="lib" path="lib/syntaxhighlighter/SyntaxHighlighter_1.5.1.zip"/>
 	<classpathentry kind="lib" path="lib/ckeditor/ckeditor_3.0.1.zip"/>
+	<classpathentry kind="lib" path="lib_dev/netbeans/org-openide-util-lookup.jar"/>
+	<classpathentry kind="lib" path="lib_dev/netbeans/org-openide-modules.jar"/>
+	<classpathentry kind="lib" path="lib_dev/netbeans/org-openide-util.jar"/>
+	<classpathentry kind="lib" path="lib_dev/netbeans/org-netbeans-modules-autoupdate-services.jar"/>
+	<classpathentry kind="lib" path="lib_dev/netbeans/org-netbeans-api-progress.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -34,7 +34,7 @@
       <zipfileset dir="documentation/javadoc" prefix="api"/>
       <!-- NetBeans splitted JARs -->
       <zipfileset dir="." includes="DJNativeSwing-SWTAPI.jar,DJNativeSwing-SWTCore.jar" prefix="netbeans"/>
-      <zipfileset dir="Release/NetBeans" prefix="netbeans"/>
+      <zipfileset dir="Release" includes="NetBeans.txt" prefix="netbeans"/>
     </zip>
   </target>
 
