@@ -43,10 +43,16 @@ public class Utils {
   public static final boolean IS_MAC;
   public static final boolean IS_WINDOWS;
 
+  public static final boolean IS_32_BIT;
+  public static final boolean IS_64_BIT;
+
   static {
     String os = SystemProperty.OS_NAME.get();
     IS_MAC = os.startsWith("Mac") || os.startsWith("Darwin");
     IS_WINDOWS = os.startsWith("Windows");
+    String arch = SystemProperty.OS_ARCH.get();
+    IS_64_BIT = "x86_64".equals(arch) || "x64".equals(arch) || "amd64".equals(arch) || "ia64".equals(arch) || "ppc64".equals(arch) || "IA64N".equals(arch);
+    IS_32_BIT = !IS_64_BIT;
   }
 
   public static final boolean IS_WINDOWS_VISTA_OR_GREATER = IS_WINDOWS && SystemProperty.OS_VERSION.get().compareTo("6.0") >= 0;

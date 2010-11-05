@@ -32,8 +32,8 @@ public class NativeCoreInstaller extends ModuleInstall {
     modelMap.put("Linux.64", "chrriis.dj.nativeswing.swtcore.gtk.linux.x86_64");
     modelMap.put("Mac.32", "chrriis.dj.nativeswing.swtcore.cocoa.macosx.x86");
     modelMap.put("Mac.64", "chrriis.dj.nativeswing.swtcore.cocoa.macosx.x86_64");
-    String osArch = System.getProperty("os.arch");
-    if ("amd64".equals(osArch)) {
+    String osArch;
+    if (Utils.IS_64_BIT) {
       osArch = "64";
     } else {
       osArch = "32";
