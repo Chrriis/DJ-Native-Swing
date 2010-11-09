@@ -119,7 +119,7 @@ public class Utils {
       return null;
     }
     if(path.startsWith("file:")) {
-      File file = new File(path.substring("file:".length()));
+      File file = new File(Utils.decodeURL(path.substring("file:".length())));
       if(file.exists()) {
         return simplifyLocalFile(file);
       }
