@@ -516,8 +516,6 @@ public class WebServer {
       }
     }
 
-    private static final boolean DEBUG_PRINT_REQUESTS = Boolean.parseBoolean(NSSystemProperty.WEBSERVER_DEBUG_PRINTREQUESTS.get());
-
     @Override
     public void run() {
       try {
@@ -641,20 +639,28 @@ public class WebServer {
               e.printStackTrace();
             }
           }
+          boolean isPrintRequestsDebug = Boolean.parseBoolean(NSSystemProperty.WEBSERVER_DEBUG_PRINTREQUESTS.get());
+          boolean isPrintDataDebug = Boolean.parseBoolean(NSSystemProperty.WEBSERVER_DEBUG_PRINTDATA.get());
           if(resourceStream_ == null) {
-            if(DEBUG_PRINT_REQUESTS) {
+            if(isPrintRequestsDebug) {
               System.err.println("Web Server " + (isPostMethod? "POST": "GET") + ": " + resourcePath + " -> 404 (not found)");
             }
             writeHTTPError(out, 404, "File Not Found.");
             return;
           }
-          if(DEBUG_PRINT_REQUESTS) {
+          if(isPrintRequestsDebug || isPrintDataDebug) {
             System.err.println("Web Server " + (isPostMethod? "POST": "GET") + ": " + resourcePath + " -> 200 (OK)");
           }
           BufferedInputStream resourceStream = new BufferedInputStream(resourceStream_);
           writeHTTPHeaders(out, 200, webServerContent.getContentType(), webServerContent.getContentLength(), webServerContent.getLastModified());
           byte[] bytes = new byte[4096];
           for(int i; (i=resourceStream.read(bytes)) != -1; out.write(bytes, 0, i)) {
+            if(isPrintDataDebug) {
+              System.err.print(new String(bytes, 0, i, "UTF-8"));
+            }
+          }
+          if(isPrintDataDebug) {
+            System.err.println();
           }
           try {
             resourceStream.close();

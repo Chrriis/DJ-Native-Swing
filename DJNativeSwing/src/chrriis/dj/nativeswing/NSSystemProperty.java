@@ -56,6 +56,13 @@ public enum NSSystemProperty {
    */
   WEBSERVER_DEBUG_PRINTREQUESTS("nativeswing.webserver.debug.printRequests", Type.READ_WRITE),
 
+  /**
+   * nativeswing.webserver.debug.printData
+   * = true/false (default: false)<br/>
+   * Set whether the web server should print the data it sends.
+   */
+  WEBSERVER_DEBUG_PRINTDATA("nativeswing.webserver.debug.printData", Type.READ_WRITE),
+
 
   /**
    * nativeswing.components.debug.printOptions
