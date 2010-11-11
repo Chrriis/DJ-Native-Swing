@@ -51,7 +51,7 @@ public class Utils {
     IS_MAC = os.startsWith("Mac") || os.startsWith("Darwin");
     IS_WINDOWS = os.startsWith("Windows");
     String arch = SystemProperty.OS_ARCH.get();
-    IS_64_BIT = "x86_64".equals(arch) || "x64".equals(arch) || "amd64".equals(arch) || "ia64".equals(arch) || "ppc64".equals(arch) || "IA64N".equals(arch);
+    IS_64_BIT = "x86_64".equals(arch) || "x64".equals(arch) || "amd64".equals(arch) || "ia64".equals(arch) || "ppc64".equals(arch) || "IA64N".equals(arch) || "64".equals(System.getProperty("sun.arch.data.model")) || "64".equals(System.getProperty("com.ibm.vm.bitmode"));
     IS_32_BIT = !IS_64_BIT;
   }
 
