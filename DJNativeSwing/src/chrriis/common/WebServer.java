@@ -643,12 +643,14 @@ public class WebServer {
           String printDataProperty = NSSystemProperty.WEBSERVER_DEBUG_PRINTDATA.get();
           boolean isPrintDataDebug = false;
           long printDataCount = -1;
-          try {
-            printDataCount = Long.parseLong(printDataProperty);
-            isPrintDataDebug = true;
-          } catch(Exception e) {
-            isPrintDataDebug = Boolean.parseBoolean(printDataProperty);
-            printDataCount = Integer.MAX_VALUE;
+          if(printDataProperty != null) {
+            try {
+              printDataCount = Long.parseLong(printDataProperty);
+              isPrintDataDebug = true;
+            } catch(Exception e) {
+              isPrintDataDebug = Boolean.parseBoolean(printDataProperty);
+              printDataCount = Integer.MAX_VALUE;
+            }
           }
           if(resourceStream_ == null) {
             if(isPrintRequestsDebug) {
