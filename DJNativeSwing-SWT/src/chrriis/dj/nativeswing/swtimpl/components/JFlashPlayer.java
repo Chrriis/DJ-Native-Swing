@@ -158,10 +158,22 @@ public class JFlashPlayer extends NSPanelComponent {
     protected String getJavascriptDefinitions() {
       String javascriptDefinitions = flashPlayer.customJavascriptDefinitions;
       return
-        "      function " + getEmbeddedObjectJavascriptName() + "_DoFScommand(command, args) {" + LS +
+        "      function " + getEmbeddedObjectJavascriptName() + "_DoFSCommand(command, args) {" + LS +
         "        sendCommand(command, args);" + LS +
         "      }" +
         (javascriptDefinitions == null? "": LS + javascriptDefinitions);
+    }
+
+    @Override
+    protected String getAdditionalHeadDefinitions() {
+      return
+      "    <script language=\"VBScript\">" + LS +
+      "    <!-- " + LS +
+      "    Sub " + getEmbeddedObjectJavascriptName() + "_FSCommand(ByVal command, ByVal args)" + LS +
+      "      call " + getEmbeddedObjectJavascriptName() + "_DoFSCommand(command, args)" + LS +
+      "    end sub" + LS +
+      "    //-->" + LS +
+      "    </script>";
     }
 
     @Override

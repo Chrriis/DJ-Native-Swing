@@ -155,6 +155,8 @@ public abstract class WebBrowserObject {
         public InputStream getInputStream() {
           String javascriptDefinitions = component.getJavascriptDefinitions();
           javascriptDefinitions = javascriptDefinitions == null? "": javascriptDefinitions + LS;
+          String additionalHeadDefinitions = component.getAdditionalHeadDefinitions();
+          additionalHeadDefinitions = additionalHeadDefinitions == null? "": additionalHeadDefinitions + LS;
           String content =
             "<html>" + LS +
             "  <head>" + LS +
@@ -201,6 +203,7 @@ public abstract class WebBrowserObject {
             "      object, embed, div { position: absolute; left:0; top:0;}" + LS +
             "      td { vertical-align: middle; }" + LS +
             "    </style>" + LS +
+            additionalHeadDefinitions +
             "  </head>" + LS +
             "  <body height=\"*\">" + LS +
             "    <iframe style=\"display:none;\" name=\"j_iframe\"></iframe>" + LS +
@@ -422,6 +425,10 @@ public abstract class WebBrowserObject {
   protected abstract ObjectHTMLConfiguration getObjectHtmlConfiguration();
 
   protected String getJavascriptDefinitions() {
+    return null;
+  }
+
+  protected String getAdditionalHeadDefinitions() {
     return null;
   }
 
