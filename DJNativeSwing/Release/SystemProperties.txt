@@ -30,6 +30,12 @@ are using them get loaded.
   Set whether the web server should print the requests it receives, along with
   the result (200 or 404).
 
+* nativeswing.webserver.debug.printData
+ = true/false/<long> (default: false)
+ Set whether the web server should print the data it sends (or how many bytes to
+ print).
+
+
 --------------------------------------------------------------------------------
 
 * nativeswing.components.debug.printOptions

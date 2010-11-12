@@ -640,7 +640,16 @@ public class WebServer {
             }
           }
           boolean isPrintRequestsDebug = Boolean.parseBoolean(NSSystemProperty.WEBSERVER_DEBUG_PRINTREQUESTS.get());
-          boolean isPrintDataDebug = Boolean.parseBoolean(NSSystemProperty.WEBSERVER_DEBUG_PRINTDATA.get());
+          String printDataProperty = NSSystemProperty.WEBSERVER_DEBUG_PRINTDATA.get();
+          boolean isPrintDataDebug = false;
+          long printDataCount = -1;
+          try {
+            printDataCount = Long.parseLong(printDataProperty);
+            isPrintDataDebug = true;
+          } catch(Exception e) {
+            isPrintDataDebug = Boolean.parseBoolean(printDataProperty);
+            printDataCount = Integer.MAX_VALUE;
+          }
           if(resourceStream_ == null) {
             if(isPrintRequestsDebug) {
               System.err.println("Web Server " + (isPostMethod? "POST": "GET") + ": " + resourcePath + " -> 404 (not found)");
@@ -655,8 +664,9 @@ public class WebServer {
           writeHTTPHeaders(out, 200, webServerContent.getContentType(), webServerContent.getContentLength(), webServerContent.getLastModified());
           byte[] bytes = new byte[4096];
           for(int i; (i=resourceStream.read(bytes)) != -1; out.write(bytes, 0, i)) {
-            if(isPrintDataDebug) {
-              System.err.print(new String(bytes, 0, i, "UTF-8"));
+            if(isPrintDataDebug && i > 0 && printDataCount > 0) {
+              System.err.print(new String(bytes, 0, (int)Math.min(i, printDataCount), "UTF-8"));
+              printDataCount -= i;
             }
           }
           if(isPrintDataDebug) {
