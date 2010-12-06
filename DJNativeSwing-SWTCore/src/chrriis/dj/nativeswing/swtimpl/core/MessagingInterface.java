@@ -282,10 +282,20 @@ abstract class MessagingInterface {
                 isFirst = false;
                 isWaitingResponse = true;
                 if(isNativeSide()) {
-                  RECEIVER_LOCK.wait(500);
+                  String timeout = System.getProperty("nativeswing.interface.syncsend.native.timeout");
+                  if(timeout != null) {
+                    RECEIVER_LOCK.wait(Long.parseLong(timeout));
+                  } else {
+                    RECEIVER_LOCK.wait(500);
+                  }
                 } else {
                   // The Mac OS case is very rare, so we set a long timeout.
-                  RECEIVER_LOCK.wait(5000);
+                  String timeout = System.getProperty("nativeswing.interface.syncsend.local.timeout");
+                  if(timeout != null) {
+                    RECEIVER_LOCK.wait(Long.parseLong(timeout));
+                  } else {
+                    RECEIVER_LOCK.wait(5000);
+                  }
                 }
                 isWaitingResponse = false;
               }
