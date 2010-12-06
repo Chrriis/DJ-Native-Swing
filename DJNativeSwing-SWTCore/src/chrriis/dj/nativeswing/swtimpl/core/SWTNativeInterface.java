@@ -32,8 +32,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -60,6 +62,7 @@ import chrriis.dj.nativeswing.swtimpl.NSSystemPropertySWT;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.NativeInterfaceConfiguration;
 import chrriis.dj.nativeswing.swtimpl.NativeInterfaceListener;
+import chrriis.dj.nativeswing.swtimpl.PeerVMProcessFactory;
 import chrriis.dj.nativeswing.swtimpl.core.InProcessMessagingInterface.SWTInProcessMessagingInterface;
 import chrriis.dj.nativeswing.swtimpl.core.InProcessMessagingInterface.SwingInProcessMessagingInterface;
 import chrriis.dj.nativeswing.swtimpl.core.OutProcessIOMessagingInterface.SWTOutProcessIOMessagingInterface;
@@ -754,7 +757,6 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
 
     private static Process createProcess(String localHostAddress, int port, int pid) {
       List<String> classPathList = new ArrayList<String>();
-      String pathSeparator = SystemProperty.PATH_SEPARATOR.get();
       List<Object> referenceList = new ArrayList<Object>();
       Class<?>[] nativeClassPathReferenceClasses = getNativeClassPathReferenceClasses(nativeInterfaceConfiguration);
       if(nativeClassPathReferenceClasses != null) {
@@ -831,29 +833,40 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
         }
         classPathList.add(classPathFile.getAbsolutePath());
       }
-      StringBuilder sb = new StringBuilder();
-      for(int i=0; i<classPathList.size(); i++) {
-        if(i > 0) {
-          sb.append(pathSeparator);
-        }
-        sb.append(classPathList.get(i));
-      }
-      String javaHome = SystemProperty.JAVA_HOME.get();
-      String[] candidateBinaries = new String[] {
-          new File(javaHome, "bin/java").getAbsolutePath(),
-          new File("/usr/lib/java").getAbsolutePath(),
-          "java",
-      };
-      Process p = null;
-      // Create the argument list for the Java process that will be created
-      List<String> argList = new ArrayList<String>();
-      // The first argument will be the binary
-      argList.add(null);
-//      argList.add("-Dvisualvm.display.name=NativeSwingPeer#" + pid);
+      List<String> vmParamList = new ArrayList<String>();
+      Map<String, String> systemPropertiesMap = new HashMap<String, String>();
+//      systemPropertiesMap.put("visualvm.display.name", "NativeSwingPeer#" + pid);
       String[] peerVMParams = getPeerVMParams(nativeInterfaceConfiguration);
+      boolean isJavaLibraryPathProperySpecified = false;
+      boolean isSWTLibraryPathProperySpecified = false;
       if(peerVMParams != null) {
-        for(String param: peerVMParams) {
-          argList.add(param);
+        for(String peerVMParam: peerVMParams) {
+          if(peerVMParam.startsWith("-D")) {
+            String property = peerVMParam.substring(2);
+            int index = property.indexOf('=');
+            String propertyKey = property.substring(0, index);
+            String propertyValue = property.substring(index + 1);
+            systemPropertiesMap.put(propertyKey, propertyValue);
+            if(SystemProperty.JAVA_LIBRARY_PATH.getName().equals(propertyKey)) {
+              isJavaLibraryPathProperySpecified = true;
+            } else if("swt.library.path".equals(propertyKey)) {
+              isSWTLibraryPathProperySpecified = true;
+            }
+          } else {
+            vmParamList.add(peerVMParam);
+          }
+        }
+      }
+      if(!isJavaLibraryPathProperySpecified) {
+        String javaLibraryPath = SystemProperty.JAVA_LIBRARY_PATH.get();
+        if(javaLibraryPath != null) {
+          systemPropertiesMap.put(SystemProperty.JAVA_LIBRARY_PATH.getName(), javaLibraryPath);
+        }
+      }
+      if(!isSWTLibraryPathProperySpecified) {
+        String swtLibraryPath = System.getProperty("swt.library.path");
+        if(swtLibraryPath != null) {
+          systemPropertiesMap.put("swt.library.path", swtLibraryPath);
         }
       }
       String[] flags = new String[] {
@@ -867,83 +880,122 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
       };
       for(String flag: flags) {
         if(Boolean.parseBoolean(System.getProperty(flag))) {
-          argList.add("-D" + flag + "=true");
+          systemPropertiesMap.put(flag, "true");
         }
       }
-      argList.add("-Dnativeswing.localhostaddress=" + localHostAddress);
-      argList.add("-classpath");
-      argList.add(sb.toString());
+      systemPropertiesMap.put("nativeswing.localhostaddress", localHostAddress);
+      String mainClass;
+      List<String> mainClassParameterList = new ArrayList<String>();
       if(isProxyClassLoaderUsed) {
-        argList.add(NetworkURLClassLoader.class.getName());
-        argList.add(WebServer.getDefaultWebServer().getClassPathResourceURL("", ""));
+        mainClass = NetworkURLClassLoader.class.getName();
+        mainClassParameterList.add(WebServer.getDefaultWebServer().getClassPathResourceURL("", ""));
+        mainClassParameterList.add(NativeInterface.class.getName());
+      } else {
+        mainClass = NativeInterface.class.getName();
       }
-      argList.add(NativeInterface.class.getName());
-      argList.add(String.valueOf(pid));
-      argList.add(String.valueOf(port));
-      // Try compatibility with Java applets on update 10.
-      String javaVersion = SystemProperty.JAVA_VERSION.get();
-      if(javaVersion != null && javaVersion.compareTo("1.6.0_10") >= 0 && "Sun Microsystems Inc.".equals(SystemProperty.JAVA_VENDOR.get())) {
-        boolean isTryingAppletCompatibility = true;
-        if(peerVMParams != null) {
-          for(String peerVMParam: peerVMParams) {
+      mainClassParameterList.add(String.valueOf(pid));
+      mainClassParameterList.add(String.valueOf(port));
+      Process p = getPeerVMProcessFactory().createProcess(classPathList.toArray(new String[0]), systemPropertiesMap, vmParamList.toArray(new String[0]), mainClass, mainClassParameterList.toArray(new String[0]));
+      if(p == null) {
+        throw new IllegalStateException("Failed to spawn the peer VM!");
+      }
+      return p;
+    }
+
+    private static PeerVMProcessFactory getPeerVMProcessFactory() {
+      PeerVMProcessFactory peerVMProcessFactory = nativeInterfaceConfiguration.getPeerVMProcessFactory();
+      if(peerVMProcessFactory != null) {
+        return peerVMProcessFactory;
+      }
+      return new PeerVMProcessFactory() {
+        public Process createProcess(String[] classpathItems, Map<String, String> systemPropertiesMap, String[] vmParams, String mainClass, String[] mainClassParameters) {
+          String pathSeparator = SystemProperty.PATH_SEPARATOR.get();
+          String[] candidateBinaries = new String[] {
+              new File(SystemProperty.JAVA_HOME.get(), "bin/java").getAbsolutePath(),
+              new File("/usr/lib/java").getAbsolutePath(),
+              "java",
+          };
+          boolean isTryingAppletCompatibility = true;
+          for(String peerVMParam: vmParams) {
             if(peerVMParam.startsWith("-Xbootclasspath/a:")) {
               isTryingAppletCompatibility = false;
               break;
             }
           }
-        }
-        if(isTryingAppletCompatibility) {
-          File[] deploymentFiles = new File[] {
-              new File(javaHome, "lib/deploy.jar"),
-              new File(javaHome, "lib/plugin.jar"),
-              new File(javaHome, "lib/javaws.jar"),
-          };
-          List<String> argListX = new ArrayList<String>();
-          argListX.add(candidateBinaries[0]);
-          StringBuilder sbX = new StringBuilder();
-          for(int i=0; i<deploymentFiles.length; i++) {
-            if(i != 0) {
-              sbX.append(pathSeparator);
+          String javaVersion = SystemProperty.JAVA_VERSION.get();
+          String vmParamsWithAppletCompatibility = null;
+          // Try compatibility with Java applets on update 10.
+          if(isTryingAppletCompatibility && javaVersion != null && javaVersion.compareTo("1.6.0_10") >= 0 && "Sun Microsystems Inc.".equals(SystemProperty.JAVA_VENDOR.get())) {
+            String javaHome = SystemProperty.JAVA_HOME.get();
+            File[] deploymentFiles = new File[] {
+                new File(javaHome, "lib/deploy.jar"),
+                new File(javaHome, "lib/plugin.jar"),
+                new File(javaHome, "lib/javaws.jar"),
+            };
+            StringBuilder sbX = new StringBuilder();
+            for(int i=0; i<deploymentFiles.length; i++) {
+              if(i != 0) {
+                sbX.append(pathSeparator);
+              }
+              File deploymentFile = deploymentFiles[i];
+              if(deploymentFile.exists()) {
+                sbX.append(deploymentFile.getAbsolutePath());
+              }
             }
-            File deploymentFile = deploymentFiles[i];
-            if(deploymentFile.exists()) {
-              sbX.append(deploymentFile.getAbsolutePath());
+            if(sbX.indexOf(" ") != -1) {
+              // TODO: check what to do when there are spaces in paths on non-windows machines
+              vmParamsWithAppletCompatibility = "\"-Xbootclasspath/a:" + sbX + "\"";
+            } else {
+              vmParamsWithAppletCompatibility = "-Xbootclasspath/a:" + sbX;
             }
-          }
-          if(sbX.indexOf(" ") != -1) {
-            // TODO: check what to do when there are spaces in paths on non-windows machines
-            argListX.add("\"-Xbootclasspath/a:" + sbX + "\"");
           } else {
-            argListX.add("-Xbootclasspath/a:" + sbX);
+            isTryingAppletCompatibility = false;
           }
-          argListX.addAll(argList.subList(1, argList.size()));
-          if(Boolean.parseBoolean(NSSystemPropertySWT.PEERVM_DEBUG_PRINTCOMMANDLINE.get())) {
-            System.err.println("Native Command: " + Arrays.toString(argListX.toArray()));
+          for(int mode=isTryingAppletCompatibility? 1: 0; mode>=0; mode--) {
+            List<String> argList = new ArrayList<String>();
+            for(String candidateBinary: candidateBinaries) {
+              // Java binary
+              argList.add(candidateBinary);
+              if(mode == 1) {
+                // Special boot class path when we try applet mode.
+                argList.add(vmParamsWithAppletCompatibility);
+              }
+              // VM parameters
+              for(String vmParam: vmParams) {
+                argList.add(vmParam);
+              }
+              // System properties
+              for(Map.Entry<String, String> propertyEntry: systemPropertiesMap.entrySet()) {
+                argList.add("-D" + propertyEntry.getKey() + "=" + propertyEntry.getValue());
+              }
+              // Class path.
+              argList.add("-classpath");
+              StringBuilder sb = new StringBuilder();
+              for(int i=0; i<classpathItems.length; i++) {
+                if(i > 0) {
+                  sb.append(pathSeparator);
+                }
+                sb.append(classpathItems[i]);
+              }
+              argList.add(sb.toString());
+              // Main class
+              argList.add(mainClass);
+              // Application parameters
+              for(String mainClassParameter: mainClassParameters) {
+                argList.add(mainClassParameter);
+              }
+              if(Boolean.parseBoolean(NSSystemPropertySWT.PEERVM_DEBUG_PRINTCOMMANDLINE.get())) {
+                System.err.println("Native Command: " + Arrays.toString(argList.toArray()));
+              }
+              try {
+                return new ProcessBuilder(argList).start();
+              } catch(IOException e) {
+              }
+            }
           }
-          try {
-            p = new ProcessBuilder(argListX).start();
-          } catch(IOException e) {
-          }
+          return null;
         }
-      }
-      if(p == null) {
-        // Try these arguments with the various candidate binaries.
-        for(String candidateBinary: candidateBinaries) {
-          argList.set(0, candidateBinary);
-          if(Boolean.parseBoolean(NSSystemPropertySWT.PEERVM_DEBUG_PRINTCOMMANDLINE.get())) {
-            System.err.println("Native Command: " + Arrays.toString(argList.toArray()));
-          }
-          try {
-            p = new ProcessBuilder(argList).start();
-            break;
-          } catch(IOException e) {
-          }
-        }
-      }
-      if(p == null) {
-        throw new IllegalStateException("Failed to spawn the VM!");
-      }
-      return p;
+      };
     }
 
     private static final boolean IS_PROCESS_IO_CHANNEL_MODE = "processio".equals(NSSystemPropertySWT.INTERFACE_OUTPROCESS_COMMUNICATION.get());

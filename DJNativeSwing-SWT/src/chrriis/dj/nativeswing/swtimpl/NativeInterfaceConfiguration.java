@@ -24,6 +24,24 @@ public class NativeInterfaceConfiguration {
   private List<Class<?>> nativeClassPathReferenceClassList = new ArrayList<Class<?>>();
   private List<String> nativeClassPathReferenceResourceList = new ArrayList<String>();
   private String[] peerVMParams;
+  private PeerVMProcessFactory peerVMProcessFactory;
+
+  /**
+   * Set the peer VM process factory which allows to override the default peer VM creation mechanism.
+   * This method can be used when the library is compiled to native and a different binary with alternate parameters needs to be called.
+   * @param peerVMProcessFactory The factory to set.
+   */
+  public void setPeerVMProcessFactory(PeerVMProcessFactory peerVMProcessFactory) {
+    this.peerVMProcessFactory = peerVMProcessFactory;
+  }
+
+  /**
+   * Get the peer VM process factory.
+   * @return the peer VM process factory or null if it is not set (in which case the default mechanism is used).
+   */
+  public PeerVMProcessFactory getPeerVMProcessFactory() {
+    return peerVMProcessFactory;
+  }
 
   /**
    * Set whether the native side respawns on error. The default is true.
