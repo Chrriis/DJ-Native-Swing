@@ -48,14 +48,14 @@ Here are the steps to follow:
 4. Create platform-dependant modules
   For each platform to support (remove unwanted ones, package names are important!):
   Create module DJNativeSwing-SWTCore-win32-win32-x86 (chrriis.dj.nativeswing.swtcore.win32.win32.x86)
-  Create module DJNativeSwing-SWTCore-win32-win32-x86 (chrriis.dj.nativeswing.swtcore.win32.win32.x86_64)
-  Create module DJNativeSwing-SWTCore-win32-win32-x86 (chrriis.dj.nativeswing.swtcore.gtk.linux.x86)
-  Create module DJNativeSwing-SWTCore-win32-win32-x86 (chrriis.dj.nativeswing.swtcore.gtk.linux.x86_64)
-  Create module DJNativeSwing-SWTCore-win32-win32-x86 (chrriis.dj.nativeswing.swtcore.cocoa.macosx.x86)
-  Create module DJNativeSwing-SWTCore-win32-win32-x86 (chrriis.dj.nativeswing.swtcore.cocoa.macosx.x86_64)
+  Create module DJNativeSwing-SWTCore-win32-win32-x86_64 (chrriis.dj.nativeswing.swtcore.win32.win32.x86_64)
+  Create module DJNativeSwing-SWTCore-gtk-linux-x86 (chrriis.dj.nativeswing.swtcore.gtk.linux.x86)
+  Create module DJNativeSwing-SWTCore-gtk-linux-x86_64 (chrriis.dj.nativeswing.swtcore.gtk.linux.x86_64)
+  Create module DJNativeSwing-SWTCore-cocoa-macosx-x86 (chrriis.dj.nativeswing.swtcore.cocoa.macosx.x86)
+  Create module DJNativeSwing-SWTCore-cocoa-macosx-x86_64 (chrriis.dj.nativeswing.swtcore.cocoa.macosx.x86_64)
     with JARs:
       - DJNativeSwing-SWTCore.jar
-      - swt-3.6-win32-win32-x86.jar
+      - swt-3.6-win32-win32-x86.jar (use appropriate JAR)
     with dependencies:
       - DJNS-SWT
       - Lookup
