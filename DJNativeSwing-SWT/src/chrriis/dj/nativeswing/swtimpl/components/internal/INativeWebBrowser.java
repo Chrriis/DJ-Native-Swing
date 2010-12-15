@@ -94,8 +94,10 @@ public interface INativeWebBrowser {
 
   public void requestFocus();
 
-  public abstract boolean isNativePeerDisposed();
+  public boolean isNativePeerDisposed();
 
-  public abstract boolean isNativePeerInitialized();
+  public boolean isNativePeerInitialized();
+
+  public boolean print(boolean isShowingDialog);
 
 }

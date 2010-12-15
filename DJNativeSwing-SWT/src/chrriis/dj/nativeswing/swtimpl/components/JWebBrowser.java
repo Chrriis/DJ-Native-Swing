@@ -741,4 +741,14 @@ public class JWebBrowser extends NSPanelComponent {
     return true;
   }
 
+  /**
+   * Attempt to print the content of the currently loaded page specifying whether to show the print dialog.
+   * This method invokes the Javascript print facility, or potentially direct native calls if the platforms allows it.
+   * Not all runtimes support printing without showing the dialog (only IE supports it at the moment) in which case the method would return false.
+   * @return true if the method call worked, false otherwise.
+   */
+  public boolean print(boolean isShowingDialog) {
+    return nativeWebBrowser.print(isShowingDialog);
+  }
+
 }
