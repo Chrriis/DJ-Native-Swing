@@ -860,13 +860,15 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
       if(!isJavaLibraryPathProperySpecified) {
         String javaLibraryPath = SystemProperty.JAVA_LIBRARY_PATH.get();
         if(javaLibraryPath != null) {
-          systemPropertiesMap.put(SystemProperty.JAVA_LIBRARY_PATH.getName(), javaLibraryPath);
+          // Double quotes in path actually cut it so we have to add a \ before.
+          systemPropertiesMap.put(SystemProperty.JAVA_LIBRARY_PATH.getName(), javaLibraryPath.replace("\"", "\\\""));
         }
       }
       if(!isSWTLibraryPathProperySpecified) {
         String swtLibraryPath = System.getProperty("swt.library.path");
         if(swtLibraryPath != null) {
-          systemPropertiesMap.put("swt.library.path", swtLibraryPath);
+          // Double quotes in path actually cut it so we have to add a \ before.
+          systemPropertiesMap.put("swt.library.path", swtLibraryPath.replace("\"", "\\\""));
         }
       }
       String[] flags = new String[] {
