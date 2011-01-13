@@ -12,6 +12,7 @@ import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GraphicsConfiguration;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -22,6 +23,8 @@ import java.awt.event.WindowEvent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.RootPaneContainer;
+
+import chrriis.common.Utils;
 
 public class WebBrowserWindowFactory {
 
@@ -109,6 +112,13 @@ public class WebBrowserWindowFactory {
       super.show();
       if(isLocationByPlatform) {
         WebBrowserWindowStrategy.adjustInScreen(this);
+      }
+    }
+
+    @Override
+    public void setIconImage(Image image) {
+      if(Utils.IS_JAVA_6_OR_GREATER) {
+        super.setIconImage(image);
       }
     }
 
