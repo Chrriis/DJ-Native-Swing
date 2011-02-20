@@ -179,7 +179,11 @@ public class JWebBrowser extends NSPanelComponent {
     INativeWebBrowser.WebBrowserRuntime runtime = INativeWebBrowser.WebBrowserRuntime.DEFAULT;
     if(optionMap.get(USE_XULRUNNER_RUNTIME_OPTION_KEY) != null) {
       runtime = INativeWebBrowser.WebBrowserRuntime.XULRUNNER;
-    } else if(optionMap.get(USE_WEBKIT_RUNTIME_OPTION_KEY) != null) {
+    }
+    if(optionMap.get(USE_WEBKIT_RUNTIME_OPTION_KEY) != null) {
+      if(runtime != INativeWebBrowser.WebBrowserRuntime.DEFAULT) {
+        throw new IllegalStateException("Only one web browser runtime can be specified!");
+      }
       runtime = INativeWebBrowser.WebBrowserRuntime.WEBKIT;
     }
     nativeWebBrowser = NativeCoreObjectFactory.create(INativeWebBrowser.class, "chrriis.dj.nativeswing.swtimpl.components.core.NativeWebBrowser", new Class<?>[] {JWebBrowser.class, INativeWebBrowser.WebBrowserRuntime.class}, new Object[] {this, runtime});

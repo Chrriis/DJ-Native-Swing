@@ -204,8 +204,8 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
       }
       if(Boolean.parseBoolean(NSSystemPropertySWT.DEPENDENCIES_CHECKVERSIONS.get("true"))) {
         // Check the versions of the libraries.
-        if(SWT.getVersion() < 3650) {
-          throw new IllegalStateException("The version of SWT that is required is 3.6 or later!");
+        if(SWT.getVersion() < 3721) {
+          throw new IllegalStateException("The version of SWT that is required is 3.7M5 or later!");
         }
       }
       if(nativeInterfaceConfiguration == null) {

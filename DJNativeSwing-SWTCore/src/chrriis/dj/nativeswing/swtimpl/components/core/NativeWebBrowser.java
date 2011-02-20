@@ -420,25 +420,15 @@ class NativeWebBrowser extends SWTNativeComponent implements INativeWebBrowser {
     }
     int style = SWT.NONE;
     WebBrowserRuntime wbRuntime = (WebBrowserRuntime)parameters[0];
-    if(wbRuntime == WebBrowserRuntime.XULRUNNER) {
-      style |= SWT.MOZILLA;
-    }
-    String webKitProperty = System.getProperty("org.eclipse.swt.browser.UseWebKitGTK");
-    if(wbRuntime == WebBrowserRuntime.WEBKIT) {
-      System.setProperty("org.eclipse.swt.browser.UseWebKitGTK", "true");
+    switch(wbRuntime) {
+      case XULRUNNER:
+        style |= SWT.MOZILLA;
+        break;
+      case WEBKIT:
+        style |= SWT.WEBKIT;
+        break;
     }
     final Browser browser = new Browser(parent, style);
-    if(wbRuntime == WebBrowserRuntime.WEBKIT) {
-      if(webKitProperty == null) {
-        System.clearProperty("org.eclipse.swt.browser.UseWebKitGTK");
-      } else {
-        System.setProperty("org.eclipse.swt.browser.UseWebKitGTK", webKitProperty);
-      }
-      if(!"webkit".equals(browser.getBrowserType())) {
-        browser.getShell().dispose();
-        throw new IllegalStateException("The webkit runtime was requested but could not be found!");
-      }
-    }
     configureBrowserFunction(browser);
     browser.addCloseWindowListener(new CloseWindowListener() {
       public void close(WindowEvent e) {
