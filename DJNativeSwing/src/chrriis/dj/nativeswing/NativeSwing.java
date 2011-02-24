@@ -118,6 +118,9 @@ public class NativeSwing {
         return;
       }
       Window windowAncestor = SwingUtilities.getWindowAncestor(component);
+      if(windowAncestor == null) {
+        return;
+      }
       for(Window window: windowAncestor.getOwnedWindows()) {
         if(window instanceof HeavyweightForcerWindow) {
           forcer = (HeavyweightForcerWindow)window;
