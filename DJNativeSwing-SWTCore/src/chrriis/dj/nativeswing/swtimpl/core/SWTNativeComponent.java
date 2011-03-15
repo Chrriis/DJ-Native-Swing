@@ -914,7 +914,9 @@ public abstract class SWTNativeComponent extends NativeComponent {
       return getAWTHandleMethod.invoke(null, this);
     } catch(Exception e) {
       try {
-        return Native.getComponentID(this);
+        if(isDisplayable()) {
+          return Native.getComponentID(this);
+        }
       } catch(Exception ex) {
         ex.printStackTrace();
       }
