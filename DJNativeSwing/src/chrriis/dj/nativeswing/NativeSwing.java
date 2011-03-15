@@ -393,6 +393,39 @@ public class NativeSwing {
       if(isAdjusting) {
         adjustNativeComponents();
       }
+      // Dialogs mess the focus: when the default focusable component is not the native component,
+      // clicking the native component has the effect of losing the focus of the dialog, then
+      // regaining it but on the default component. Hence it is very hard to actually give focus to
+      // the native component.
+      // The fix is to prevent the window from being focusable for a short amount of time when it
+      // loses focus. The effect is that the native component can gain focus and retargetting does
+      // not happen.
+      switch(e.getID()) {
+        case WindowEvent.WINDOW_LOST_FOCUS:
+          if(e.getSource() instanceof Dialog) {
+            final Dialog d = (Dialog)e.getSource();
+            if(d.getFocusableWindowState()) {
+              d.setFocusableWindowState(false);
+              Thread t = new Thread("Dialog focus fixer") {
+                @Override
+                public void run() {
+                  try {
+                    sleep(125);
+                  } catch (InterruptedException e) {
+                  }
+                  SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                      d.setFocusableWindowState(true);
+                    }
+                  });
+                }
+              };
+              t.setDaemon(true);
+              t.start();
+            }
+            break;
+        }
+      }
     }
 
   }
