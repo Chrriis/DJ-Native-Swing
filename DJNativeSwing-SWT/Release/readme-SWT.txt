@@ -32,6 +32,8 @@ public static void main(String[] args) {
   NativeInterface.runEventPump();
 }
 
+On Mac, you may need to add the "-XstartOnFirstThread" VM parameter.
+
 If you want to use the shaping mode for native components (cf the demo), you
 need "jna.jar" and "jna_WindowUtils.jar" in your classpath.
 
@@ -41,6 +43,7 @@ implementation is configured.
 
 If you want to use the syntax highlighter, you need zip of the SyntaxHighlighter
 in your classpath.
+
 
 3. Any tutorial or demo?
 

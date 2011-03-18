@@ -5,7 +5,7 @@ Licence terms: LGPL (see licence.txt)
 
 ---------------------------------- Change log ----------------------------------
 
-* Version 0.9.9 (xxxxxxxxxxxxxx):
+* Version 1.0.1 (March 18, 2011):
 
 - Modality improvements: new windows are not blocked by current modal dialogs.
 - Code that was applying shaping depending on sub-windows is removed.
