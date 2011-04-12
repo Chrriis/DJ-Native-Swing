@@ -228,6 +228,7 @@ public class WebServer {
       extensionToMimeTypeMap.put("movie", "video/x-sgi-movie");
       extensionToMimeTypeMap.put("mp2", "video/mpeg");
       extensionToMimeTypeMap.put("mp3", "audio/mpeg");
+      extensionToMimeTypeMap.put("mp4", "video/mp4");
       extensionToMimeTypeMap.put("mpa", "video/mpeg");
       extensionToMimeTypeMap.put("mpe", "video/mpeg");
       extensionToMimeTypeMap.put("mpeg", "video/mpeg");
@@ -315,6 +316,7 @@ public class WebServer {
       extensionToMimeTypeMap.put("wax", "audio/x-ms-wax");
       extensionToMimeTypeMap.put("wcm", "application/vnd.ms-works");
       extensionToMimeTypeMap.put("wdb", "application/vnd.ms-works");
+      extensionToMimeTypeMap.put("webm", "video/webm");
       extensionToMimeTypeMap.put("wks", "application/vnd.ms-works");
       extensionToMimeTypeMap.put("wm", "video/x-ms-wm");
       extensionToMimeTypeMap.put("wma", "audio/x-ms-wma");
