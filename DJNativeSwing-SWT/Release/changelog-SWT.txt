@@ -5,6 +5,12 @@ Licence terms: LGPL (see licence.txt)
 
 ---------------------------------- Change log ----------------------------------
 
+* Version 1.0.2 (xxxxxxxxxxxxxx):
+
+- Fixed a freeze when quitting the application on Mac by not adding the shutdown hook.
+- Attempt to call display.dispose() when closing the native interface.
+
+
 * Version 1.0.1 (March 18, 2011):
 
 - Mac OS X is supported, except "constrainVisibility"/"proxyComponentHierarchy".

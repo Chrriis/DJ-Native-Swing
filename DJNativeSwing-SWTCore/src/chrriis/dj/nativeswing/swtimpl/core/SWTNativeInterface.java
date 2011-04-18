@@ -578,12 +578,14 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
           }
         }
       }
-      Runtime.getRuntime().addShutdownHook(new Thread() {
-        @Override
-        public void run() {
-          destroyControls();
-        }
-      });
+      if(!Utils.IS_MAC || Boolean.parseBoolean(System.getProperty("nativeswing.inprocess.forceShutdownHook"))) {
+        Runtime.getRuntime().addShutdownHook(new Thread("NativeSwing Shutdown Hook") {
+          @Override
+          public void run() {
+            destroyControls();
+          }
+        });
+      }
     }
 
     private static void runWithMacExecutor(final Runnable runnable) {
@@ -1291,7 +1293,14 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
         }
         control.dispose();
       }
-//      display.dispose();
+      try {
+        // This line was commented out but I don't remember if there was a reason.
+        // It seems disposing the display solves certain issue, like the browser not terminating cleanly.
+        // Thus: I am going to be defensive and wrap the call with a try/catch (but dump the trace to follow up).
+        display.dispose();
+      } catch(Throwable t) {
+        t.printStackTrace();
+      }
     }
   }
 
