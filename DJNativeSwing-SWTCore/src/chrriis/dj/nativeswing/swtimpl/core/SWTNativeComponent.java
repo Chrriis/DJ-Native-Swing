@@ -124,7 +124,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
 
     @Override
     protected void setNativeComponentEnabled(boolean isEnabled) {
-      setControlParentEnabled(isEnabled);
+      setControlParentEnabled(isEnabled, Utils.IS_MAC && isEnabled && isShowing());
     }
 
     @Override
@@ -1139,25 +1139,51 @@ public abstract class SWTNativeComponent extends NativeComponent {
   private static class CMN_setControlParentEnabled extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
-      Control control = getControl();
+      final Control control = getControl();
       if(control == null || control.isDisposed()) {
         return null;
       }
       control.getParent().setEnabled((Boolean)args[0]);
+      if((Boolean)args[1]) {
+        Point size = control.getParent().getSize();
+        size.y -= 1;
+        control.setSize(size);
+        Thread t = new Thread("Native Swing Repaint fix") {
+          public void run() {
+            try {
+              Thread.sleep(50);
+            } catch (InterruptedException e) {
+            }
+            if(control.isDisposed()) {
+              return;
+            }
+            control.getDisplay().asyncExec(new Runnable() {
+              public void run() {
+                if(control.isDisposed()) {
+                  return;
+                }
+                control.setSize(control.getParent().getSize());
+              }
+            });
+          }
+        };
+        t.setDaemon(true);
+        t.start();
+      }
       return null;
     }
   }
 
   private boolean isControlParentEnabled = true;
 
-  private void setControlParentEnabled(boolean isEnabled) {
+  private void setControlParentEnabled(boolean isEnabled, boolean isForcingRepaint) {
     if(isEnabled == isControlParentEnabled) {
       return;
     }
     isControlParentEnabled = isEnabled;
     // We do not want to send this message on a disposed or dead component
     if(!isNativePeerInitialized() || isNativePeerValid()) {
-      runAsync(new CMN_setControlParentEnabled(), isEnabled);
+      runAsync(new CMN_setControlParentEnabled(), isEnabled, isForcingRepaint);
     }
   }
 
@@ -1764,7 +1790,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
           for(int i=0; i<nativeComponents.length; i++) {
             SWTNativeComponent nativeComponent = nativeComponents[i];
             wereEnabled[i] = nativeComponent.isControlParentEnabled;
-            nativeComponent.setControlParentEnabled(false);
+            nativeComponent.setControlParentEnabled(false, false);
           }
           dndHandler.nativeComponents = nativeComponents;
           dndHandler.wereEnabled = wereEnabled;
@@ -1776,7 +1802,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
           for(int i=0; i<nativeComponents.length; i++) {
             SWTNativeComponent nativeComponent = nativeComponents[i];
             if(wereEnabled[i]) {
-              nativeComponent.setControlParentEnabled(true);
+              nativeComponent.setControlParentEnabled(true, false);
             }
           }
           dndHandler = null;
