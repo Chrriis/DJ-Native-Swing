@@ -249,6 +249,15 @@ public enum NSSystemPropertySWT {
 
 
   /**
+   * nativeswing.htmleditor.getHTMLContent.timeout
+   * = &lt;integer&gt; (default: 1500)<br/>
+   * Under heavy load, getHTLMContent may not complete in time, so for such systems
+   * it is desirable to increase the timeout.
+   */
+  HTMLEDITOR_GETHTMLCONTENT_TIMEOUT("nativeswing.htmleditor.getHTMLContent.timeout", Type.READ_WRITE),
+
+
+  /**
    * nativeswing.vlcplayer.fixPlaylistAutoPlayNext
    * = true/false (default: true)<br/>
    * VLC seems to have a bug: it does not automatically play the next queued item.

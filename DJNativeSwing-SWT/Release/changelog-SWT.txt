@@ -7,8 +7,9 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 1.0.2 (xxxxxxxxxxxxxx):
 
-- Fixed a freeze when quitting the application on Mac by not adding the shutdown hook.
-- Attempt to call display.dispose() when closing the native interface.
+- Fixed a freeze when quitting the application on Mac (shutdown hook not added).
+- JHTMLEditor timeout is slightly increased and can be changed.
+- Call to display.dispose() when closing the native interface for better cleanup.
 
 
 * Version 1.0.1 (March 18, 2011):
