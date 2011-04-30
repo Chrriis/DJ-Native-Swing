@@ -124,7 +124,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
 
     @Override
     protected void setNativeComponentEnabled(boolean isEnabled) {
-      setShellEnabled(isEnabled);
+      setControlParentEnabled(isEnabled);
     }
 
     @Override
@@ -636,17 +636,19 @@ public abstract class SWTNativeComponent extends NativeComponent {
           }
         });
         shell.setLayout(new FillLayout());
+        Composite controlComposite = new Composite(shell, SWT.NONE);
+        controlComposite.setLayout(new FillLayout());
         Control control = (Control)controlRegistry.get(componentID);
         if(control != null) {
           Shell oldShell = control.getShell();
-          control.setParent(shell);
+          control.setParent(controlComposite);
           oldShell.dispose();
         } else {
           String nativeComponentClassName = (String)args[2];
           Object nativePeerCreationParameters = args[3];
           Method createControlMethod = Class.forName(nativeComponentClassName).getDeclaredMethod("createControl", Composite.class, Object[].class);
           createControlMethod.setAccessible(true);
-          control = (Control)createControlMethod.invoke(null, shell, nativePeerCreationParameters);
+          control = (Control)createControlMethod.invoke(null, controlComposite, nativePeerCreationParameters);
           if(Boolean.parseBoolean(NSSystemPropertySWT.COMPONENTS_DEBUG_PRINTCREATION.get())) {
             System.err.println("Created control: " + componentID);
           }
@@ -1134,28 +1136,28 @@ public abstract class SWTNativeComponent extends NativeComponent {
     return nativeComponentWrapper.createEmbeddableComponent(optionMap);
   }
 
-  private static class CMN_setShellEnabled extends ControlCommandMessage {
+  private static class CMN_setControlParentEnabled extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
       Control control = getControl();
       if(control == null || control.isDisposed()) {
         return null;
       }
-      control.getShell().setEnabled((Boolean)args[0]);
+      control.getParent().setEnabled((Boolean)args[0]);
       return null;
     }
   }
 
-  private boolean isShellEnabled = true;
+  private boolean isControlParentEnabled = true;
 
-  private void setShellEnabled(boolean isEnabled) {
-    if(isEnabled == isShellEnabled) {
+  private void setControlParentEnabled(boolean isEnabled) {
+    if(isEnabled == isControlParentEnabled) {
       return;
     }
-    isShellEnabled = isEnabled;
+    isControlParentEnabled = isEnabled;
     // We do not want to send this message on a disposed or dead component
     if(!isNativePeerInitialized() || isNativePeerValid()) {
-      runAsync(new CMN_setShellEnabled(), isEnabled);
+      runAsync(new CMN_setControlParentEnabled(), isEnabled);
     }
   }
 
@@ -1601,7 +1603,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
       Control control = getControl();
       Shell shell = control.getShell();
       Shell newShell = new Shell(control.getDisplay(), SWT.NONE);
-      control.setParent(newShell);
+      control.getParent().setParent(newShell);
       shell.dispose();
       return null;
     }
@@ -1761,8 +1763,8 @@ public abstract class SWTNativeComponent extends NativeComponent {
           boolean[] wereEnabled = new boolean[nativeComponents.length];
           for(int i=0; i<nativeComponents.length; i++) {
             SWTNativeComponent nativeComponent = nativeComponents[i];
-            wereEnabled[i] = nativeComponent.isShellEnabled;
-            nativeComponent.setShellEnabled(false);
+            wereEnabled[i] = nativeComponent.isControlParentEnabled;
+            nativeComponent.setControlParentEnabled(false);
           }
           dndHandler.nativeComponents = nativeComponents;
           dndHandler.wereEnabled = wereEnabled;
@@ -1774,7 +1776,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
           for(int i=0; i<nativeComponents.length; i++) {
             SWTNativeComponent nativeComponent = nativeComponents[i];
             if(wereEnabled[i]) {
-              nativeComponent.setShellEnabled(true);
+              nativeComponent.setControlParentEnabled(true);
             }
           }
           dndHandler = null;
