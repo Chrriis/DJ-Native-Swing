@@ -13,6 +13,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import chrriis.dj.nativeswing.NSSystemProperty;
+
 /**
  * A convenient class to register objects to an ID.
  * @author Christopher Deckers
@@ -65,7 +67,7 @@ public class ObjectRegistry {
           }
         }
       };
-      boolean isApplet = "applet".equals(System.getProperty("nativeswing.deployment.type"));
+      boolean isApplet = "applet".equals(NSSystemProperty.DEPLOYMENT_TYPE.get());
       cleanUpThread.setDaemon(!isApplet);
       cleanUpThread.start();
     }

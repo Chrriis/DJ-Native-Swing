@@ -10,6 +10,8 @@ package chrriis.dj.nativeswing;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
+import chrriis.common.Utils;
+
 /**
  * A class that exposes all the system properties used by DJ Native Swing.
  * @author Christopher Deckers
@@ -105,6 +107,11 @@ public enum NSSystemProperty {
    */
   DEPENDENCIES_CHECKVERSIONS("nativeswing.dependencies.checkVersions", Type.READ_WRITE),
 
+
+  JNA_FORCE_HW_POPUP("jna.force_hw_popups", Type.READ_WRITE),
+  DEPLOYMENT_TYPE("nativeswing.deployment.type", Type.READ_WRITE),
+  INTEGRATION_USEDEFAULTCLIPPING("nativeswing.integration.useDefaultClipping", Type.READ_WRITE),
+
   ;
 
   //private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
@@ -155,7 +162,18 @@ public enum NSSystemProperty {
   public String get(final String defaultValue) {
     return AccessController.doPrivileged(new PrivilegedAction<String>() {
       public String run() {
-        return System.getProperty(getName(), defaultValue);
+        String name = getName();
+        String value = System.getProperty(name);
+        if(value != null) {
+          return value;
+        }
+        if(Utils.IS_WEBSTART) {
+          value = System.getProperty("jnlp." + name);
+          if(value != null) {
+            return value;
+          }
+        }
+        return defaultValue;
       }
     });
   }

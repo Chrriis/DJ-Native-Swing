@@ -1052,7 +1052,7 @@ public class WebServer {
       }
       webServer = new WebServer();
       try {
-        boolean isApplet = "applet".equals(System.getProperty("nativeswing.deployment.type"));
+        boolean isApplet = "applet".equals(NSSystemProperty.DEPLOYMENT_TYPE.get());
         webServer.start(!isApplet);
       } catch(Exception e) {
         e.printStackTrace();

@@ -46,12 +46,14 @@ public class Utils {
   public static final boolean IS_32_BIT;
   public static final boolean IS_64_BIT;
 
+  public static final boolean IS_WEBSTART = SystemProperty.JAVAWEBSTART_VERSION.get() != null;
+
   static {
     String os = SystemProperty.OS_NAME.get();
     IS_MAC = os.startsWith("Mac") || os.startsWith("Darwin");
     IS_WINDOWS = os.startsWith("Windows");
     String arch = SystemProperty.OS_ARCH.get();
-    IS_64_BIT = "x86_64".equals(arch) || "x64".equals(arch) || "amd64".equals(arch) || "ia64".equals(arch) || "ppc64".equals(arch) || "IA64N".equals(arch) || "64".equals(System.getProperty("sun.arch.data.model")) || "64".equals(System.getProperty("com.ibm.vm.bitmode"));
+    IS_64_BIT = "x86_64".equals(arch) || "x64".equals(arch) || "amd64".equals(arch) || "ia64".equals(arch) || "ppc64".equals(arch) || "IA64N".equals(arch) || "64".equals(SystemProperty.SUN_ARCH_DATA_MODEL.get()) || "64".equals(SystemProperty.COM_IBM_VM_BITMODE.get());
     IS_32_BIT = !IS_64_BIT;
   }
 

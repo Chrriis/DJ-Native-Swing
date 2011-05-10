@@ -178,7 +178,7 @@ public class NativeComponentWrapper {
     Boolean deferredDestruction = optionMap.get(NSComponentOptions.DESTROY_ON_FINALIZATION_OPTION_KEY) != null? Boolean.TRUE: null;
     Boolean componentHierarchyProxying = optionMap.get(NSComponentOptions.PROXY_COMPONENT_HIERARCHY_OPTION_KEY) != null? Boolean.TRUE: null;
     Boolean visibilityConstraint = optionMap.get(NSComponentOptions.CONSTRAIN_VISIBILITY_OPTION_KEY) != null? Boolean.TRUE: null;
-    if(Boolean.valueOf(System.getProperty("nativeswing.integration.useDefaultClipping")) || visibilityConstraint == null && componentHierarchyProxying == null) {
+    if(Boolean.valueOf(NSSystemProperty.INTEGRATION_USEDEFAULTCLIPPING.get()) || visibilityConstraint == null && componentHierarchyProxying == null) {
       if(deferredDestruction != null && componentHierarchyProxying == null) {
         componentHierarchyProxying = true;
       }

@@ -15,6 +15,7 @@ import java.util.Set;
 
 import org.openide.modules.ModuleInstall;
 
+import chrriis.common.SystemProperty;
 import chrriis.common.Utils;
 
 /**
@@ -38,7 +39,7 @@ public class NativeCoreInstaller extends ModuleInstall {
     } else {
       osArch = "32";
     }
-    String osName = System.getProperty("os.name");
+    String osName = SystemProperty.OS_NAME.get();
     if (Utils.IS_WINDOWS) {
       osName = "Windows";
     } else if (Utils.IS_MAC) {

@@ -129,7 +129,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
 
     @Override
     protected void storeInHiddenParent() {
-      if(Boolean.parseBoolean(System.getProperty("nativeswing.components.disableHiddenParentReparenting"))) {
+      if(Boolean.parseBoolean(NSSystemPropertySWT.COMPONENTS_DISABLEHIDDENPARENTREPARENTING.get())) {
         throw new IllegalStateException("Storing to a hidden parent is not supported!");
       }
       SWTNativeComponent.this.storeInHiddenParent();
@@ -1149,6 +1149,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
         size.y -= 1;
         control.setSize(size);
         Thread t = new Thread("Native Swing Repaint fix") {
+          @Override
           public void run() {
             try {
               Thread.sleep(50);
@@ -1324,7 +1325,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
       final Image image = new Image(display, regionBounds.x + regionBounds.width, regionBounds.y + regionBounds.height);
       GC gc = new GC(image);
       gc.setClipping(region);
-      if(Boolean.parseBoolean(System.getProperty("nativeswing.components.printingHack"))) {
+      if(Boolean.parseBoolean(NSSystemPropertySWT.COMPONENTS_PRINTINGHACK.get())) {
         // 1. https://bugs.eclipse.org/bugs/show_bug.cgi?id=223590
         // 2. https://bugs.eclipse.org/bugs/show_bug.cgi?id=299714
         // Note 1: bug 1 is marked as fixed, but preliminary testing shows some other bugs. Have to test more before removing this hack.
@@ -1545,7 +1546,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
       CMN_getComponentImage getComponentImage = new CMN_getComponentImage();
       NativeInterface.addNativeInterfaceListener(nativeInterfaceListener);
       final AtomicReference<Boolean> isServerSocketToBeClosed = new AtomicReference<Boolean>(true);
-      if(Boolean.parseBoolean(System.getProperty("nativeswing.components.useComponentImageClosingThread"))) {
+      if(Boolean.parseBoolean(NSSystemPropertySWT.COMPONENTS_USECOMPONENTIMAGECLOSINGTHREAD.get())) {
         new Thread("NativeSwing[" + SWTNativeInterface.getInstance().getInterfaceID(false) + "] Component Image Socket Closing") {
           @Override
           public void run() {

@@ -446,7 +446,7 @@ public class NativeSwing {
     // It seems on Linux this is required to get the component visible.
     SystemProperty.SUN_AWT_XEMBEDSERVER.set("true");
     // We use our own HW forcing, so we disable the one from JNA
-    System.setProperty("jna.force_hw_popups", "false");
+    NSSystemProperty.JNA_FORCE_HW_POPUP.set("false");
     // We have to disable mixing until all bahaviors can be implemented using the JDK features.
     if(SystemProperty.JAVAWEBSTART_VERSION.get() != null && SystemProperty.JAVA_VERSION.get().compareTo("1.6.0_18") >= 0) {
       if(SystemProperty.SUN_AWT_DISABLEMIXING.get() == null) {
@@ -460,7 +460,7 @@ public class NativeSwing {
     }
     boolean isSunMixingEnabled = !"true".equals(SystemProperty.SUN_AWT_DISABLEMIXING.get()) && SystemProperty.JAVA_VERSION.get().compareTo("1.6.0_12") >= 0;
     isHeavyWeightForcerEnabled = isSunMixingEnabled;
-    System.setProperty("nativeswing.integration.useDefaultClipping", String.valueOf(isSunMixingEnabled));
+    NSSystemProperty.INTEGRATION_USEDEFAULTCLIPPING.set(String.valueOf(isSunMixingEnabled));
     // Create window monitor
     Toolkit.getDefaultToolkit().addAWTEventListener(new NIAWTEventListener(), WindowEvent.WINDOW_EVENT_MASK | ComponentEvent.COMPONENT_EVENT_MASK);
     isInitialized = true;

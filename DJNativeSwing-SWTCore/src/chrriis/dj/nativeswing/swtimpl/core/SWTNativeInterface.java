@@ -54,6 +54,7 @@ import chrriis.common.NetworkURLClassLoader;
 import chrriis.common.SystemProperty;
 import chrriis.common.Utils;
 import chrriis.common.WebServer;
+import chrriis.dj.nativeswing.NSSystemProperty;
 import chrriis.dj.nativeswing.NativeSwing;
 import chrriis.dj.nativeswing.swtimpl.CommandMessage;
 import chrriis.dj.nativeswing.swtimpl.LocalMessage;
@@ -556,7 +557,7 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
 
     private static void initialize() {
       Device.DEBUG = Boolean.parseBoolean(NSSystemPropertySWT.SWT_DEVICE_DEBUG.get());
-      if(Utils.IS_MAC && "applet".equals(System.getProperty("nativeswing.deployment.type"))) {
+      if(Utils.IS_MAC && "applet".equals(NSSystemProperty.DEPLOYMENT_TYPE.get())) {
         runWithMacExecutor(new Runnable() {
           public void run() {
             findSWTDisplay();
@@ -578,7 +579,7 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
           }
         }
       }
-      if(!Utils.IS_MAC || Boolean.parseBoolean(System.getProperty("nativeswing.inprocess.forceShutdownHook"))) {
+      if(!Utils.IS_MAC || Boolean.parseBoolean(NSSystemPropertySWT.INTERFACE_INPROCESS_FORCESHUTDOWNHOOK.get())) {
         Runtime.getRuntime().addShutdownHook(new Thread("NativeSwing Shutdown Hook") {
           @Override
           public void run() {
@@ -623,19 +624,19 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
 
     private static void findSWTDisplay() {
       display = Display.getCurrent();
-      if(display == null && Boolean.parseBoolean(System.getProperty("nativeswing.interface.inprocess.useExternalSWTDisplay"))) {
+      if(display == null && Boolean.parseBoolean(NSSystemPropertySWT.INTERFACE_INPROCESS_USEEXTERNALSWTDISPLAY.get())) {
         display = Display.getDefault();
         if(display.getThread() == Thread.currentThread()) {
           // Though we wanted to recycle the display, it was actually created by us so we dispose it and create it properly.
           display.dispose();
           display = null;
-          System.setProperty("nativeswing.interface.inprocess.useExternalSWTDisplay", "false");
+          NSSystemPropertySWT.INTERFACE_INPROCESS_USEEXTERNALSWTDISPLAY.set("false");
         }
       }
       if(display == null) {
         DeviceData data = new DeviceData();
-        data.debug = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.debug"));
-        data.tracking = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.tracking"));
+        data.debug = Boolean.parseBoolean(NSSystemPropertySWT.SWT_DEVICEDATA_DEBUG.get());
+        data.tracking = Boolean.parseBoolean(NSSystemPropertySWT.SWT_DEVICEDATA_TRACKING.get());
         display = new Display(data);
       }
     }
@@ -646,7 +647,7 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
     }
 
     static void runEventPump() {
-      if(Boolean.parseBoolean(System.getProperty("nativeswing.interface.inprocess.useExternalSWTDisplay")) && display.getThread() != Thread.currentThread()) {
+      if(Boolean.parseBoolean(NSSystemPropertySWT.INTERFACE_INPROCESS_USEEXTERNALSWTDISPLAY.get()) && display.getThread() != Thread.currentThread()) {
         // If we recycle the display thread (we haven't created it) and runEventPump is called, we just return.
         return;
       }
@@ -867,10 +868,10 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
         }
       }
       if(!isSWTLibraryPathProperySpecified) {
-        String swtLibraryPath = System.getProperty("swt.library.path");
+        String swtLibraryPath = NSSystemPropertySWT.SWT_LIBRARY_PATH.get();
         if(swtLibraryPath != null) {
           // Double quotes in path actually cut it so we have to add a \ before.
-          systemPropertiesMap.put("swt.library.path", swtLibraryPath.replace("\"", "\\\""));
+          systemPropertiesMap.put(NSSystemPropertySWT.SWT_LIBRARY_PATH.getName(), swtLibraryPath.replace("\"", "\\\""));
         }
       }
       String[] flags = new String[] {
@@ -879,15 +880,15 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
           NSSystemPropertySWT.PEERVM_DEBUG_PRINTSTARTMESSAGE.getName(),
           NSSystemPropertySWT.PEERVM_DEBUG_PRINTSTOPMESSAGE.getName(),
           NSSystemPropertySWT.SWT_DEVICE_DEBUG.getName(),
-          "nativeswing.swt.devicedata.debug",
-          "nativeswing.swt.devicedata.tracking",
+          NSSystemPropertySWT.SWT_DEVICEDATA_DEBUG.getName(),
+          NSSystemPropertySWT.SWT_DEVICEDATA_TRACKING.getName(),
       };
       for(String flag: flags) {
         if(Boolean.parseBoolean(System.getProperty(flag))) {
           systemPropertiesMap.put(flag, "true");
         }
       }
-      systemPropertiesMap.put("nativeswing.localhostaddress", localHostAddress);
+      systemPropertiesMap.put(NSSystemProperty.LOCALHOSTADDRESS.getName(), localHostAddress);
       String mainClass;
       List<String> mainClassParameterList = new ArrayList<String>();
       if(isProxyClassLoaderUsed) {
@@ -1164,8 +1165,8 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
 //      }
       Device.DEBUG = Boolean.parseBoolean(NSSystemPropertySWT.SWT_DEVICE_DEBUG.get());
       DeviceData data = new DeviceData();
-      data.debug = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.debug"));
-      data.tracking = Boolean.parseBoolean(System.getProperty("nativeswing.swt.devicedata.tracking"));
+      data.debug = Boolean.parseBoolean(NSSystemPropertySWT.SWT_DEVICEDATA_DEBUG.get());
+      data.tracking = Boolean.parseBoolean(NSSystemPropertySWT.SWT_DEVICEDATA_TRACKING.get());
       display = new Display(data);
       Display.setAppName("DJ Native Swing");
       if(isProcessIOChannelMode) {

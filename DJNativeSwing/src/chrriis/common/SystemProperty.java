@@ -54,12 +54,15 @@ import java.util.TreeSet;
  */
 public enum SystemProperty {
 
+  COM_IBM_VM_BITMODE("com.ibm.vm.bitmode"),
+
   FILE_ENCODING("file.encoding"),
   FILE_ENCODING_PKG("file.encoding.pkg"),
   FILE_SEPARATOR("file.separator"),
 
   JAVA_AWT_GRAPHICSENV("java.awt.graphicsenv"),
   JAVA_AWT_PRINTERJOB("java.awt.printerjob"),
+  JAVA_AWT_SMARTINVALIDATE("java.awt.smartInvalidate"),
 
   JAVA_CLASS_PATH("java.class.path"),
   JAVA_CLASS_VERSION("java.class.version"),

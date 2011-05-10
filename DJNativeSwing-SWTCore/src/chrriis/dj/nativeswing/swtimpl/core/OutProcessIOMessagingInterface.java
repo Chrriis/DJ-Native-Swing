@@ -181,7 +181,7 @@ abstract class OutProcessIOMessagingInterface extends MessagingInterface {
       super.destroy();
       // It is unclear whether there is any benefit in waiting for the peer VM to be closed (I don't think of any conceptually).
       // However, a user seems to have an issue that is improved when doing so, so let's have this waiting conditional.
-      if(process != null && Boolean.parseBoolean(System.getProperty("nativeswing.interface.outprocess.syncclosing"))) {
+      if(process != null && Boolean.parseBoolean(NSSystemPropertySWT.INTERFACE_OUTPROCESS_SYNCCLOSING.get())) {
         while(true) {
           try {
             process.waitFor();

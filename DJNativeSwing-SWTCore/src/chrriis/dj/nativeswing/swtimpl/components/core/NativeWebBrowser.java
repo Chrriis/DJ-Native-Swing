@@ -408,13 +408,13 @@ class NativeWebBrowser extends SWTNativeComponent implements INativeWebBrowser {
   protected static Control createControl(Composite parent, Object[] parameters) {
     String xulRunnerPath = (String)parameters[1];
     if(xulRunnerPath != null) {
-      System.setProperty("org.eclipse.swt.browser.XULRunnerPath", xulRunnerPath);
+      NSSystemPropertySWT.ORG_ECLIPSE_SWT_BROWSER_XULRUNNERPATH.set(xulRunnerPath);
     } else {
-      xulRunnerPath = System.getProperty("org.eclipse.swt.browser.XULRunnerPath");
+      xulRunnerPath = NSSystemPropertySWT.ORG_ECLIPSE_SWT_BROWSER_XULRUNNERPATH.get();
       if(xulRunnerPath == null) {
         xulRunnerPath = System.getenv("XULRUNNER_HOME");
         if(xulRunnerPath != null) {
-          System.setProperty("org.eclipse.swt.browser.XULRunnerPath", xulRunnerPath);
+          NSSystemPropertySWT.ORG_ECLIPSE_SWT_BROWSER_XULRUNNERPATH.set(xulRunnerPath);
         }
       }
     }

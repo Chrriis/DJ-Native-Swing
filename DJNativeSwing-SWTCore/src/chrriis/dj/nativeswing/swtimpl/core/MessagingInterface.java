@@ -282,7 +282,7 @@ abstract class MessagingInterface {
                 isFirst = false;
                 isWaitingResponse = true;
                 if(isNativeSide()) {
-                  String timeout = System.getProperty("nativeswing.interface.syncsend.native.timeout");
+                  String timeout = NSSystemPropertySWT.INTERFACE_SYNCSEND_NATIVE_TIMEOUT.get();
                   if(timeout != null) {
                     RECEIVER_LOCK.wait(Long.parseLong(timeout));
                   } else {
@@ -290,7 +290,7 @@ abstract class MessagingInterface {
                   }
                 } else {
                   // The Mac OS case is very rare, so we set a long timeout.
-                  String timeout = System.getProperty("nativeswing.interface.syncsend.local.timeout");
+                  String timeout = NSSystemPropertySWT.INTERFACE_SYNCSEND_LOCAL_TIMEOUT.get();
                   if(timeout != null) {
                     RECEIVER_LOCK.wait(Long.parseLong(timeout));
                   } else {

@@ -51,9 +51,9 @@ class NativeMozillaXPCOM implements INativeMozillaXPCOM {
   public boolean initialize() {
     String path = NSSystemPropertySWT.WEBBROWSER_XULRUNNER_HOME.get();
     if(path == null) {
-      path = System.getProperty("org.eclipse.swt.browser.XULRunnerPath");
+      path = NSSystemPropertySWT.ORG_ECLIPSE_SWT_BROWSER_XULRUNNERPATH.get();
     } else {
-      System.setProperty("org.eclipse.swt.browser.XULRunnerPath", path);
+      NSSystemPropertySWT.ORG_ECLIPSE_SWT_BROWSER_XULRUNNERPATH.set(path);
     }
     if (Utils.IS_MAC) {
       if(path == null) {

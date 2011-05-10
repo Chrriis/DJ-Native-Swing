@@ -10,6 +10,7 @@ package chrriis.dj.nativeswing.swtimpl;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
+import chrriis.common.Utils;
 import chrriis.dj.nativeswing.NSSystemProperty;
 
 /**
@@ -274,6 +275,20 @@ public enum NSSystemPropertySWT {
    */
   SWT_DEVICE_DEBUG("nativeswing.swt.device.debug", Type.READ_WRITE),
 
+
+  SWT_LIBRARY_PATH("swt.library.path", Type.READ_WRITE),
+  SWT_DEVICEDATA_DEBUG("nativeswing.swt.devicedata.debug", Type.READ_WRITE),
+  SWT_DEVICEDATA_TRACKING("nativeswing.swt.devicedata.tracking", Type.READ_WRITE),
+  ORG_ECLIPSE_SWT_BROWSER_XULRUNNERPATH("org.eclipse.swt.browser.XULRunnerPath", Type.READ_WRITE),
+  COMPONENTS_DISABLEHIDDENPARENTREPARENTING("nativeswing.components.disableHiddenParentReparenting", Type.READ_WRITE),
+  COMPONENTS_PRINTINGHACK("nativeswing.components.printingHack", Type.READ_WRITE),
+  COMPONENTS_USECOMPONENTIMAGECLOSINGTHREAD("nativeswing.components.useComponentImageClosingThread", Type.READ_WRITE),
+  INTERFACE_INPROCESS_FORCESHUTDOWNHOOK("nativeswing.interface.inprocess.forceShutdownHook", Type.READ_WRITE),
+  INTERFACE_INPROCESS_USEEXTERNALSWTDISPLAY("nativeswing.interface.inprocess.useExternalSWTDisplay", Type.READ_WRITE),
+  INTERFACE_OUTPROCESS_SYNCCLOSING("nativeswing.interface.outprocess.syncclosing", Type.READ_WRITE),
+  INTERFACE_SYNCSEND_LOCAL_TIMEOUT("nativeswing.interface.syncsend.local.timeout", Type.READ_WRITE),
+  INTERFACE_SYNCSEND_NATIVE_TIMEOUT("nativeswing.interface.syncsend.native.timeout", Type.READ_WRITE),
+
   ;
 
   //private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
@@ -306,7 +321,6 @@ public enum NSSystemPropertySWT {
     if ("".equals(name)) {
       throw new IllegalArgumentException();
     }
-
     _name = name;
     _readOnly = type == Type.READ_ONLY;
   }
@@ -329,7 +343,18 @@ public enum NSSystemPropertySWT {
   public String get(final String defaultValue) {
     return AccessController.doPrivileged(new PrivilegedAction<String>() {
       public String run() {
-        return System.getProperty(getName(), defaultValue);
+        String name = getName();
+        String value = System.getProperty(name);
+        if(value != null) {
+          return value;
+        }
+        if(Utils.IS_WEBSTART) {
+          value = System.getProperty("jnlp." + name);
+          if(value != null) {
+            return value;
+          }
+        }
+        return defaultValue;
       }
     });
   }

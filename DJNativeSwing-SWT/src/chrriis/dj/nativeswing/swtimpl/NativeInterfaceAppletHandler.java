@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import chrriis.common.WebServer;
+import chrriis.dj.nativeswing.NSSystemProperty;
 
 /**
  * A special helper that allows Native Swing to work in a JApplet.<br/>
@@ -60,7 +61,7 @@ public class NativeInterfaceAppletHandler {
   private static Set<Applet> activeAppletSet = new HashSet<Applet>();
 
   public static void activateAppletMode() {
-    System.setProperty("nativeswing.deployment.type", "applet");
+    NSSystemProperty.DEPLOYMENT_TYPE.set("applet");
     if(NativeInterface.isInProcess()) {
       final AtomicBoolean isInitialized = new AtomicBoolean(false);
       synchronized(isInitialized) {
@@ -136,7 +137,7 @@ public class NativeInterfaceAppletHandler {
   }
 
   private static void checkAppletMode() {
-    if(!"applet".equals(System.getProperty("nativeswing.deployment.type"))) {
+    if(!"applet".equals(NSSystemProperty.DEPLOYMENT_TYPE.get())) {
       throw new IllegalStateException(NativeInterfaceAppletHandler.class.getName() + ".activateAppletMode() was not called! This code has to be placed first in the applet subclass in a static initializer.");
     }
   }
