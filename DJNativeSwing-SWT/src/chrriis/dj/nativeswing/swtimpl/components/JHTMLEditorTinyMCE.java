@@ -83,11 +83,11 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
             "<html xmlns=\"http://www.w3.org/1999/xhtml\">" + LS +
             "  <head>" + LS +
             "    <title></title>" + LS +
+            (customHTMLHeaders != null? customHTMLHeaders + LS: "") +
             "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>" + LS +
             "    <style type=\"text/css\">" + LS +
             "      body, form {margin: 0; padding: 0; overflow: auto;}" + LS +
             "    </style>" + LS +
-            (customHTMLHeaders != null? customHTMLHeaders + LS: "") +
             "    <script type=\"text/javascript\" src=\"tiny_mce.js\"></script>" + LS +
             "    <script type=\"text/javascript\">" + LS +
             "      function debug (text) {" + LS +
