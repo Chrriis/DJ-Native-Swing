@@ -810,6 +810,11 @@ public class WebServer {
     if(codeBase == null) {
       codeBase = new File(SystemProperty.USER_DIR.get()).getAbsolutePath();
     }
+    if(Utils.IS_WINDOWS) {
+      // '\' is not allowed in URL, and it is causing a problem with certain URL handlers. Let's replace with '/'
+      codeBase = codeBase.replace('\\', '/');
+      resourcePath = resourcePath.replace('\\', '/');
+    }
     return getURLPrefix() + "/resource/" + Utils.encodeURL(codeBase) + "/" + Utils.encodeURL(resourcePath);
   }
 
