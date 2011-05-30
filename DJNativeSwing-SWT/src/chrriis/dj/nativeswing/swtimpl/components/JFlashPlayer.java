@@ -200,6 +200,11 @@ public class JFlashPlayer extends NSPanelComponent {
             case ':':
             case '/':
               break;
+            case '\\':
+              if(Utils.IS_WINDOWS) {
+                c = '/';
+              }
+              break;
             default:
               isToEncode = true;
               break;
