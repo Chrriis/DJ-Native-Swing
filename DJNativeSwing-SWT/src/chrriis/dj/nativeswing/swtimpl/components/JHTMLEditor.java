@@ -23,6 +23,7 @@ import chrriis.common.WebServer;
 import chrriis.common.WebServer.HTTPRequest;
 import chrriis.common.WebServer.WebServerContent;
 import chrriis.dj.nativeswing.NSOption;
+import chrriis.dj.nativeswing.NSSystemProperty;
 import chrriis.dj.nativeswing.swtimpl.EventDispatchUtils;
 import chrriis.dj.nativeswing.swtimpl.LocalMessage;
 import chrriis.dj.nativeswing.swtimpl.NSPanelComponent;
@@ -344,7 +345,11 @@ public class JHTMLEditor extends NSPanelComponent {
     for(Matcher m; (m = p.matcher(html)).find(); ) {
       String resource = html.substring(m.start(2), m.end(2));
       File resourceFile = new File(resource);
-      resource = WebServer.getDefaultWebServer().getResourcePathURL(Utils.encodeURL(resourceFile.getParent()), resourceFile.getName());
+      if(Boolean.parseBoolean(NSSystemProperty.WEBSERVER_ACTIVATEOLDRESOURCEMETHOD.get())) {
+        resource = WebServer.getDefaultWebServer().getResourcePathURL(Utils.encodeURL(resourceFile.getParent()), resourceFile.getName());
+      } else {
+        resource = WebServer.getDefaultWebServer().getResourcePathURL(resourceFile.getParent(), resourceFile.getName());
+      }
       html = html.substring(0, m.start(1)) + resource + html.substring(m.end(2));
     }
     return html;

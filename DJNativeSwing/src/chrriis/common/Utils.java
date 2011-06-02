@@ -82,6 +82,14 @@ public class Utils {
     return encodedString.replaceAll("\\+", "%20");
   }
 
+  public static String encodeBase64(String s, boolean isURLSafe) {
+    return Base64.encode(s, isURLSafe);
+  }
+
+  public static String decodeBase64(String s) {
+    return Base64.decode(s);
+  }
+
   public static String escapeXML(String s) {
     if(s == null || s.length() == 0) {
       return s;

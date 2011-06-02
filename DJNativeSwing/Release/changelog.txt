@@ -5,6 +5,11 @@ Licence terms: LGPL (see licence.txt)
 
 ---------------------------------- Change log ----------------------------------
 
+* Version 1.0.2 (xxxxxxxxxxxxxx):
+
+- Proxied paths use Base64url encoding instead of URL encoding.
+
+
 * Version 1.0.1 (March 18, 2011):
 
 - Modality improvements: new windows are not blocked by current modal dialogs.

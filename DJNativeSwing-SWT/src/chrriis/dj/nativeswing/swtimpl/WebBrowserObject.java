@@ -225,6 +225,7 @@ public abstract class WebBrowserObject {
         url = webBrowserObject.getLocalFileURL(file);
       }
       final String escapedURL = Utils.escapeXML(url);
+      final String encodedURL = Utils.encodeURL(url);
       return new WebServerContent() {
         @Override
         public String getContentType() {
@@ -261,7 +262,7 @@ public abstract class WebBrowserObject {
           String content =
             "<!--" + LS +
             "window.document.write('<object classid=\"clsid:" + objectHtmlConfiguration.getWindowsClassID() + "\" id=\"" + embeddedObjectJavascriptName + "\" codebase=\"" + objectHtmlConfiguration.getWindowsInstallationURL() + "\" events=\"true\">');" + LS +
-            (windowsParamName == null? "": "window.document.write('  <param name=\"" + windowsParamName + "\" value=\"' + decodeURIComponent('" + escapedURL + "') + '\"/>');" + LS) +
+            (windowsParamName == null? "": "window.document.write('  <param name=\"" + windowsParamName + "\" value=\"' + decodeURIComponent('" + encodedURL + "') + '\"/>');" + LS) +
             objectParameters +
             "window.document.write('  <embed" + embedParameters + " name=\"" + embeddedObjectJavascriptName + "\"" + (paramName == null? "": " " + paramName + "=\"" + escapedURL + "\"") + " type=\"" + objectHtmlConfiguration.getMimeType() + "\" pluginspage=\"" + objectHtmlConfiguration.getInstallationURL() + "\"" + versionParameter+ ">');" + LS +
             "window.document.write('  </embed>');" + LS +

@@ -66,6 +66,8 @@ public enum NSSystemProperty {
    */
   WEBSERVER_DEBUG_PRINTDATA("nativeswing.webserver.debug.printData", Type.READ_WRITE),
 
+  WEBSERVER_ACTIVATEOLDRESOURCEMETHOD("nativeswing.webserver.activateOldResourceMethod", Type.READ_WRITE),
+
 
   /**
    * nativeswing.components.debug.printOptions

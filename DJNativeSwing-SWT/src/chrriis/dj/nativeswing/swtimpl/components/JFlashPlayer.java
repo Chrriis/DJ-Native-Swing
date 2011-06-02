@@ -21,6 +21,7 @@ import chrriis.common.WebServer.HTTPRequest;
 import chrriis.common.WebServer.WebServerContent;
 import chrriis.common.WebServer.WebServerContentProvider;
 import chrriis.dj.nativeswing.NSOption;
+import chrriis.dj.nativeswing.NSSystemProperty;
 import chrriis.dj.nativeswing.swtimpl.NSPanelComponent;
 import chrriis.dj.nativeswing.swtimpl.WebBrowserObject;
 
@@ -178,9 +179,12 @@ public class JFlashPlayer extends NSPanelComponent {
 
     @Override
     public String getLocalFileURL(File localFile) {
-      // Local files cannot be played due to security restrictions. We need to proxy.
-      // Moreover, we need to double encode non ASCII characters.
-      return WebServer.getDefaultWebServer().getResourcePathURL(encodeSpecialCharacters(localFile.getParent()), encodeSpecialCharacters(localFile.getName()));
+      if(Boolean.parseBoolean(NSSystemProperty.WEBSERVER_ACTIVATEOLDRESOURCEMETHOD.get())) {
+        // Local files cannot be played due to security restrictions. We need to proxy.
+        // Moreover, we need to double encode non ASCII characters.
+        return WebServer.getDefaultWebServer().getResourcePathURL(encodeSpecialCharacters(localFile.getParent()), encodeSpecialCharacters(localFile.getName()));
+      }
+      return WebServer.getDefaultWebServer().getResourcePathURL(localFile.getParent(), localFile.getName());
     }
 
     private String encodeSpecialCharacters(String s) {

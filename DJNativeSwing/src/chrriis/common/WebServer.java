@@ -810,12 +810,15 @@ public class WebServer {
     if(codeBase == null) {
       codeBase = new File(SystemProperty.USER_DIR.get()).getAbsolutePath();
     }
-    if(Utils.IS_WINDOWS) {
-      // '\' is not allowed in URL, and it is causing a problem with certain URL handlers. Let's replace with '/'
-      codeBase = codeBase.replace('\\', '/');
-      resourcePath = resourcePath.replace('\\', '/');
+    if(Boolean.parseBoolean(NSSystemProperty.WEBSERVER_ACTIVATEOLDRESOURCEMETHOD.get())) {
+      if(Utils.IS_WINDOWS) {
+        // '\' is not allowed in URL, and it is causing a problem with certain URL handlers. Let's replace with '/'
+        codeBase = codeBase.replace('\\', '/');
+        resourcePath = resourcePath.replace('\\', '/');
+      }
+      return getURLPrefix() + "/resource/" + Utils.encodeURL(codeBase) + "/" + Utils.encodeURL(resourcePath);
     }
-    return getURLPrefix() + "/resource/" + Utils.encodeURL(codeBase) + "/" + Utils.encodeURL(resourcePath);
+    return getURLPrefix() + "/location/" + Utils.encodeBase64(codeBase, true) + "/" + Utils.encodeURL(resourcePath);
   }
 
   public WebServerContent getURLContent(String resourceURL) {
@@ -944,6 +947,61 @@ public class WebServer {
               e.printStackTrace();
               return null;
             }
+          }
+        };
+      }
+      if("location".equals(type)) {
+        index = parameter.indexOf('/');
+        String codeBase = Utils.decodeBase64(parameter.substring(0, index));
+        parameter = Utils.decodeURL(removeHTMLAnchor(parameter.substring(index + 1)));
+        String resourceURL;
+        try {
+          URL url = new URL(codeBase);
+          int port = url.getPort();
+          resourceURL = url.getProtocol() + "://" + url.getHost() + (port != -1? ":" + port: "");
+          if(parameter.startsWith("/")) {
+            resourceURL += parameter;
+          } else {
+            String path = url.getPath();
+            path = path.substring(0, path.lastIndexOf('/') + 1) + parameter;
+            resourceURL += path.startsWith("/")? path: "/" + path;
+          }
+        } catch(Exception e) {
+          // Exception when creating a URL, so it is malformed: it is likely to be a local file.
+          File file = Utils.getLocalFile(new File(codeBase, parameter).getAbsolutePath());
+          if(file != null) {
+            resourceURL = new File(codeBase, parameter).toURI().toString();
+          } else {
+            resourceURL = codeBase + "/" + parameter;
+          }
+        }
+        final String resourceURL_ = resourceURL;
+        return new WebServerContent() {
+          @Override
+          public long getContentLength() {
+            File file = Utils.getLocalFile(resourceURL_);
+            if(file != null) {
+              return file.length();
+            }
+            return super.getContentLength();
+          }
+          @Override
+          public String getContentType() {
+            int index = resourceURL_.lastIndexOf('.');
+            return getDefaultMimeType(index == -1? null: resourceURL_.substring(index));
+          }
+          @Override
+          public InputStream getInputStream() {
+            try {
+              return new URL(resourceURL_).openStream();
+            } catch(Exception e) {
+            }
+            try {
+              return new FileInputStream("/" + resourceURL_);
+            } catch(Exception e) {
+              e.printStackTrace();
+            }
+            return null;
           }
         };
       }

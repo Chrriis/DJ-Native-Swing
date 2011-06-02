@@ -263,7 +263,11 @@ class JHTMLEditorCKeditor implements JHTMLEditorImplementation {
         if(("GetFoldersAndFiles".equals(command) || "GetFolders".equals(command)) && currentDir.equals("/") && roots.length > 1) {
           sb.append("<Folders>");
           for(File file: roots) {
-            sb.append("<Folder name=\"").append(Utils.escapeXML(file.getAbsolutePath())).append("\"/>");
+            String rootPath = file.getAbsolutePath();
+            if(Utils.IS_WINDOWS && rootPath.endsWith("\\")) {
+              rootPath = rootPath.substring(0, rootPath.length() - 1);
+            }
+            sb.append("<Folder name=\"").append(Utils.escapeXML(rootPath)).append("\"/>");
           }
           sb.append("</Folders>");
         } else {
@@ -271,7 +275,7 @@ class JHTMLEditorCKeditor implements JHTMLEditorImplementation {
             sb.append("<Folders>");
             for(File file: new File(currentDir).listFiles(new FileFilter() {
               public boolean accept(File pathname) {
-                return !pathname.isFile();
+                return !pathname.isFile() && !pathname.isHidden() && pathname.listFiles() != null;
               }
             })) {
               sb.append("<Folder name=\"").append(Utils.escapeXML(file.getName())).append("\"/>");
