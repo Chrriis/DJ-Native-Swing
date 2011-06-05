@@ -333,6 +333,16 @@ public class JHTMLEditor extends NSPanelComponent {
       }
       html = html.substring(0, m.start(1)) + resource + html.substring(m.end(3));
     }
+    p = Pattern.compile("=\\s*\"(" + WebServer.getDefaultWebServer().getURLPrefix() + "/location/)([^/]+)/([^\"]+)\"\\s");
+    for(Matcher m; (m = p.matcher(html)).find(); ) {
+      String codeBase = html.substring(m.start(2), m.end(2));
+      String resource = html.substring(m.start(3), m.end(3));
+      try {
+        resource = new File(Utils.decodeBase64(codeBase), Utils.decodeURL(resource)).toURI().toURL().toExternalForm();
+      } catch (MalformedURLException e) {
+      }
+      html = html.substring(0, m.start(1)) + resource + html.substring(m.end(3));
+    }
     return html;
   }
 
@@ -344,10 +354,11 @@ public class JHTMLEditor extends NSPanelComponent {
     Pattern p = Pattern.compile("=\\s*\"(file:/{1,3})([^\"]+)\"\\s");
     for(Matcher m; (m = p.matcher(html)).find(); ) {
       String resource = html.substring(m.start(2), m.end(2));
-      File resourceFile = new File(resource);
       if(Boolean.parseBoolean(NSSystemProperty.WEBSERVER_ACTIVATEOLDRESOURCEMETHOD.get())) {
+        File resourceFile = new File(resource);
         resource = WebServer.getDefaultWebServer().getResourcePathURL(Utils.encodeURL(resourceFile.getParent()), resourceFile.getName());
       } else {
+        File resourceFile = new File(Utils.decodeURL(resource));
         resource = WebServer.getDefaultWebServer().getResourcePathURL(resourceFile.getParent(), resourceFile.getName());
       }
       html = html.substring(0, m.start(1)) + resource + html.substring(m.end(2));
