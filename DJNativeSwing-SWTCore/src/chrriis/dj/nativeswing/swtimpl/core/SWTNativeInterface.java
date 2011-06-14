@@ -1133,7 +1133,7 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
         try {
           socket = serverSocket.accept();
         } catch(Exception e) {
-          throw new IllegalStateException("The native side did not receive an incoming connection!");
+          throw new IllegalStateException("The native side did not receive an incoming connection!", e);
         }
       }
 //      // We set up a new security manager to track exit calls.
