@@ -63,6 +63,7 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseMoveListener;
+import org.eclipse.swt.events.MouseTrackAdapter;
 import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
@@ -710,6 +711,22 @@ public abstract class SWTNativeComponent extends NativeComponent {
       @Override
       public void mouseUp(org.eclipse.swt.events.MouseEvent e) {
         Object[] mouseEventArgs = getMouseEventArgs(control, e, MouseEvent.MOUSE_RELEASED);
+        if(mouseEventArgs != null) {
+          new CMJ_dispatchMouseEvent().asyncExec(control, mouseEventArgs);
+        }
+      }
+    });
+    control.addMouseTrackListener(new MouseTrackAdapter() {
+      @Override
+      public void mouseEnter(org.eclipse.swt.events.MouseEvent e) {
+        Object[] mouseEventArgs = getMouseEventArgs(control, e, MouseEvent.MOUSE_ENTERED);
+        if(mouseEventArgs != null) {
+          new CMJ_dispatchMouseEvent().asyncExec(control, mouseEventArgs);
+        }
+      }
+      @Override
+      public void mouseExit(org.eclipse.swt.events.MouseEvent e) {
+        Object[] mouseEventArgs = getMouseEventArgs(control, e, MouseEvent.MOUSE_EXITED);
         if(mouseEventArgs != null) {
           new CMJ_dispatchMouseEvent().asyncExec(control, mouseEventArgs);
         }
