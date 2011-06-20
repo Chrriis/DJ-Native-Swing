@@ -1601,7 +1601,12 @@ public abstract class SWTNativeComponent extends NativeComponent {
               for(int x=0; x<rectangle.width && readCount != -1; x++) {
                 if(readCount == 0) {
                   readCount = in.read(bytes);
-                  if(readCount != -1 && (readCount % 3) != 0) {
+                  int itCount = 0;
+                  while(readCount != -1 && (readCount % 3) != 0) {
+                    if(itCount++ == 1000) {
+                      // I don't know if such case happens but I don't want to take the risk of a loop that never exits.
+                      readCount = -1;
+                    }
                     int c = in.read(bytes, readCount, bytes.length - readCount);
                     if(c == -1) {
                       readCount = -1;
