@@ -1599,20 +1599,17 @@ public abstract class SWTNativeComponent extends NativeComponent {
             int[] pixels = new int[rectangle.width];
             for(int y=0; y<rectangle.height && readCount != -1; y++) {
               for(int x=0; x<rectangle.width && readCount != -1; x++) {
-                if(readCount == 0) {
-                  readCount = in.read(bytes);
-                  int itCount = 0;
-                  while(readCount != -1 && (readCount % 3) != 0) {
-                    if(itCount++ == 1000) {
-                      // I don't know if such case happens but I don't want to take the risk of a loop that never exits.
-                      readCount = -1;
-                    }
-                    int c = in.read(bytes, readCount, bytes.length - readCount);
-                    if(c == -1) {
-                      readCount = -1;
-                    } else {
-                      readCount += c;
-                    }
+                int itCount = 0;
+                while(readCount != -1 && (readCount == 0 || (readCount % 3) != 0)) {
+                  if(itCount++ == 1000) {
+                    // I don't know if such case happens but I don't want to take the risk of a loop that never exits.
+                    readCount = -1;
+                  }
+                  int c = in.read(bytes, readCount, bytes.length - readCount);
+                  if(c == -1) {
+                    readCount = -1;
+                  } else {
+                    readCount += c;
                   }
                 }
                 if(readCount == -1) {
