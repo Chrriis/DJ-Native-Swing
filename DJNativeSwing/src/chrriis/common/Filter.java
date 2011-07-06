@@ -8,14 +8,20 @@
 package chrriis.common;
 
 /**
- * A generic filter.
+ * A generic filter suitable for flat and tree like structures.
  * @author Christopher Deckers
  */
 public interface Filter<T> {
 
+  public static enum Acceptance {
+    YES,
+    NO,
+    TEST_CHILDREN,
+  }
+
   /**
    * Test whether the element should be accepted.
    */
-  public boolean accept(T element);
+  public Acceptance accept(T element);
 
 }

@@ -22,6 +22,8 @@ import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+import chrriis.common.Filter.Acceptance;
+
 /**
  * @author Christopher Deckers
  */
@@ -167,10 +169,9 @@ public class UIUtils {
    * Get the area that is not covered by components obeying the condition imposed by the visitor. Usually, the filter focuses on all components, or opaque components.
    * @param component the component for which to find the visible areas.
    * @param filter the filter to consider when determining if an area is hidden.
-   * @param traverseChildren true if children that are not captured by the filter should look into their own children recursively.
    * @return an array of rectangles specify the visible area.
    */
-  public static Rectangle[] getComponentVisibleArea(Component component, Filter<Component> filter, boolean traverseChildren) {
+  public static Rectangle[] getComponentVisibleArea(Component component, Filter<Component> filter) {
     Window windowAncestor = SwingUtilities.getWindowAncestor(component);
     int width = component.getWidth();
     int height = component.getHeight();
@@ -183,12 +184,20 @@ public class UIUtils {
       Container container = (Container)component;
       for(int i=container.getComponentCount()-1; i>=0; i--) {
         Component c = container.getComponent(i);
-        if(c == component) {
-          break;
-        }
-        if(c.isVisible() && filter.accept(c)) {
-          tempRectangle.setBounds(c.getX(), c.getY(), c.getWidth(), c.getHeight());
-          shape = UIUtils.subtract(shape, tempRectangle);
+        if(c.isVisible()) {
+          switch(filter.accept(c)) {
+            case YES: {
+              tempRectangle.setBounds(c.getX(), c.getY(), c.getWidth(), c.getHeight());
+              shape = UIUtils.subtract(shape, tempRectangle);
+              break;
+            }
+            case TEST_CHILDREN: {
+              if(c instanceof Container) {
+                shape = getChildrenVisibleArea(component, filter, shape, (Container)c, null);
+              }
+              break;
+            }
+          }
         }
       }
     }
@@ -212,7 +221,7 @@ public class UIUtils {
       }
       shape = newRectangleList.toArray(new Rectangle[0]);
       if(parent instanceof JComponent && !((JComponent)parent).isOptimizedDrawingEnabled()) {
-        shape = getChildrenVisibleArea(component, filter, shape, parent, c, traverseChildren);
+        shape = getChildrenVisibleArea(component, filter, shape, parent, c);
       }
       if(shape.length == 0) {
         return shape;
@@ -225,37 +234,43 @@ public class UIUtils {
 
   private static String COMPONENT_TRANSPARENT_CLIENT_PROPERTY = "nsTransparent";
 
+  public static enum TransparencyType {
+    OPAQUE,
+    TRANSPARENT_WITH_OPAQUE_CHILDREN,
+    NOT_VISIBLE,
+  }
+
   /**
    * Set a transparency hint for the getComponentVisibleArea(xxx) method to decide whether a component is visible.
    * @param c The component for which to set the transparency hint.
-   * @param isTransparent which is true/false/null, where null removes any hint: glass panes of JRootPanes are considered transparent by default for example.
+   * @param transparencyType which can be null to remove any hint; glass panes of JRootPanes are considered transparent by default for example.
    */
-  public static void setComponentTransparencyHint(Component c, Boolean isTransparent) {
+  public static void setComponentTransparencyHint(Component c, TransparencyType transparencyType) {
     // If it is not a JComponent it can only be opaque and thus isComponentTransparent will return false.
     if(c instanceof JComponent) {
-      ((JComponent)c).putClientProperty(COMPONENT_TRANSPARENT_CLIENT_PROPERTY, isTransparent);
+      ((JComponent)c).putClientProperty(COMPONENT_TRANSPARENT_CLIENT_PROPERTY, transparencyType);
     }
   }
 
   /**
    * Get the actual transparent state, which considers the opacity and the transparency hint that may have been set with the setComponentTransparencyHint(xxx) method.
    */
-  public static boolean isComponentTransparent(Component c) {
+  public static TransparencyType getComponentTransparency(Component c) {
     if(!(c instanceof JComponent) || c.isOpaque()) {
-      return false;
+      return TransparencyType.OPAQUE;
     }
-    Boolean isTransparent = (Boolean)((JComponent)c).getClientProperty(COMPONENT_TRANSPARENT_CLIENT_PROPERTY);
-    if(isTransparent != null) {
-      return isTransparent;
+    TransparencyType transparencyType = (TransparencyType)((JComponent)c).getClientProperty(COMPONENT_TRANSPARENT_CLIENT_PROPERTY);
+    if(transparencyType != null) {
+      return transparencyType;
     }
     Container parent = c.getParent();
     if(parent instanceof JRootPane && ((JRootPane)parent).getGlassPane() == c) {
-      return true;
+      return TransparencyType.TRANSPARENT_WITH_OPAQUE_CHILDREN;
     }
-    return false;
+    return TransparencyType.OPAQUE;
   }
 
-  private static Rectangle[] getChildrenVisibleArea(Component component, Filter<Component> filter, Rectangle[] shape, Container parent, Component c, boolean traverseChildren) {
+  private static Rectangle[] getChildrenVisibleArea(Component component, Filter<Component> filter, Rectangle[] shape, Container parent, Component c) {
     Component[] children;
     if(parent instanceof JLayeredPane) {
       JLayeredPane layeredPane = (JLayeredPane)parent;
@@ -281,11 +296,12 @@ public class UIUtils {
         break;
       }
       if(child.isVisible()) {
-        if(!isComponentTransparent(child) && filter.accept(child)) {
+        Acceptance accept = filter.accept(child);
+        if(accept == Acceptance.YES) {
           tempRectangle.setBounds(child.getX(), child.getY(), child.getWidth(), child.getHeight());
           shape = UIUtils.subtract(shape, SwingUtilities.convertRectangle(parent, tempRectangle, component));
-        } else if(traverseChildren && child instanceof Container) {
-          shape = getChildrenVisibleArea(component, filter, shape, (Container)child, null, traverseChildren);
+        } else if(accept == Acceptance.TEST_CHILDREN && child instanceof Container) {
+          shape = getChildrenVisibleArea(component, filter, shape, (Container)child, null);
         }
       }
     }

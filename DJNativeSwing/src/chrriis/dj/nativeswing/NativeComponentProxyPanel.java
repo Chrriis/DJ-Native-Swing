@@ -37,6 +37,7 @@ import javax.swing.SwingUtilities;
 
 import chrriis.common.Filter;
 import chrriis.common.UIUtils;
+import chrriis.common.UIUtils.TransparencyType;
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.NativeComponentWrapper.NativeComponentHolder;
 
@@ -216,17 +217,24 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
       System.err.println("Computing shape: [" + NativeComponentProxyPanel.this.getWidth() + "x" + NativeComponentProxyPanel.this.getHeight() + "] " + nativeComponentWrapper.getComponentDescription());
     }
     Rectangle[] shape = UIUtils.getComponentVisibleArea(this, new Filter<Component>() {
-      public boolean accept(Component c) {
-        boolean isAccepted = !(c instanceof EmbeddedPanel);
-        if(IS_DEBUGGING_SHAPE && isAccepted) {
+      public Acceptance accept(Component c) {
+        if(c instanceof EmbeddedPanel) {
+          return Acceptance.NO;
+        }
+        TransparencyType transparency = UIUtils.getComponentTransparency(c);
+        switch(transparency) {
+          case TRANSPARENT_WITH_OPAQUE_CHILDREN: return Acceptance.TEST_CHILDREN;
+          case NOT_VISIBLE: return Acceptance.NO;
+        }
+        if(IS_DEBUGGING_SHAPE) {
           Rectangle intersectionRectangle = SwingUtilities.convertRectangle(c, new Rectangle(c.getSize()), NativeComponentProxyPanel.this).intersection(new Rectangle(NativeComponentProxyPanel.this.getSize()));
           if(!intersectionRectangle.isEmpty()) {
             System.err.println("  -> Subtracting [" + intersectionRectangle.x + "," + intersectionRectangle.y + "," + intersectionRectangle.width + "x" + intersectionRectangle.height + "] " + c);
           }
         }
-        return isAccepted;
+        return Acceptance.YES;
       }
-    }, false);
+    });
     return shape;
   }
 
