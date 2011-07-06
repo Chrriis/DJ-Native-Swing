@@ -31,6 +31,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
+import java.awt.peer.ComponentPeer;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -301,7 +302,10 @@ public abstract class SWTNativeComponent extends NativeComponent {
       // That means the native event is not received by the native component.
       // The solution is to dispatch the event directly to the peer if it is not our synthetic event (listeners do not get called).
       // Listeners are then called when our synthetic events are dispatched.
-      getPeer().handleEvent(e);
+      ComponentPeer peer = getPeer();
+      if(peer != null) {
+        peer.handleEvent(e);
+      }
       e.consume();
       return;
     }
