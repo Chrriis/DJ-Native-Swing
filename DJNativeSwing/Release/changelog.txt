@@ -9,6 +9,7 @@ Licence terms: LGPL (see licence.txt)
 
 - Logic for overlapping components is improved.
 - Proxied paths use Base64url encoding instead of URL encoding.
+- Indexed color model support for component printing.
 
 
 * Version 1.0.1 (March 18, 2011):
