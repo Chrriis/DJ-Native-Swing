@@ -73,6 +73,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -1451,21 +1452,21 @@ public abstract class SWTNativeComponent extends NativeComponent {
       // Has to be a multiple of 3
       byte[] bytes = new byte[1024 * 3];
       PaletteData palette = imageData.palette;
-      if (palette.isDirect) {
-        Socket socket = null;
-        BufferedOutputStream out = null;
-        int width = imageData.width;
-        int height = imageData.height;
-        try {
-          socket = new Socket(hostAddress, port);
-          out = new BufferedOutputStream(socket.getOutputStream());
-          for(Rectangle rectangle: rectangles) {
-            for(int j=0; j<rectangle.height; j++) {
-              int y = rectangle.y + j;
-              for(int i=0; i<rectangle.width; i++) {
-                int x = rectangle.x + i;
-                if(x < width && y < height) {
-                  int pixel = imageData.getPixel(x, y);
+      Socket socket = null;
+      BufferedOutputStream out = null;
+      int width = imageData.width;
+      int height = imageData.height;
+      try {
+        socket = new Socket(hostAddress, port);
+        out = new BufferedOutputStream(socket.getOutputStream());
+        for(Rectangle rectangle: rectangles) {
+          for(int j=0; j<rectangle.height; j++) {
+            int y = rectangle.y + j;
+            for(int i=0; i<rectangle.width; i++) {
+              int x = rectangle.x + i;
+              if(x < width && y < height) {
+                int pixel = imageData.getPixel(x, y);
+                if (palette.isDirect) {
                   // We cannot use palette.getRGB() because all the creations of RGB objects make it too slow.
                   int red = pixel & palette.redMask;
                   bytes[cursor++] = (byte)(palette.redShift < 0? red >>> -palette.redShift: red << palette.redShift);
@@ -1474,35 +1475,38 @@ public abstract class SWTNativeComponent extends NativeComponent {
                   int blue = pixel & palette.blueMask;
                   bytes[cursor++] = (byte)((palette.blueShift < 0)? blue >>> -palette.blueShift: blue << palette.blueShift);
                 } else {
-                  cursor += 3;
+                  RGB rgb = palette.colors[pixel];
+                  bytes[cursor++] = (byte)rgb.red;
+                  bytes[cursor++] = (byte)rgb.green;
+                  bytes[cursor++] = (byte)rgb.blue;
                 }
-                if(cursor == bytes.length) {
-                  out.write(bytes);
-                  cursor = 0;
-                }
+              } else {
+                cursor += 3;
+              }
+              if(cursor == bytes.length) {
+                out.write(bytes);
+                cursor = 0;
               }
             }
           }
-          out.write(bytes, 0, cursor);
-          out.flush();
-        } catch(Exception e) {
-          e.printStackTrace();
         }
-        try {
-          if(out != null) {
-            out.close();
-          }
-        } catch(Exception e) {
-        }
-        try {
-          if(socket != null) {
-            socket.close();
-          }
-        } catch(Exception e) {
-        }
-        return;
+        out.write(bytes, 0, cursor);
+        out.flush();
+      } catch(Exception e) {
+        e.printStackTrace();
       }
-      throw new IllegalStateException("Not implemented");
+      try {
+        if(out != null) {
+          out.close();
+        }
+      } catch(Exception e) {
+      }
+      try {
+        if(socket != null) {
+          socket.close();
+        }
+      } catch(Exception e) {
+      }
     }
 
   }
