@@ -17,8 +17,10 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.event.AWTEventListener;
 import java.awt.event.ComponentEvent;
+import java.awt.event.FocusEvent;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.StringReader;
@@ -343,8 +345,28 @@ public class NativeSwing {
     }
 
     public void eventDispatched(AWTEvent e) {
+      int eventID = e.getID();
+      if(Utils.IS_JAVA_7_OR_GREATER) {
+        switch(eventID) {
+          case MouseEvent.MOUSE_PRESSED:
+          case FocusEvent.FOCUS_GAINED:
+            if(nativeComponentWrapperList == null) {
+              return;
+            }
+            // In Java 7, components cannot gain focus if a native component is shown.
+            // The fix is to temporary disable the native component hierarchy.
+            for(int i=nativeComponentWrapperList.size()-1; i>=0; i--) {
+              final NativeComponentWrapper nativeComponentWrapper = nativeComponentWrapperList.get(i);
+              if(nativeComponentWrapper.isNativeComponentEnabled()) {
+                nativeComponentWrapper.setNativeComponentEnabled(false);
+                nativeComponentWrapper.setNativeComponentEnabled(true);
+              }
+            }
+            return;
+        }
+      }
       boolean isAdjusting = false;
-      switch(e.getID()) {
+      switch(eventID) {
         case ComponentEvent.COMPONENT_SHOWN:
         case ComponentEvent.COMPONENT_HIDDEN:
           isAdjusting = true;
@@ -354,7 +376,7 @@ public class NativeSwing {
         if(windowList == null) {
           windowList = new ArrayList<Window>();
         }
-        switch(e.getID()) {
+        switch(eventID) {
           case WindowEvent.WINDOW_OPENED:
           case ComponentEvent.COMPONENT_SHOWN:
             Window w = (Window)e.getSource();
@@ -368,7 +390,7 @@ public class NativeSwing {
         }
       }
       if(e.getSource() instanceof Dialog) {
-        switch(e.getID()) {
+        switch(eventID) {
           case WindowEvent.WINDOW_OPENED:
           case ComponentEvent.COMPONENT_SHOWN:
             Dialog d = (Dialog)e.getSource();
@@ -380,7 +402,7 @@ public class NativeSwing {
             dialogList.remove(e.getSource());
             break;
         }
-        switch(e.getID()) {
+        switch(eventID) {
           case WindowEvent.WINDOW_OPENED:
           case WindowEvent.WINDOW_CLOSED:
           case ComponentEvent.COMPONENT_SHOWN:
@@ -400,7 +422,7 @@ public class NativeSwing {
       // The fix is to prevent the window from being focusable for a short amount of time when it
       // loses focus. The effect is that the native component can gain focus and retargetting does
       // not happen.
-      switch(e.getID()) {
+      switch(eventID) {
         case WindowEvent.WINDOW_LOST_FOCUS:
           if(e.getSource() instanceof Dialog) {
             final Dialog d = (Dialog)e.getSource();
@@ -462,7 +484,11 @@ public class NativeSwing {
     isHeavyWeightForcerEnabled = isSunMixingEnabled;
     NSSystemProperty.INTEGRATION_USEDEFAULTCLIPPING.set(String.valueOf(isSunMixingEnabled));
     // Create window monitor
-    Toolkit.getDefaultToolkit().addAWTEventListener(new NIAWTEventListener(), WindowEvent.WINDOW_EVENT_MASK | ComponentEvent.COMPONENT_EVENT_MASK);
+    long flags = WindowEvent.WINDOW_EVENT_MASK | ComponentEvent.COMPONENT_EVENT_MASK;
+    if(Utils.IS_JAVA_7_OR_GREATER) {
+      flags |= ComponentEvent.FOCUS_EVENT_MASK | ComponentEvent.MOUSE_EVENT_MASK;
+    }
+    Toolkit.getDefaultToolkit().addAWTEventListener(new NIAWTEventListener(), flags);
     isInitialized = true;
   }
 

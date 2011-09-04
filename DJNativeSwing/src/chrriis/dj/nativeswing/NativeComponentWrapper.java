@@ -125,6 +125,10 @@ public class NativeComponentWrapper {
     // Do nothing by default, though it is desirable that subclasses implement it.
   }
 
+  protected boolean isNativeComponentEnabled() {
+    return true;
+  }
+
   /**
    * Get a description of this component wrapper, which is used for example to improve debug messages.
    * @return a description of this component wrapper.

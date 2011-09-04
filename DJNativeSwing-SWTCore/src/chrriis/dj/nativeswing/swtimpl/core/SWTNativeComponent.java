@@ -131,6 +131,11 @@ public abstract class SWTNativeComponent extends NativeComponent {
     }
 
     @Override
+    protected boolean isNativeComponentEnabled() {
+      return isControlParentEnabled();
+    }
+
+    @Override
     protected void storeInHiddenParent() {
       if(Boolean.parseBoolean(NSSystemPropertySWT.COMPONENTS_DISABLEHIDDENPARENTREPARENTING.get())) {
         throw new IllegalStateException("Storing to a hidden parent is not supported!");
@@ -1165,7 +1170,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
       if(control == null || control.isDisposed()) {
         return null;
       }
-      control.getParent().setEnabled((Boolean)args[0]);
+      control.getShell().setEnabled((Boolean)args[0]);
       if((Boolean)args[1]) {
         Point size = control.getParent().getSize();
         size.y -= 1;
@@ -1198,6 +1203,10 @@ public abstract class SWTNativeComponent extends NativeComponent {
   }
 
   private boolean isControlParentEnabled = true;
+
+  private boolean isControlParentEnabled() {
+    return isControlParentEnabled;
+  }
 
   private void setControlParentEnabled(boolean isEnabled, boolean isForcingRepaint) {
     if(isEnabled == isControlParentEnabled) {

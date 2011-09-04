@@ -39,6 +39,7 @@ public class Utils {
   private Utils() {}
 
   public static final boolean IS_JAVA_6_OR_GREATER = SystemProperty.JAVA_VERSION.get().compareTo("1.6") >= 0;
+  public static final boolean IS_JAVA_7_OR_GREATER = SystemProperty.JAVA_VERSION.get().compareTo("1.7") >= 0;
 
   public static final boolean IS_MAC;
   public static final boolean IS_WINDOWS;
