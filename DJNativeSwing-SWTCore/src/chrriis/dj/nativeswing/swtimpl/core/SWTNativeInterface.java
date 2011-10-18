@@ -904,7 +904,12 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
       if(peerVMProcessFactory == null) {
         peerVMProcessFactory = new DefaultPeerVMProcessFactory();
       }
-      Process p = peerVMProcessFactory.createProcess(classPathList.toArray(new String[0]), systemPropertiesMap, vmParamList.toArray(new String[0]), mainClass, mainClassParameterList.toArray(new String[0]));
+      Process p = null;
+      try {
+        p = peerVMProcessFactory.createProcess(classPathList.toArray(new String[0]), systemPropertiesMap, vmParamList.toArray(new String[0]), mainClass, mainClassParameterList.toArray(new String[0]));
+      } catch(Exception e) {
+        throw new IllegalStateException("Failed to spawn the peer VM!", e);
+      }
       if(p == null) {
         throw new IllegalStateException("Failed to spawn the peer VM!");
       }

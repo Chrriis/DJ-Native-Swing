@@ -105,6 +105,7 @@ public class DefaultPeerVMProcessFactory implements PeerVMProcessFactory {
         try {
           return new ProcessBuilder(argList).start();
         } catch(IOException e) {
+          throw new IllegalStateException(e);
         }
       }
     }
