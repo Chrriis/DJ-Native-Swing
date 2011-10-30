@@ -13,6 +13,7 @@ Licence terms: LGPL (see licence.txt)
 - JHTMLEditor timeout is slightly increased and can be changed.
 - Call to display.dispose() when closing the native interface for better cleanup.
 - TinyMCE upgrade to 3.4.3.2.
+- hasFocus() on native peer can be called from outside the UI thread.
 
 
 * Version 1.0.1 (March 18, 2011):

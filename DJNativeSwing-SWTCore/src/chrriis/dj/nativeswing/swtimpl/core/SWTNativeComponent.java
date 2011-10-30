@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.MenuSelectionManager;
@@ -1240,11 +1241,26 @@ public abstract class SWTNativeComponent extends NativeComponent {
   private static class CMN_hasFocus extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
-      Control control = getControl();
-      return control.isDisposed()? false: control.isFocusControl();
+      final Control control = getControl();
+      if(control.isDisposed()) {
+        return false;
+      }
+      if(!NativeInterface.isUIThread(true)) {
+        final AtomicBoolean result = new AtomicBoolean();
+        control.getDisplay().syncExec(new Runnable() {
+          public void run() {
+            result.set(control.isDisposed()? false: control.isFocusControl());
+          }
+        });
+        return result.get();
+      }
+      return control.isFocusControl();
     }
   }
 
+  /**
+   * This method can be called from a non-UI thread.
+   */
   @Override
   public boolean hasFocus() {
     boolean hasFocus = super.hasFocus();
