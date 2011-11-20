@@ -90,7 +90,7 @@ public class DefaultPeerVMProcessFactory implements PeerVMProcessFactory {
             // This is not a perfect escaping, but there does not seem to be one. Try to show with quotes: "c:\temp", "c:\temp\", and "c:\temp\\"...
             value = value.replace("\\\"", "\"").replace("\"", "\\\"");
           }
-		      argList.add("-D" + propertyEntry.getKey() + "=" + value);
+          argList.add("-D" + propertyEntry.getKey() + "=" + value);
         }
         // Class path.
         argList.add("-classpath");
