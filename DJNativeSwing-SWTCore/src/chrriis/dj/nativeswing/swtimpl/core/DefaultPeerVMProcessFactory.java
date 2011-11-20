@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import chrriis.common.SystemProperty;
+import chrriis.common.Utils;
 import chrriis.dj.nativeswing.swtimpl.NSSystemPropertySWT;
 import chrriis.dj.nativeswing.swtimpl.PeerVMProcessFactory;
 
@@ -81,7 +82,15 @@ public class DefaultPeerVMProcessFactory implements PeerVMProcessFactory {
         }
         // System properties
         for(Map.Entry<String, String> propertyEntry: systemPropertiesMap.entrySet()) {
-          argList.add("-D" + propertyEntry.getKey() + "=" + propertyEntry.getValue());
+          String value = propertyEntry.getValue();
+          if(Utils.IS_WINDOWS) {
+      	    // On Windows, double quotes cut the property so we have to add a \ before.
+            // But! if there is a sequence like \\", then the property is cut too...
+            // Because such sequence happens in end of paths, too bad, we drop the last ending \
+            // This is not a perfect escaping, but there does not seem to be one. Try to show with quotes: "c:\temp", "c:\temp\", and "c:\temp\\"...
+            value = value.replace("\\\"", "\"").replace("\"", "\\\"");
+          }
+		  argList.add("-D" + propertyEntry.getKey() + "=" + value);
         }
         // Class path.
         argList.add("-classpath");
