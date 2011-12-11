@@ -8,6 +8,7 @@
 package chrriis.dj.nativeswing.swtimpl.demo.examples.win32.shellexplorer;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -41,24 +42,19 @@ public class SimpleWShellExplorerExample extends JPanel {
     JPanel playerPanel = new JPanel(new BorderLayout());
     playerPanel.setBorder(BorderFactory.createTitledBorder("Native Shell Explorer component"));
     final JWShellExplorer shellExplorer = new JWShellExplorer();
-    shellExplorer.addShellExplorerListener(new ShellExplorerListener() {
-      public void documentComplete(ShellExplorerDocumentCompleteEvent e) {
-        System.err.println("in: " + e.getLocation());
-      }
-    });
     playerPanel.add(shellExplorer, BorderLayout.CENTER);
     add(playerPanel, BorderLayout.CENTER);
     // Create the components that allow to load a file in the shell explorer.
     GridBagLayout gridBag = new GridBagLayout();
     GridBagConstraints cons = new GridBagConstraints();
-    JPanel playerFilePanel = new JPanel(gridBag);
+    JPanel shellExplorerFilePanel = new JPanel(gridBag);
     JLabel playerFileLabel = new JLabel("File: ");
     cons.gridx = 0;
     cons.gridy = 0;
     cons.insets = new Insets(2, 2, 2, 0);
     cons.fill = GridBagConstraints.HORIZONTAL;
     gridBag.setConstraints(playerFileLabel, cons);
-    playerFilePanel.add(playerFileLabel);
+    shellExplorerFilePanel.add(playerFileLabel);
     final JTextField playerFileTextField = new JTextField();
     cons.gridx++;
     cons.weightx = 1;
@@ -73,7 +69,7 @@ public class SimpleWShellExplorerExample extends JPanel {
         loadPlayerFileRunnable.run();
       }
     });
-    playerFilePanel.add(playerFileTextField);
+    shellExplorerFilePanel.add(playerFileTextField);
     JButton playerFileButton = new JButton("...");
     cons.gridx++;
     cons.insets = new Insets(2, 2, 2, 2);
@@ -92,8 +88,17 @@ public class SimpleWShellExplorerExample extends JPanel {
         }
       }
     });
-    playerFilePanel.add(playerFileButton);
-    add(playerFilePanel, BorderLayout.NORTH);
+    shellExplorerFilePanel.add(playerFileButton);
+    add(shellExplorerFilePanel, BorderLayout.NORTH);
+    JPanel statusPane = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+    final JLabel statusLabel = new JLabel("Document Complete: ");
+    statusPane.add(statusLabel);
+    shellExplorer.addShellExplorerListener(new ShellExplorerListener() {
+      public void documentComplete(ShellExplorerDocumentCompleteEvent e) {
+        statusLabel.setText("Document Complete: " + e.getLocation());
+      }
+    });
+    add(statusPane, BorderLayout.SOUTH);
   }
 
   /* Standard main method to try that test as a standalone application. */
