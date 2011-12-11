@@ -7,6 +7,7 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 1.0.2 (xxxxxxxxxxxxxx):
 
+- JWShellExplorer (win32).
 - Improvements to focus issues on Java 7.
 - Fix in paintComponent.
 - Fixed a freeze when quitting the application on Mac (shutdown hook not added).

@@ -7,6 +7,7 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 1.0.2 (xxxxxxxxxxxxxx):
 
+- Migration to Git.
 - Improvements to focus issues on Java 7.
 - Logic for overlapping components is improved.
 - Proxied paths use Base64url encoding instead of URL encoding.

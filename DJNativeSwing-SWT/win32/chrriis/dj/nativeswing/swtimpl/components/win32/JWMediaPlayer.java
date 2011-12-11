@@ -19,7 +19,7 @@ import chrriis.dj.nativeswing.swtimpl.components.win32.internal.INativeWMediaPla
 import chrriis.dj.nativeswing.swtimpl.internal.NativeCoreObjectFactory;
 
 /**
- * A multimedia player, based on the Window Media Player (only avaialable on the Windows operating system).<br/>
+ * A multimedia player, based on the Windows Media Player (only available on the Windows operating system).<br/>
  * Methods execute when this component is initialized. If the component is not initialized, methods will be executed as soon as it gets initialized.
  * If the initialization fails, the methods will not have any effect. The results from methods have relevant values only when the component is valid.
  * @author Christopher Deckers

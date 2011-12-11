@@ -48,6 +48,7 @@ import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.WebBrowserFunctio
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.XPCOMDownloadManager;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.XPCOMToggleEditionMode;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.win32.multimediaplayer.SimpleWMediaPlayerExample;
+import chrriis.dj.nativeswing.swtimpl.demo.examples.win32.shellexplorer.SimpleWShellExplorerExample;
 
 /**
  * @author Christopher Deckers
@@ -100,6 +101,9 @@ public class DemoExampleDefinitionLoader {
     }));
     exampleGroupList.add(new ExampleGroup("JWMediaPlayer (win32)", new Example[] {
         new Example("Simple Example", SimpleWMediaPlayerExample.class, "Load a movie/sound file to an embedded multimedia player.", true, System.getProperty("os.name").startsWith("Windows"), "This example is only available on a Windows operating system."),
+    }));
+    exampleGroupList.add(new ExampleGroup("JWShellExplorer (win32)", new Example[] {
+        new Example("Simple Example", SimpleWShellExplorerExample.class, "Load a file to an embedded shell explorer.", true, System.getProperty("os.name").startsWith("Windows"), "This example is only available on a Windows operating system."),
     }));
     exampleGroupList.add(new ExampleGroup("Native Dialogs", new Example[] {
         new Example("Simple Example", NativeDialogs.class, "Use a file dialog or a directory dialog, and customize them to your needs.", true),
