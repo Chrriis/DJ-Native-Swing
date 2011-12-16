@@ -70,8 +70,8 @@ import com.sun.jna.examples.unix.X11.XVisualInfo;
 import com.sun.jna.examples.unix.X11.Xext;
 import com.sun.jna.examples.unix.X11.Xrender.XRenderPictFormat;
 import com.sun.jna.examples.win32.GDI32;
-import com.sun.jna.examples.win32.User32;
 import com.sun.jna.examples.win32.GDI32.BITMAPINFO;
+import com.sun.jna.examples.win32.User32;
 import com.sun.jna.examples.win32.User32.BLENDFUNCTION;
 import com.sun.jna.examples.win32.User32.POINT;
 import com.sun.jna.examples.win32.User32.SIZE;
@@ -454,6 +454,10 @@ public class WindowUtils {
             // do nothing
         }
 
+        public void setWindowClickThrough(Window w, boolean isClickThrough) {
+          // do nothing
+        }
+        
         protected void setDoubleBuffered(Component root, boolean buffered) {
             if (root instanceof JComponent) {
                 ((JComponent)root).setDoubleBuffered(buffered);
@@ -891,6 +895,28 @@ public class WindowUtils {
             });
         }
 
+        @Override
+        public void setWindowClickThrough(final Window w, final boolean isClickThrough) {
+          if (!(w instanceof RootPaneContainer)) {
+            throw new IllegalArgumentException("Window must be a RootPaneContainer");
+        }
+        whenDisplayable(w, new Runnable() {
+            public void run() {
+                User32 user = User32.INSTANCE;
+                HWND hWnd = getHWnd(w);
+                int flags = user.GetWindowLong(hWnd, User32.GWL_EXSTYLE);
+                if (isClickThrough) {
+                    flags |= User32.WS_EX_TRANSPARENT;
+                    user.SetWindowLong(hWnd, User32.GWL_EXSTYLE, flags);
+                }
+                else if (!isClickThrough) {
+                    flags &= ~User32.WS_EX_TRANSPARENT;
+                    user.SetWindowLong(hWnd, User32.GWL_EXSTYLE, flags);
+                }
+            }
+        });
+        }
+        
         @Override
 		public void setWindowMask(final Component w, final Shape mask) {
             if (mask instanceof Area && ((Area)mask).isPolygonal()) {
@@ -1738,6 +1764,10 @@ public class WindowUtils {
 	 */
 	public static void setWindowMask(Window w, Rectangle[] rectangles) {
 		getInstance().setWindowMask(w, rectangles);
+	}
+	
+	public static void setWindowClickThrough(Window w, boolean isClickThrough) {
+	  getInstance().setWindowClickThrough(w, isClickThrough);
 	}
 
 }
