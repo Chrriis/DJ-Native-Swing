@@ -258,6 +258,10 @@ abstract class MessagingInterface {
             synchronized(RECEIVER_LOCK) {
               boolean isFirst = true;
               while(receivedMessageList.isEmpty()) {
+                if(!isAlive()) {
+                  printFailedInvocation(message);
+                  return null;
+                }
                 if(!isFirst) {
                   isFirst = true;
                   if(isNativeSide()) {

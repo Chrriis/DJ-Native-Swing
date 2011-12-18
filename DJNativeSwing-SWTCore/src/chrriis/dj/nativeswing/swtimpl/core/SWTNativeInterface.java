@@ -1130,6 +1130,20 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
         Runtime.getRuntime().addShutdownHook(new Thread() {
           @Override
           public void run() {
+            // There used to be cases in the past where VM was not closed properly.
+            // To prevent this case, we forcibly halt the VM after a timeout
+            Thread t = new Thread("Forced VM termination thread") {
+              @Override
+              public void run() {
+                try {
+                  sleep(20000);
+                } catch (InterruptedException e) {
+                }
+                Runtime.getRuntime().halt(-1);
+              }
+            };
+            t.setDaemon(false);
+            t.start();
             destroyControls();
           }
         });
