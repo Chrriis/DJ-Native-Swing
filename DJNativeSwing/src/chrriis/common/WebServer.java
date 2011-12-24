@@ -780,6 +780,10 @@ public class WebServer {
   }
 
   public String getURLPrefix() {
+    if(hostAddress.indexOf(':') >= 0) {
+      // IPv6
+      return "http://[" + hostAddress + "]:" + port;
+    }
     return "http://" + hostAddress + ":" + port;
   }
 
