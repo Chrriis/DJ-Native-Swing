@@ -45,6 +45,7 @@ import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.SendingCommands;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.SettingContent;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.SimpleWebBrowserExample;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.WebBrowserFunctionsExample;
+import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.WindowsAsTabs;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.XPCOMDownloadManager;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser.XPCOMToggleEditionMode;
 import chrriis.dj.nativeswing.swtimpl.demo.examples.win32.multimediaplayer.SimpleWMediaPlayerExample;
@@ -69,6 +70,7 @@ public class DemoExampleDefinitionLoader {
         new Example("Simple Example", SimpleWebBrowserExample.class, "This is a simple example that shows the basic configuration of an embedded web browser component.", true),
         new Example("Setting Content", SettingContent.class, "Set any HTML content to the web browser.", true),
         new Example("Javascript Execution", JavascriptExecution.class, "Execute some Javascript code in the current web browser page.", true),
+        new Example("Windows as Tabs", WindowsAsTabs.class, "Redirect all window opening actions to a tabbed pane as new tabs.", true),
         new Example("Navigation Control", NavigationControl.class, "Control the navigation happening in the web browser from the Java application.\nThis allows to block certain links and/or the creation of new windows, or to open links and/or new windows elsewhere.", true),
         new Example("Sending Commands", SendingCommands.class, "Use static links or the Javascript sendNSCommand(name, arg1, arg2, ...) function to send commands to the Java application.", true),
         new Example("Cookies", Cookies.class, "Access and modify the cookies set by the various browser instances.", true),
