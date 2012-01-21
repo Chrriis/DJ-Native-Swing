@@ -17,6 +17,7 @@ import java.awt.event.ItemListener;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -81,7 +82,7 @@ public class DemoPane extends JPanel {
                 SwingUtilities.invokeLater(new Runnable() {
                   public void run() {
                     JComponent c;
-                    Class<? extends JComponent> componentClass = example.getComponentClass();
+                    Class<?> exampleClass = example.getExampleClass();
                     if(!example.isAvailable()) {
                       GridBagConstraints cons = new GridBagConstraints();
                       cons.anchor = GridBagConstraints.WEST;
@@ -96,11 +97,17 @@ public class DemoPane extends JPanel {
                       }
                       c = panel;
                     } else {
-                      if(componentClass == null) {
+                      if(exampleClass == null) {
                         c = new JPanel();
                       } else {
                         try {
-                          c = componentClass.newInstance();
+                          if(JComponent.class.isAssignableFrom(exampleClass)) {
+                            c = (JComponent)exampleClass.newInstance();
+                          } else {
+                            Method m = exampleClass.getDeclaredMethod("createContent");
+                            m.setAccessible(true);
+                            c = (JComponent)m.invoke(null);
+                          }
                         } catch(Throwable t) {
                           t.printStackTrace();
                           return;
@@ -134,7 +141,7 @@ public class DemoPane extends JPanel {
                       contentPane.add(descriptionPanel, BorderLayout.NORTH);
                     }
                     contentPane.add(component, BorderLayout.CENTER);
-                    if(componentClass != null && example.isShowingSources()) {
+                    if(exampleClass != null && example.isShowingSources()) {
                       final JTabbedPane tabbedPane = new JTabbedPane();
                       tabbedPane.addTab("Demo", contentPane);
                       final JPanel sourcePanel = new JPanel(new BorderLayout());
@@ -143,13 +150,13 @@ public class DemoPane extends JPanel {
                         public void stateChanged(ChangeEvent e) {
                           if(tabbedPane.getSelectedComponent() == sourcePanel) {
                             tabbedPane.removeChangeListener(this);
-                            Class<? extends JComponent> componentClass = selectedExample.getComponentClass();
+                            Class<?> exampleClass = selectedExample.getExampleClass();
                             try {
                               InputStreamReader reader;
                               try {
-                                reader = new InputStreamReader(DemoPane.class.getResourceAsStream("/src/" + componentClass.getName().replace('.', '/') + ".java"), "UTF-8");
+                                reader = new InputStreamReader(DemoPane.class.getResourceAsStream("/src/" + exampleClass.getName().replace('.', '/') + ".java"), "UTF-8");
                               } catch(Exception ex) {
-                                reader = new InputStreamReader(new BufferedInputStream(new FileInputStream("src/" + componentClass.getName().replace('.', '/') + ".java")), "UTF-8");
+                                reader = new InputStreamReader(new BufferedInputStream(new FileInputStream("src/" + exampleClass.getName().replace('.', '/') + ".java")), "UTF-8");
                               }
 //                              sourcePanel.add(new JScrollPane(new SourcePane(reader)), BorderLayout.CENTER);
                               StringBuilder sb = new StringBuilder();

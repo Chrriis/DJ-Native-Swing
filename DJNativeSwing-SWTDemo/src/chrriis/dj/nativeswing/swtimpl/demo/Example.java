@@ -7,7 +7,6 @@
  */
 package chrriis.dj.nativeswing.swtimpl.demo;
 
-import javax.swing.JComponent;
 
 /**
  * @author Christopher Deckers
@@ -15,27 +14,27 @@ import javax.swing.JComponent;
 public class Example {
 
   protected String name;
-  protected Class<? extends JComponent> componentClass;
+  protected Class<?> exampleClass;
   protected String description;
   protected boolean isShowingSources;
   protected boolean isAvailable;
   protected String notAvailableMessage;
 
-  public Example(String name, Class<? extends JComponent> componentClass, String description, boolean isShowingSources) {
-    this(name, componentClass, description, isShowingSources, true, null);
+  public Example(String name, Class<?> exampleClass, String description, boolean isShowingSources) {
+    this(name, exampleClass, description, isShowingSources, true, null);
   }
 
-  public Example(String name, Class<? extends JComponent> componentClass, String description, boolean isShowingSources, boolean isAvailable, String notAvailableMessage) {
+  public Example(String name, Class<?> exampleClass, String description, boolean isShowingSources, boolean isAvailable, String notAvailableMessage) {
     this.name = name;
-    this.componentClass = componentClass;
+    this.exampleClass = exampleClass;
     this.description = description;
     this.isShowingSources = isShowingSources;
     this.isAvailable = isAvailable;
     this.notAvailableMessage = notAvailableMessage;
   }
 
-  public Class<? extends JComponent> getComponentClass() {
-    return componentClass;
+  public Class<?> getExampleClass() {
+    return exampleClass;
   }
 
   public String getName() {
