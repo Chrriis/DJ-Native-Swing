@@ -218,8 +218,8 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
         // We can detect that the call does not originate from an AWT Component subclass.
         mainLoop: for(StackTraceElement ste: Thread.currentThread().getStackTrace()) {
           try {
-            Class steClass = Class.forName(ste.getClassName());
-            for(Class clazz = steClass; clazz != null; clazz = clazz.getSuperclass()) {
+            Class<?> steClass = Class.forName(ste.getClassName());
+            for(Class<?> clazz = steClass; clazz != null; clazz = clazz.getSuperclass()) {
               if(clazz.getName().equals("java.awt.Component")) {
                 System.err.println("On Mac, \"NativeInterface.initialize()\"/\"NativeInterface.open()\" should not be called after AWT static initializers have run, otherwise there can be all sorts of side effects (non-functional modal dialogs, etc.). Generally, the problem is when the \"main(String[])\" method is located inside an AWT component subclass and the fix is to move that main method to a standalone class. The problematic class here is \"" + steClass.getName() + "\"");
                 break mainLoop;
