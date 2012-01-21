@@ -247,8 +247,6 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
       } else {
         OutProcess.initialize();
       }
-      // Tweak AWT/Swing, after SWT has finished initializing or else there can be stability issues.
-      NativeSwing.initialize();
       Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
         public void eventDispatched(AWTEvent e) {
           KeyEvent ke = (KeyEvent)e;
@@ -576,6 +574,8 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
     private static void initialize() {
       Device.DEBUG = Boolean.parseBoolean(NSSystemPropertySWT.SWT_DEVICE_DEBUG.get());
       if(Utils.IS_MAC && "applet".equals(NSSystemProperty.DEPLOYMENT_TYPE.get())) {
+        // Applets obviously have AWT initialized before SWT...
+        NativeSwing.initialize();
         runWithMacExecutor(new Runnable() {
           public void run() {
             findSWTDisplay();
@@ -596,6 +596,8 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
             throw e;
           }
         }
+        // Tweak AWT/Swing, after SWT has finished initializing or else there can be stability issues.
+        NativeSwing.initialize();
       }
       if(!Utils.IS_MAC || Boolean.parseBoolean(NSSystemPropertySWT.INTERFACE_INPROCESS_FORCESHUTDOWNHOOK.get())) {
         Runtime.getRuntime().addShutdownHook(new Thread("NativeSwing Shutdown Hook") {
@@ -714,6 +716,7 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
     }
 
     private static void initialize() {
+      NativeSwing.initialize();
       Runtime.getRuntime().addShutdownHook(new Thread() {
         @Override
         public void run() {
