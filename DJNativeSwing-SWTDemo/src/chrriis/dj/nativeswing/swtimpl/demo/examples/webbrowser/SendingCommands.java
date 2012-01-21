@@ -11,6 +11,7 @@ import java.awt.BorderLayout;
 import java.util.Arrays;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -27,12 +28,11 @@ import chrriis.dj.nativeswing.swtimpl.components.WebBrowserCommandEvent;
 /**
  * @author Christopher Deckers
  */
-public class SendingCommands extends JPanel {
+public class SendingCommands {
 
   protected static final String LS = System.getProperty("line.separator");
 
-  public SendingCommands() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
     JPanel contentPane = new JPanel(new BorderLayout(5, 5));
     JPanel commandPanel = new JPanel(new BorderLayout());
     commandPanel.add(new JLabel("Received command: "), BorderLayout.WEST);
@@ -77,18 +77,18 @@ public class SendingCommands extends JPanel {
         "</html>");
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
     contentPane.add(webBrowserPanel, BorderLayout.CENTER);
-    add(contentPane, BorderLayout.CENTER);
+    return contentPane;
   }
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new SendingCommands(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

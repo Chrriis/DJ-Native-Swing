@@ -17,6 +17,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -32,17 +33,17 @@ import chrriis.dj.nativeswing.swtimpl.components.JFlashPlayer;
 /**
  * @author Christopher Deckers
  */
-public class FunctionCalls extends JPanel {
+public class FunctionCalls {
 
-  public FunctionCalls() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
+    JPanel contentPane = new JPanel(new BorderLayout());
     JPanel flashPlayerPanel = new JPanel(new BorderLayout());
     flashPlayerPanel.setBorder(BorderFactory.createTitledBorder("Native Flash Player component"));
     final JFlashPlayer flashPlayer = new JFlashPlayer();
     // Flash Demo from Paulus Tuerah (www.goldenstudios.or.id)
-    flashPlayer.load(getClass(), "resource/FlashPlayerInteractions.swf");
+    flashPlayer.load(FunctionCalls.class, "resource/FlashPlayerInteractions.swf");
     flashPlayerPanel.add(flashPlayer, BorderLayout.CENTER);
-    add(flashPlayerPanel, BorderLayout.CENTER);
+    contentPane.add(flashPlayerPanel, BorderLayout.CENTER);
     GridBagLayout gridBag = new GridBagLayout();
     JPanel interactionsPanel = new JPanel(gridBag);
     interactionsPanel.setBorder(BorderFactory.createTitledBorder("Java Interactions"));
@@ -76,7 +77,7 @@ public class FunctionCalls extends JPanel {
     final JLabel commandValueLabel = new JLabel("-");
     gridBag.setConstraints(commandValueLabel, cons);
     interactionsPanel.add(commandValueLabel);
-    add(interactionsPanel, BorderLayout.SOUTH);
+    contentPane.add(interactionsPanel, BorderLayout.SOUTH);
     // Attach the listeners
     getterButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -103,17 +104,18 @@ public class FunctionCalls extends JPanel {
         }
       }
     });
+    return contentPane;
   }
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new FunctionCalls(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

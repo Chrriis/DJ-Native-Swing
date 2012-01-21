@@ -15,6 +15,7 @@ import java.io.InputStream;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -32,19 +33,19 @@ import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
 /**
  * @author Christopher Deckers
  */
-public class Cookies extends JPanel {
+public class Cookies {
 
-  public Cookies() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
+    JPanel contentPane = new JPanel(new BorderLayout());
     JPanel webBrowserPanel = new JPanel(new BorderLayout());
     webBrowserPanel.setBorder(BorderFactory.createTitledBorder("Native Web Browser component"));
     final JWebBrowser webBrowser = new JWebBrowser();
     webBrowser.setBarsVisible(false);
     webBrowser.setStatusBarVisible(true);
-    final String url = WebServer.getDefaultWebServer().getDynamicContentURL(getClass().getName(), "index.html");
+    final String url = WebServer.getDefaultWebServer().getDynamicContentURL(Cookies.class.getName(), "index.html");
     webBrowser.navigate(url);
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
-    add(webBrowserPanel, BorderLayout.CENTER);
+    contentPane.add(webBrowserPanel, BorderLayout.CENTER);
     JPanel cookiesPanel = new JPanel(new BorderLayout());
     cookiesPanel.setBorder(BorderFactory.createTitledBorder("Get/Set Cookies"));
     JPanel getSetNorthPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
@@ -79,7 +80,8 @@ public class Cookies extends JPanel {
     });
     getSetSouthPanel.add(getLabel);
     cookiesPanel.add(getSetSouthPanel, BorderLayout.SOUTH);
-    add(cookiesPanel, BorderLayout.SOUTH);
+    contentPane.add(cookiesPanel, BorderLayout.SOUTH);
+    return contentPane;
   }
 
   private static final String LS = Utils.LINE_SEPARATOR;
@@ -136,13 +138,13 @@ public class Cookies extends JPanel {
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new Cookies(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

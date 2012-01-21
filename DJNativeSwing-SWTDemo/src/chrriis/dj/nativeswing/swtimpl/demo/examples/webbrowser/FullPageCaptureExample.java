@@ -20,6 +20,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -35,19 +36,20 @@ import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
 /**
  * @author Christopher Deckers
  */
-public class FullPageCaptureExample extends JPanel {
+public class FullPageCaptureExample {
 
   private static final String LS = System.getProperty("line.separator");
-  private static final Dimension THUMBNAIL_SIZE = new Dimension(400, 300);
 
-  public FullPageCaptureExample() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
+    // Constant is placed in code and not in class, because Dimension contains a static initializer that loads AWT, and NativeSwing initialization must happen first.
+    final Dimension THUMBNAIL_SIZE = new Dimension(400, 300);
+    JPanel contentPane = new JPanel(new BorderLayout());
     JPanel webBrowserPanel = new JPanel(new BorderLayout());
     webBrowserPanel.setBorder(BorderFactory.createTitledBorder("Native Web Browser component"));
     final JWebBrowser webBrowser = new JWebBrowser();
     webBrowser.navigate("http://www.google.com");
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
-    add(webBrowserPanel, BorderLayout.CENTER);
+    contentPane.add(webBrowserPanel, BorderLayout.CENTER);
     // Create an panel with a screen capture button.
     JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 4));
     JButton captureButton = new JButton("Full-page capture");
@@ -111,18 +113,19 @@ public class FullPageCaptureExample extends JPanel {
       }
     });
     southPanel.add(captureButton);
-    add(southPanel, BorderLayout.SOUTH);
+    contentPane.add(southPanel, BorderLayout.SOUTH);
+    return contentPane;
   }
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new FullPageCaptureExample(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

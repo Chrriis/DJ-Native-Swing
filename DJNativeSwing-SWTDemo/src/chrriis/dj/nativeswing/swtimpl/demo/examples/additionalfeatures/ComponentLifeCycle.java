@@ -32,15 +32,16 @@ import chrriis.dj.nativeswing.swtimpl.demo.examples.flashplayer.SimpleFlashExamp
 /**
  * @author Christopher Deckers
  */
-public class ComponentLifeCycle extends JPanel {
+public class ComponentLifeCycle {
 
-  public ComponentLifeCycle() {
-    super(new GridLayout(0, 1, 0, 0));
-    addLifeCyclePane(false);
-    addLifeCyclePane(true);
+  public static JComponent createContent() {
+    JPanel contentPane = new JPanel(new GridLayout(0, 1, 0, 0));
+    addLifeCyclePane(contentPane, false);
+    addLifeCyclePane(contentPane, true);
+    return contentPane;
   }
 
-  private void addLifeCyclePane(final boolean isForcedInitializationType) {
+  private static void addLifeCyclePane(JPanel contentPane, final boolean isForcedInitializationType) {
     JPanel lifeCyclePane = new JPanel(new BorderLayout(5, 0));
     lifeCyclePane.setBorder(BorderFactory.createTitledBorder(isForcedInitializationType? "Forced initialization life cycle": "Default life cycle"));
     final JPanel componentPane = new JPanel(new BorderLayout());
@@ -52,7 +53,7 @@ public class ComponentLifeCycle extends JPanel {
     final JTextArea logTextArea = new JTextArea();
     logTextArea.setEditable(false);
     lifeCyclePane.add(new JScrollPane(logTextArea));
-    add(lifeCyclePane);
+    contentPane.add(lifeCyclePane);
     componentPane.setPreferredSize(new Dimension(Math.max(componentPane.getPreferredSize().width, 150), 0));
     // Add listener
     createButton.addActionListener(new ActionListener() {
@@ -77,7 +78,7 @@ public class ComponentLifeCycle extends JPanel {
     });
   }
 
-  public JFlashPlayer createPlayerWithDefaultLyfeCycle(final JTextArea logTextArea, JComponent componentPane) {
+  private static JFlashPlayer createPlayerWithDefaultLyfeCycle(final JTextArea logTextArea, JComponent componentPane) {
     log(logTextArea, "- JFlashPlayer creation.");
     JFlashPlayer flashPlayer = new JFlashPlayer(JFlashPlayer.destroyOnFinalization());
     flashPlayer.setControlBarVisible(false);
@@ -104,7 +105,7 @@ public class ComponentLifeCycle extends JPanel {
     return flashPlayer;
   }
 
-  public JFlashPlayer createPlayerWithForcedInitializationLyfeCycle(final JTextArea logTextArea, JComponent componentPane) {
+  private static JFlashPlayer createPlayerWithForcedInitializationLyfeCycle(final JTextArea logTextArea, JComponent componentPane) {
     log(logTextArea, "- JFlashPlayer creation.");
     JFlashPlayer flashPlayer = new JFlashPlayer(JFlashPlayer.destroyOnFinalization());
     flashPlayer.setControlBarVisible(false);
@@ -133,20 +134,20 @@ public class ComponentLifeCycle extends JPanel {
     return flashPlayer;
   }
 
-  private void log(JTextArea logTextArea, String s) {
+  private static void log(JTextArea logTextArea, String s) {
     logTextArea.append((logTextArea.getText().length() > 0? Utils.LINE_SEPARATOR: "") + s);
     logTextArea.setCaretPosition(0);
   }
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new ComponentLifeCycle(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

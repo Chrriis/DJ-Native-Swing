@@ -20,6 +20,7 @@ import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -39,10 +40,10 @@ import chrriis.dj.nativeswing.swtimpl.components.WebBrowserNavigationParameters;
 /**
  * @author Christopher Deckers
  */
-public class NavigationParameters extends JPanel {
+public class NavigationParameters {
 
-  public NavigationParameters() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
+    JPanel contentPane = new JPanel(new BorderLayout());
     JPanel buttonPanel = new JPanel(new GridBagLayout());
     buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     buttonPanel.add(new JLabel("Custom Header:"), new GridBagConstraints(0, 0, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 1, 0), 0, 0));
@@ -57,10 +58,10 @@ public class NavigationParameters extends JPanel {
     buttonPanel.add(testPostDataValueTextField, new GridBagConstraints(2, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(1, 5, 0, 0), 0, 0));
     JButton testHeaderButton = new JButton("Test");
     buttonPanel.add(testHeaderButton, new GridBagConstraints(3, 0, 1, 2, 0, GridBagConstraints.WEST, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 5, 0, 0), 0, 0));
-    add(buttonPanel, BorderLayout.NORTH);
+    contentPane.add(buttonPanel, BorderLayout.NORTH);
     final JPanel webBrowserPanel = new JPanel(new BorderLayout());
     webBrowserPanel.setBorder(BorderFactory.createTitledBorder("Native Web Browser component"));
-    add(webBrowserPanel, BorderLayout.CENTER);
+    contentPane.add(webBrowserPanel, BorderLayout.CENTER);
     // Add the listeners
     testHeaderButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -76,12 +77,13 @@ public class NavigationParameters extends JPanel {
         postDataMap.put(testPostDataKeyTextField.getText(), testPostDataValueTextField.getText());
         parameters.setPostData(postDataMap);
         // Let's generate the page with the resulting HTTP headers dynamically.
-        webBrowser.navigate(WebServer.getDefaultWebServer().getDynamicContentURL(NavigationParameters.this.getClass().getName(), "header-viewer.html"), parameters);
+        webBrowser.navigate(WebServer.getDefaultWebServer().getDynamicContentURL(NavigationParameters.class.getName(), "header-viewer.html"), parameters);
         webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
         webBrowserPanel.revalidate();
         webBrowserPanel.repaint();
       }
     });
+    return contentPane;
   }
 
   protected static WebServerContent getWebServerContent(final HTTPRequest httpRequest) {
@@ -130,13 +132,13 @@ public class NavigationParameters extends JPanel {
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new NavigationParameters(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

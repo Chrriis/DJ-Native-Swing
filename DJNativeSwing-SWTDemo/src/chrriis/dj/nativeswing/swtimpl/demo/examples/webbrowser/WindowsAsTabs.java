@@ -9,6 +9,7 @@ package chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser;
 
 import java.awt.BorderLayout;
 
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -25,12 +26,12 @@ import chrriis.dj.nativeswing.swtimpl.components.WebBrowserWindowWillOpenEvent;
 /**
  * @author Christopher Deckers
  */
-public class WindowsAsTabs extends JPanel {
+public class WindowsAsTabs {
 
   protected static final String LS = System.getProperty("line.separator");
 
-  public WindowsAsTabs() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
+    JPanel contentPane = new JPanel(new BorderLayout());
     JTabbedPane tabbedPane = new JTabbedPane();
     tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
     JWebBrowser webBrowser = new JWebBrowser();
@@ -45,10 +46,11 @@ public class WindowsAsTabs extends JPanel {
         "</html>");
     addWebBrowserListener(tabbedPane, webBrowser);
     tabbedPane.addTab("Startup page", webBrowser);
-    add(tabbedPane, BorderLayout.CENTER);
+    contentPane.add(tabbedPane, BorderLayout.CENTER);
+    return contentPane;
   }
 
-  private void addWebBrowserListener(final JTabbedPane tabbedPane, final JWebBrowser webBrowser) {
+  private static void addWebBrowserListener(final JTabbedPane tabbedPane, final JWebBrowser webBrowser) {
     webBrowser.addWebBrowserListener(new WebBrowserAdapter() {
       @Override
       public void titleChanged(WebBrowserEvent e) {
@@ -78,13 +80,13 @@ public class WindowsAsTabs extends JPanel {
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new WindowsAsTabs(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

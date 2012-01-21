@@ -17,6 +17,7 @@ import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -33,12 +34,12 @@ import chrriis.dj.nativeswing.swtimpl.components.JHTMLEditor;
 /**
  * @author Christopher Deckers
  */
-public class CKEditorExample extends JPanel {
+public class CKEditorExample {
 
   protected static final String LS = System.getProperty("line.separator");
 
-  public CKEditorExample() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
+    final JPanel contentPane = new JPanel(new BorderLayout());
     Map<String, String> optionMap = new HashMap<String, String>();
     optionMap.put("toolbar", "[" +
         "  ['Source','-','Save','NewPage','Preview','-','Templates']," +
@@ -64,10 +65,10 @@ public class CKEditorExample extends JPanel {
     htmlEditor.addHTMLEditorListener(new HTMLEditorAdapter() {
       @Override
       public void saveHTML(HTMLEditorSaveEvent e) {
-        JOptionPane.showMessageDialog(CKEditorExample.this, "The data of the HTML editor could be saved anywhere...");
+        JOptionPane.showMessageDialog(contentPane, "The data of the HTML editor could be saved anywhere...");
       }
     });
-    add(htmlEditor, BorderLayout.CENTER);
+    contentPane.add(htmlEditor, BorderLayout.CENTER);
     JPanel southPanel = new JPanel(new BorderLayout());
     southPanel.setBorder(BorderFactory.createTitledBorder("Custom Controls"));
     JPanel middlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -86,7 +87,7 @@ public class CKEditorExample extends JPanel {
     JScrollPane scrollPane = new JScrollPane(htmlTextArea);
     scrollPane.setPreferredSize(new Dimension(0, 100));
     southPanel.add(scrollPane, BorderLayout.CENTER);
-    add(southPanel, BorderLayout.SOUTH);
+    contentPane.add(southPanel, BorderLayout.SOUTH);
     getHTMLButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         htmlTextArea.setText(htmlEditor.getHTMLContent());
@@ -99,17 +100,18 @@ public class CKEditorExample extends JPanel {
       }
     });
     htmlEditor.setHTMLContent(htmlTextArea.getText());
+    return contentPane;
   }
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new CKEditorExample(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

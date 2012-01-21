@@ -15,6 +15,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -32,14 +33,14 @@ import chrriis.dj.nativeswing.swtimpl.components.JHTMLEditor.HTMLEditorImplement
 /**
  * @author Christopher Deckers
  */
-public class EditorDirtyExample extends JPanel {
+public class EditorDirtyExample {
 
   protected static final String LS = System.getProperty("line.separator");
 
-  public EditorDirtyExample() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
+    JPanel contentPane = new JPanel(new BorderLayout());
     final JHTMLEditor htmlEditor = new JHTMLEditor(HTMLEditorImplementation.TinyMCE);
-    add(htmlEditor, BorderLayout.CENTER);
+    contentPane.add(htmlEditor, BorderLayout.CENTER);
     JPanel southPanel = new JPanel(new BorderLayout());
     JPanel dirtyPanel = new JPanel();
     dirtyPanel.setBorder(BorderFactory.createTitledBorder("Dirty State"));
@@ -78,7 +79,7 @@ public class EditorDirtyExample extends JPanel {
     scrollPane.setPreferredSize(new Dimension(0, 100));
     controlsPanel.add(scrollPane, BorderLayout.CENTER);
     southPanel.add(controlsPanel, BorderLayout.SOUTH);
-    add(southPanel, BorderLayout.SOUTH);
+    contentPane.add(southPanel, BorderLayout.SOUTH);
     getHTMLButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         htmlTextArea.setText(htmlEditor.getHTMLContent());
@@ -91,17 +92,18 @@ public class EditorDirtyExample extends JPanel {
       }
     });
     htmlEditor.setHTMLContent(htmlTextArea.getText());
+    return contentPane;
   }
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new EditorDirtyExample(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

@@ -16,6 +16,7 @@ import java.util.Arrays;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -32,10 +33,10 @@ import chrriis.dj.nativeswing.swtimpl.components.JFileDialog.SelectionMode;
 /**
  * @author Christopher Deckers
  */
-public class NativeDialogs extends JPanel {
+public class NativeDialogs {
 
-  public NativeDialogs() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
+    final JPanel contentPane = new JPanel(new BorderLayout());
     JPanel buttonPanel = new JPanel(new GridBagLayout());
     ButtonGroup buttonGroup = new ButtonGroup();
     GridBagConstraints cons = new GridBagConstraints();
@@ -69,19 +70,19 @@ public class NativeDialogs extends JPanel {
       public void actionPerformed(ActionEvent e) {
         if(basicRadioButton.isSelected()) {
           JFileDialog fileDialog = new JFileDialog();
-          fileDialog.show(NativeDialogs.this);
-          JOptionPane.showMessageDialog(NativeDialogs.this, "Selected file: " + fileDialog.getSelectedFileName());
+          fileDialog.show(contentPane);
+          JOptionPane.showMessageDialog(contentPane, "Selected file: " + fileDialog.getSelectedFileName());
           return;
         }
         if(multiSelectionRadioButton.isSelected()) {
           JFileDialog fileDialog = new JFileDialog();
           fileDialog.setSelectionMode(SelectionMode.MULTIPLE_SELECTION);
-          fileDialog.show(NativeDialogs.this);
+          fileDialog.show(contentPane);
           String fileNames = Arrays.toString(fileDialog.getSelectedFileNames());
           if(fileNames.length() > 100) {
             fileNames = fileNames.substring(0, 100) + "...";
           }
-          JOptionPane.showMessageDialog(NativeDialogs.this, "Selected files: " + fileNames);
+          JOptionPane.showMessageDialog(contentPane, "Selected files: " + fileNames);
           return;
         }
         if(filtersRadioButton.isSelected()) {
@@ -89,39 +90,40 @@ public class NativeDialogs extends JPanel {
           fileDialog.setDialogType(DialogType.SAVE_DIALOG_TYPE);
           fileDialog.setExtensionFilters(new String[] {"*.*", "*.mp3;*.avi", "*.txt;*.doc"}, new String[] {"All files", "Multimedia file (*.mp3, *.avi)", "Text document (*.txt, *.doc)"}, 1);
           fileDialog.setConfirmedOverwrite(true);
-          fileDialog.show(NativeDialogs.this);
-          JOptionPane.showMessageDialog(NativeDialogs.this, "Selected file: " + fileDialog.getSelectedFileName());
+          fileDialog.show(contentPane);
+          JOptionPane.showMessageDialog(contentPane, "Selected file: " + fileDialog.getSelectedFileName());
           return;
         }
         if(directoryRadioButton.isSelected()) {
           JDirectoryDialog directoryDialog = new JDirectoryDialog();
-          directoryDialog.show(NativeDialogs.this);
-          JOptionPane.showMessageDialog(NativeDialogs.this, "Selected directory: " + directoryDialog.getSelectedDirectory());
+          directoryDialog.show(contentPane);
+          JOptionPane.showMessageDialog(contentPane, "Selected directory: " + directoryDialog.getSelectedDirectory());
           return;
         }
         if(customizedDirectoryRadioButton.isSelected()) {
           JDirectoryDialog directoryDialog = new JDirectoryDialog();
           directoryDialog.setTitle("This is a GREAT dialog!");
           directoryDialog.setMessage("Choose a directory NOW!");
-          directoryDialog.show(NativeDialogs.this);
-          JOptionPane.showMessageDialog(NativeDialogs.this, "Selected directory: " + directoryDialog.getSelectedDirectory());
+          directoryDialog.show(contentPane);
+          JOptionPane.showMessageDialog(contentPane, "Selected directory: " + directoryDialog.getSelectedDirectory());
           return;
         }
       }
     });
     buttonPanel.add(showDialogButton, cons);
-    add(buttonPanel, BorderLayout.CENTER);
+    contentPane.add(buttonPanel, BorderLayout.CENTER);
+    return contentPane;
   }
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new NativeDialogs(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

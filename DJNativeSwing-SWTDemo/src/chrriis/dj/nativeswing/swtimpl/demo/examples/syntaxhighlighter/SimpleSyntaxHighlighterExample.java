@@ -9,8 +9,8 @@ package chrriis.dj.nativeswing.swtimpl.demo.examples.syntaxhighlighter;
 
 import java.awt.BorderLayout;
 
+import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import chrriis.common.UIUtils;
@@ -21,12 +21,11 @@ import chrriis.dj.nativeswing.swtimpl.components.JSyntaxHighlighter;
 /**
  * @author Christopher Deckers
  */
-public class SimpleSyntaxHighlighterExample extends JPanel {
+public class SimpleSyntaxHighlighterExample {
 
   private static final String LS = Utils.LINE_SEPARATOR;
 
-  public SimpleSyntaxHighlighterExample() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
     JSyntaxHighlighter syntaxHighlighter = new JSyntaxHighlighter();
     syntaxHighlighter.setContent(
         "/************************" + LS +
@@ -40,18 +39,18 @@ public class SimpleSyntaxHighlighterExample extends JPanel {
         "    public static void Bar(int firstParam) {}" + LS +
         "}"
         , JSyntaxHighlighter.ContentLanguage.CSharp);
-    add(syntaxHighlighter, BorderLayout.CENTER);
+    return syntaxHighlighter;
   }
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new SimpleSyntaxHighlighterExample(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

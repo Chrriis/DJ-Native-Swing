@@ -19,6 +19,7 @@ import java.util.Comparator;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -43,36 +44,32 @@ import chrriis.dj.nativeswing.swtimpl.utilities.FileTypeLauncher;
 /**
  * @author Christopher Deckers
  */
-public class FileAssociations extends JPanel {
+public class FileAssociations {
 
-  protected static Icon EMPTY_ICON = new Icon() {
-    public int getIconHeight() {
-      return FileTypeLauncher.getIconSize().height;
-    }
-    public int getIconWidth() {
-      return 0;
-    }
-    public void paintIcon(Component c, Graphics g, int x, int y) {
-    }
-  };
-
-  public FileAssociations() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
+    // Set in code and and not in class to avoid AWT to initialize before Native Swing.
+    final Icon EMPTY_ICON = new Icon() {
+      public int getIconHeight() {
+        return FileTypeLauncher.getIconSize().height;
+      }
+      public int getIconWidth() {
+        return 0;
+      }
+      public void paintIcon(Component c, Graphics g, int x, int y) {
+      }
+    };
+    final JPanel contentPane = new JPanel(new BorderLayout());
     JPanel loadingPanel = new JPanel(new GridBagLayout());
     loadingPanel.add(new JLabel("Please wait while the full list is being retrieved..."));
-    add(loadingPanel, BorderLayout.CENTER);
-    initialize();
-  }
-
-  protected void initialize() {
+    contentPane.add(loadingPanel, BorderLayout.CENTER);
     new Thread("NativeSwingDemo File Association Loader") {
       @Override
       public void run() {
         final FileTypeLauncher[] fileTypeLaunchers = FileTypeLauncher.getLaunchers();
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
-            removeAll();
-            JPanel contentPane = new JPanel(new BorderLayout());
+            contentPane.removeAll();
+            JPanel mainPane = new JPanel(new BorderLayout());
             final JTable table = new JTable() {
               @Override
               public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
@@ -114,7 +111,6 @@ public class FileAssociations extends JPanel {
               }
             };
             table.setModel(new TableSorter(tableModel, table.getTableHeader()) {
-              @SuppressWarnings("unchecked")
               @Override
               protected Comparator getComparator(int column) {
                 if(column == 0) {
@@ -127,7 +123,7 @@ public class FileAssociations extends JPanel {
                 return super.getComparator(column);
               }
             });
-            contentPane.add(new JScrollPane(table), BorderLayout.CENTER);
+            mainPane.add(new JScrollPane(table), BorderLayout.CENTER);
             JPanel fileLaunchPanel = new JPanel(new BorderLayout());
             fileLaunchPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 0, 4));
             fileLaunchPanel.add(new JLabel("File: "), BorderLayout.WEST);
@@ -140,7 +136,7 @@ public class FileAssociations extends JPanel {
                 if(fileChooser == null) {
                   fileChooser = new JFileChooser();
                 }
-                if(fileChooser.showOpenDialog(FileAssociations.this) == JFileChooser.APPROVE_OPTION) {
+                if(fileChooser.showOpenDialog(contentPane) == JFileChooser.APPROVE_OPTION) {
                   fileLaunchTextField.setText(fileChooser.getSelectedFile().getAbsolutePath());
                 }
               }
@@ -190,25 +186,26 @@ public class FileAssociations extends JPanel {
             });
             buttonPanel.add(launchAssociatedButton);
             fileLaunchPanel.add(buttonPanel, BorderLayout.SOUTH);
-            contentPane.add(fileLaunchPanel, BorderLayout.SOUTH);
-            add(contentPane, BorderLayout.CENTER);
-            revalidate();
-            repaint();
+            mainPane.add(fileLaunchPanel, BorderLayout.SOUTH);
+            contentPane.add(mainPane, BorderLayout.CENTER);
+            contentPane.revalidate();
+            contentPane.repaint();
           }
         });
       }
     }.start();
+    return contentPane;
   }
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new FileAssociations(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

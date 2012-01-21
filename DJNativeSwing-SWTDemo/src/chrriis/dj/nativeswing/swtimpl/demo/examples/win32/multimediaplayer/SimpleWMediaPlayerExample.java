@@ -21,6 +21,7 @@ import java.io.File;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -35,16 +36,16 @@ import chrriis.dj.nativeswing.swtimpl.components.win32.JWMediaPlayer;
 /**
  * @author Christopher Deckers
  */
-public class SimpleWMediaPlayerExample extends JPanel {
+public class SimpleWMediaPlayerExample {
 
-  public SimpleWMediaPlayerExample() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
+    final JPanel contentPane = new JPanel(new BorderLayout());
     // Create the player.
     JPanel playerPanel = new JPanel(new BorderLayout());
     playerPanel.setBorder(BorderFactory.createTitledBorder("Native Media Player component"));
     final JWMediaPlayer player = new JWMediaPlayer();
     playerPanel.add(player, BorderLayout.CENTER);
-    add(playerPanel, BorderLayout.CENTER);
+    contentPane.add(playerPanel, BorderLayout.CENTER);
     // Create the components that allow to load a file in the player.
     GridBagLayout gridBag = new GridBagLayout();
     GridBagConstraints cons = new GridBagConstraints();
@@ -82,7 +83,7 @@ public class SimpleWMediaPlayerExample extends JPanel {
         if(fileChooser == null) {
           fileChooser = new JFileChooser();
         }
-        if(fileChooser.showOpenDialog(SimpleWMediaPlayerExample.this) == JFileChooser.APPROVE_OPTION) {
+        if(fileChooser.showOpenDialog(contentPane) == JFileChooser.APPROVE_OPTION) {
           File selectedFile = fileChooser.getSelectedFile();
           playerFileTextField.setText(selectedFile.getAbsolutePath());
           loadPlayerFileRunnable.run();
@@ -90,7 +91,7 @@ public class SimpleWMediaPlayerExample extends JPanel {
       }
     });
     playerFilePanel.add(playerFileButton);
-    add(playerFilePanel, BorderLayout.NORTH);
+    contentPane.add(playerFilePanel, BorderLayout.NORTH);
     // Create the button pane with a check box to show/hide the control bar
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 4));
     player.setControlBarVisible(false);
@@ -101,18 +102,19 @@ public class SimpleWMediaPlayerExample extends JPanel {
       }
     });
     buttonPanel.add(controlBarCheckBox);
-    add(buttonPanel, BorderLayout.SOUTH);
+    contentPane.add(buttonPanel, BorderLayout.SOUTH);
+    return contentPane;
   }
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new SimpleWMediaPlayerExample(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

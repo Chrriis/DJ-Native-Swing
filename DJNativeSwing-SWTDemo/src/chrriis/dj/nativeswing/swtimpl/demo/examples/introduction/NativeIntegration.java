@@ -9,6 +9,7 @@ package chrriis.dj.nativeswing.swtimpl.demo.examples.introduction;
 
 import java.awt.BorderLayout;
 
+import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -16,12 +17,12 @@ import javax.swing.JScrollPane;
 /**
  * @author Christopher Deckers
  */
-public class NativeIntegration extends JPanel {
+public class NativeIntegration {
 
   protected static final String LS = System.getProperty("line.separator");
 
-  public NativeIntegration() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
+    JPanel contentPane = new JPanel(new BorderLayout());
     JEditorPane editorPane = new JEditorPane("text/html",
         "<html>" + LS +
         "  <body>" + LS +
@@ -42,7 +43,8 @@ public class NativeIntegration extends JPanel {
         "  </body>" + LS +
         "</html>");
     editorPane.setEditable(false);
-    add(new JScrollPane(editorPane));
+    contentPane.add(new JScrollPane(editorPane));
+    return contentPane;
   }
 
 }

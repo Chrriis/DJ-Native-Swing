@@ -11,8 +11,10 @@ import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -26,28 +28,32 @@ import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
 /**
  * @author Christopher Deckers
  */
-public class PseudoTransparency extends JPanel {
+public class PseudoTransparency {
 
-  private JWebBrowser webBrowser;
-
-  @Override
-  public boolean isOptimizedDrawingEnabled() {
-    // This indicates that the component allows layering of children.
-    return false;
-  }
-
-  public PseudoTransparency() {
-    super(null);
-    webBrowser = new JWebBrowser(JWebBrowser.constrainVisibility());
+  public static JComponent createContent() {
+    final JWebBrowser webBrowser = new JWebBrowser(JWebBrowser.constrainVisibility());
+    final AtomicBoolean isDisposedRef = new AtomicBoolean(false);
+    JPanel contentPane = new JPanel(null) {
+      @Override
+      public boolean isOptimizedDrawingEnabled() {
+        // This indicates that the component allows layering of children.
+        return false;
+      }
+      @Override
+      public void removeNotify() {
+        super.removeNotify();
+        isDisposedRef.set(true);
+      }
+    };
     webBrowser.setBarsVisible(false);
     webBrowser.navigate("http://www.google.com");
     webBrowser.setBounds(50, 50, 500, 400);
-    add(webBrowser);
+    contentPane.add(webBrowser);
     JLabel descriptionLabel = new JLabel("Grab and move that image over the native component: ");
     descriptionLabel.setSize(descriptionLabel.getPreferredSize());
     descriptionLabel.setLocation(5, 15);
-    add(descriptionLabel);
-    ImageIcon icon = new ImageIcon(getClass().getResource("resource/DJIcon48x48.png"));
+    contentPane.add(descriptionLabel);
+    ImageIcon icon = new ImageIcon(PseudoTransparency.class.getResource("resource/DJIcon48x48.png"));
     final JLabel imageLabel = new JLabel(icon);
     MouseInputAdapter mouseInputAdapter = new MouseInputAdapter() {
       private Point originalMouseLocation;
@@ -69,21 +75,20 @@ public class PseudoTransparency extends JPanel {
     imageLabel.setSize(imageLabel.getPreferredSize());
     imageLabel.setLocation(descriptionLabel.getWidth(), 0);
     imageLabel.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
-    add(imageLabel);
+    contentPane.add(imageLabel);
     // Force label to be logically on top.
-    setComponentZOrder(imageLabel, 0);
-    updateBackgroundBuffer();
+    contentPane.setComponentZOrder(imageLabel, 0);
+    updateBackgroundBuffer(webBrowser, isDisposedRef);
+    return contentPane;
   }
 
-  private volatile boolean isDisposed;
-
-  private void updateBackgroundBuffer() {
+  private static void updateBackgroundBuffer(final JWebBrowser webBrowser, final AtomicBoolean isDisposedRef) {
     // we refresh the background buffer outside the UI thread, to minimize the overhead.
     new Thread("NativeSwing Pseudo Transparency Refresh") {
       @Override
       public void run() {
         int i = 0;
-        while(!isDisposed) {
+        while(!isDisposedRef.get()) {
           if(i == 0) {
             // Every now and then we refresh the full buffer.
             webBrowser.getNativeComponent().createBackBuffer();
@@ -102,21 +107,15 @@ public class PseudoTransparency extends JPanel {
     }.start();
   }
 
-  @Override
-  public void removeNotify() {
-    super.removeNotify();
-    isDisposed = true;
-  }
-
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new PseudoTransparency(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

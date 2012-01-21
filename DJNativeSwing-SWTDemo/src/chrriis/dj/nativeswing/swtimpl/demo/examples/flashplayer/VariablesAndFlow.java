@@ -15,6 +15,7 @@ import java.util.HashMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -32,19 +33,19 @@ import chrriis.dj.nativeswing.swtimpl.components.JFlashPlayer;
 /**
  * @author Christopher Deckers
  */
-public class VariablesAndFlow extends JPanel {
+public class VariablesAndFlow {
 
-  public VariablesAndFlow() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
+    JPanel contentPane = new JPanel(new BorderLayout());
     JPanel flashPlayerPanel = new JPanel(new BorderLayout());
     flashPlayerPanel.setBorder(BorderFactory.createTitledBorder("Native Flash Player component"));
     final JFlashPlayer flashPlayer = new JFlashPlayer();
     flashPlayer.setControlBarVisible(true);
     FlashPluginOptions flashLoadingOptions = new FlashPluginOptions();
     flashLoadingOptions.setVariables(new HashMap<String, String>() {{put("mytext", "My Text");}});
-    flashPlayer.load(getClass(), "resource/dyn_text_moving.swf", flashLoadingOptions);
+    flashPlayer.load(VariablesAndFlow.class, "resource/dyn_text_moving.swf", flashLoadingOptions);
     flashPlayerPanel.add(flashPlayer, BorderLayout.CENTER);
-    add(flashPlayerPanel, BorderLayout.CENTER);
+    contentPane.add(flashPlayerPanel, BorderLayout.CENTER);
     JPanel variablePanel = new JPanel(new BorderLayout());
     variablePanel.setBorder(BorderFactory.createTitledBorder("Get/Set Variables"));
     JPanel getSetNorthPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
@@ -80,18 +81,19 @@ public class VariablesAndFlow extends JPanel {
     });
     getSetSouthPanel.add(getLabel);
     variablePanel.add(getSetSouthPanel, BorderLayout.SOUTH);
-    add(variablePanel, BorderLayout.SOUTH);
+    contentPane.add(variablePanel, BorderLayout.SOUTH);
+    return contentPane;
   }
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new VariablesAndFlow(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

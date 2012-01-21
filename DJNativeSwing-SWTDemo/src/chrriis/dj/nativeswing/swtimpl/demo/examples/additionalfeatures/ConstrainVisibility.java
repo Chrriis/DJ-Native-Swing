@@ -13,6 +13,7 @@ import java.awt.Dimension;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
@@ -28,7 +29,7 @@ import chrriis.dj.nativeswing.swtimpl.demo.examples.flashplayer.SimpleFlashExamp
 /**
  * @author Christopher Deckers
  */
-public class ConstrainVisibility extends JPanel {
+public class ConstrainVisibility {
 
   protected static final String LS = System.getProperty("line.separator");
   protected static final int OFFSET_X = 150;
@@ -36,8 +37,8 @@ public class ConstrainVisibility extends JPanel {
   protected static final int WIDTH = 200;
   protected static final int HEIGHT = 200;
 
-  public ConstrainVisibility() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
+    JPanel contentPane = new JPanel(new BorderLayout());
     JLayeredPane layeredPane = new JLayeredPane();
     layeredPane.setOpaque(true);
     layeredPane.setBackground(new Color(200, 200, 255));
@@ -76,18 +77,19 @@ public class ConstrainVisibility extends JPanel {
     layeredPane.add(swingButton);
     layeredPane.add(webBrowser);
     layeredPane.setPreferredSize(new Dimension(600, 600));
-    add(new JScrollPane(layeredPane), BorderLayout.CENTER);
+    contentPane.add(new JScrollPane(layeredPane), BorderLayout.CENTER);
+    return contentPane;
   }
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new ConstrainVisibility(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

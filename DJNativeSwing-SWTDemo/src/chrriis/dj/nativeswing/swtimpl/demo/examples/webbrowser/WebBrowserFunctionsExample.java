@@ -12,6 +12,7 @@ import java.awt.Dimension;
 import java.util.Arrays;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -26,12 +27,12 @@ import chrriis.dj.nativeswing.swtimpl.components.WebBrowserFunction;
 /**
  * @author Christopher Deckers
  */
-public class WebBrowserFunctionsExample extends JPanel {
+public class WebBrowserFunctionsExample {
 
   private static final String LS = System.getProperty("line.separator");
 
-  public WebBrowserFunctionsExample() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
+    JPanel contentPane = new JPanel(new BorderLayout());
     JPanel webBrowserPanel = new JPanel(new BorderLayout());
     webBrowserPanel.setBorder(BorderFactory.createTitledBorder("Native Web Browser component"));
     JWebBrowser webBrowser = new JWebBrowser();
@@ -99,24 +100,25 @@ public class WebBrowserFunctionsExample extends JPanel {
         "</html>");
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
     webBrowserPanel.setPreferredSize(new Dimension(100, 200));
-    add(webBrowserPanel, BorderLayout.NORTH);
+    contentPane.add(webBrowserPanel, BorderLayout.NORTH);
     // Create an additional area to show the function calls.
     JPanel functionalCallsPanel = new JPanel(new BorderLayout());
     functionalCallsPanel.setBorder(BorderFactory.createTitledBorder("Java log for Javascript custom function calls"));
     functionCallsTextArea.setEditable(false);
     functionalCallsPanel.add(new JScrollPane(functionCallsTextArea));
-    add(functionalCallsPanel, BorderLayout.CENTER);
+    contentPane.add(functionalCallsPanel, BorderLayout.CENTER);
+    return contentPane;
   }
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new WebBrowserFunctionsExample(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

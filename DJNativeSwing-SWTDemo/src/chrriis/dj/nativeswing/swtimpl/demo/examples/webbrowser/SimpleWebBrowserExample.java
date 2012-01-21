@@ -28,7 +28,7 @@ import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
  */
 public class SimpleWebBrowserExample {
 
-  private static JComponent createContent() {
+  public static JComponent createContent() {
     JPanel contentPane = new JPanel(new BorderLayout());
     JPanel webBrowserPanel = new JPanel(new BorderLayout());
     webBrowserPanel.setBorder(BorderFactory.createTitledBorder("Native Web Browser component"));
@@ -51,8 +51,8 @@ public class SimpleWebBrowserExample {
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");

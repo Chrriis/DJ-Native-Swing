@@ -14,6 +14,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -25,16 +26,16 @@ import chrriis.common.UIUtils;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.components.DefaultWebBrowserDecorator;
 import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
-import chrriis.dj.nativeswing.swtimpl.components.WebBrowserDecorator;
 import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser.WebBrowserDecoratorFactory;
+import chrriis.dj.nativeswing.swtimpl.components.WebBrowserDecorator;
 
 /**
  * @author Christopher Deckers
  */
-public class CustomDecorators extends JPanel {
+public class CustomDecorators {
 
-  public CustomDecorators() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
+    JPanel contentPane = new JPanel(new BorderLayout());
     JPanel webBrowserPanel = new JPanel(new BorderLayout());
     webBrowserPanel.setBorder(BorderFactory.createTitledBorder("Native Web Browser component"));
     // We create a web browser that replaces its decorator.
@@ -46,7 +47,7 @@ public class CustomDecorators extends JPanel {
     };
     webBrowser.navigate("http://www.google.com");
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
-    add(webBrowserPanel, BorderLayout.CENTER);
+    contentPane.add(webBrowserPanel, BorderLayout.CENTER);
     JPanel southPanel = new JPanel();
     southPanel.setBorder(BorderFactory.createTitledBorder("Global change of decorator to customize a whole application"));
     JButton setCustomButton = new JButton("Set custom decorator for all instances");
@@ -67,7 +68,8 @@ public class CustomDecorators extends JPanel {
       }
     });
     southPanel.add(setDefaultsButton);
-    add(southPanel, BorderLayout.SOUTH);
+    contentPane.add(southPanel, BorderLayout.SOUTH);
+    return contentPane;
   }
 
   private static WebBrowserDecorator createCustomWebBrowserDecorator(JWebBrowser webBrowser, Component renderingComponent) {
@@ -103,13 +105,13 @@ public class CustomDecorators extends JPanel {
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new CustomDecorators(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

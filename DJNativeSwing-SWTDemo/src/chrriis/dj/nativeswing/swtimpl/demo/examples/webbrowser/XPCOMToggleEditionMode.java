@@ -14,6 +14,7 @@ import java.awt.event.ItemListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -32,16 +33,16 @@ import chrriis.dj.nativeswing.swtimpl.components.MozillaXPCOM;
 /**
  * @author Christopher Deckers
  */
-public class XPCOMToggleEditionMode extends JPanel {
+public class XPCOMToggleEditionMode {
 
-  public XPCOMToggleEditionMode() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
+    JPanel contentPane = new JPanel(new BorderLayout());
     JPanel webBrowserPanel = new JPanel(new BorderLayout());
     webBrowserPanel.setBorder(BorderFactory.createTitledBorder("Native Web Browser component"));
     final JWebBrowser webBrowser = new JWebBrowser(JWebBrowser.useXULRunnerRuntime());
     webBrowser.navigate("http://www.google.com");
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
-    add(webBrowserPanel, BorderLayout.CENTER);
+    contentPane.add(webBrowserPanel, BorderLayout.CENTER);
     // Create an additional bar allowing to toggle the edition mode of the web browser.
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 4));
     JCheckBox designModeCheckBox = new JCheckBox("Edition Mode (allows to type text or resize elements directly in the page)");
@@ -59,18 +60,19 @@ public class XPCOMToggleEditionMode extends JPanel {
       }
     });
     buttonPanel.add(designModeCheckBox);
-    add(buttonPanel, BorderLayout.SOUTH);
+    contentPane.add(buttonPanel, BorderLayout.SOUTH);
+    return contentPane;
   }
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new XPCOMToggleEditionMode(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

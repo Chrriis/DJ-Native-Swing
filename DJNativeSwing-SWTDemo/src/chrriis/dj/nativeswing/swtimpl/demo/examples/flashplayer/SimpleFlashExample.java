@@ -9,8 +9,8 @@ package chrriis.dj.nativeswing.swtimpl.demo.examples.flashplayer;
 
 import java.awt.BorderLayout;
 
+import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import chrriis.common.UIUtils;
@@ -20,24 +20,23 @@ import chrriis.dj.nativeswing.swtimpl.components.JFlashPlayer;
 /**
  * @author Christopher Deckers
  */
-public class SimpleFlashExample extends JPanel {
+public class SimpleFlashExample {
 
-  public SimpleFlashExample() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
     JFlashPlayer flashPlayer = new JFlashPlayer();
-    flashPlayer.load(getClass(), "resource/Movement-pointer_or_click.swf");
-    add(flashPlayer, BorderLayout.CENTER);
+    flashPlayer.load(SimpleFlashExample.class, "resource/Movement-pointer_or_click.swf");
+    return flashPlayer;
   }
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new SimpleFlashExample(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

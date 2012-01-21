@@ -21,6 +21,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -34,12 +35,12 @@ import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
 /**
  * @author Christopher Deckers
  */
-public class ThumbnailCreation extends JPanel {
-
-  private static final Dimension THUMBNAIL_SIZE = new Dimension(200, 150);
+public class ThumbnailCreation {
 
   private static abstract class ThumbnailPane extends JPanel {
 
+    public static final Dimension THUMBNAIL_SIZE = new Dimension(200, 150);
+    
     private JLabel thumbnailLabel;
 
     public ThumbnailPane(String title) {
@@ -83,16 +84,14 @@ public class ThumbnailCreation extends JPanel {
 
   }
 
-  private JWebBrowser webBrowser;
-
-  public ThumbnailCreation() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
+    JPanel contentPane = new JPanel(new BorderLayout());
     JPanel webBrowserPanel = new JPanel(new BorderLayout());
     webBrowserPanel.setBorder(BorderFactory.createTitledBorder("Web Browser component"));
-    webBrowser = new JWebBrowser();
+    final JWebBrowser webBrowser = new JWebBrowser();
     webBrowser.navigate("http://www.google.com");
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
-    add(webBrowserPanel, BorderLayout.CENTER);
+    contentPane.add(webBrowserPanel, BorderLayout.CENTER);
     JPanel eastPanel = new JPanel(new GridBagLayout());
     GridBagConstraints cons = new GridBagConstraints();
     cons.gridx = 0;
@@ -100,20 +99,21 @@ public class ThumbnailCreation extends JPanel {
     eastPanel.add(new ThumbnailPane("Full Web Browser") {
       @Override
       public void createThumbnail() {
-        ThumbnailCreation.this.createThumbnail(this, webBrowser);
+        ThumbnailCreation.createThumbnail(this, webBrowser);
       }
     }, cons);
     cons.gridy++;
     eastPanel.add(new ThumbnailPane("Native Area Only") {
       @Override
       public void createThumbnail() {
-        ThumbnailCreation.this.createThumbnail(this, webBrowser.getNativeComponent());
+        ThumbnailCreation.createThumbnail(this, webBrowser.getNativeComponent());
       }
     }, cons);
-    add(eastPanel, BorderLayout.EAST);
+    contentPane.add(eastPanel, BorderLayout.EAST);
+    return contentPane;
   }
 
-  private void createThumbnail(final ThumbnailPane thumbnailPane, final Component component) {
+  private static void createThumbnail(final ThumbnailPane thumbnailPane, final Component component) {
     final int cWidth = component.getWidth();
     final int cHeight = component.getHeight();
     if(cWidth <= 0 || cHeight <= 0) {
@@ -132,8 +132,8 @@ public class ThumbnailCreation extends JPanel {
           component.print(g);
           g.dispose();
         }
-        int tWidth = THUMBNAIL_SIZE.width;
-        int tHeight = THUMBNAIL_SIZE.height;
+        int tWidth = ThumbnailPane.THUMBNAIL_SIZE.width;
+        int tHeight = ThumbnailPane.THUMBNAIL_SIZE.height;
         final ImageIcon imageIcon;
         if(cWidth <= tWidth && cHeight <= tHeight) {
           imageIcon = new ImageIcon(image);
@@ -155,13 +155,13 @@ public class ThumbnailCreation extends JPanel {
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new ThumbnailCreation(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

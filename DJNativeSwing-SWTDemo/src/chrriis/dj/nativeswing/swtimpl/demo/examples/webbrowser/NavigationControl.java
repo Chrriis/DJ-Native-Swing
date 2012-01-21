@@ -9,6 +9,7 @@ package chrriis.dj.nativeswing.swtimpl.demo.examples.webbrowser;
 
 import java.awt.BorderLayout;
 
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -26,12 +27,12 @@ import chrriis.dj.nativeswing.swtimpl.components.WebBrowserWindowWillOpenEvent;
 /**
  * @author Christopher Deckers
  */
-public class NavigationControl extends JPanel {
+public class NavigationControl {
 
   protected static final String LS = System.getProperty("line.separator");
 
-  public NavigationControl() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
+    JPanel contentPane = new JPanel(new BorderLayout());
     final JTabbedPane tabbedPane = new JTabbedPane();
     tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
     final JWebBrowser webBrowser = new JWebBrowser();
@@ -115,18 +116,19 @@ public class NavigationControl extends JPanel {
       }
     });
     tabbedPane.addTab("Controled Browser", webBrowser);
-    add(tabbedPane, BorderLayout.CENTER);
+    contentPane.add(tabbedPane, BorderLayout.CENTER);
+    return contentPane;
   }
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new NavigationControl(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

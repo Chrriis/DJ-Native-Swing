@@ -12,6 +12,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
@@ -27,12 +28,9 @@ import chrriis.dj.nativeswing.swtimpl.demo.examples.flashplayer.SimpleFlashExamp
 /**
  * @author Christopher Deckers
  */
-public class HierarchyProxying extends JPanel {
+public class HierarchyProxying {
 
-  private JWebBrowser webBrowser2;
-
-  public HierarchyProxying() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
     JDesktopPane desktopPane = new JDesktopPane();
     // Web Browser 1 internal frame
     JInternalFrame webBrowser1InternalFrame = new JInternalFrame("Web Browser 1");
@@ -70,7 +68,7 @@ public class HierarchyProxying extends JPanel {
       }
     };
     // When a frame is iconified, components are destroyed. To avoid this, we use the option to destroy on finalization.
-    webBrowser2 = new JWebBrowser(JWebBrowser.proxyComponentHierarchy(), JWebBrowser.destroyOnFinalization());
+    final JWebBrowser webBrowser2 = new JWebBrowser(JWebBrowser.proxyComponentHierarchy(), JWebBrowser.destroyOnFinalization());
     webBrowser2.navigate("http://www.google.com");
     cons.weightx = 1;
     cons.weighty = 1;
@@ -86,26 +84,28 @@ public class HierarchyProxying extends JPanel {
     webBrowser2InternalFrame.add(webBrowser2ContentPane, BorderLayout.CENTER);
     webBrowser2InternalFrame.setIconifiable(true);
     desktopPane.add(webBrowser2InternalFrame);
-    add(desktopPane, BorderLayout.CENTER);
-  }
-
-  @Override
-  public void removeNotify() {
-    super.removeNotify();
-    // webBrowser2 is destroyed on finalization.
-    // Rather than wait for garbage collection, release when the component is removed from its parent.
-    webBrowser2.disposeNativePeer();
+    JPanel contentPane = new JPanel(new BorderLayout()) {
+      @Override
+      public void removeNotify() {
+        super.removeNotify();
+        // webBrowser2 is destroyed on finalization.
+        // Rather than wait for garbage collection, release when the component is removed from its parent.
+        webBrowser2.disposeNativePeer();
+      }
+    };
+    contentPane.add(desktopPane, BorderLayout.CENTER);
+    return contentPane;
   }
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new HierarchyProxying(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

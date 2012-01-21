@@ -18,6 +18,7 @@ import java.io.File;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -34,16 +35,16 @@ import chrriis.dj.nativeswing.swtimpl.components.win32.ShellExplorerListener;
 /**
  * @author Christopher Deckers
  */
-public class SimpleWShellExplorerExample extends JPanel {
+public class SimpleWShellExplorerExample {
 
-  public SimpleWShellExplorerExample() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
+    final JPanel contentPane = new JPanel(new BorderLayout());
     // Create the player.
     JPanel playerPanel = new JPanel(new BorderLayout());
     playerPanel.setBorder(BorderFactory.createTitledBorder("Native Shell Explorer component"));
     final JWShellExplorer shellExplorer = new JWShellExplorer();
     playerPanel.add(shellExplorer, BorderLayout.CENTER);
-    add(playerPanel, BorderLayout.CENTER);
+    contentPane.add(playerPanel, BorderLayout.CENTER);
     // Create the components that allow to load a file in the shell explorer.
     GridBagLayout gridBag = new GridBagLayout();
     GridBagConstraints cons = new GridBagConstraints();
@@ -81,7 +82,7 @@ public class SimpleWShellExplorerExample extends JPanel {
         if(fileChooser == null) {
           fileChooser = new JFileChooser();
         }
-        if(fileChooser.showOpenDialog(SimpleWShellExplorerExample.this) == JFileChooser.APPROVE_OPTION) {
+        if(fileChooser.showOpenDialog(contentPane) == JFileChooser.APPROVE_OPTION) {
           File selectedFile = fileChooser.getSelectedFile();
           playerFileTextField.setText(selectedFile.getAbsolutePath());
           loadPlayerFileRunnable.run();
@@ -89,7 +90,7 @@ public class SimpleWShellExplorerExample extends JPanel {
       }
     });
     shellExplorerFilePanel.add(playerFileButton);
-    add(shellExplorerFilePanel, BorderLayout.NORTH);
+    contentPane.add(shellExplorerFilePanel, BorderLayout.NORTH);
     JPanel statusPane = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
     final JLabel statusLabel = new JLabel("Document Complete: ");
     statusPane.add(statusLabel);
@@ -98,18 +99,19 @@ public class SimpleWShellExplorerExample extends JPanel {
         statusLabel.setText("Document Complete: " + e.getLocation());
       }
     });
-    add(statusPane, BorderLayout.SOUTH);
+    contentPane.add(statusPane, BorderLayout.SOUTH);
+    return contentPane;
   }
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new SimpleWShellExplorerExample(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

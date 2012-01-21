@@ -43,20 +43,20 @@ import chrriis.dj.nativeswing.swtimpl.components.MozillaXPCOM;
 /**
  * @author Christopher Deckers
  */
-public class XPCOMDownloadManager extends JPanel {
+public class XPCOMDownloadManager {
 
-  public XPCOMDownloadManager() {
-    super(new BorderLayout());
+  public static JComponent createContent() {
+    JPanel contentPane = new JPanel(new BorderLayout());
     JPanel webBrowserPanel = new JPanel(new BorderLayout());
     webBrowserPanel.setBorder(BorderFactory.createTitledBorder("Native Web Browser component"));
     final JWebBrowser webBrowser = new JWebBrowser(JWebBrowser.useXULRunnerRuntime());
     webBrowser.navigate("http://www.eclipse.org/downloads");
     webBrowserPanel.add(webBrowser, BorderLayout.CENTER);
-    add(webBrowserPanel, BorderLayout.CENTER);
+    contentPane.add(webBrowserPanel, BorderLayout.CENTER);
     // Create an additional area to see the downloads in progress.
     final JPanel downloadsPanel = new JPanel(new GridLayout(0, 1));
     downloadsPanel.setBorder(BorderFactory.createTitledBorder("Download manager (on-going downloads are automatically added to this area)"));
-    add(downloadsPanel, BorderLayout.SOUTH);
+    contentPane.add(downloadsPanel, BorderLayout.SOUTH);
     // We can only access XPCOM when it is properly initialized.
     // This happens when the web browser is created so we run our code in sequence.
     webBrowser.runInSequence(new Runnable() {
@@ -83,6 +83,7 @@ public class XPCOMDownloadManager extends JPanel {
         }
       }
     });
+    return contentPane;
   }
 
   private static nsITransfer createTransfer(final JPanel downloadsPanel) {
@@ -143,13 +144,13 @@ public class XPCOMDownloadManager extends JPanel {
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new XPCOMDownloadManager(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);

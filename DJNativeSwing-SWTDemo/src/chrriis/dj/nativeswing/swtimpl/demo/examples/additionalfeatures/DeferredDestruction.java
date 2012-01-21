@@ -13,6 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -25,52 +26,52 @@ import chrriis.dj.nativeswing.swtimpl.demo.examples.flashplayer.SimpleFlashExamp
 /**
  * @author Christopher Deckers
  */
-public class DeferredDestruction extends JPanel {
+public class DeferredDestruction {
 
-  protected JFlashPlayer flashPlayer;
 
-  public DeferredDestruction() {
-    super(new BorderLayout());
-    flashPlayer = new JFlashPlayer(JFlashPlayer.destroyOnFinalization());
+  public static JComponent createContent() {
+    final JFlashPlayer flashPlayer = new JFlashPlayer(JFlashPlayer.destroyOnFinalization());
+    final JPanel contentPane = new JPanel(new BorderLayout()) {
+      @Override
+      public void removeNotify() {
+        super.removeNotify();
+        // flashPlayer is destroyed on finalization.
+        // Rather than wait for garbage collection, release when the component is removed from its parent.
+        flashPlayer.disposeNativePeer();
+      }
+    };
     flashPlayer.setControlBarVisible(false);
     flashPlayer.load(SimpleFlashExample.class, "resource/Movement-pointer_or_click.swf");
-    add(flashPlayer, BorderLayout.CENTER);
+    contentPane.add(flashPlayer, BorderLayout.CENTER);
     JButton addRemoveButton = new JButton("Add/Remove component");
     addRemoveButton.addActionListener(new ActionListener() {
       protected boolean isAdded = true;
       public void actionPerformed(ActionEvent e) {
         if(isAdded) {
-          remove(flashPlayer);
+          contentPane.remove(flashPlayer);
         } else {
-          add(flashPlayer, BorderLayout.CENTER);
+          contentPane.add(flashPlayer, BorderLayout.CENTER);
         }
-        revalidate();
-        repaint();
+        contentPane.revalidate();
+        contentPane.repaint();
         isAdded = !isAdded;
       }
     });
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
     buttonPanel.add(addRemoveButton);
-    add(buttonPanel, BorderLayout.SOUTH);
-  }
-
-  @Override
-  public void removeNotify() {
-    super.removeNotify();
-    // flashPlayer is destroyed on finalization.
-    // Rather than wait for garbage collection, release when the component is removed from its parent.
-    flashPlayer.disposeNativePeer();
+    contentPane.add(buttonPanel, BorderLayout.SOUTH);
+    return contentPane;
   }
 
   /* Standard main method to try that test as a standalone application. */
   public static void main(String[] args) {
-    UIUtils.setPreferredLookAndFeel();
     NativeInterface.open();
+    UIUtils.setPreferredLookAndFeel();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         JFrame frame = new JFrame("DJ Native Swing Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new DeferredDestruction(), BorderLayout.CENTER);
+        frame.getContentPane().add(createContent(), BorderLayout.CENTER);
         frame.setSize(800, 600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);
