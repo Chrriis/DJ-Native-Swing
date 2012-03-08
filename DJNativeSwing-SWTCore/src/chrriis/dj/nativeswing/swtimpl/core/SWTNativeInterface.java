@@ -521,7 +521,10 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
           }
         }
         // Shutdown procedure
-        if(display != null && !display.isDisposed()) {
+        if(display == null) {
+          // out-process: no display
+          isEventPumpRunning = false;
+        } else if(!display.isDisposed()) {
           display.asyncExec(new Runnable() {
             public void run() {
               isEventPumpRunning = false;
