@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.event.EventListenerList;
 
@@ -624,11 +625,14 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
       // It seems the executor is asynchronous but we want this method to be synchronous: we sync using a lock.
       // Note that this code should work even if it were synchronous.
       final AtomicBoolean isExecutorCallComplete = new AtomicBoolean(false);
+      final AtomicReference<Throwable> exceptionReference = new AtomicReference<Throwable>();
       synchronized(isExecutorCallComplete) {
         mainQueueExecutor.execute(new Runnable() {
           public void run() {
             try {
               runnable.run();
+            } catch(Throwable t) {
+              exceptionReference.set(t);
             } finally {
               synchronized(isExecutorCallComplete) {
                 isExecutorCallComplete.set(true);
@@ -642,6 +646,13 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
             isExecutorCallComplete.wait();
           } catch (InterruptedException e) {}
         }
+      }
+      Throwable throwable = exceptionReference.get();
+      if(throwable != null) {
+        if(throwable instanceof RuntimeException) {
+          throw (RuntimeException)throwable;
+        }
+        throw new RuntimeException(throwable);
       }
     }
 
