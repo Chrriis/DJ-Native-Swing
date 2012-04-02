@@ -10,6 +10,7 @@ package chrriis.dj.nativeswing.swtimpl.internal;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
+import chrriis.dj.nativeswing.swtimpl.ApplicationMessageHandler;
 import chrriis.dj.nativeswing.swtimpl.Message;
 import chrriis.dj.nativeswing.swtimpl.NativeInterfaceConfiguration;
 import chrriis.dj.nativeswing.swtimpl.NativeInterfaceListener;
@@ -62,6 +63,8 @@ public interface ISWTNativeInterface {
   public void removeNativeInterfaceListener_(NativeInterfaceListener listener);
 
   public NativeInterfaceListener[] getNativeInterfaceListeners_();
+
+  public void setApplicationMessageHandler_(ApplicationMessageHandler applicationMessageHandler);
 
   public void main_(String[] args) throws Exception;
 

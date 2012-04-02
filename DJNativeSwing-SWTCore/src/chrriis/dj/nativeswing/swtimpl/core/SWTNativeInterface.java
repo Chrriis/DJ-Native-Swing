@@ -41,6 +41,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
 
 import org.eclipse.swt.SWT;
@@ -49,6 +50,8 @@ import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.DeviceData;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 
 import chrriis.common.NetworkURLClassLoader;
@@ -57,6 +60,7 @@ import chrriis.common.Utils;
 import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.NSSystemProperty;
 import chrriis.dj.nativeswing.NativeSwing;
+import chrriis.dj.nativeswing.swtimpl.ApplicationMessageHandler;
 import chrriis.dj.nativeswing.swtimpl.CommandMessage;
 import chrriis.dj.nativeswing.swtimpl.LocalMessage;
 import chrriis.dj.nativeswing.swtimpl.Message;
@@ -563,6 +567,33 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
   public NativeInterfaceListener[] getNativeInterfaceListeners_() {
     return listenerList.getListeners(NativeInterfaceListener.class);
   }
+  
+  private ApplicationMessageHandler applicationMessageHandler;
+  
+  public void setApplicationMessageHandler_(ApplicationMessageHandler applicationMessageHandler) {
+    this.applicationMessageHandler = applicationMessageHandler;
+  }
+  
+  public ApplicationMessageHandler getApplicationMessageHandler() {
+    return applicationMessageHandler;
+  }
+
+  private static void handleQuit() {
+    if(!SwingUtilities.isEventDispatchThread()) {
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          handleQuit();
+        }
+      });
+      return;
+    }
+    ApplicationMessageHandler applicationMessageHandler = getInstance().getApplicationMessageHandler();
+    if(applicationMessageHandler == null) {
+      System.exit(-1324);
+    } else {
+      applicationMessageHandler.handleQuit();
+    }
+  }
 
   static class InProcess {
 
@@ -673,6 +704,11 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
         data.tracking = Boolean.parseBoolean(NSSystemPropertySWT.SWT_DEVICEDATA_TRACKING.get());
         display = new Display(data);
       }
+      display.addListener(SWT.Close, new Listener() {
+        public void handleEvent(Event event) {
+          handleQuit();
+        }
+      });
     }
 
     private static MessagingInterface createInProcessMessagingInterface() {
@@ -720,11 +756,13 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
     private static class CMN_destroyControls extends CommandMessage {
       @Override
       public Object run(Object[] args) throws Exception {
-        display.syncExec(new Runnable() {
-          public void run() {
-            destroyControls();
-          }
-        });
+        if(display != null && !display.isDisposed()) {
+          display.syncExec(new Runnable() {
+            public void run() {
+              destroyControls();
+            }
+          });
+        }
         return null;
       }
     }
@@ -1083,6 +1121,14 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
       streamThread.start();
     }
 
+    private static class CMJ_handleClosedDisplay extends CommandMessage {
+      @Override
+      public Object run(Object[] args) {
+        handleQuit();
+        return null;
+      }
+    }
+    
     private static class CMJ_systemOut extends CommandMessage {
       @Override
       public Object run(Object[] args) {
@@ -1091,6 +1137,14 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
         } catch (IOException e) {
           e.printStackTrace();
         }
+        return null;
+      }
+    }
+
+    private static class CMJ_unlockSystemIn extends CommandMessage {
+      @Override
+      public Object run(Object[] args) throws Exception {
+        new Message().asyncSend(true);
         return null;
       }
     }
@@ -1220,6 +1274,11 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
       data.debug = Boolean.parseBoolean(NSSystemPropertySWT.SWT_DEVICEDATA_DEBUG.get());
       data.tracking = Boolean.parseBoolean(NSSystemPropertySWT.SWT_DEVICEDATA_TRACKING.get());
       display = new Display(data);
+      display.addListener(SWT.Close, new Listener() {
+        public void handleEvent(Event event) {
+          new CMJ_handleClosedDisplay().asyncExec(false);
+        }
+      });
       Display.setAppName("DJ Native Swing");
       if(isProcessIOChannelMode) {
         PrintStream sysout = System.out;
@@ -1316,14 +1375,6 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
   }
 
   private static volatile long lastProcessTime = Long.MAX_VALUE;
-
-  private static class CMJ_unlockSystemIn extends CommandMessage {
-    @Override
-    public Object run(Object[] args) throws Exception {
-      new Message().asyncSend(true);
-      return null;
-    }
-  }
 
   private static void destroyControls() {
     if(display != null && !display.isDisposed()) {

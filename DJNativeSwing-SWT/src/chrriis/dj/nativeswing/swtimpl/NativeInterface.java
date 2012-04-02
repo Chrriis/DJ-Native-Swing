@@ -155,6 +155,10 @@ public abstract class NativeInterface {
   public static NativeInterfaceListener[] getNativeInterfaceListeners() {
     return swtNativeInterface.getNativeInterfaceListeners_();
   }
+  
+  public static void setApplicationMessageHandler(ApplicationMessageHandler applicationMessageHandler) {
+    swtNativeInterface.setApplicationMessageHandler_(applicationMessageHandler);
+  }
 
   protected static NativeInterfaceConfiguration createConfiguration() {
     return new NativeInterfaceConfiguration();
