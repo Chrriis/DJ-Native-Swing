@@ -1273,9 +1273,22 @@ public abstract class SWTNativeComponent extends NativeComponent {
   private static class CMN_getPreferredSize extends ControlCommandMessage {
     @Override
     public Object run(Object[] args) {
-      Control control = getControl();
+      final Control control = getControl();
       if(control.isDisposed()) {
         return null;
+      }
+      if(!NativeInterface.isUIThread(true)) {
+        final AtomicReference<Dimension> result = new AtomicReference<Dimension>();
+        control.getDisplay().syncExec(new Runnable() {
+          public void run() {
+            if(control.isDisposed()) {
+              return;
+            }
+            Point cSize = control.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+            result.set(new Dimension(cSize.x, cSize.y));
+          }
+        });
+        return result.get();
       }
       Point cSize = control.computeSize(SWT.DEFAULT, SWT.DEFAULT);
       return new Dimension(cSize.x, cSize.y);
