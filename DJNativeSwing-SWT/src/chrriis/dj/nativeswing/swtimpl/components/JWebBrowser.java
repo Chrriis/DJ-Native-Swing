@@ -98,15 +98,15 @@ public class JWebBrowser extends NSPanelComponent {
   }
 
   /**
-   * Create a decorator for this web browser. This method can be overriden so that the web browser uses a different decorator.
+   * Create a decorator for this web browser. This method can be overwritten so that the web browser uses a different decorator.
    * @param renderingComponent the component to add to the decorator's component hierarchy.
    * @return the decorator that was created.
    */
   protected WebBrowserDecorator createWebBrowserDecorator(Component renderingComponent) {
     if(webBrowserDecoratorFactory != null) {
-      WebBrowserDecorator webBrowserDecorator = webBrowserDecoratorFactory.createWebBrowserDecorator(this, renderingComponent);
-      if(webBrowserDecorator != null) {
-        return webBrowserDecorator;
+      WebBrowserDecorator tempWebBrowserDecorator = webBrowserDecoratorFactory.createWebBrowserDecorator(this, renderingComponent);
+      if(tempWebBrowserDecorator != null) {
+        return tempWebBrowserDecorator;
       }
     }
     return new DefaultWebBrowserDecorator(this, renderingComponent);
@@ -546,75 +546,75 @@ public class JWebBrowser extends NSPanelComponent {
     }
 
     public void commandReceived(WebBrowserCommandEvent e) {
-      WebBrowserListener webBrowserListener = this.webBrowserListener.get();
-      if(webBrowserListener != null) {
+      WebBrowserListener temp = this.webBrowserListener.get();
+      if(temp != null) {
         boolean isInternal = e.getCommand().startsWith("[Chrriis]");
-        if(!isInternal || webBrowserListener.getClass().getName().startsWith("chrriis.")) {
-          webBrowserListener.commandReceived(e);
+        if(!isInternal || temp.getClass().getName().startsWith("chrriis.")) {
+          temp.commandReceived(e);
         }
       }
     }
 
     public void loadingProgressChanged(WebBrowserEvent e) {
-      WebBrowserListener webBrowserListener = this.webBrowserListener.get();
-      if(webBrowserListener != null) {
-        webBrowserListener.loadingProgressChanged(e);
+      WebBrowserListener temp = this.webBrowserListener.get();
+      if(temp != null) {
+        temp.loadingProgressChanged(e);
       }
     }
 
     public void locationChangeCanceled(WebBrowserNavigationEvent e) {
-      WebBrowserListener webBrowserListener = this.webBrowserListener.get();
-      if(webBrowserListener != null) {
-        webBrowserListener.locationChangeCanceled(e);
+      WebBrowserListener temp = this.webBrowserListener.get();
+      if(temp != null) {
+        temp.locationChangeCanceled(e);
       }
     }
 
     public void locationChanged(WebBrowserNavigationEvent e) {
-      WebBrowserListener webBrowserListener = this.webBrowserListener.get();
-      if(webBrowserListener != null) {
-        webBrowserListener.locationChanged(e);
+      WebBrowserListener temp = this.webBrowserListener.get();
+      if(temp != null) {
+        temp.locationChanged(e);
       }
     }
 
     public void locationChanging(WebBrowserNavigationEvent e) {
-      WebBrowserListener webBrowserListener = this.webBrowserListener.get();
-      if(webBrowserListener != null) {
-        webBrowserListener.locationChanging(e);
+      WebBrowserListener temp = this.webBrowserListener.get();
+      if(temp != null) {
+        temp.locationChanging(e);
       }
     }
 
     public void statusChanged(WebBrowserEvent e) {
-      WebBrowserListener webBrowserListener = this.webBrowserListener.get();
-      if(webBrowserListener != null) {
-        webBrowserListener.statusChanged(e);
+      WebBrowserListener temp = this.webBrowserListener.get();
+      if(temp != null) {
+        temp.statusChanged(e);
       }
     }
 
     public void titleChanged(WebBrowserEvent e) {
-      WebBrowserListener webBrowserListener = this.webBrowserListener.get();
-      if(webBrowserListener != null) {
-        webBrowserListener.titleChanged(e);
+      WebBrowserListener temp = this.webBrowserListener.get();
+      if(temp != null) {
+        temp.titleChanged(e);
       }
     }
 
     public void windowClosing(WebBrowserEvent e) {
-      WebBrowserListener webBrowserListener = this.webBrowserListener.get();
-      if(webBrowserListener != null) {
-        webBrowserListener.windowClosing(e);
+      WebBrowserListener temp = this.webBrowserListener.get();
+      if(temp != null) {
+        temp.windowClosing(e);
       }
     }
 
     public void windowOpening(WebBrowserWindowOpeningEvent e) {
-      WebBrowserListener webBrowserListener = this.webBrowserListener.get();
-      if(webBrowserListener != null) {
-        webBrowserListener.windowOpening(e);
+      WebBrowserListener temp = this.webBrowserListener.get();
+      if(temp != null) {
+        temp.windowOpening(e);
       }
     }
 
     public void windowWillOpen(WebBrowserWindowWillOpenEvent e) {
-      WebBrowserListener webBrowserListener = this.webBrowserListener.get();
-      if(webBrowserListener != null) {
-        webBrowserListener.windowWillOpen(e);
+      WebBrowserListener temp = this.webBrowserListener.get();
+      if(temp != null) {
+        temp.windowWillOpen(e);
       }
     }
 
