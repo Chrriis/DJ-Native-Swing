@@ -26,29 +26,28 @@ import chrriis.dj.nativeswing.swtimpl.core.SWTOleNativeComponent;
  */
 class NativeWMediaPlayer extends SWTOleNativeComponent implements INativeWMediaPlayer {
 
-  protected static Control createControl(Composite parent, Object[] parameters) {
-    OleFrame frame = new OleFrame(parent, SWT.NONE);
-    OleClientSite site;
-    try {
-      site = new OleClientSite(frame, SWT.NONE, "WMPlayer.OCX");
-      configureOleFrame(site, frame);
-    } catch(SWTException e) {
-      e.printStackTrace();
-      frame.dispose();
-      return null;
+    protected static Control createControl(Composite parent, Object[] parameters) {
+        OleFrame frame = new OleFrame(parent, SWT.NONE);
+        OleClientSite site;
+        try {
+            site = new OleClientSite(frame, SWT.NONE, "WMPlayer.OCX");
+            configureOleFrame(site, frame);
+        } catch (SWTException e) {
+            e.printStackTrace();
+            frame.dispose();
+            return null;
+        }
+        site.doVerb(OLE.OLEIVERB_INPLACEACTIVATE);
+        return frame;
     }
-    site.doVerb(OLE.OLEIVERB_INPLACEACTIVATE);
-    return frame;
-  }
 
-  @Override
-  public Component createEmbeddableComponent(Map<Object, Object> optionMap) {
-    return super.createEmbeddableComponent(optionMap);
-  }
+    @Override
+    public Component createEmbeddableComponent(Map<Object, Object> optionMap) {
+        return super.createEmbeddableComponent(optionMap);
+    }
 
-  @Override
-  protected void disposeNativePeer() {
-    super.disposeNativePeer();
-  }
-
+    @Override
+    protected void disposeNativePeer() {
+        super.disposeNativePeer();
+    }
 }
