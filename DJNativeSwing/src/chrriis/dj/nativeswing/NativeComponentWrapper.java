@@ -61,6 +61,7 @@ public class NativeComponentWrapper {
     checkParent();
     // Add a check to ensure that its parent is an embeddable component.
     nativeComponent.addHierarchyListener(new HierarchyListener() {
+            @Override
       public void hierarchyChanged(HierarchyEvent e) {
         long changeFlags = e.getChangeFlags();
         if((changeFlags & HierarchyEvent.PARENT_CHANGED) != 0) {

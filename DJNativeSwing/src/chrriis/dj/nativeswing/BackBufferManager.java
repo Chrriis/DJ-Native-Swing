@@ -47,6 +47,7 @@ class BackBufferManager {
   protected Rectangle[] getTranslucentOverlays() {
     Rectangle[] boundsArea = new Rectangle[] {new Rectangle(0, 0, paintingComponent.getWidth(), paintingComponent.getHeight())};
     boundsArea = UIUtils.subtract(boundsArea, UIUtils.getComponentVisibleArea(paintingComponent, new Filter<Component>() {
+            @Override
       public Acceptance accept(Component c) {
         if(c.isOpaque()) {
           return Acceptance.YES;
@@ -55,6 +56,7 @@ class BackBufferManager {
       }
     }));
     return UIUtils.subtract(boundsArea, UIUtils.getComponentVisibleArea(paintingComponent, new Filter<Component>() {
+            @Override
       public Acceptance accept(Component c) {
         if(!c.isOpaque()) {
           return Acceptance.YES;

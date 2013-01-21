@@ -22,6 +22,7 @@ class ClipLayout implements LayoutManager2, Serializable {
 
   private Component component;
 
+    @Override
   public void addLayoutComponent(Component component, Object constraints) {
     synchronized(component.getTreeLock()) {
       if (constraints != null && !(constraints instanceof String)) {
@@ -32,12 +33,14 @@ class ClipLayout implements LayoutManager2, Serializable {
   }
 
   @Deprecated
+    @Override
   public void addLayoutComponent(String name, Component component) {
     synchronized(component.getTreeLock()) {
       this.component = component;
     }
   }
 
+    @Override
   public void removeLayoutComponent(Component component) {
     synchronized(component.getTreeLock()) {
       if (component == this.component) {
@@ -46,6 +49,7 @@ class ClipLayout implements LayoutManager2, Serializable {
     }
   }
 
+    @Override
   public void layoutContainer(Container target) {
     synchronized(target.getTreeLock()) {
       if(component == null) {
@@ -71,6 +75,7 @@ class ClipLayout implements LayoutManager2, Serializable {
     }
   }
 
+    @Override
   public Dimension minimumLayoutSize(Container target) {
     synchronized(target.getTreeLock()) {
       Insets insets = target.getInsets();
@@ -84,6 +89,7 @@ class ClipLayout implements LayoutManager2, Serializable {
     }
   }
 
+    @Override
   public Dimension preferredLayoutSize(Container target) {
     synchronized(target.getTreeLock()) {
       Insets insets = target.getInsets();
@@ -97,17 +103,21 @@ class ClipLayout implements LayoutManager2, Serializable {
     }
   }
 
+    @Override
   public Dimension maximumLayoutSize(Container target) {
     return new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
   }
 
+    @Override
   public void invalidateLayout(Container target) {
   }
 
+    @Override
   public float getLayoutAlignmentX(Container parent) {
     return 0.5f;
   }
 
+    @Override
   public float getLayoutAlignmentY(Container parent) {
     return 0.5f;
   }

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>chrriis.dj.nativeswing</groupId>
+    <artifactId>DJNativeSwing-Parent</artifactId>
+    <version>1.0.3-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
+    
+    <name>DJNativeSwing Parent</name>
+    <!--TODO<description>jWrestling: a Wrestling/trading card game based on the now 
+        unsupported With Authority! The future of wrestling is here! 
+        We're joining forces with Arianne to bring a new twist to this awesome 
+        wrestling game!
+    </description>
+    <url>https://sourceforge.net/projects/jwrestling/</url>
+    <issueManagement>
+        <system>jira</system>
+        <url>https://simple-marauroa.jira.com/browse/JW</url>
+    </issueManagement>
+    <developers>
+        <developer>
+            <id>javydreamercsw</id>
+            <name>Javier A. Ortiz Bultron</name>
+            <roles>
+                <role>admin</role>
+            </roles>
+        </developer>
+    </developers>
+    <licenses>
+        <license>
+            <name>CDDL-1.0</name>
+            <url>http://www.opensource.org/licenses/cddl1.php</url>
+            <comments>Common Development and Distribution License</comments>
+        </license>
+    </licenses>
+    <scm>
+        <url>https://bitbucket.org/javydreamercsw/jwrestling/src</url>
+        <connection>scm:hg:https://bitbucket.org/javydreamercsw/jwrestling/src</connection>
+        <developerConnection>scm:hg:ssh://hg@bitbucket.org/javydreamercsw/jwrestling</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+    <ciManagement>
+        <system>Jenkins</system>
+        <url>https://xinco.ci.cloudbees.com/</url>
+    </ciManagement>-->
+    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
+    <modules>
+        <module>DJNativeSwing</module>
+        <module>DJNativeSwing-SWTCore</module>
+        <module>DJNativeSwing-SWTDemo</module>
+        <module>DJNativeSwing-SWT</module>
+        <module>jna_WindowUtils</module>
+    </modules>
+    <build>
+        <pluginManagement>
+            <plugins>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+        </plugins>
+    </build>
+    
+    <repositories>
+        <repository>
+            <id>swt-repo</id>
+            <url>https://swt-repo.googlecode.com/svn/repo/</url>
+        </repository>
+        <repository> 
+            <id>project.local</id> 
+            <name>project</name> 
+            <url>file:${project.basedir}/../repo</url> 
+        </repository> 
+    </repositories>
+</project>

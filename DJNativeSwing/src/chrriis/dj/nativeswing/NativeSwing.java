@@ -93,6 +93,7 @@ public class NativeSwing {
     private void destroyForcer() {
       if(!SwingUtilities.isEventDispatchThread()) {
         SwingUtilities.invokeLater(new Runnable() {
+                    @Override
           public void run() {
             destroyForcer();
           }
@@ -113,6 +114,7 @@ public class NativeSwing {
     private void createForcer() {
       if(!SwingUtilities.isEventDispatchThread()) {
         SwingUtilities.invokeLater(new Runnable() {
+                    @Override
           public void run() {
             createForcer();
           }
@@ -135,6 +137,7 @@ public class NativeSwing {
       forcer.setCount(forcer.getCount() + 1);
     }
 
+        @Override
     public void hierarchyChanged(HierarchyEvent e) {
       long changeFlags = e.getChangeFlags();
       if((changeFlags & HierarchyEvent.DISPLAYABILITY_CHANGED) != 0) {
@@ -344,6 +347,7 @@ public class NativeSwing {
       }
     }
 
+        @Override
     public void eventDispatched(AWTEvent e) {
       int eventID = e.getID();
       if(Utils.IS_JAVA_7_OR_GREATER) {
@@ -436,6 +440,7 @@ public class NativeSwing {
                   } catch (InterruptedException e) {
                   }
                   SwingUtilities.invokeLater(new Runnable() {
+                                @Override
                     public void run() {
                       d.setFocusableWindowState(true);
                     }
