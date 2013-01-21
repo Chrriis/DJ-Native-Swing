@@ -38,6 +38,11 @@
     
     <build>
         <sourceDirectory>src</sourceDirectory>
+        <resources>
+            <resource>
+                <directory>src/chrriis/dj/nativeswing/swtimpl/components/resource</directory>
+            </resource>
+        </resources>
         <plugins>
             <!--Add the win 32 folder as source-->
             <plugin>

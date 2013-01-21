@@ -40,6 +40,20 @@
     
     <build>
         <sourceDirectory>src</sourceDirectory>
+        <resources>
+            <resource>
+                <directory>src/chrriis/dj/nativeswing/swtimpl/demo/examples/additionalfeatures/resource</directory>
+            </resource>
+            <resource>
+                <directory>src/chrriis/dj/nativeswing/swtimpl/demo/examples/flashplayer/resource</directory>
+            </resource>
+            <resource>
+                <directory>src/chrriis/dj/nativeswing/swtimpl/demo/examples/webbrowser/resource</directory>
+            </resource>
+            <resource>
+                <directory>src/chrriis/dj/nativeswing/swtimpl/demo/resource</directory>
+            </resource>
+        </resources>
         <plugins>
         </plugins>
     </build>
