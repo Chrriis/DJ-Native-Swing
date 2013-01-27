@@ -98,7 +98,7 @@ public class JWebBrowser extends NSPanelComponent {
   }
 
   /**
-   * Create a decorator for this web browser. This method can be overriden so that the web browser uses a different decorator.
+   * Create a decorator for this web browser. This method can be overridden so that the web browser uses a different decorator.
    * @param renderingComponent the component to add to the decorator's component hierarchy.
    * @return the decorator that was created.
    */

@@ -44,7 +44,7 @@ public class JVLCPlayer extends NSPanelComponent {
   private static VLCPlayerDecoratorFactory vlcPlayerDecoratorFactory;
 
   /**
-   * Set the decorator that will be used for future vlc player instances.
+   * Set the decorator that will be used for future VLC player instances.
    * @param vlcPlayerDecoratorFactory the factory that creates the decorators, or null for default decorators.
    */
   public static void setVLCPlayerDecoratorFactory(VLCPlayerDecoratorFactory vlcPlayerDecoratorFactory) {
@@ -58,7 +58,7 @@ public class JVLCPlayer extends NSPanelComponent {
   }
 
   /**
-   * Create a decorator for this vlc player. This method can be overriden so that the vlc player uses a different decorator.
+   * Create a decorator for this VLC player. This method can be overridden so that the VLC player uses a different decorator.
    * @param renderingComponent the component to add to the decorator's component hierarchy.
    * @return the decorator that was created.
    */

@@ -103,7 +103,7 @@ public class JFlashPlayer extends NSPanelComponent {
   }
 
   /**
-   * Create a decorator for this flash player. This method can be overriden so that the flash player uses a different decorator.
+   * Create a decorator for this flash player. This method can be overridden so that the flash player uses a different decorator.
    * @param renderingComponent the component to add to the decorator's component hierarchy.
    * @return the decorator that was created.
    */

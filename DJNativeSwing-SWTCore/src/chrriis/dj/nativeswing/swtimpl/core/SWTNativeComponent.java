@@ -978,7 +978,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
   }
 
   /**
-   * Get the parameters that are passed to the creation method. This method can be overriden by subclasses to pass additional information necessary for the native peer creation.
+   * Get the parameters that are passed to the creation method. This method can be overridden by subclasses to pass additional information necessary for the native peer creation.
    * @return the parameters.
    */
   @Override

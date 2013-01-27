@@ -100,13 +100,13 @@ public abstract class NativeComponent extends Canvas {
   protected abstract int getComponentID();
 
   /**
-   * Force the component to initialize. All method calls will then be synchronous instead of being queued waiting for the componant to be initialized.
+   * Force the component to initialize. All method calls will then be synchronous instead of being queued waiting for the component to be initialized.
    * This call fails if the component is not in a component hierarchy with a Window ancestor.
    */
   public abstract void initializeNativePeer();
 
   /**
-   * Get the parameters that are passed to the creation method. This method can be overriden by subclasses to pass additional information necessary for the native peer creation.
+   * Get the parameters that are passed to the creation method. This method can be overridden by subclasses to pass additional information necessary for the native peer creation.
    * @return the parameters.
    */
   protected abstract Object[] getNativePeerCreationParameters();

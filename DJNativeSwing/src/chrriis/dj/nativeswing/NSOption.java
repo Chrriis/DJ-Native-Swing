@@ -50,7 +50,7 @@ public class NSOption {
   }
 
   /**
-   * Get the value of this option. The default is to return this object, assuming the instance is a singleton. This method should be overriden if a different value should be considered.
+   * Get the value of this option. The default is to return this object, assuming the instance is a singleton. This method should be overridden if a different value should be considered.
    * @return the value of this option.
    */
   public Object getOptionValue() {
