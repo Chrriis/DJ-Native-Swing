@@ -1229,7 +1229,7 @@ class NativeWebBrowser extends SWTNativeComponent implements INativeWebBrowser {
     public Object run(Object[] args) {
       boolean isShowingDialog = (Boolean)args[0];
       Browser browser = (Browser)getControl();
-      if(Utils.IS_WINDOWS) {
+      if(Utils.IS_WINDOWS && "ie".equals(browser.getBrowserType())) {
         try {
           Class<?> ieClass = Class.forName("org.eclipse.swt.browser.IE");
           Field webBrowserField = Browser.class.getDeclaredField("webBrowser");
