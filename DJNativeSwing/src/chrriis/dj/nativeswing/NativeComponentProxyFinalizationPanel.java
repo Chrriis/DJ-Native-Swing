@@ -71,6 +71,7 @@ class NativeComponentProxyFinalizationPanel extends NativeComponentProxy {
     protected void finalize() throws Throwable {
       if(isHiddenReparenting) {
         SwingUtilities.invokeLater(new Runnable() {
+                    @Override
           public void run() {
             nativeComponentWrapper.restoreFromHiddenParent();
             // Remove will dispose the component only after the store/restore sequence is complete.
@@ -183,6 +184,7 @@ class NativeComponentProxyFinalizationPanel extends NativeComponentProxy {
     super.finalize();
     if(embeddedPanel != null) {
       SwingUtilities.invokeLater(new Runnable() {
+                @Override
         public void run() {
           dispose();
         }

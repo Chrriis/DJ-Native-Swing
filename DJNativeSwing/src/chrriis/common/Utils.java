@@ -343,6 +343,7 @@ public class Utils {
     Map<Thread, StackTraceElement[]> allStackTraces = Thread.getAllStackTraces();
     Thread[] threads = allStackTraces.keySet().toArray(new Thread[0]);
     Arrays.sort(threads, new Comparator<Thread>() {
+            @Override
       public int compare(Thread o1, Thread o2) {
         return o1.getName().compareToIgnoreCase(o2.getName());
       }
@@ -429,6 +430,7 @@ public class Utils {
     } catch (SocketException e) {
     }
     Collections.sort(inetAddressList, new Comparator<InetAddress>() {
+            @Override
       public int compare(InetAddress o1, InetAddress o2) {
         if(o1.isLoopbackAddress() != o2.isLoopbackAddress() && o1.isSiteLocalAddress() != o2.isSiteLocalAddress()) {
           if(o1.isLoopbackAddress()) {
