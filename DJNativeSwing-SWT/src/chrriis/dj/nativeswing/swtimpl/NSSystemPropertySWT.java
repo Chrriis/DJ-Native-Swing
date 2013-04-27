@@ -142,6 +142,14 @@ public enum NSSystemPropertySWT {
   INTERFACE_OUTPROCESS_COMMUNICATION("nativeswing.interface.outProcess.communication", Type.READ_WRITE),
 
   /**
+   * nativeswing.interface.outProcess.connectionTimeout
+   * = &lt;integer&gt; (default: 10000)<br/>
+   * On slow systems, connection to the other process may not complete in time, in
+   * which case it might be desirable to increase the timeout.
+   */
+  INTERFACE_OUTPROCESS_CONNECTIONTIMEOUT("nativeswing.interface.outProcess.connectionTimeout", Type.READ_WRITE),
+  
+  /**
    * nativeswing.interface.inProcess.printNonSerializableMessages
    * = true/false (default: false)<br/>
    * When in-process, set whether messages should be artificially serialized to

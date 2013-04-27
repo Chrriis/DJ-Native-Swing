@@ -1036,6 +1036,7 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
       }
       Exception exception = null;
       Socket socket = null;
+      long peerVMConnectionTimeout = Integer.parseInt(NSSystemPropertySWT.INTERFACE_OUTPROCESS_CONNECTIONTIMEOUT.get("10000"));
       long startTime = System.currentTimeMillis();
       do {
         if(p != null) {
@@ -1058,7 +1059,7 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
           Thread.sleep(200);
         } catch(Exception e) {
         }
-      } while(System.currentTimeMillis() - startTime < 10000);
+      } while(System.currentTimeMillis() - startTime < peerVMConnectionTimeout);
       if(socket == null) {
         if(p != null) {
           p.destroy();
