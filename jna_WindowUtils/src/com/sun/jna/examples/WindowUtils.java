@@ -70,16 +70,17 @@ import com.sun.jna.examples.unix.X11.XVisualInfo;
 import com.sun.jna.examples.unix.X11.Xext;
 import com.sun.jna.examples.unix.X11.Xrender.XRenderPictFormat;
 import com.sun.jna.examples.win32.GDI32;
-import com.sun.jna.examples.win32.GDI32.BITMAPINFO;
 import com.sun.jna.examples.win32.User32;
-import com.sun.jna.examples.win32.User32.BLENDFUNCTION;
-import com.sun.jna.examples.win32.User32.POINT;
-import com.sun.jna.examples.win32.User32.SIZE;
-import com.sun.jna.examples.win32.W32API.HANDLE;
-import com.sun.jna.examples.win32.W32API.HBITMAP;
-import com.sun.jna.examples.win32.W32API.HDC;
-import com.sun.jna.examples.win32.W32API.HRGN;
-import com.sun.jna.examples.win32.W32API.HWND;
+import com.sun.jna.examples.win32.WinDef.HBITMAP;
+import com.sun.jna.examples.win32.WinDef.HDC;
+import com.sun.jna.examples.win32.WinDef.HRGN;
+import com.sun.jna.examples.win32.WinDef.HWND;
+import com.sun.jna.examples.win32.WinDef.POINT;
+import com.sun.jna.examples.win32.WinGDI;
+import com.sun.jna.examples.win32.WinGDI.BITMAPINFO;
+import com.sun.jna.examples.win32.WinNT.HANDLE;
+import com.sun.jna.examples.win32.WinUser.BLENDFUNCTION;
+import com.sun.jna.examples.win32.WinUser.SIZE;
 import com.sun.jna.ptr.ByteByReference;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
@@ -784,11 +785,11 @@ public class WindowUtils {
                         bmi.bmiHeader.biHeight = wh;
                         bmi.bmiHeader.biPlanes = 1;
                         bmi.bmiHeader.biBitCount = 32;
-                        bmi.bmiHeader.biCompression = GDI32.BI_RGB;
+                        bmi.bmiHeader.biCompression = WinGDI.BI_RGB;
                         bmi.bmiHeader.biSizeImage = ww * wh * 4;
                         PointerByReference ppbits = new PointerByReference();
                         hBitmap = gdi.CreateDIBSection(memDC, bmi,
-                                                       GDI32.DIB_RGB_COLORS,
+                                                       WinGDI.DIB_RGB_COLORS,
                                                        ppbits, null, 0);
                         pbits = ppbits.getValue();
                         bitmapSize = new Dimension(ww, wh);
@@ -950,7 +951,7 @@ public class WindowUtils {
             GDI32 gdi = GDI32.INSTANCE;
             PathIterator pi = area.getPathIterator(null);
             int mode = pi.getWindingRule() == PathIterator.WIND_NON_ZERO
-                ? GDI32.WINDING: GDI32.ALTERNATE;
+                ? WinGDI.WINDING: WinGDI.ALTERNATE;
             float[] coords = new float[6];
             List points = new ArrayList();
             int size = 0;
@@ -999,7 +1000,7 @@ public class WindowUtils {
                         public boolean outputRange(int x, int y, int w, int h) {
                             GDI32 gdi = GDI32.INSTANCE;
                             gdi.SetRectRgn(tempRgn, x, y, x + w, y + h);
-                            return gdi.CombineRgn(region, region, tempRgn, GDI32.RGN_OR) != GDI32.ERROR;
+                            return gdi.CombineRgn(region, region, tempRgn, WinGDI.RGN_OR) != WinGDI.ERROR;
                         }
                     });
                 }
@@ -1032,7 +1033,7 @@ public class WindowUtils {
 											+ rectangle.width,
 											rectangle.y + rectangle.height);
 									gdi.CombineRgn(result, result, tempRgn,
-											GDI32.RGN_OR);
+									    WinGDI.RGN_OR);
 								}
 							} finally {
 								gdi.DeleteObject(tempRgn);
@@ -1488,7 +1489,7 @@ public class WindowUtils {
                 Raster raster = buf.getData();
                 int w = bounds.width;
                 int h = bounds.height;
-                if (buffer == null || buffer.getSize() != w*h*4) {
+                if (buffer == null || buffer.size() != w*h*4) {
                     buffer = new Memory(w*h*4);
                     pixels = new int[w*h];
                 }

@@ -7,6 +7,7 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 1.0.2 (xxxxxxxxxxxxxx):
 
+- JNA updated to 4.0.0. WindowUtils still uses "examples" sub-package for now.
 - IPv6 support in WebServer.
 - Migration to Git.
 - Improvements to focus issues on Java 7.

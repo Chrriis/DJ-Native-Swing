@@ -28,7 +28,7 @@ Here are the steps to follow:
     - DJNativeSwing.jar
     - DJNativeSwing-SWTAPI.jar
     - jna_WindowUtils.jar
-    - jna-3.2.4.jar
+    - jna-4.0.0.jar
     - ckeditor_3.0.1.zip
     - FCKeditor_2.6.3.zip
     - TinyMCE_3.4.3.2.zip
