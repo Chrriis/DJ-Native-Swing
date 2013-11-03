@@ -5,7 +5,7 @@ Licence terms: LGPL (see licence.txt)
 
 ---------------------------------- Change log ----------------------------------
 
-* Version 1.0.2 (xxxxxxxxxxxxxx):
+* Version 1.0.2 (November 3, 2013):
 
 - Application quit handler for Mac quit menus on NativeInterface (configurable).
 - Auto-shutdown procedure works for out-process mode.
