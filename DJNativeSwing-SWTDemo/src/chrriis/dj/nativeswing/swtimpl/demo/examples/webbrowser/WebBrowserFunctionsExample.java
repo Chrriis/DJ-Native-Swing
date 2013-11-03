@@ -38,7 +38,7 @@ public class WebBrowserFunctionsExample {
     JWebBrowser webBrowser = new JWebBrowser();
     webBrowser.setBarsVisible(false);
     final JTextArea functionCallsTextArea = new JTextArea(7, 0);
-    webBrowser.registerFunction(new WebBrowserFunction("invokeJava") {
+    webBrowser.registerFunction(new WebBrowserFunction("invokeJavaNoError") {
       @Override
       public Object invoke(JWebBrowser webBrowser, Object... args) {
         StringBuilder sb = new StringBuilder();
@@ -70,9 +70,9 @@ public class WebBrowserFunctionsExample {
         "<html>" + LS +
         "  <head>" + LS +
         "    <script language=\"JavaScript\">" + LS +
-        "      function callJava() {" + LS +
-        "        var result = invokeJava(123, false, null, [1.2, ['hi', true]], 'swing');" + LS +
-        "        var s = 'Result from invokeJava():';" + LS +
+        "      function callJavaNoError() {" + LS +
+        "        var s = 'Result from invokeJavaNoError():';" + LS +
+        "        var result = invokeJavaNoError(123, false, null, [1.2, ['hi', true]], 'swing');" + LS +
         "        for (var i = 0; i < result.length; i++) {" + LS +
         "          s += '\\n    ' + result[i];" + LS +
         "        }" + LS +
@@ -92,9 +92,9 @@ public class WebBrowserFunctionsExample {
         "  </head>" + LS +
         "  <body>" + LS +
         "    <p>" + LS +
-        "      Object[] invokeJava(123, false, null, [1.2, ['hi', true]], 'swing'):<br/><input id=button type=\"button\" value=\"call\" onclick=\"callJava();\">" + LS +
+        "      Object[] invokeJavaNoError(123, false, null, [1.2, ['hi', true]], 'swing'):<br/><input id=\"button1\" type=\"button\" value=\"call\" onclick=\"callJavaNoError();\"/>" + LS +
         "    </p><p>" + LS +
-        "      Object invokeJavaWithError():<br/><input id=button type=\"button\" value=\"call\" onclick=\"callJavaWithError();\">" + LS +
+        "      Object invokeJavaWithError():<br/><input id=\"button2\" type=\"button\" value=\"call\" onclick=\"callJavaWithError();\"/>" + LS +
         "    </p>" + LS +
         "  </body>" + LS +
         "</html>");
