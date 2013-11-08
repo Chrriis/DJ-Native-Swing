@@ -1863,6 +1863,9 @@ public abstract class SWTNativeComponent extends NativeComponent {
         }
         @Override
         public void dragDropEnd(DragSourceDropEvent dsde) {
+          if(dndHandler == null) {
+            return;
+          }
           SWTNativeComponent[] nativeComponents = dndHandler.nativeComponents;
           boolean[] wereEnabled = dndHandler.wereEnabled;
           for(int i=0; i<nativeComponents.length; i++) {

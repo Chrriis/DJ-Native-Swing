@@ -5,6 +5,11 @@ Licence terms: LGPL (see licence.txt)
 
 ---------------------------------- Change log ----------------------------------
 
+* Version 1.0.3 (xxxxxxxxxxxxxxxx):
+
+- Prevent NPE in drag and drop handler under unexpected flows.
+
+
 * Version 1.0.2 (November 3, 2013):
 
 - JNA updated to 4.0.0. WindowUtils still uses "examples" sub-package for now.
