@@ -168,7 +168,7 @@ class JHTMLEditorTinyMCE implements JHTMLEditorImplementation {
             "        setup: function (ed) {" + LS +
             "          ed.onInit.add (function (ed) {" + LS +
             "            sendCommand ('[Chrriis]JH_setLoaded');" + LS +
-            "          })" + LS +
+            "          });" + LS +
             "        }" + LS +
             "      };" + LS +
             (customOptions != null? "      var addOpts = {" + LS + customOptions + LS + "      };" + LS + "      for (var x in addOpts) {" + LS + "        opts[x] = addOpts[x];" + LS + "      }" + LS: "") +

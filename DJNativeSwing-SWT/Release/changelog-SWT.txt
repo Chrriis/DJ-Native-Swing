@@ -7,6 +7,8 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 1.0.3 (xxxxxxxxxxxxxxxx):
 
+- TinyMCE upgraded to 3.5.10 to work with IE 11.
+
 
 * Version 1.0.2 (November 3, 2013):
 
