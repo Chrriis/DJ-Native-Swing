@@ -716,7 +716,7 @@ public class WebServer {
           return null;
         }
         parameter = parameter.substring(index + 1);
-        final String resourcePath = removeHTMLAnchor(parameter);
+        final String resourcePath = Utils.decodeURL(removeHTMLAnchor(parameter));
         return new WebServerContent() {
           @Override
           public String getContentType() {

@@ -8,6 +8,7 @@ Licence terms: LGPL (see licence.txt)
 * Version 1.0.3 (xxxxxxxxxxxxxxxx):
 
 - Prevent NPE in drag and drop handler under unexpected flows.
+- Fixed a WebServer issue with classpath URLs containing a space.
 
 
 * Version 1.0.2 (November 3, 2013):
