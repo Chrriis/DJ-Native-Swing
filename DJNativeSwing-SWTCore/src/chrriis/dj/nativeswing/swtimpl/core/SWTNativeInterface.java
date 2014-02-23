@@ -519,10 +519,10 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
           isAlive = false;
           for(int i=group.enumerate(activeThreads, true)-1; i>=0; i--) {
             Thread t = activeThreads[i];
-            if(t != displayThread && t != currentThread && !t.isDaemon() && t.isAlive()) {
+            if(!isAlive && t != displayThread && t != currentThread && !t.isDaemon() && t.isAlive()) {
               isAlive = true;
-              break;
             }
+            activeThreads[i] = null;
           }
         }
         // Shutdown procedure
