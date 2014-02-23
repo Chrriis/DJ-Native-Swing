@@ -7,6 +7,7 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 1.0.3 (xxxxxxxxxxxxxxxx):
 
+- Fixed an issue preventing some threads from being GC'ed (by Stephen Allen).
 - Prevent NPE in drag and drop handler under unexpected flows.
 - Fixed a WebServer issue with classpath URLs containing a space.
 
