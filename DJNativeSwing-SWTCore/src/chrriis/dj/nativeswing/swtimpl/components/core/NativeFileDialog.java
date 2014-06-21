@@ -31,7 +31,7 @@ class NativeFileDialog implements INativeFileDialog {
       Data data = (Data)args[0];
       Control control = getControl();
       if(control.isDisposed()) {
-        return data;
+        return null;
       }
       int style = 0;
       if(data.isSave) {
@@ -90,7 +90,12 @@ class NativeFileDialog implements INativeFileDialog {
     new NativeModalDialogHandler() {
       @Override
       protected void processResult(Object result) {
-        data = (Data)result;
+        if(result == null) {
+          // In case of communication error or if the control is disposed, the whole result is null.
+          data.selectedFileNames = null;
+        } else {
+          data = (Data)result;
+        }
       }
     }.showModalDialog(component, new CMN_openFileDialog(), data);
   }
