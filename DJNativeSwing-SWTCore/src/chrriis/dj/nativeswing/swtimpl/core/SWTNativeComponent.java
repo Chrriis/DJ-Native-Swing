@@ -997,25 +997,29 @@ public abstract class SWTNativeComponent extends NativeComponent {
     }
     List<CommandMessage> initializationCommandMessageList_ = initializationCommandMessageList;
     initializationCommandMessageList = null;
-    isNativePeerInitialized = true;
-    if(isInterfaceAlive) {
-      nativeInterfaceListener = new NNativeInterfaceListener(this);
-      NativeInterface.addNativeInterfaceListener(nativeInterfaceListener);
-      isNativePeerValid = true;
-      try {
-        runSync(new CMN_createControl(), componentID, getHandle(), SWTNativeComponent.this.getClass().getName(), getNativePeerCreationParameters());
-      } catch(Exception e) {
-        isNativePeerValid = false;
-        StringBuilder sb = new StringBuilder();
-        for(Throwable t = e; t != null; t = t.getCause()) {
-          sb.append("    " + t.toString() + "\n");
-        }
-        invalidNativePeerText = "Failed to create " + getComponentDescription() + "\n\nReason:\n" + sb.toString();
-        e.printStackTrace();
-      }
-      new CMN_reshape().asyncExec(this, getWidth(), getHeight());
+    if(isNativePeerDisposed) {
+      invalidNativePeerText = "Failed to create " + getComponentDescription() + "\n\nReason:\nThe native peer was disposed!";
     } else {
-      invalidNativePeerText = "Failed to create " + getComponentDescription() + "\n\nReason:\nThe native interface is not open!";
+      isNativePeerInitialized = true;
+      if(isInterfaceAlive) {
+        nativeInterfaceListener = new NNativeInterfaceListener(this);
+        NativeInterface.addNativeInterfaceListener(nativeInterfaceListener);
+        isNativePeerValid = true;
+        try {
+          runSync(new CMN_createControl(), componentID, getHandle(), SWTNativeComponent.this.getClass().getName(), getNativePeerCreationParameters());
+        } catch(Exception e) {
+          isNativePeerValid = false;
+          StringBuilder sb = new StringBuilder();
+          for(Throwable t = e; t != null; t = t.getCause()) {
+            sb.append("    " + t.toString() + "\n");
+          }
+          invalidNativePeerText = "Failed to create " + getComponentDescription() + "\n\nReason:\n" + sb.toString();
+          e.printStackTrace();
+        }
+        new CMN_reshape().asyncExec(this, getWidth(), getHeight());
+      } else {
+        invalidNativePeerText = "Failed to create " + getComponentDescription() + "\n\nReason:\nThe native interface is not open!";
+      }
     }
     for(CommandMessage initCommandMessage: initializationCommandMessageList_) {
       if(!isNativePeerValid()) {
@@ -1092,7 +1096,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
   private boolean isNativePeerDisposed;
 
   /**
-   * Explicitely dispose the native resources. This is particularly useful if deferred destruction is used (cf native component options) and the component is not going to be used anymore.
+   * Explicitly dispose the native resources. This is particularly useful if deferred destruction is used (cf. native component options) and the component is not going to be used anymore.
    */
   @Override
   protected void disposeNativePeer() {
