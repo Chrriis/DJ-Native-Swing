@@ -4,8 +4,8 @@
   <target name="createJavadoc" description="Create the javadoc">
     <delete dir="documentation/javadoc"/>
     <javadoc destdir="documentation/javadoc" windowtitle="DJ Native Swing">
-      <classpath path="lib/jna/jna.jar"/>
-      <classpath path="lib/jna/jna_WindowUtils.jar"/>
+      <classpath path="lib/jna/jna-5.2.0.jar"/>
+      <classpath path="lib/jna/jna-platform-5.2.0.jar"/>
       <packageset dir="src">
         <include name="chrriis/**"/>
       </packageset>

@@ -40,8 +40,7 @@ import chrriis.common.UIUtils;
 import chrriis.common.UIUtils.TransparencyType;
 import chrriis.common.Utils;
 import chrriis.dj.nativeswing.NativeComponentWrapper.NativeComponentHolder;
-
-import com.sun.jna.examples.WindowUtils;
+import chrriis.dj.nativeswing.jna.platform.WindowUtils;
 
 
 /**

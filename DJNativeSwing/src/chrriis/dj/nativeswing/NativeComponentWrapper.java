@@ -214,7 +214,8 @@ public class NativeComponentWrapper {
 
   private static boolean isJNAPresent() {
     try {
-      Class.forName("com.sun.jna.examples.WindowUtils");
+      Class.forName("chrriis.dj.nativeswing.jna.platform.WindowUtils");
+      Class.forName("com.sun.jna.platform.WindowUtils");
       Class.forName("com.sun.jna.Platform");
       return true;
     } catch(Exception e) {

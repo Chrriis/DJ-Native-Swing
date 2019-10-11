@@ -32,7 +32,7 @@ NativeComponentWrapper ncw = new NativeComponentWrapper(nativeComponent);
 container.add(ncw.createEmbeddableComponent(<options>)); 
 
 If you want to use the shaping mode for native components (cf the demo), you
-need "jna.jar" and "jna_WindowUtils.jar" in your classpath.
+need "jna.jar" and "jna-platform.jar" in your classpath.
 
 3. Any tutorial or demo?
 

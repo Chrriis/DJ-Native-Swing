@@ -35,7 +35,7 @@ public static void main(String[] args) {
 On Mac, you may need to add the "-XstartOnFirstThread" VM parameter.
 
 If you want to use the shaping mode for native components (cf the demo), you
-need "jna.jar" and "jna_WindowUtils.jar" in your classpath.
+need "jna.jar" and "jna-platform.jar" in your classpath.
 
 If you want to use the HTML editor, you need the zip of the FCK editor, the
 CKEditor editor or the Tiny MCE editor in your classpath depending on which
