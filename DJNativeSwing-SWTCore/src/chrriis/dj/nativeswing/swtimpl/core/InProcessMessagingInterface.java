@@ -18,7 +18,7 @@ import javax.swing.SwingUtilities;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
-import chrriis.common.ObjectRegistry;
+import chrriis.dj.nativeswing.common.ObjectRegistry;
 import chrriis.dj.nativeswing.swtimpl.Message;
 import chrriis.dj.nativeswing.swtimpl.NSSystemPropertySWT;
 

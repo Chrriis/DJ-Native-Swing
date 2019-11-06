@@ -55,7 +55,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 
-import chrriis.common.Utils;
+import chrriis.dj.nativeswing.common.Utils;
 import chrriis.dj.nativeswing.swtimpl.CommandMessage;
 import chrriis.dj.nativeswing.swtimpl.NSSystemPropertySWT;
 import chrriis.dj.nativeswing.swtimpl.NativeComponent;

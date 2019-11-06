@@ -5,7 +5,7 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.common;
+package chrriis.dj.nativeswing.common;
 
 /**
  * A generic filter suitable for flat and tree like structures.

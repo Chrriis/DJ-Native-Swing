@@ -11,8 +11,8 @@ import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.List;
 
-import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.NSOption;
+import chrriis.dj.nativeswing.common.WebServer;
 import chrriis.dj.nativeswing.swtimpl.NSPanelComponent;
 import chrriis.dj.nativeswing.swtimpl.NativeComponent;
 import chrriis.dj.nativeswing.swtimpl.components.win32.internal.INativeWShellExplorer;

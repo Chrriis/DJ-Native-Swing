@@ -19,7 +19,7 @@ import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import chrriis.common.UIUtils;
+import chrriis.dj.nativeswing.common.UIUtils;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.components.JFlashPlayer;
 import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;

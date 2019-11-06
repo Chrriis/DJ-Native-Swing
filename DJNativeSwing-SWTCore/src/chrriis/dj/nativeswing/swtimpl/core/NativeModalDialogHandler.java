@@ -28,7 +28,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
-import chrriis.common.Utils;
+import chrriis.dj.nativeswing.common.Utils;
 
 /**
  * A utility class responsible for showing a native modal dialog and processing its result.

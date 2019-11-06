@@ -21,8 +21,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import chrriis.common.UIUtils;
-import chrriis.common.Utils;
+import chrriis.dj.nativeswing.common.UIUtils;
+import chrriis.dj.nativeswing.common.Utils;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
 

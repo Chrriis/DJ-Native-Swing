@@ -5,7 +5,7 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.common;
+package chrriis.dj.nativeswing.common;
 
 import java.awt.Component;
 import java.awt.Container;
@@ -22,7 +22,7 @@ import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import chrriis.common.Filter.Acceptance;
+import chrriis.dj.nativeswing.common.Filter.Acceptance;
 
 /**
  * @author Christopher Deckers

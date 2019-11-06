@@ -21,12 +21,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
 
-import chrriis.common.ObjectRegistry;
-import chrriis.common.Utils;
-import chrriis.common.WebServer;
-import chrriis.common.WebServer.HTTPData;
-import chrriis.common.WebServer.HTTPRequest;
-import chrriis.common.WebServer.WebServerContent;
+import chrriis.dj.nativeswing.common.ObjectRegistry;
+import chrriis.dj.nativeswing.common.Utils;
+import chrriis.dj.nativeswing.common.WebServer;
+import chrriis.dj.nativeswing.common.WebServer.HTTPData;
+import chrriis.dj.nativeswing.common.WebServer.HTTPRequest;
+import chrriis.dj.nativeswing.common.WebServer.WebServerContent;
 import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
 import chrriis.dj.nativeswing.swtimpl.components.WebBrowserAdapter;
 import chrriis.dj.nativeswing.swtimpl.components.WebBrowserCommandEvent;

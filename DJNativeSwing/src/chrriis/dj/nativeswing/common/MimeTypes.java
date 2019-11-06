@@ -5,7 +5,7 @@
  * See the file "readme.txt" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-package chrriis.common;
+package chrriis.dj.nativeswing.common;
 
 import java.util.HashMap;
 import java.util.Locale;

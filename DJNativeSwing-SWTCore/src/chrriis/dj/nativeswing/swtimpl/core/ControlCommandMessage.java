@@ -11,7 +11,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.widgets.Control;
 
-import chrriis.common.ObjectRegistry;
+import chrriis.dj.nativeswing.common.ObjectRegistry;
 import chrriis.dj.nativeswing.swtimpl.CommandMessage;
 import chrriis.dj.nativeswing.swtimpl.NativeComponent;
 

@@ -24,7 +24,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.RootPaneContainer;
 
-import chrriis.common.Utils;
+import chrriis.dj.nativeswing.common.Utils;
 
 public class WebBrowserWindowFactory {
 

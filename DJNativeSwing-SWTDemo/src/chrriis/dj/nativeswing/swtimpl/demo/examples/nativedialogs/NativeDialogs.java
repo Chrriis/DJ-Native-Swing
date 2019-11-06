@@ -23,7 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingUtilities;
 
-import chrriis.common.UIUtils;
+import chrriis.dj.nativeswing.common.UIUtils;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.components.JDirectoryDialog;
 import chrriis.dj.nativeswing.swtimpl.components.JFileDialog;

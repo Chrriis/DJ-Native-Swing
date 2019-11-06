@@ -13,7 +13,7 @@ import java.awt.Container;
 import javax.swing.JApplet;
 import javax.swing.SwingUtilities;
 
-import chrriis.common.UIUtils;
+import chrriis.dj.nativeswing.common.UIUtils;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.NativeInterfaceAppletHandler;
 

@@ -24,7 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 
-import chrriis.common.WebServer;
+import chrriis.dj.nativeswing.common.WebServer;
 
 /**
  * @author Christopher Deckers

@@ -14,8 +14,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import chrriis.common.SystemProperty;
-import chrriis.common.Utils;
+import chrriis.dj.nativeswing.common.SystemProperty;
+import chrriis.dj.nativeswing.common.Utils;
 import chrriis.dj.nativeswing.swtimpl.NSSystemPropertySWT;
 import chrriis.dj.nativeswing.swtimpl.PeerVMProcessFactory;
 

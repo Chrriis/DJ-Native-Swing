@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import chrriis.common.ObjectRegistry;
+import chrriis.dj.nativeswing.common.ObjectRegistry;
 
 /**
  * A native component that gets connected to a native peer.

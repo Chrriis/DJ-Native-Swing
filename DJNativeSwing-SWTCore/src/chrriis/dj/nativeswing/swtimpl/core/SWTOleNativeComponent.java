@@ -24,7 +24,7 @@ import org.eclipse.swt.ole.win32.OleFunctionDescription;
 import org.eclipse.swt.ole.win32.OleParameterDescription;
 import org.eclipse.swt.ole.win32.Variant;
 
-import chrriis.common.Utils;
+import chrriis.dj.nativeswing.common.Utils;
 import chrriis.dj.nativeswing.swtimpl.internal.IOleNativeComponent;
 
 

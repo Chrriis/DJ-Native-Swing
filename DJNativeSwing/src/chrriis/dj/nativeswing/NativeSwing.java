@@ -32,8 +32,8 @@ import java.util.Set;
 
 import javax.swing.SwingUtilities;
 
-import chrriis.common.SystemProperty;
-import chrriis.common.Utils;
+import chrriis.dj.nativeswing.common.SystemProperty;
+import chrriis.dj.nativeswing.common.Utils;
 
 /**
  * The Native Swing class responsible for the initialization of the framework.

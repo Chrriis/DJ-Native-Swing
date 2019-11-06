@@ -27,12 +27,12 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import chrriis.common.UIUtils;
-import chrriis.common.Utils;
-import chrriis.common.WebServer;
-import chrriis.common.WebServer.HTTPData;
-import chrriis.common.WebServer.HTTPRequest;
-import chrriis.common.WebServer.WebServerContent;
+import chrriis.dj.nativeswing.common.UIUtils;
+import chrriis.dj.nativeswing.common.Utils;
+import chrriis.dj.nativeswing.common.WebServer;
+import chrriis.dj.nativeswing.common.WebServer.HTTPData;
+import chrriis.dj.nativeswing.common.WebServer.HTTPRequest;
+import chrriis.dj.nativeswing.common.WebServer.WebServerContent;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
 import chrriis.dj.nativeswing.swtimpl.components.WebBrowserNavigationParameters;

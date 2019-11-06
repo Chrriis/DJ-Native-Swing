@@ -18,8 +18,8 @@ import javax.swing.JComponent;
 import javax.swing.JLayeredPane;
 import javax.swing.SwingUtilities;
 
-import chrriis.common.UIUtils;
 import chrriis.dj.nativeswing.NativeComponentWrapper.NativeComponentHolder;
+import chrriis.dj.nativeswing.common.UIUtils;
 
 /**
  * @author Christopher Deckers

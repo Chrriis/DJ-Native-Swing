@@ -10,7 +10,7 @@ package chrriis.dj.nativeswing;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
-import chrriis.common.Utils;
+import chrriis.dj.nativeswing.common.Utils;
 
 /**
  * A class that exposes all the system properties used by DJ Native Swing.

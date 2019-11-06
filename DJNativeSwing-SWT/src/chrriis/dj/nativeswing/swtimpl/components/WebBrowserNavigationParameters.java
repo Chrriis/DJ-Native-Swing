@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import chrriis.common.Utils;
+import chrriis.dj.nativeswing.common.Utils;
 
 /**
  * A class that allows to set HTTP headers and POST data to use during navigation requests.

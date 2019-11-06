@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import chrriis.common.Utils;
+import chrriis.dj.nativeswing.common.Utils;
 
 /**
  * The options for the Flash player to better configure the initialization of the Flash plugin.

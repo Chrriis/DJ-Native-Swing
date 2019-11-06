@@ -12,8 +12,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.NSSystemProperty;
+import chrriis.dj.nativeswing.common.WebServer;
 
 /**
  * A special helper that allows Native Swing to work in a JApplet.<br/>

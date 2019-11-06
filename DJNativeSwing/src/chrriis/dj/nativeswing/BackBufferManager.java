@@ -12,8 +12,8 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
-import chrriis.common.Filter;
-import chrriis.common.UIUtils;
+import chrriis.dj.nativeswing.common.Filter;
+import chrriis.dj.nativeswing.common.UIUtils;
 
 /**
  * @author Christopher Deckers

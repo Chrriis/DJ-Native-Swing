@@ -15,8 +15,8 @@ import java.util.Set;
 
 import org.openide.modules.ModuleInstall;
 
-import chrriis.common.SystemProperty;
-import chrriis.common.Utils;
+import chrriis.dj.nativeswing.common.SystemProperty;
+import chrriis.dj.nativeswing.common.Utils;
 
 /**
  * The NetBeans integration object responsible for the activation of the appropriate platform core module.

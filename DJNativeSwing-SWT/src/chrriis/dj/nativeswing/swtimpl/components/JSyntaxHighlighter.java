@@ -9,9 +9,9 @@ package chrriis.dj.nativeswing.swtimpl.components;
 
 import java.awt.BorderLayout;
 
-import chrriis.common.Utils;
-import chrriis.common.WebServer;
 import chrriis.dj.nativeswing.NSOption;
+import chrriis.dj.nativeswing.common.Utils;
+import chrriis.dj.nativeswing.common.WebServer;
 import chrriis.dj.nativeswing.swtimpl.NSPanelComponent;
 
 /**

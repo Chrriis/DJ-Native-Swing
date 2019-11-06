@@ -33,7 +33,7 @@ import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import chrriis.common.WebServer;
+import chrriis.dj.nativeswing.common.WebServer;
 import chrriis.dj.nativeswing.swtimpl.components.VLCInput.VLCMediaState;
 
 /**

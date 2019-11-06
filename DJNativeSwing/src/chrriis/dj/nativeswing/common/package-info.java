@@ -10,4 +10,4 @@
  * A set of generic utility classes.
  * @author Christopher Deckers
  */
-package chrriis.common;
+package chrriis.dj.nativeswing.common;

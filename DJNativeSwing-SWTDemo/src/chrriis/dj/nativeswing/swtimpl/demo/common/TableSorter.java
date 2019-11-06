@@ -1,4 +1,4 @@
-package chrriis.common.ui;
+package chrriis.dj.nativeswing.swtimpl.demo.common;
 
 import java.awt.Color;
 import java.awt.Component;

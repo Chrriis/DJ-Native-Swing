@@ -15,13 +15,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import chrriis.common.Utils;
-import chrriis.common.WebServer;
-import chrriis.common.WebServer.HTTPRequest;
-import chrriis.common.WebServer.WebServerContent;
-import chrriis.common.WebServer.WebServerContentProvider;
 import chrriis.dj.nativeswing.NSOption;
 import chrriis.dj.nativeswing.NSSystemProperty;
+import chrriis.dj.nativeswing.common.Utils;
+import chrriis.dj.nativeswing.common.WebServer;
+import chrriis.dj.nativeswing.common.WebServer.HTTPRequest;
+import chrriis.dj.nativeswing.common.WebServer.WebServerContent;
+import chrriis.dj.nativeswing.common.WebServer.WebServerContentProvider;
 import chrriis.dj.nativeswing.swtimpl.NSPanelComponent;
 import chrriis.dj.nativeswing.swtimpl.WebBrowserObject;
 

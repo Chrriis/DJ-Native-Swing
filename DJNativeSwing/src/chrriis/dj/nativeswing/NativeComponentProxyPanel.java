@@ -35,11 +35,11 @@ import javax.swing.JInternalFrame;
 import javax.swing.JLayeredPane;
 import javax.swing.SwingUtilities;
 
-import chrriis.common.Filter;
-import chrriis.common.UIUtils;
-import chrriis.common.UIUtils.TransparencyType;
-import chrriis.common.Utils;
 import chrriis.dj.nativeswing.NativeComponentWrapper.NativeComponentHolder;
+import chrriis.dj.nativeswing.common.Filter;
+import chrriis.dj.nativeswing.common.UIUtils;
+import chrriis.dj.nativeswing.common.Utils;
+import chrriis.dj.nativeswing.common.UIUtils.TransparencyType;
 import chrriis.dj.nativeswing.jna.platform.WindowUtils;
 
 

@@ -10,6 +10,7 @@ Licence terms: LGPL (see licence.txt)
 - TinyMCE upgraded to 3.5.10 to work with IE 11.
 - Fix in native file dialog to avoid NPE in case of communication error.
 - Fast creation/disposal of parent was not preventing creation.
+- Removed duplicate packages between JAR files.
 
 
 * Version 1.0.2 (November 3, 2013):

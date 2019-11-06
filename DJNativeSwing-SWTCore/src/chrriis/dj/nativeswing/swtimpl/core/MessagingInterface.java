@@ -18,7 +18,7 @@ import java.util.List;
 
 import org.eclipse.swt.SWT;
 
-import chrriis.common.ObjectRegistry;
+import chrriis.dj.nativeswing.common.ObjectRegistry;
 import chrriis.dj.nativeswing.swtimpl.CommandMessage;
 import chrriis.dj.nativeswing.swtimpl.Message;
 import chrriis.dj.nativeswing.swtimpl.NSSystemPropertySWT;

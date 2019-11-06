@@ -11,8 +11,8 @@ import java.io.File;
 
 import javax.swing.SwingUtilities;
 
-import chrriis.common.Utils;
-import chrriis.common.WebServer;
+import chrriis.dj.nativeswing.common.Utils;
+import chrriis.dj.nativeswing.common.WebServer;
 import chrriis.dj.nativeswing.swtimpl.NSSystemPropertySWT;
 import chrriis.dj.nativeswing.swtimpl.WebBrowserObject;
 import chrriis.dj.nativeswing.swtimpl.components.VLCInput.VLCMediaState;

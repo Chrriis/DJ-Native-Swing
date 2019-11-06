@@ -82,9 +82,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import chrriis.common.ObjectRegistry;
-import chrriis.common.Utils;
 import chrriis.dj.nativeswing.NativeComponentWrapper;
+import chrriis.dj.nativeswing.common.ObjectRegistry;
+import chrriis.dj.nativeswing.common.Utils;
 import chrriis.dj.nativeswing.swtimpl.CommandMessage;
 import chrriis.dj.nativeswing.swtimpl.LocalMessage;
 import chrriis.dj.nativeswing.swtimpl.Message;

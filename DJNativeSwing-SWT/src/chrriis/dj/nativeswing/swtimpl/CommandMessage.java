@@ -7,7 +7,7 @@
  */
 package chrriis.dj.nativeswing.swtimpl;
 
-import chrriis.common.Utils;
+import chrriis.dj.nativeswing.common.Utils;
 
 /**
  * A type of message that executes a command with optional arguments and returns a result.

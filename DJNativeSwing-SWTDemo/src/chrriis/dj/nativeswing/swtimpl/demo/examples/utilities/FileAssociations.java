@@ -36,9 +36,9 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 
-import chrriis.common.UIUtils;
-import chrriis.common.ui.TableSorter;
+import chrriis.dj.nativeswing.common.UIUtils;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
+import chrriis.dj.nativeswing.swtimpl.demo.common.TableSorter;
 import chrriis.dj.nativeswing.swtimpl.utilities.FileTypeLauncher;
 
 /**
