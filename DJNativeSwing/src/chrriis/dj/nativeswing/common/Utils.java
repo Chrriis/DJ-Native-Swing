@@ -9,6 +9,7 @@ package chrriis.dj.nativeswing.common;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -175,7 +176,7 @@ public class Utils {
   }
 
   private static File getJARFile(Class<?> clazz, String resourcePath) {
-    URL resource = clazz.getResource(resourcePath);
+    URL resource = getResourceWithinJavaModules(clazz, resourcePath);
     if(resource == null) {
       return null;
     }
@@ -205,7 +206,7 @@ public class Utils {
     if(resourceName.startsWith("/")) {
       resourceName = resourceName.substring(1);
     }
-    URL resource = clazz.getResource(resourcePath);
+    URL resource = getResourceWithinJavaModules(clazz, resourcePath);
     if(resource == null) {
       return null;
     }
@@ -222,6 +223,22 @@ public class Utils {
     return null;
   }
 
+  public static URL getResourceWithinJavaModules(Class<?> clazz, String resourcePath) {
+    URL resource = clazz.getResource(resourcePath);
+    if(resource == null && resourcePath.startsWith("/")) {
+      resource = clazz.getClassLoader().getResource(resourcePath.substring(1));
+    }
+    return resource;
+  }
+  
+  public static InputStream getResourceAsStreamWithinJavaModules(Class<?> clazz, String resourcePath) {
+    InputStream resource = clazz.getResourceAsStream(resourcePath);
+    if(resource == null && resourcePath.startsWith("/")) {
+      resource = clazz.getClassLoader().getResourceAsStream(resourcePath.substring(1));
+    }
+    return resource;
+  }
+  
   /**
    * Delete the file, or delete the directtory and all its children recursively.
    * @param fileOrDir a file or a directory to delete.

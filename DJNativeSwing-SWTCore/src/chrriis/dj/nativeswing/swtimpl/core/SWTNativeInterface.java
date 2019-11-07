@@ -856,7 +856,7 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
         if(optionalReference.startsWith("/")) {
           optionalReference = optionalReference.substring(1);
         }
-        if(SWTNativeInterface.class.getResource('/' + optionalReference) != null) {
+        if(Utils.getResourceWithinJavaModules(SWTNativeInterface.class, '/' + optionalReference) != null) {
           referenceList.add(optionalReference);
         }
       }
@@ -869,7 +869,7 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
           } else {
             String resource = (String)o;
             clazzClassPath = Utils.getClassPathFile(resource);
-            if(SWTNativeInterface.class.getResource('/' + resource) == null) {
+            if(Utils.getResourceWithinJavaModules(SWTNativeInterface.class, '/' + resource) == null) {
               throw new IllegalStateException("A resource that is needed in the classpath is missing: " + o);
             }
           }
@@ -895,7 +895,7 @@ public class SWTNativeInterface extends NativeInterface implements ISWTNativeInt
         if(!mainClassFile.exists()) {
           try {
             BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(mainClassFile));
-            BufferedInputStream in = new BufferedInputStream(SWTNativeInterface.class.getResourceAsStream("/" + classPath));
+            BufferedInputStream in = new BufferedInputStream(Utils.getResourceAsStreamWithinJavaModules(SWTNativeInterface.class, "/" + classPath));
             byte[] bytes = new byte[1024];
             for(int n; (n=in.read(bytes)) != -1; out.write(bytes, 0, n)) {
             }

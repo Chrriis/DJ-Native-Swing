@@ -732,7 +732,7 @@ public class WebServer {
                   return in;
                 }
               }
-              return WebServer.class.getResourceAsStream('/' + resourcePath);
+              return Utils.getResourceAsStreamWithinJavaModules(WebServer.class, '/' + resourcePath);
             } catch(Exception e) {
               e.printStackTrace();
               return null;
