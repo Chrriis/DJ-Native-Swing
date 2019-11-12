@@ -10,6 +10,9 @@
   	<copy file="../DJNativeSwing-SWTCore/DJNativeSwing-SWTCore.jar" tofile="DJNativeSwing-SWTCore.jar"/>
     <delete file="DJNativeSwing-SWT.jar"/>
     <jar duplicate="preserve" destfile="DJNativeSwing-SWT.jar">
+      <manifest>
+          <attribute name="Automatic-Module-Name" value="chrriis.dj.nativeswing.swtimpl"/>
+      </manifest>
     	<zipgroupfileset dir="." includes="DJNativeSwing-SWTAPI.jar,DJNativeSwing-SWTCore.jar"/>
 		</jar>
     <ant antfile="../DJNativeSwing-SWTDemo/build.xml" inheritall="false"/>

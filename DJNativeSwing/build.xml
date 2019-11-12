@@ -4,6 +4,9 @@
   <target name="createJar" description="Create the Jar files">
     <delete file="DJNativeSwing.jar"/>
     <jar duplicate="preserve" destfile="DJNativeSwing.jar">
+      <manifest>
+          <attribute name="Automatic-Module-Name" value="chrriis.dj.nativeswing"/>
+      </manifest>
 	    <fileset dir="bin"/>
 		</jar>
   </target>
