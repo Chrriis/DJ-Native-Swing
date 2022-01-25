@@ -82,9 +82,12 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import com.sun.jna.Native;
+
 import chrriis.dj.nativeswing.NativeComponentWrapper;
 import chrriis.dj.nativeswing.common.ObjectRegistry;
 import chrriis.dj.nativeswing.common.Utils;
+import chrriis.dj.nativeswing.jna.platform.WindowUtils;
 import chrriis.dj.nativeswing.swtimpl.CommandMessage;
 import chrriis.dj.nativeswing.swtimpl.LocalMessage;
 import chrriis.dj.nativeswing.swtimpl.Message;
@@ -94,8 +97,6 @@ import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.NativeInterfaceAdapter;
 import chrriis.dj.nativeswing.swtimpl.NativeInterfaceListener;
 import chrriis.dj.nativeswing.swtimpl.core.ControlCommandMessage.DisposedControlException;
-
-import com.sun.jna.Native;
 
 /**
  * A native SWT component that gets connected to a native peer.
@@ -309,7 +310,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
       // That means the native event is not received by the native component.
       // The solution is to dispatch the event directly to the peer if it is not our synthetic event (listeners do not get called).
       // Listeners are then called when our synthetic events are dispatched.
-      ComponentPeer peer = getPeer();
+      ComponentPeer peer = WindowUtils.getPeer(this);
       if(peer != null) {
         peer.handleEvent(e);
       }
@@ -346,6 +347,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
     }
     if(!SwingUtilities.isEventDispatchThread()) {
       SwingUtilities.invokeLater(new Runnable() {
+        @Override
         public void run() {
           applyPendingReshape();
         }
@@ -385,6 +387,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
     }
     if(!SwingUtilities.isEventDispatchThread()) {
       SwingUtilities.invokeLater(new Runnable() {
+        @Override
         public void run() {
           applyPendingRepaint();
         }
@@ -665,6 +668,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
             System.err.println("Created control: " + componentID);
           }
           control.addDisposeListener(new DisposeListener() {
+            @Override
             public void widgetDisposed(DisposeEvent e) {
               if(Boolean.parseBoolean(NSSystemPropertySWT.COMPONENTS_DEBUG_PRINTDISPOSAL.get())) {
                 System.err.println("Disposed control: " + componentID);
@@ -676,6 +680,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
         }
         shell.setVisible (true);
         shell.getDisplay().asyncExec(new Runnable() {
+          @Override
           public void run() {
             if(!shell.isDisposed()) {
               shell.setLocation(0, 0);
@@ -744,6 +749,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
       }
     });
     control.addMouseMoveListener(new MouseMoveListener() {
+      @Override
       public void mouseMove(org.eclipse.swt.events.MouseEvent e) {
         if((((Long)e.widget.getData("NS_EnabledEventsMask")) & MouseEvent.MOUSE_MOTION_EVENT_MASK) != 0) {
           Object[] mouseEventArgs = getMouseEventArgs(control, e, MouseEvent.MOUSE_MOVED);
@@ -754,6 +760,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
       }
     });
     control.addMouseWheelListener(new MouseWheelListener() {
+      @Override
       public void mouseScrolled(org.eclipse.swt.events.MouseEvent e) {
         Object[] mouseEventArgs = getMouseEventArgs(control, e, MouseEvent.MOUSE_WHEEL);
         if(mouseEventArgs != null) {
@@ -762,12 +769,14 @@ public abstract class SWTNativeComponent extends NativeComponent {
       }
     });
     control.addKeyListener(new KeyListener() {
+      @Override
       public void keyPressed(org.eclipse.swt.events.KeyEvent e) {
         if((e.stateMask & SWT.CONTROL) != 0 && e.keyCode == SWT.TAB) {
           e.doit = false;
         }
         new CMJ_dispatchKeyEvent().asyncExec(control, getKeyEventArgs(e, KeyEvent.KEY_PRESSED));
       }
+      @Override
       public void keyReleased(org.eclipse.swt.events.KeyEvent e) {
         new CMJ_dispatchKeyEvent().asyncExec(control, getKeyEventArgs(e, KeyEvent.KEY_RELEASED));
         // TODO: Maybe innacurate: Swing may issue pressed events when a key is stuck. Verify this behavior some day.
@@ -872,6 +881,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
     }
     additionCount++;
     SwingUtilities.invokeLater(new Runnable() {
+      @Override
       public void run() {
         if(isNativePeerDisposed) {
           if(additionCount > 1) {
@@ -965,6 +975,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
     public void nativeInterfaceClosed() {
       NativeInterface.removeNativeInterfaceListener(this);
       SwingUtilities.invokeLater(new Runnable() {
+        @Override
         public void run() {
           SWTNativeComponent nativeComponent = NNativeInterfaceListener.this.nativeComponent.get();
           if(nativeComponent == null) {
@@ -1191,6 +1202,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
               return;
             }
             control.getDisplay().asyncExec(new Runnable() {
+              @Override
               public void run() {
                 if(control.isDisposed()) {
                   return;
@@ -1252,6 +1264,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
       if(!NativeInterface.isUIThread(true)) {
         final AtomicBoolean result = new AtomicBoolean();
         control.getDisplay().syncExec(new Runnable() {
+          @Override
           public void run() {
             result.set(control.isDisposed()? false: control.isFocusControl());
           }
@@ -1284,6 +1297,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
       if(!NativeInterface.isUIThread(true)) {
         final AtomicReference<Dimension> result = new AtomicReference<Dimension>();
         control.getDisplay().syncExec(new Runnable() {
+          @Override
           public void run() {
             if(control.isDisposed()) {
               return;
@@ -1336,6 +1350,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
       displayGC.copyArea(screenshot, location.x, location.y);
       displayGC.dispose();
       PaintListener paintListener = new PaintListener() {
+        @Override
         public void paintControl(PaintEvent e) {
           e.gc.drawImage(screenshot, 0, 0);
         }
@@ -1443,6 +1458,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
         }
         final AtomicReference<Boolean> isSocketClosed = new AtomicReference<Boolean>(false);
         control.getDisplay().syncExec(new Runnable() {
+          @Override
           public void run() {
             if(control.isDisposed()) {
               try {

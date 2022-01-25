@@ -45,6 +45,8 @@ import java.awt.geom.Area;
 import java.awt.geom.PathIterator;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
+import java.awt.peer.ComponentPeer;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -187,23 +189,29 @@ public class WindowUtils {
                 repaint();
             }
 
+            @Override
             public void componentHidden(ComponentEvent e) {}
 
+            @Override
             public void componentMoved(ComponentEvent e) {}
 
+            @Override
             public void componentResized(ComponentEvent e) {
                 setSize(getParent().getSize());
                 repaint();
             }
 
+            @Override
             public void componentShown(ComponentEvent e) {
                 repaint();
             }
 
+            @Override
             public void hierarchyChanged(HierarchyEvent e) {
                 repaint();
             }
 
+            @Override
             public void eventDispatched(AWTEvent e) {
                 if (e instanceof MouseEvent) {
                     Component src = ((MouseEvent)e).getComponent();
@@ -297,6 +305,7 @@ public class WindowUtils {
                 setDoubleBuffered(!transparent);
                 repaint();
             }
+            @Override
             public void eventDispatched(AWTEvent e) {
                 if (e.getID() == ContainerEvent.COMPONENT_ADDED
                     && SwingUtilities.isDescendingFrom(((ContainerEvent)e).getChild(), this)) {
@@ -366,6 +375,7 @@ public class WindowUtils {
                 // Hierarchy events are fired in direct response to
                 // displayability changes
                 w.addHierarchyListener(new HierarchyListener() {
+                    @Override
                     public void hierarchyChanged(HierarchyEvent e) {
                         if ((e.getChangeFlags() & HierarchyEvent.DISPLAYABILITY_CHANGED) != 0
                             && e.getComponent().isDisplayable()) {
@@ -418,6 +428,7 @@ public class WindowUtils {
         protected Shape toShape(Raster raster) {
             final Area area = new Area(new Rectangle(0, 0, 0, 0));
             RasterRangesUtils.outputOccupiedRanges(raster, new RasterRangesUtils.RangesOutput() {
+                @Override
                 public boolean outputRange(int x, int y, int w, int h) {
                     area.add(new Area(new Rectangle(x, y, w, h)));
                     return true;
@@ -691,6 +702,7 @@ public class WindowUtils {
                 throw new UnsupportedOperationException("Set sun.java2d.noddraw=true to enable transparent windows");
             }
             whenDisplayable(w, new Runnable() {
+                @Override
                 public void run() {
                     HWND hWnd = getHWnd(w);
                     User32 user = User32.INSTANCE;
@@ -865,6 +877,7 @@ public class WindowUtils {
 				return;
 			}
             whenDisplayable(w, new Runnable() {
+                @Override
                 public void run() {
                     User32 user = User32.INSTANCE;
                     HWND hWnd = getHWnd(w);
@@ -903,6 +916,7 @@ public class WindowUtils {
             throw new IllegalArgumentException("Window must be a RootPaneContainer");
         }
         whenDisplayable(w, new Runnable() {
+            @Override
             public void run() {
                 User32 user = User32.INSTANCE;
                 HWND hWnd = getHWnd(w);
@@ -932,6 +946,7 @@ public class WindowUtils {
         // NOTE: Deletes hrgn after setting the window region
         private void setWindowRegion(final Component w, final HRGN hrgn) {
             whenDisplayable(w, new Runnable() {
+                @Override
                 public void run() {
                     GDI32 gdi = GDI32.INSTANCE;
                     User32 user = User32.INSTANCE;
@@ -998,6 +1013,7 @@ public class WindowUtils {
                 final HRGN tempRgn = gdi.CreateRectRgn(0, 0, 0, 0);
                 try {
                     RasterRangesUtils.outputOccupiedRanges(raster, new RasterRangesUtils.RangesOutput() {
+                        @Override
                         public boolean outputRange(int x, int y, int w, int h) {
                             GDI32 gdi = GDI32.INSTANCE;
                             gdi.SetRectRgn(tempRgn, x, y, x + w, y + h);
@@ -1015,7 +1031,8 @@ public class WindowUtils {
 		@Override
 		protected void setMask(final Component w, final Rectangle[] rectangles) {
 			whenDisplayable(w, new Runnable() {
-				public void run() {
+				@Override
+        public void run() {
 					GDI32 gdi = GDI32.INSTANCE;
 					User32 user = User32.INSTANCE;
 					HWND hWnd = getHWnd(w);
@@ -1132,8 +1149,9 @@ public class WindowUtils {
                 fixWindowDragging(w, "setWindowAlpha");
             }
             whenDisplayable(w, new Runnable() {
+                @Override
                 public void run() {
-                    Object peer = w.getPeer();
+                    Object peer = getPeer(w);
                     try {
                         peer.getClass().getMethod("setAlpha", new Class[]{
                                 float.class
@@ -1253,6 +1271,7 @@ public class WindowUtils {
             final List rlist = new ArrayList();
             try {
                 RasterRangesUtils.outputOccupiedRanges(raster, new RasterRangesUtils.RangesOutput() {
+                    @Override
                     public boolean outputRange(int x, int y, int w, int h) {
                         rlist.add(new Rectangle(x, y, w, h));
                         return true;
@@ -1433,6 +1452,7 @@ public class WindowUtils {
                 throw new UnsupportedOperationException("This X11 display does not provide a 32-bit visual");
             }
             Runnable action = new Runnable() {
+                @Override
                 public void run() {
                     X11 x11 = X11.INSTANCE;
                     Display dpy = x11.XOpenDisplay(null);
@@ -1541,6 +1561,7 @@ public class WindowUtils {
 				return;
 			}
             whenDisplayable(w, new Runnable() {
+                @Override
                 public void run() {
                     JRootPane root = ((RootPaneContainer)w).getRootPane();
                     JLayeredPane lp = root.getLayeredPane();
@@ -1568,6 +1589,7 @@ public class WindowUtils {
 
         private void setWindowShape(final Window w, final PixmapSource src) {
             Runnable action = new Runnable() {
+                @Override
                 public void run() {
                     X11 x11 = X11.INSTANCE;
                     Display dpy = x11.XOpenDisplay(null);
@@ -1598,6 +1620,7 @@ public class WindowUtils {
         @Override
 		protected void setMask(final Component w, final Raster raster) {
             setWindowShape(getWindow(w), new PixmapSource() {
+                @Override
                 public Pixmap getPixmap(Display dpy, X11.Window win) {
                     return raster != null ? createBitmap(dpy, win, raster) : null;
                 }
@@ -1645,7 +1668,8 @@ public class WindowUtils {
 		@Override
 		protected void setMask(final Component w, final Rectangle[] rectangles) {
 			Runnable action = new Runnable() {
-				public void run() {
+				@Override
+        public void run() {
 					X11 x11 = X11.INSTANCE;
 					Xext ext = Xext.INSTANCE;
 					Display dpy = x11.XOpenDisplay(null);
@@ -1781,5 +1805,18 @@ public class WindowUtils {
 	public static void setWindowClickThrough(Window w, boolean isClickThrough) {
 	  getInstance().setWindowClickThrough(w, isClickThrough);
 	}
+
+  /**
+   * The Component getPeer method is removed, but we still need it in some cases, so we access the field using reflection.
+   */
+  public static ComponentPeer getPeer(Component c) {
+    try {
+      Field peerField = Component.class.getDeclaredField("peer");
+      peerField.setAccessible(true);
+      return (ComponentPeer)peerField.get(c);
+    } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
 }
