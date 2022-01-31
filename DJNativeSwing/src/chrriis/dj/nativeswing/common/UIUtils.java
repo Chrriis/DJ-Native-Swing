@@ -353,10 +353,10 @@ public class UIUtils {
   public static Point2D.Double getScaledFactor(Component c) {
     GraphicsConfiguration graphicsConfiguration = c.getGraphicsConfiguration();
     if(graphicsConfiguration != null) {
-      AffineTransform normalizingTransform = graphicsConfiguration.getDefaultTransform();
-      if(normalizingTransform != null) {
-        double scaleX = normalizingTransform.getScaleX();
-        double scaleY = normalizingTransform.getScaleY();
+      AffineTransform defaultTransform = graphicsConfiguration.getDefaultTransform();
+      if(defaultTransform != null) {
+        double scaleX = defaultTransform.getScaleX();
+        double scaleY = defaultTransform.getScaleY();
         return new Point2D.Double(scaleX, scaleY);
       }
     }
