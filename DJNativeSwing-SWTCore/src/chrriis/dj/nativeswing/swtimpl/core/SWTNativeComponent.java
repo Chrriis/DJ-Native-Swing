@@ -260,8 +260,10 @@ public abstract class SWTNativeComponent extends NativeComponent {
         int height = (Integer)args[1];
         // When there is a scaling factor (e.g. 150%), Swing automatically converts the conceptual sizes (e.g. 400) to physical sizes (e.g. 600).
         // The conceptual sizes that we obtain are not automatically converted in SWT, so we need to manually apply the scaling factor.
-        int currentDpiX = shell.getDisplay().getDPI().x;
-        int currentDpiY = shell.getDisplay().getDPI().y;
+        Display display = shell.getDisplay();
+        Point dpi = display.getDPI();
+        int currentDpiX = dpi.x;
+        int currentDpiY = dpi.y;
         float defaultDpi = 96.0f;
         if(currentDpiX != defaultDpi || currentDpiY != defaultDpi) {
           width = Math.round(width * currentDpiX / defaultDpi);
