@@ -30,6 +30,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.awt.peer.ComponentPeer;
 import java.io.BufferedInputStream;
@@ -86,6 +87,7 @@ import com.sun.jna.Native;
 
 import chrriis.dj.nativeswing.NativeComponentWrapper;
 import chrriis.dj.nativeswing.common.ObjectRegistry;
+import chrriis.dj.nativeswing.common.UIUtils;
 import chrriis.dj.nativeswing.common.Utils;
 import chrriis.dj.nativeswing.jna.platform.WindowUtils;
 import chrriis.dj.nativeswing.swtimpl.CommandMessage;
@@ -256,20 +258,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
     public Object run(Object[] args) {
       Shell shell = getControl().getShell();
       if(!shell.isDisposed()) {
-        int width = (Integer)args[0];
-        int height = (Integer)args[1];
-        // When there is a scaling factor (e.g. 150%), Swing automatically converts the conceptual sizes (e.g. 400) to physical sizes (e.g. 600).
-        // The conceptual sizes that we obtain are not automatically converted in SWT, so we need to manually apply the scaling factor.
-        Display display = shell.getDisplay();
-        Point dpi = display.getDPI();
-        int currentDpiX = dpi.x;
-        int currentDpiY = dpi.y;
-        float defaultDpi = 96.0f;
-        if(currentDpiX != defaultDpi || currentDpiY != defaultDpi) {
-          width = Math.round(width * currentDpiX / defaultDpi);
-          height = Math.round(height * currentDpiY / defaultDpi);
-        }
-        shell.setSize(width, height);
+        shell.setSize((Integer)args[0], (Integer)args[1]);
       }
       return null;
     }
@@ -372,7 +361,14 @@ public abstract class SWTNativeComponent extends NativeComponent {
     }
     resizeThread = null;
     if(isNativePeerValid()) {
-      new CMN_reshape().asyncExec(SWTNativeComponent.this, getWidth(), getHeight());
+      int width = getWidth();
+      int height = getHeight();
+      Point2D.Double scaledFactor = UIUtils.getScaledFactor(this);
+      if(scaledFactor.x != 1.0 || scaledFactor.y != 1.0) {
+        width = (int)(width * scaledFactor.x);
+        height = (int)(height * scaledFactor.y);
+      }
+      new CMN_reshape().asyncExec(SWTNativeComponent.this, width, height);
     }
   }
 
@@ -1040,7 +1036,14 @@ public abstract class SWTNativeComponent extends NativeComponent {
           invalidNativePeerText = "Failed to create " + getComponentDescription() + "\n\nReason:\n" + sb.toString();
           e.printStackTrace();
         }
-        new CMN_reshape().asyncExec(this, getWidth(), getHeight());
+        int width = getWidth();
+        int height = getHeight();
+        Point2D.Double scaledFactor = UIUtils.getScaledFactor(this);
+        if(scaledFactor.x != 1.0 || scaledFactor.y != 1.0) {
+          width = (int)(width * scaledFactor.x);
+          height = (int)(height * scaledFactor.y);
+        }
+        new CMN_reshape().asyncExec(this, width, height);
       } else {
         invalidNativePeerText = "Failed to create " + getComponentDescription() + "\n\nReason:\nThe native interface is not open!";
       }
@@ -1749,7 +1752,14 @@ public abstract class SWTNativeComponent extends NativeComponent {
     }
     try {
       runSync(new CMN_createControl(), componentID, getHandle());
-      new CMN_reshape().asyncExec(this, getWidth(), getHeight());
+      int width = getWidth();
+      int height = getHeight();
+      Point2D.Double scaledFactor = UIUtils.getScaledFactor(this);
+      if(scaledFactor.x != 1.0 || scaledFactor.y != 1.0) {
+        width = (int)(width * scaledFactor.x);
+        height = (int)(height * scaledFactor.y);
+      }
+      new CMN_reshape().asyncExec(this, width, height);
     } catch(Exception e) {
       StringBuilder sb = new StringBuilder();
       for(Throwable t = e; t != null; t = t.getCause()) {

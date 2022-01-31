@@ -28,6 +28,7 @@ import java.awt.event.HierarchyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+import java.awt.geom.Point2D;
 import java.beans.PropertyVetoException;
 import java.util.Arrays;
 
@@ -38,8 +39,8 @@ import javax.swing.SwingUtilities;
 import chrriis.dj.nativeswing.NativeComponentWrapper.NativeComponentHolder;
 import chrriis.dj.nativeswing.common.Filter;
 import chrriis.dj.nativeswing.common.UIUtils;
-import chrriis.dj.nativeswing.common.Utils;
 import chrriis.dj.nativeswing.common.UIUtils.TransparencyType;
+import chrriis.dj.nativeswing.common.Utils;
 import chrriis.dj.nativeswing.jna.platform.WindowUtils;
 
 
@@ -62,6 +63,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     this.isDestructionOnFinalization = isDestructionOnFinalization;
     this.isVisibilityConstrained = isVisibilityConstrained;
     hierarchyListener = new HierarchyListener() {
+      @Override
       public void hierarchyChanged(HierarchyEvent e) {
         long changeFlags = e.getChangeFlags();
         if((changeFlags & (HierarchyEvent.SHOWING_CHANGED)) != 0) {
@@ -75,6 +77,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     };
     if(isVisibilityConstrained) {
       shapeAdjustmentEventListener = new AWTEventListener() {
+        @Override
         public void eventDispatched(AWTEvent e) {
           boolean isAdjustingShape = false;
           switch(e.getID()) {
@@ -103,6 +106,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
   }
 
   private HierarchyBoundsListener hierarchyBoundsListener = new HierarchyBoundsListener() {
+    @Override
     public void ancestorMoved(HierarchyEvent e) {
       Component component = e.getChanged();
       if(component instanceof Window) {
@@ -110,6 +114,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
       }
       adjustEmbeddedPanelBounds();
     }
+    @Override
     public void ancestorResized(HierarchyEvent e) {
       adjustEmbeddedPanelBounds();
     }
@@ -182,6 +187,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     }
     isInvoking = true;
     SwingUtilities.invokeLater(new Runnable() {
+      @Override
       public void run() {
         isInvoking = false;
         adjustEmbeddedPanelShape_();
@@ -216,6 +222,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
       System.err.println("Computing shape: [" + NativeComponentProxyPanel.this.getWidth() + "x" + NativeComponentProxyPanel.this.getHeight() + "] " + nativeComponentWrapper.getComponentDescription());
     }
     Rectangle[] shape = UIUtils.getComponentVisibleArea(this, new Filter<Component>() {
+      @Override
       public Acceptance accept(Component c) {
         if(c instanceof EmbeddedPanel) {
           return Acceptance.NO;
@@ -329,6 +336,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     protected void finalize() throws Throwable {
       if(isHiddenReparenting) {
         SwingUtilities.invokeLater(new Runnable() {
+          @Override
           public void run() {
             nativeComponentWrapper.restoreFromHiddenParent();
             // Remove will dispose the component only after the store/restore sequence is complete.
@@ -343,6 +351,16 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
 
     public void applyShape(Rectangle[] rectangles) {
       if(!Utils.IS_MAC && !RESTRICT_SHAPE_TO_SINGLE_RECTANGLE) {
+        if(rectangles.length > 0) {
+          Point2D.Double scaledFactor = UIUtils.getScaledFactor(this);
+          if(scaledFactor.x != 1.0 || scaledFactor.y != 1.0) {
+            Rectangle[] newRectangles = new Rectangle[rectangles.length];
+            for(int i=0; i<rectangles.length; i++) {
+              newRectangles[i] = new Rectangle((int)(rectangles[i].x * scaledFactor.x), (int)(rectangles[i].y * scaledFactor.y), (int)(rectangles[i].width * scaledFactor.x), (int)(rectangles[i].height * scaledFactor.y));
+            }
+            rectangles = newRectangles;
+          }
+        }
         WindowUtils.setComponentMask(this, rectangles);
         nativeComponentWrapper.getNativeComponent().repaint();
         return;
@@ -446,6 +464,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     lastArea = null;
     adjustEmbeddedPanelBounds();
     SwingUtilities.invokeLater(new Runnable() {
+      @Override
       public void run() {
         addHierarchyBoundsListener(hierarchyBoundsListener);
         adjustEmbeddedPanelBounds();
@@ -477,6 +496,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     }
     if(isDestructionOnFinalization) {
       SwingUtilities.invokeLater(new Runnable() {
+        @Override
         public void run() {
           removeHierarchyBoundsListener(hierarchyBoundsListener);
           adjustEmbeddedPanelBounds();
@@ -498,6 +518,7 @@ class NativeComponentProxyPanel extends NativeComponentProxy {
     super.finalize();
     if(embeddedPanel != null) {
       SwingUtilities.invokeLater(new Runnable() {
+        @Override
         public void run() {
           dispose();
         }

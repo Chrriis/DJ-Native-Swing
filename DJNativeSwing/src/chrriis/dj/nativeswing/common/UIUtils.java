@@ -10,8 +10,11 @@ package chrriis.dj.nativeswing.common;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.GraphicsConfiguration;
 import java.awt.Rectangle;
 import java.awt.Window;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -342,6 +345,22 @@ public class UIUtils {
       c.invalidate();
       c.validate();
     }
+  }
+
+  /**
+   * When there is a scaling factor (e.g. 150%), Swing automatically converts the conceptual sizes (e.g. 400) to physical sizes (e.g. 600), but we sometimes needs to compute the physical sizes.
+   */
+  public static Point2D.Double getScaledFactor(Component c) {
+    GraphicsConfiguration graphicsConfiguration = c.getGraphicsConfiguration();
+    if(graphicsConfiguration != null) {
+      AffineTransform normalizingTransform = graphicsConfiguration.getDefaultTransform();
+      if(normalizingTransform != null) {
+        double scaleX = normalizingTransform.getScaleX();
+        double scaleY = normalizingTransform.getScaleY();
+        return new Point2D.Double(scaleX, scaleY);
+      }
+    }
+    return new Point2D.Double(1.0, 1.0);
   }
 
 }
