@@ -7,6 +7,7 @@ Licence terms: LGPL (see licence.txt)
 
 * Version 1.0.3 (xxxxxxxxxxxxxxxx):
 
+- Fixed some scaling issues on HighDPI screens (with OS scaling factor).
 - JNA updated to 5.2.0. JNA-platform used, but custom WindowUtils class in Native Swing.
 - Fixed an issue preventing some threads from being GC'ed (by Stephen Allen).
 - Prevent NPE in drag and drop handler under unexpected flows.

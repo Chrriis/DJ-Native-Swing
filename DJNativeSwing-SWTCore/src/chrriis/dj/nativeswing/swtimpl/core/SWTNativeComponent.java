@@ -429,6 +429,11 @@ public abstract class SWTNativeComponent extends NativeComponent {
       int type = (Integer)args[0];
       int e_x = (Integer)args[1];
       int e_y = (Integer)args[2];
+      Point2D.Double scaledFactor = UIUtils.getScaledFactor(nativeComponent);
+      if(scaledFactor.x != 1.0 || scaledFactor.y != 1.0) {
+        e_x = (int)(e_x / scaledFactor.x);
+        e_y = (int)(e_y / scaledFactor.y);
+      }
       int e_button = (Integer)args[3];
       int e_count = (Integer)args[4];
       int e_stateMask = (Integer)args[5];
