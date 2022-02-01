@@ -438,6 +438,9 @@ public abstract class SWTNativeComponent extends NativeComponent {
       int e_count = (Integer)args[4];
       int e_stateMask = (Integer)args[5];
       Point e_cursorLocation = (Point)args[6];
+      if(scaledFactor.x != 1.0 || scaledFactor.y != 1.0) {
+        e_cursorLocation = new Point((int)(e_cursorLocation.x / scaledFactor.x),  (int)(e_cursorLocation.y / scaledFactor.y));
+      }
       switch(type) {
         case MouseEvent.MOUSE_PRESSED:
           buttonPressedCount++;
