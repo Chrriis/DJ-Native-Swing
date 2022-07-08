@@ -22,6 +22,7 @@ import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
+import javax.swing.MenuSelectionManager;
 import javax.swing.SwingUtilities;
 
 import org.eclipse.swt.SWT;
@@ -123,6 +124,9 @@ class NativeWebBrowser extends SWTNativeComponent implements INativeWebBrowser {
           break;
         case XULRUNNER:
           jWebBrowser = new JWebBrowser(JWebBrowser.useXULRunnerRuntime());
+          break;
+        case EDGE:
+          jWebBrowser = new JWebBrowser(JWebBrowser.useEdgeRuntime());
           break;
         default:
           jWebBrowser = new JWebBrowser();
@@ -427,9 +431,12 @@ class NativeWebBrowser extends SWTNativeComponent implements INativeWebBrowser {
       case WEBKIT:
         style |= SWT.WEBKIT;
         break;
+      case EDGE:
+        style |= SWT.EDGE;
+        break;
     }
     final Browser browser = new Browser(parent, style);
-    configureBrowserFunction(browser);
+    configureBrowserFunctions(browser);
     browser.addCloseWindowListener(new CloseWindowListener() {
       public void close(WindowEvent e) {
         new CMJ_closeWindow().asyncExec(browser);
@@ -446,7 +453,7 @@ class NativeWebBrowser extends SWTNativeComponent implements INativeWebBrowser {
           isDisposed = true;
           Shell shell = new Shell();
           newWebBrowser = new Browser(shell, browser.getStyle());
-          configureBrowserFunction(newWebBrowser);
+          configureBrowserFunctions(newWebBrowser);
         } else {
           isDisposed = false;
           newWebBrowser = (Browser)NativeComponent.getControlRegistry().get(componentID);
@@ -588,6 +595,16 @@ class NativeWebBrowser extends SWTNativeComponent implements INativeWebBrowser {
         updateProgress(e.current == e.total? 100: Math.min(e.current * 100 / e.total, 99));
       }
       public void completed(ProgressEvent progressevent) {
+        if("edge".equals(browser.getBrowserType())) {
+          browser.execute("if(!document.swtMouseHandled) {" +
+              "var f = function (event)" +
+              "{" +
+              BROWSER_FOCUS_FUNCTION + "();" +
+              "};" +
+              "document.addEventListener('mousedown', f, true);" +
+              "document.swtMouseHandled = true;" +
+              "}");
+        }
         browser.setData("Browser.loading", false);
         updateProgress(100);
       }
@@ -612,6 +629,35 @@ class NativeWebBrowser extends SWTNativeComponent implements INativeWebBrowser {
         commandArgs = new Object[0];
       }
       new CMJ_commandReceived().asyncExec(getBrowser(), command, commandArgs);
+      return null;
+    }
+  }
+  
+  private static class CMJ_browserFocus extends ControlCommandMessage {
+    @Override
+    public Object run(Object[] args) {
+      NativeWebBrowser nativeWebBrowser = (NativeWebBrowser)getNativeComponent();
+      JWebBrowser webBrowser = nativeWebBrowser == null? null: nativeWebBrowser.webBrowser.get();
+      if(webBrowser == null) {
+        return null;
+      }
+      Window windowAncestor = SwingUtilities.getWindowAncestor(nativeWebBrowser);
+      Component focusOwner = windowAncestor.getFocusOwner();
+      if(focusOwner != null && focusOwner != nativeWebBrowser) {
+        nativeWebBrowser.requestFocus();
+      }
+      MenuSelectionManager.defaultManager().clearSelectedPath();
+      return null;
+    }
+  }
+
+  private static class NSBrowserFocusBrowserFunction extends BrowserFunction {
+    public NSBrowserFocusBrowserFunction(Browser browser) {
+      super(browser, BROWSER_FOCUS_FUNCTION);
+    }
+    @Override
+    public Object function(Object[] args) {
+      new CMJ_browserFocus().asyncExec(getBrowser());
       return null;
     }
   }
@@ -647,7 +693,10 @@ class NativeWebBrowser extends SWTNativeComponent implements INativeWebBrowser {
     }
   }
 
-  private static void configureBrowserFunction(final Browser browser) {
+  private static void configureBrowserFunctions(final Browser browser) {
+    if("edge".equals(browser.getBrowserType())) {
+      new NSBrowserFocusBrowserFunction(browser);
+    }
     new NSCommandBrowserFunction(browser);
     new NSConsolePrintingBrowserFunction(browser, false);
     new NSConsolePrintingBrowserFunction(browser, true);
@@ -663,6 +712,8 @@ class NativeWebBrowser extends SWTNativeComponent implements INativeWebBrowser {
         runtime = WebBrowserRuntime.XULRUNNER;
       } else if("webkit".equals(runtimeProperty)) {
         runtime = WebBrowserRuntime.WEBKIT;
+      } else if("edge".equals(runtimeProperty)) {
+        runtime = WebBrowserRuntime.EDGE;
       }
     }
     this.runtime = runtime;

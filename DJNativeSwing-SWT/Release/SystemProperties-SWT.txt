@@ -101,7 +101,7 @@ are using them get loaded.
 --------------------------------------------------------------------------------
 
 * nativeswing.webbrowser.runtime
-  = xulrunner/webkit (default: none)
+  = xulrunner/webkit/edge (default: none)
   Set the runtime of the web browser.
 
 * nativeswing.webbrowser.xulrunner.home

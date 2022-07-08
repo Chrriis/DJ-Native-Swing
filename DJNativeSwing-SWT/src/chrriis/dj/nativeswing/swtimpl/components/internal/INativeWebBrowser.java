@@ -23,9 +23,11 @@ public interface INativeWebBrowser {
   static enum WebBrowserRuntime {
     DEFAULT,
     XULRUNNER,
-    WEBKIT
+    WEBKIT,
+    EDGE
   }
 
+  public static final String BROWSER_FOCUS_FUNCTION = "nsBrowserFocus";
   public static final String CONSOLE_OUT_FUNCTION = "nsConsoleOut";
   public static final String CONSOLE_ERR_FUNCTION = "nsConsoleErr";
   public static final String COMMAND_FUNCTION = "sendNSCommand";

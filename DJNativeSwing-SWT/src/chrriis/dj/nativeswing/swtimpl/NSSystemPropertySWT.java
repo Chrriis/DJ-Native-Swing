@@ -243,7 +243,7 @@ public enum NSSystemPropertySWT {
 
   /**
    * nativeswing.webbrowser.runtime
-   * = xulrunner/webkit (default: none)<br/>
+   * = xulrunner/webkit/edge (default: none)<br/>
    * Set the runtime of the web browser.
    */
   WEBBROWSER_RUNTIME("nativeswing.webbrowser.runtime", Type.READ_WRITE),

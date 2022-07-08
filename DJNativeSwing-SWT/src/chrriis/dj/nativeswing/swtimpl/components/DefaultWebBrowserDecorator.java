@@ -214,6 +214,9 @@ public class DefaultWebBrowserDecorator extends WebBrowserDecorator {
             case XULRUNNER:
               newWebBrowser = new JWebBrowser(JWebBrowser.useXULRunnerRuntime());
               break;
+            case EDGE:
+              newWebBrowser = new JWebBrowser(JWebBrowser.useEdgeRuntime());
+              break;
             default:
               newWebBrowser = new JWebBrowser();
               break;

@@ -1056,6 +1056,11 @@ public abstract class SWTNativeComponent extends NativeComponent {
         invalidNativePeerText = "Failed to create " + getComponentDescription() + "\n\nReason:\nThe native interface is not open!";
       }
     }
+    // With Edge web browser, initialization needs a bit of time before being ready (generally 30ms). Let's wait for 100ms.
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException e1) {
+    }
     for(CommandMessage initCommandMessage: initializationCommandMessageList_) {
       if(!isNativePeerValid()) {
         printFailedInvocation(initCommandMessage);

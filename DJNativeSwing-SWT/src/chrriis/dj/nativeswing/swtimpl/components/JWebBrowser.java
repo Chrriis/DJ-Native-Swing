@@ -67,6 +67,17 @@ public class JWebBrowser extends NSPanelComponent {
     return WEBKIT_RUNTIME_OPTION;
   }
 
+  private static final String USE_EDGE_RUNTIME_OPTION_KEY = "Edge Runtime";
+  private static final NSOption EDGE_RUNTIME_OPTION = new NSOption(USE_EDGE_RUNTIME_OPTION_KEY);
+  
+  /**
+   * Create an option to make the web browser use the Edge runtime.
+   * @return the option to use the Edge runtime.
+   */
+  public static NSOption useEdgeRuntime() {
+    return EDGE_RUNTIME_OPTION;
+  }
+  
   /**
    * A factory that creates the decorators for web browsers.
    * @author Christopher Deckers
@@ -185,6 +196,12 @@ public class JWebBrowser extends NSPanelComponent {
         throw new IllegalStateException("Only one web browser runtime can be specified!");
       }
       runtime = INativeWebBrowser.WebBrowserRuntime.WEBKIT;
+    }
+    if(optionMap.get(USE_EDGE_RUNTIME_OPTION_KEY) != null) {
+      if(runtime != INativeWebBrowser.WebBrowserRuntime.DEFAULT) {
+        throw new IllegalStateException("Only one web browser runtime can be specified!");
+      }
+      runtime = INativeWebBrowser.WebBrowserRuntime.EDGE;
     }
     nativeWebBrowser = NativeCoreObjectFactory.create(INativeWebBrowser.class, "chrriis.dj.nativeswing.swtimpl.components.core.NativeWebBrowser", new Class<?>[] {JWebBrowser.class, INativeWebBrowser.WebBrowserRuntime.class}, new Object[] {this, runtime});
     initialize((NativeComponent)nativeWebBrowser);
