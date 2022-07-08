@@ -1058,7 +1058,7 @@ public abstract class SWTNativeComponent extends NativeComponent {
     }
     // With Edge web browser, initialization needs a bit of time before being ready (generally 30ms). Let's wait for 100ms.
     try {
-      Thread.sleep(1000);
+      Thread.sleep(100);
     } catch (InterruptedException e1) {
     }
     for(CommandMessage initCommandMessage: initializationCommandMessageList_) {
