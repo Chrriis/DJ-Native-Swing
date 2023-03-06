@@ -77,6 +77,7 @@ import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Region;
+import org.eclipse.swt.internal.DPIUtil;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -258,7 +259,10 @@ public abstract class SWTNativeComponent extends NativeComponent {
     public Object run(Object[] args) {
       Shell shell = getControl().getShell();
       if(!shell.isDisposed()) {
-        shell.setSize((Integer)args[0], (Integer)args[1]);
+        float factor = DPIUtil.getDeviceZoom() / 100f;
+        int width = Math.round((Integer)args[0] / factor);
+        int height = Math.round((Integer)args[1] / factor);
+        shell.setSize(width, height);
       }
       return null;
     }
